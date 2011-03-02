@@ -5,7 +5,7 @@ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -46,7 +46,53 @@ public final class CachedOWLReasoner implements OWLReasoner,
 		OWLOntologyChangeListener {
 	protected final OWLReasoner delegate;
 
+	private static final class BoolKey {
+		Object o;
+		boolean b;
+
+		@Override
+		public int hashCode() {
+			return o.hashCode() * (b ? 1 : -1);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			BoolKey bk = (BoolKey) obj;
+			return b == bk.b && o.equals(bk.o);
+		}
+	}
+
+	private static final class RegKey {
+		Object o1;
+		Object o2;
+
+		@Override
+		public int hashCode() {
+			return o1.hashCode() * o2.hashCode();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			RegKey bk = (RegKey) obj;
+			return o1.equals(bk.o1) && o2.equals(bk.o2);
+		}
+	}
+
 	private final static class CachedReasoner {
+		public static Object makeKey(Object o1, Object o2) {
+			RegKey r = new RegKey();
+			r.o1 = o1;
+			r.o2 = o2;
+			return r;
+		}
+
+		public static Object makeKey(Object o1, boolean o2) {
+			BoolKey r = new BoolKey();
+			r.o = o1;
+			r.b = o2;
+			return r;
+		}
+
 		public CachedReasoner() {
 		}
 
@@ -297,8 +343,8 @@ public final class CachedOWLReasoner implements OWLReasoner,
 				return null;
 			}
 		};
-		NodeSet<OWLClass> toReturn = (NodeSet<OWLClass>) cache.get(key, ce,
-				checker);
+		NodeSet<OWLClass> toReturn = (NodeSet<OWLClass>) cache.get(key,
+				CachedReasoner.makeKey(ce, direct), checker);
 		if (checker.hasThrownException()) {
 			Throwable e = checker.thrownException();
 			if (e instanceof ReasonerInterruptedException) {
@@ -350,8 +396,8 @@ public final class CachedOWLReasoner implements OWLReasoner,
 				return null;
 			}
 		};
-		NodeSet<OWLClass> toReturn = (NodeSet<OWLClass>) cache.get(key, ce,
-				checker);
+		NodeSet<OWLClass> toReturn = (NodeSet<OWLClass>) cache.get(key,
+				CachedReasoner.makeKey(ce, direct), checker);
 		if (checker.hasThrownException()) {
 			Throwable e = checker.thrownException();
 			if (e instanceof ReasonerInterruptedException) {
@@ -503,7 +549,7 @@ public final class CachedOWLReasoner implements OWLReasoner,
 			}
 		};
 		NodeSet<OWLObjectPropertyExpression> toReturn = (NodeSet<OWLObjectPropertyExpression>) cache
-				.get(key, pe, checker);
+				.get(key, CachedReasoner.makeKey(pe, direct), checker);
 		if (checker.hasThrownException()) {
 			Throwable e = checker.thrownException();
 			if (e instanceof ReasonerInterruptedException) {
@@ -553,7 +599,7 @@ public final class CachedOWLReasoner implements OWLReasoner,
 			}
 		};
 		NodeSet<OWLObjectPropertyExpression> toReturn = (NodeSet<OWLObjectPropertyExpression>) cache
-				.get(key, pe, checker);
+				.get(key, CachedReasoner.makeKey(pe, direct), checker);
 		if (checker.hasThrownException()) {
 			Throwable e = checker.thrownException();
 			if (e instanceof ReasonerInterruptedException) {
@@ -749,8 +795,8 @@ public final class CachedOWLReasoner implements OWLReasoner,
 				return null;
 			}
 		};
-		NodeSet<OWLClass> toReturn = (NodeSet<OWLClass>) cache.get(key, pe,
-				checker);
+		NodeSet<OWLClass> toReturn = (NodeSet<OWLClass>) cache.get(key,
+				CachedReasoner.makeKey(pe, direct), checker);
 		if (checker.hasThrownException()) {
 			Throwable e = checker.thrownException();
 			if (e instanceof ReasonerInterruptedException) {
@@ -799,8 +845,8 @@ public final class CachedOWLReasoner implements OWLReasoner,
 				return null;
 			}
 		};
-		NodeSet<OWLClass> toReturn = (NodeSet<OWLClass>) cache.get(key, pe,
-				checker);
+		NodeSet<OWLClass> toReturn = (NodeSet<OWLClass>) cache.get(key,
+				CachedReasoner.makeKey(pe, direct), checker);
 		if (checker.hasThrownException()) {
 			Throwable e = checker.thrownException();
 			if (e instanceof ReasonerInterruptedException) {
@@ -858,7 +904,7 @@ public final class CachedOWLReasoner implements OWLReasoner,
 			}
 		};
 		NodeSet<OWLDataProperty> toReturn = (NodeSet<OWLDataProperty>) cache
-				.get(key, pe, checker);
+				.get(key, CachedReasoner.makeKey(pe, direct), checker);
 		if (checker.hasThrownException()) {
 			Throwable e = checker.thrownException();
 			if (e instanceof ReasonerInterruptedException) {
@@ -908,7 +954,7 @@ public final class CachedOWLReasoner implements OWLReasoner,
 			}
 		};
 		NodeSet<OWLDataProperty> toReturn = (NodeSet<OWLDataProperty>) cache
-				.get(key, pe, checker);
+				.get(key, CachedReasoner.makeKey(pe, direct), checker);
 		if (checker.hasThrownException()) {
 			Throwable e = checker.thrownException();
 			if (e instanceof ReasonerInterruptedException) {
@@ -1055,8 +1101,8 @@ public final class CachedOWLReasoner implements OWLReasoner,
 				return null;
 			}
 		};
-		NodeSet<OWLClass> toReturn = (NodeSet<OWLClass>) cache.get(key, pe,
-				checker);
+		NodeSet<OWLClass> toReturn = (NodeSet<OWLClass>) cache.get(key,
+				CachedReasoner.makeKey(pe, direct), checker);
 		if (checker.hasThrownException()) {
 			Throwable e = checker.thrownException();
 			if (e instanceof ReasonerInterruptedException) {
@@ -1104,8 +1150,8 @@ public final class CachedOWLReasoner implements OWLReasoner,
 				return null;
 			}
 		};
-		NodeSet<OWLClass> toReturn = (NodeSet<OWLClass>) cache.get(key, ind,
-				checker);
+		NodeSet<OWLClass> toReturn = (NodeSet<OWLClass>) cache.get(key,
+				CachedReasoner.makeKey(ind, direct), checker);
 		if (checker.hasThrownException()) {
 			Throwable e = checker.thrownException();
 			if (e instanceof ReasonerInterruptedException) {
@@ -1156,7 +1202,7 @@ public final class CachedOWLReasoner implements OWLReasoner,
 			}
 		};
 		NodeSet<OWLNamedIndividual> toReturn = (NodeSet<OWLNamedIndividual>) cache
-				.get(key, ce, checker);
+				.get(key, CachedReasoner.makeKey(ce, direct), checker);
 		if (checker.hasThrownException()) {
 			Throwable e = checker.thrownException();
 			if (e instanceof ReasonerInterruptedException) {
@@ -1205,7 +1251,7 @@ public final class CachedOWLReasoner implements OWLReasoner,
 			}
 		};
 		NodeSet<OWLNamedIndividual> toReturn = (NodeSet<OWLNamedIndividual>) cache
-				.get(key, pe, checker);
+				.get(key, CachedReasoner.makeKey(ind, pe), checker);
 		if (checker.hasThrownException()) {
 			Throwable e = checker.thrownException();
 			if (e instanceof ReasonerInterruptedException) {
@@ -1253,8 +1299,8 @@ public final class CachedOWLReasoner implements OWLReasoner,
 				return null;
 			}
 		};
-		Set<OWLLiteral> toReturn = (Set<OWLLiteral>) cache
-				.get(key, pe, checker);
+		Set<OWLLiteral> toReturn = (Set<OWLLiteral>) cache.get(key,
+				CachedReasoner.makeKey(ind, pe), checker);
 		if (checker.hasThrownException()) {
 			Throwable e = checker.thrownException();
 			if (e instanceof ReasonerInterruptedException) {
