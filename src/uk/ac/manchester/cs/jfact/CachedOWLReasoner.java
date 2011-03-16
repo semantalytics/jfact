@@ -47,7 +47,9 @@ public final class CachedOWLReasoner implements OWLReasoner, OWLOntologyChangeLi
 	private static final class BoolKey {
 		Object o;
 		boolean b;
-
+public BoolKey() {
+	
+}
 		@Override
 		public int hashCode() {
 			return o.hashCode() * (b ? 1 : -1);
@@ -63,7 +65,9 @@ public final class CachedOWLReasoner implements OWLReasoner, OWLOntologyChangeLi
 	private static final class RegKey {
 		Object o1;
 		Object o2;
+public RegKey() {
 
+}
 		@Override
 		public int hashCode() {
 			return o1.hashCode() * o2.hashCode();
