@@ -11,10 +11,14 @@ import static uk.ac.manchester.cs.jfact.kernel.ToDoPriorMatrix.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
+import uk.ac.manchester.cs.jfact.dep.DepSet;
 import uk.ac.manchester.cs.jfact.dep.TSaveStack;
+import uk.ac.manchester.cs.jfact.helpers.FastSetSimple;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
 import uk.ac.manchester.cs.jfact.helpers.IfDefs;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
@@ -25,44 +29,39 @@ public class ToDoList {
 	public static class ToDoEntry {
 		/** node to include concept */
 		private final DlCompletionTree Node;
-		/** offset of included concept in Node's label */
-		private final ConceptWDep offset;
+		private int Concept;
+		private FastSetSimple Delegate;
 
 		ToDoEntry(DlCompletionTree n, ConceptWDep off) {
 			Node = n;
-			offset = new ConceptWDep(off.getConcept(), off.getDep());
+			Concept = off.getConcept();
+			Delegate = off.getDep().getDelegate();
 		}
 
 		protected DlCompletionTree getNode() {
 			return Node;
 		}
 
-		protected ConceptWDep getOffset() {
-			return offset;
+		protected int getOffsetConcept() {
+			return Concept;
+		}
+
+		protected FastSetSimple getOffsetDepSet() {
+			return Delegate;
 		}
 
 		@Override
 		public String toString() {
-			return "Node(" + Node.getId() + "), offset(" + offset + ")";
+			return "Node(" + Node.getId() + "), offset(" + new ConceptWDep(Concept, new DepSet(Delegate)) + ")";
 		}
 
 		public void Print(LogAdapter l) {
 			l.print("Node(" + Node.getId() + "), offset(");
-			offset.print(l);
+			new ConceptWDep(Concept, new DepSet(Delegate)).print(l);
 			l.print(")");
 		}
 	}
 
-	/** class for saving/restoring array Todo queue */
-	//	static class ArrayQueueSaveState {
-	//		/** save start point of queue of entries */
-	//		protected int sp;
-	//		/** save end point of queue of entries */
-	//		protected int ep;
-	//
-	//		ArrayQueueSaveState() {
-	//		}
-	//	}
 	/** class to represent single queue */
 	static final class ArrayQueue {
 		/** waiting ops queue */
@@ -201,12 +200,14 @@ public class ToDoList {
 			if (queueBroken) {
 				// the tss variable is discarded at the end of the restore, so no need to copy
 				_Wait = tss.Wait;
+				size = _Wait.size();
 				//_Wait = new ArrayList<ToDoList.ToDoEntry>(tss.Wait);
 			} else {
 				// save just end pointer
 				Helper.resize(_Wait, tss.ep);
+				size=tss.ep;
 			}
-			size = _Wait.size();
+
 		}
 
 		@Override
@@ -216,7 +217,7 @@ public class ToDoList {
 	}
 
 	/** class for saving/restoring array Todo table */
-	static class SaveState {
+	static final class TODOListSaveState {
 		/** save state for queueID */
 		//protected ArrayQueueSaveState backupID = new ArrayQueueSaveState();
 		protected int backupID_sp;
@@ -228,16 +229,60 @@ public class ToDoList {
 		/** save number-of-entries to do */
 		protected int noe;
 
+		TODOListSaveState() {
+		}
+
+//		private static final ConcurrentLinkedQueue<SaveState> states = new ConcurrentLinkedQueue<ToDoList.SaveState>();
+//		private static final AtomicInteger statesSize = new AtomicInteger(0);
+//		private final static int limit=100;
+//		static {
+//			
+//			Thread stateFiller = new Thread() {
+//				@Override
+//				public void run() {
+//					while (true) {
+//						if (statesSize.get() < limit) {
+//							for (int i = 0; i < limit; i++) {
+//								states.add(new SaveState());
+//							}
+//							statesSize.addAndGet(limit);
+//						}
+////						try {
+////							Thread.currentThread().sleep(5);
+////						} catch (InterruptedException e) {
+////							e.printStackTrace();
+////						}
+//					}
+//				}
+//			};
+//			stateFiller.setDaemon(true);
+//			stateFiller.start();
+//		}
+//
+//		public static final SaveState getInstance() {
+//			if(statesSize.get()==0) {
+//				System.err.println("ToDoList.SaveState.getInstance() waiting...");
+//while(statesSize.get()==0) {
+//	//wait
+//}
+//			}
+//			SaveState toReturn =  states.poll();
+//			if (toReturn == null) {
+//				System.err.println("ToDoList.SaveState.getInstance() STILL waiting...");
+//				while (toReturn == null) {
+//					toReturn = states.poll();
+//				}
+//			}
+//			statesSize.decrementAndGet();
+//			return toReturn;
+//		}
+
 		@Override
 		public String toString() {
 			return "" + noe + " " + backupID_sp + "," + backupID_ep + " " + backupNN + " " + Arrays.toString(backup);
 		}
 	}
 
-	//	class NNQueue extends queueQueue {
-	//	}
-	//	class NNQueueSaveState extends queueQueueSaveState {
-	//	}
 	/** waiting ops queue for IDs */
 	private ArrayQueue queueID = new ArrayQueue();
 	/** waiting ops queue for <= ops in nominal nodes */
@@ -245,14 +290,14 @@ public class ToDoList {
 	/** waiting ops queues */
 	private List<ArrayQueue> Wait = new ArrayList<ArrayQueue>(nRegularOps);
 	/** stack of saved states */
-	private TSaveStack<SaveState> SaveStack = new TSaveStack<SaveState>();
+	private TSaveStack<TODOListSaveState> SaveStack = new TSaveStack<TODOListSaveState>();
 	/** priority matrix */
 	private ToDoPriorMatrix Matrix = new ToDoPriorMatrix();
 	/** number of un-processed entries */
 	private int noe;
 
 	/** save current Todo table content to given saveState entry */
-	void saveState(SaveState tss) {
+	void saveState(TODOListSaveState tss) {
 		//queueID.save(tss.backupID);
 		tss.backupID_sp = queueID.sPointer;
 		tss.backupID_ep = queueID.Wait.size();
@@ -265,7 +310,7 @@ public class ToDoList {
 	}
 
 	/** restore Todo table content from given saveState entry */
-	void restoreState(final SaveState tss) {
+	void restoreState(final TODOListSaveState tss) {
 		//queueID.restore(tss.backupID);
 		queueID.restore(tss.backupID_sp, tss.backupID_ep);
 		queueNN.restore(tss.backupNN);
@@ -328,7 +373,7 @@ public class ToDoList {
 
 	/** save current state using internal stack */
 	void save() {
-		SaveState state = new SaveState();
+		TODOListSaveState state = new TODOListSaveState();
 		saveState(state);
 		SaveStack.push(state);
 	}
