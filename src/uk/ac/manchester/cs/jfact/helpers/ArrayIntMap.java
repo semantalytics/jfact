@@ -243,8 +243,8 @@ public final class ArrayIntMap {
 				if (values[0][i] != o.values[0][i]) {
 					return false;
 				}
-				return true;
 			}
+			return true;
 		}
 		return false;
 	}
