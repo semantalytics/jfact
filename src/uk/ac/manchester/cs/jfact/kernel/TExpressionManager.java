@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -66,7 +66,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.TDLObjectRoleComplexExpres
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.TDLObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.kernel.voc.Vocabulary;
 
-
 public class TExpressionManager {
 	/** Cache for the inverse roles */
 	protected static class TInverseRoleCache {
@@ -107,46 +106,38 @@ public class TExpressionManager {
 		}
 	}
 
-	protected static final class DataroleNameCreator implements
-			TNameCreator<TDLDataRoleName> {
+	protected static final class DataroleNameCreator implements TNameCreator<TDLDataRoleName> {
 		public TDLDataRoleName makeEntry(String name) {
 			return new TDLDataRoleName(name);
 		}
 	}
 
-	protected static final class ObjectroleNameCreator implements
-			TNameCreator<TDLObjectRoleName> {
+	protected static final class ObjectroleNameCreator implements TNameCreator<TDLObjectRoleName> {
 		public TDLObjectRoleName makeEntry(String name) {
 			return new TDLObjectRoleName(name);
 		}
 	}
 
-	protected static final class IndividualNameCreator implements
-			TNameCreator<TDLIndividualName> {
+	protected static final class IndividualNameCreator implements TNameCreator<TDLIndividualName> {
 		public TDLIndividualName makeEntry(String name) {
 			return new TDLIndividualName(name);
 		}
 	}
 
-	protected static final class ConceptNameCreator implements
-			TNameCreator<TDLConceptName> {
+	protected static final class ConceptNameCreator implements TNameCreator<TDLConceptName> {
 		public TDLConceptName makeEntry(String name) {
 			return new TDLConceptName(name);
 		}
 	}
 
 	/** nameset for concepts */
-	private final TNameSet<TDLConceptName> NS_C = new TNameSet<TDLConceptName>(
-			new ConceptNameCreator());
+	private final TNameSet<TDLConceptName> NS_C = new TNameSet<TDLConceptName>(new ConceptNameCreator());
 	/** nameset for individuals */
-	private final TNameSet<TDLIndividualName> NS_I = new TNameSet<TDLIndividualName>(
-			new IndividualNameCreator());
+	private final TNameSet<TDLIndividualName> NS_I = new TNameSet<TDLIndividualName>(new IndividualNameCreator());
 	/** nameset for object roles */
-	private final TNameSet<TDLObjectRoleName> NS_OR = new TNameSet<TDLObjectRoleName>(
-			new ObjectroleNameCreator());
+	private final TNameSet<TDLObjectRoleName> NS_OR = new TNameSet<TDLObjectRoleName>(new ObjectroleNameCreator());
 	/** nameset for data roles */
-	private final TNameSet<TDLDataRoleName> NS_DR = new TNameSet<TDLDataRoleName>(
-			new DataroleNameCreator());
+	private final TNameSet<TDLDataRoleName> NS_DR = new TNameSet<TDLDataRoleName>(new DataroleNameCreator());
 	/** n-ary queue for arguments */
 	//private final TNAryQueue<TDLExpression> ArgQueue = new TNAryQueue<TDLExpression>();
 	/** TOP concept */
@@ -241,14 +232,12 @@ public class TExpressionManager {
 	}
 
 	/** @return C and D */
-	public TDLConceptExpression And(TDLConceptExpression C,
-			TDLConceptExpression D) {
+	public TDLConceptExpression And(TDLConceptExpression C, TDLConceptExpression D) {
 		return And(Arrays.<TDLExpression> asList(C, D));
 	}
 
 	/** @return C or D */
-	public TDLConceptExpression Or(TDLConceptExpression C,
-			TDLConceptExpression D) {
+	public TDLConceptExpression Or(TDLConceptExpression C, TDLConceptExpression D) {
 		return Or(Arrays.<TDLExpression> asList(C, D));
 	}
 
@@ -283,20 +272,17 @@ public class TExpressionManager {
 	}
 
 	/** get value restriction wrt an object role R and an individual I */
-	public TDLConceptExpression Value(final TDLObjectRoleExpression R,
-			final TDLIndividualExpression I) {
+	public TDLConceptExpression Value(final TDLObjectRoleExpression R, final TDLIndividualExpression I) {
 		return record(new TDLConceptObjectValue(R, I));
 	}
 
 	/** get existential restriction wrt an object role R and a concept C */
-	public TDLConceptExpression Exists(final TDLObjectRoleExpression R,
-			final TDLConceptExpression C) {
+	public TDLConceptExpression Exists(final TDLObjectRoleExpression R, final TDLConceptExpression C) {
 		return record(new TDLConceptObjectExists(R, C));
 	}
 
 	/** get universal restriction wrt an object role R and a concept C */
-	public TDLConceptExpression Forall(final TDLObjectRoleExpression R,
-			final TDLConceptExpression C) {
+	public TDLConceptExpression Forall(final TDLObjectRoleExpression R, final TDLConceptExpression C) {
 		return record(new TDLConceptObjectForall(R, C));
 	}
 
@@ -304,8 +290,7 @@ public class TExpressionManager {
 	 * get min cardinality restriction wrt number N, an object role R and a
 	 * concept C
 	 */
-	public TDLConceptExpression MinCardinality(int n,
-			final TDLObjectRoleExpression R, final TDLConceptExpression C) {
+	public TDLConceptExpression MinCardinality(int n, final TDLObjectRoleExpression R, final TDLConceptExpression C) {
 		return record(new TDLConceptObjectMinCardinality(n, R, C));
 	}
 
@@ -313,8 +298,7 @@ public class TExpressionManager {
 	 * get max cardinality restriction wrt number N, an object role R and a
 	 * concept C
 	 */
-	public TDLConceptExpression MaxCardinality(int n,
-			final TDLObjectRoleExpression R, final TDLConceptExpression C) {
+	public TDLConceptExpression MaxCardinality(int n, final TDLObjectRoleExpression R, final TDLConceptExpression C) {
 		return record(new TDLConceptObjectMaxCardinality(n, R, C));
 	}
 
@@ -322,26 +306,22 @@ public class TExpressionManager {
 	 * get exact cardinality restriction wrt number N, an object role R and a
 	 * concept C
 	 */
-	public TDLConceptExpression Cardinality(int n,
-			final TDLObjectRoleExpression R, final TDLConceptExpression C) {
+	public TDLConceptExpression Cardinality(int n, final TDLObjectRoleExpression R, final TDLConceptExpression C) {
 		return record(new TDLConceptObjectExactCardinality(n, R, C));
 	}
 
 	/** get value restriction wrt a data role R and a data value V */
-	public TDLConceptExpression Value(final TDLDataRoleExpression R,
-			final TDLDataValue V) {
+	public TDLConceptExpression Value(final TDLDataRoleExpression R, final TDLDataValue V) {
 		return record(new TDLConceptDataValue(R, V));
 	}
 
 	/** get existential restriction wrt a data role R and a data expression E */
-	public TDLConceptExpression Exists(final TDLDataRoleExpression R,
-			final TDLDataExpression E) {
+	public TDLConceptExpression Exists(final TDLDataRoleExpression R, final TDLDataExpression E) {
 		return record(new TDLConceptDataExists(R, E));
 	}
 
 	/** get universal restriction wrt a data role R and a data expression E */
-	public TDLConceptExpression Forall(final TDLDataRoleExpression R,
-			final TDLDataExpression E) {
+	public TDLConceptExpression Forall(final TDLDataRoleExpression R, final TDLDataExpression E) {
 		return record(new TDLConceptDataForall(R, E));
 	}
 
@@ -349,8 +329,7 @@ public class TExpressionManager {
 	 * get min cardinality restriction wrt number N, a data role R and a data
 	 * expression E
 	 */
-	public TDLConceptExpression MinCardinality(int n,
-			final TDLDataRoleExpression R, final TDLDataExpression E) {
+	public TDLConceptExpression MinCardinality(int n, final TDLDataRoleExpression R, final TDLDataExpression E) {
 		return record(new TDLConceptDataMinCardinality(n, R, E));
 	}
 
@@ -358,8 +337,7 @@ public class TExpressionManager {
 	 * get max cardinality restriction wrt number N, a data role R and a data
 	 * expression E
 	 */
-	public TDLConceptExpression MaxCardinality(int n,
-			final TDLDataRoleExpression R, final TDLDataExpression E) {
+	public TDLConceptExpression MaxCardinality(int n, final TDLDataRoleExpression R, final TDLDataExpression E) {
 		return record(new TDLConceptDataMaxCardinality(n, R, E));
 	}
 
@@ -367,8 +345,7 @@ public class TExpressionManager {
 	 * get exact cardinality restriction wrt number N, a data role R and a data
 	 * expression E
 	 */
-	public TDLConceptExpression Cardinality(int n,
-			final TDLDataRoleExpression R, final TDLDataExpression E) {
+	public TDLConceptExpression Cardinality(int n, final TDLDataRoleExpression R, final TDLDataExpression E) {
 		return record(new TDLConceptDataExactCardinality(n, R, E));
 	}
 
@@ -403,14 +380,12 @@ public class TExpressionManager {
 	}
 
 	/** get a expression corresponding to R projected from C */
-	public TDLObjectRoleComplexExpression ProjectFrom(
-			final TDLObjectRoleExpression R, final TDLConceptExpression C) {
+	public TDLObjectRoleComplexExpression ProjectFrom(final TDLObjectRoleExpression R, final TDLConceptExpression C) {
 		return record(new TDLObjectRoleProjectionFrom(R, C));
 	}
 
 	/** get a expression corresponding to R projected into C */
-	public TDLObjectRoleComplexExpression ProjectInto(
-			final TDLObjectRoleExpression R, final TDLConceptExpression C) {
+	public TDLObjectRoleComplexExpression ProjectInto(final TDLObjectRoleExpression R, final TDLConceptExpression C) {
 		return record(new TDLObjectRoleProjectionInto(R, C));
 	}
 
@@ -448,8 +423,7 @@ public class TExpressionManager {
 	}
 
 	/** get basic boolean data type */
-	public TDLDataTypeRestriction RestrictedType(TDLDataTypeExpression type,
-			final TDLFacetExpression facet) {
+	public TDLDataTypeRestriction RestrictedType(TDLDataTypeExpression type, final TDLFacetExpression facet) {
 		TDLDataTypeRestriction ret = null;
 		if (type instanceof TDLDataTypeRestriction) {
 			ret = (TDLDataTypeRestriction) type;
@@ -464,8 +438,7 @@ public class TExpressionManager {
 	}
 
 	/** get data value with given VALUE and TYPE; */
-	public final TDLDataValue DataValue(final String value,
-			TDLDataTypeExpression type) {
+	public final TDLDataValue DataValue(final String value, TDLDataTypeExpression type) {
 		return getBasicDataType(type).getValue(value);
 	}
 

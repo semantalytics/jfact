@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
 import static uk.ac.manchester.cs.jfact.kernel.DagTag.*;
 import static uk.ac.manchester.cs.jfact.kernel.Redo.*;
@@ -20,7 +20,6 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 
-
 import org.semanticweb.owlapi.reasoner.TimeOutException;
 
 import uk.ac.manchester.cs.jfact.dep.DepSet;
@@ -32,11 +31,11 @@ import uk.ac.manchester.cs.jfact.helpers.FastSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
 import uk.ac.manchester.cs.jfact.helpers.IfDefs;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
+import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
+import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.helpers.Reference;
 import uk.ac.manchester.cs.jfact.helpers.TsProcTimer;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.kernel.TBox.TSimpleRule;
 import uk.ac.manchester.cs.jfact.kernel.ToDoList.ToDoEntry;
 import uk.ac.manchester.cs.jfact.kernel.datatype.DataTypeReasoner;
@@ -51,7 +50,7 @@ public class DlSatTester {
 		/** currently processed node */
 		protected DlCompletionTree node;
 		/** currently processed concept */
-		protected ConceptWDep concept;
+		protected ConceptWDep concept = null;
 		/** positions of the Used members */
 		//	protected int pUsedIndex, nUsedIndex;
 		/** dependences for branching clashes */
@@ -60,7 +59,7 @@ public class DlSatTester {
 		/** empty c'tor */
 		public BranchingContext() {
 			node = null;
-			concept = new ConceptWDep(Helper.bpINVALID);
+			//concept = new ConceptWDep(Helper.bpINVALID);
 		}
 
 		/** init indeces (if necessary) */
@@ -71,8 +70,7 @@ public class DlSatTester {
 
 		@Override
 		public String toString() {
-			return this.getClass().getSimpleName() + " dep '" + branchDep
-					+ "' curconcept '" + concept + "' curnode '" + node + "'";
+			return this.getClass().getSimpleName() + " dep '" + branchDep + "' curconcept '" + (concept == null ? new ConceptWDep(Helper.bpINVALID) : concept) + "' curnode '" + node + "'";
 		}
 	}
 
@@ -80,7 +78,7 @@ public class DlSatTester {
 	}
 
 	/** stack to keep BContext */
-final class BCStack extends TSaveStack<BranchingContext> {
+	final class BCStack extends TSaveStack<BranchingContext> {
 		/** pool for OR contexts */
 		//private final List<BCOr> PoolOr = new ArrayList<BCOr>();
 		/** pool for NN contexts */
@@ -182,7 +180,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		}
 	}
 
-	 final class BCBarrier extends BranchingContext {
+	final class BCBarrier extends BranchingContext {
 		@Override
 		public void init() {
 		}
@@ -192,7 +190,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		}
 	}
 
-	 final class BCLE extends BranchingContext {
+	final class BCLE extends BranchingContext {
 		/** current branching index; used in several branching rules */
 		private int branchIndex;
 		/** index of a merge-candidate (in LE concept) */
@@ -250,7 +248,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		}
 	}
 
-	 final class BCNN extends BranchingContext {
+	final class BCNN extends BranchingContext {
 		/** current branching index; used in several branching rules */
 		private int branchIndex;
 
@@ -281,7 +279,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		}
 	}
 
-	 final class BCOr extends BranchingContext {
+	final class BCOr extends BranchingContext {
 		/** current branching index; used in several branching rules */
 		private int branchIndex;
 		/** useful disjuncts (ready to add) in case of OR */
@@ -323,8 +321,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 			return applicableOrEntries;
 		}
 
-		protected void setApplicableOrEntries(
-				List<ConceptWDep> applicableOrEntries) {
+		protected void setApplicableOrEntries(List<ConceptWDep> applicableOrEntries) {
 			this.applicableOrEntries = applicableOrEntries;
 		}
 
@@ -336,7 +333,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 			o.append(" dep ");
 			o.append(branchDep);
 			o.append(" curconcept ");
-			o.append(concept);
+			o.append((concept == null ? new ConceptWDep(Helper.bpINVALID) : concept));
 			o.append(" curnode ");
 			o.append(node);
 			o.append(" orentries [");
@@ -496,8 +493,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 	 * to add entry to label, but it is necessary to provide offset of existing
 	 * concept. This is done by providing OFFSET of the concept in NODE's label
 	 */
-	private void addExistingToDoEntry(DlCompletionTree node, ConceptWDep C,
-			final String reason /*= null*/) {
+	private void addExistingToDoEntry(DlCompletionTree node, ConceptWDep C, final String reason /*= null*/) {
 		int bp = C.getConcept();
 		TODO.addEntry(node, DLHeap.get(bp).Type(), C);
 		if (IfDefs._USE_LOGGING) {
@@ -529,8 +525,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 
 	//--		internal cache support
 	/** return cache of given completion tree (implementation) */
-	protected final ModelCacheInterface createModelCache(
-			final DlCompletionTree p) {
+	protected final ModelCacheInterface createModelCache(final DlCompletionTree p) {
 		return new ModelCacheIan(DLHeap, p, encounterNominal, tBox.nC, tBox.nR);
 	}
 
@@ -542,8 +537,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 	/** check whether node may be (un)cached; save node if something is changed */
 	private ModelCacheState tryCacheNode(DlCompletionTree node) {
 		//TODO verify
-		ModelCacheState ret = canBeCached(node) ? reportNodeCached(node)
-				: ModelCacheState.csFailed;
+		ModelCacheState ret = canBeCached(node) ? reportNodeCached(node) : ModelCacheState.csFailed;
 		// node is cached if RET is csvalid
 		boolean val = ret == ModelCacheState.csValid;
 		if (node.isCached() != val) {
@@ -609,8 +603,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		//XXX move to BranchingContext
 		// save reasoning context
 		c.node = curNode;
-		c.concept = new ConceptWDep(curConcept.getConcept(),
-				curConcept.getDep());
+		c.concept = new ConceptWDep(curConcept.getConcept(), curConcept.getDep());
 		c.branchDep = DepSetFactory.create(curConcept.getDep());
 	}
 
@@ -644,8 +637,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 
 	/** check whether a node represents a functional one */
 	private static boolean isFunctionalVertex(final DLVertex v) {
-		return v.Type() == DagTag.dtLE && v.getNumberLE() == 1
-				&& v.getC() == Helper.bpTOP;
+		return v.Type() == DagTag.dtLE && v.getNumberLE() == 1 && v.getC() == Helper.bpTOP;
 	}
 
 	/**
@@ -653,8 +645,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 	 * dtLE type.
 	 */
 	private boolean checkNRclash(final DLVertex atleast, final DLVertex atmost) { // >= n R.C clash with <= m S.D iff...
-		return (atmost.getC() == Helper.bpTOP || atleast.getC() == atmost
-				.getC()) && // either D is TOP or C == D...
+		return (atmost.getC() == Helper.bpTOP || atleast.getC() == atmost.getC()) && // either D is TOP or C == D...
 				atleast.getNumberGE() > atmost.getNumberLE() && // and n is greater than m...
 				atleast.getRole().lesserequal(atmost.getRole()); // and R [= S
 	}
@@ -713,8 +704,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 	}
 
 	/** check whether clash occures EDGE to TO labelled with S disjoint with R */
-	private boolean checkDisjointRoleClash(final DlCompletionTreeArc edge,
-			DlCompletionTree to, final TRole R, final DepSet dep) { // clash found
+	private boolean checkDisjointRoleClash(final DlCompletionTreeArc edge, DlCompletionTree to, final TRole R, final DepSet dep) { // clash found
 		if (edge.getArcEnd().equals(to) && edge.getRole().isDisjoint(R)) {
 			setClashSet(dep);
 			updateClashSet(edge.getDep());
@@ -725,8 +715,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 
 	// support for FORALL expansion
 	/** Perform expansion of (\neg \ER.Self).DEP to an EDGE */
-	private boolean checkIrreflexivity(final DlCompletionTreeArc edge,
-			final TRole R, final DepSet dep) {
+	private boolean checkIrreflexivity(final DlCompletionTreeArc edge, final TRole R, final DepSet dep) {
 		// only loops counts here...
 		if (!edge.getArcEnd().equals(edge.getReverse().getArcEnd())) {
 			return false;
@@ -755,8 +744,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 	}
 
 	/** log the result of processing ACTION with entry (N,C{DEP})/REASON */
-	private void logNCEntry(final DlCompletionTree n, int bp, DepSet dep,
-			final String action, final String reason) {
+	private void logNCEntry(final DlCompletionTree n, int bp, DepSet dep, final String action, final String reason) {
 		LL.print(Templates.SPACE, action);
 		LL.print("(");
 		n.logNode();
@@ -767,14 +755,13 @@ final class BCStack extends TSaveStack<BranchingContext> {
 	}
 
 	/** log addition of the entry to ToDo list */
-	private void logEntry(final DlCompletionTree n, int bp, DepSet dep,
-			final String reason) {
+	private void logEntry(final DlCompletionTree n, int bp, DepSet dep, final String reason) {
 		logNCEntry(n, bp, dep, "+", reason);
 	}
 
 	/** log clash happened during node processing */
 	private void logClash(final DlCompletionTree n, int bp, DepSet dep) {
-		logNCEntry(n, bp, dep, "x", DLHeap.get(bp).getTagName());
+		logNCEntry(n, bp, dep, "x", DLHeap.get(bp).Type().getName());
 	}
 
 	/** use this method in ALL dependency stuff (never use tryLevel directly) */
@@ -830,6 +817,14 @@ final class BCStack extends TSaveStack<BranchingContext> {
 	/** set value of global dep-set to D */
 	private void setClashSet(final DepSet d) {
 		clashSet = d;
+	}
+
+	private void setClashSet(final List<DepSet> d) {
+		DepSet dep = new DepSet();
+		for (int i = 0; i < d.size(); i++) {
+			dep.add(d.get(i));
+		}
+		clashSet = dep;
 	}
 
 	/** add D to global dep-set */
@@ -949,12 +944,9 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		return cache;
 	}
 
-	private final static EnumSet<DagTag> handlecollection = EnumSet.of(dtAnd,
-			dtCollection);
-	private final static EnumSet<DagTag> handleforallle = EnumSet.of(dtForall,
-			dtLE);
-	private final static EnumSet<DagTag> handlesingleton = EnumSet.of(
-			dtPSingleton, dtNSingleton, dtNConcept, dtPConcept);
+	private final static EnumSet<DagTag> handlecollection = EnumSet.of(dtAnd, dtCollection);
+	private final static EnumSet<DagTag> handleforallle = EnumSet.of(dtForall, dtLE);
+	private final static EnumSet<DagTag> handlesingleton = EnumSet.of(dtPSingleton, dtNSingleton, dtNConcept, dtPConcept);
 
 	private void prepareCascadedCache(int p, FastSet f) {
 		//System.out.println("DlSatTester.prepareCascadedCache() "+p);
@@ -1052,9 +1044,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 	boolean runSat(int p, int q) {
 		prepareReasoner();
 		// use general method to init node with P and add Q then
-		if (initNewNode(CGraph.getRoot(), DepSetFactory.create(), p)
-				|| addToDoEntry(CGraph.getRoot(), q, DepSetFactory.create(),
-						null)) {
+		if (initNewNode(CGraph.getRoot(), DepSetFactory.create(), p) || addToDoEntry(CGraph.getRoot(), q, DepSetFactory.create(), null)) {
 			return false; // concept[s] unsatisfiable
 		}
 		// check satisfiability explicitly
@@ -1077,11 +1067,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		DlCompletionTreeArc edgeR = createOneNeighbour(R, dummy);
 		DlCompletionTreeArc edgeS = createOneNeighbour(S, dummy);
 		// init new nodes/edges. No need to apply restrictions, as no reasoning have been done yet.
-		if (initNewNode(edgeR.getArcEnd(), dummy, Helper.bpTOP)
-				|| initNewNode(edgeS.getArcEnd(), dummy, Helper.bpTOP)
-				|| setupEdge(edgeR, dummy, /*flags=*/0)
-				|| setupEdge(edgeS, dummy, /*flags=*/0)
-				|| Merge(edgeS.getArcEnd(), edgeR.getArcEnd(), dummy)) {
+		if (initNewNode(edgeR.getArcEnd(), dummy, Helper.bpTOP) || initNewNode(edgeS.getArcEnd(), dummy, Helper.bpTOP) || setupEdge(edgeR, dummy, /*flags=*/0) || setupEdge(edgeS, dummy, /*flags=*/0) || Merge(edgeS.getArcEnd(), edgeR.getArcEnd(), dummy)) {
 			return true;
 		}
 		// 2 roles are disjoint if current setting is unsatisfiable
@@ -1100,9 +1086,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		curNode = CGraph.getRoot();
 		DlCompletionTreeArc edgeR = createOneNeighbour(R, dummy);
 		// init new nodes/edges. No need to apply restrictions, as no reasoning have been done yet.
-		if (initNewNode(edgeR.getArcEnd(), dummy, Helper.bpTOP)
-				|| setupEdge(edgeR, dummy, /*flags=*/0)
-				|| Merge(edgeR.getArcEnd(), CGraph.getRoot(), dummy)) {
+		if (initNewNode(edgeR.getArcEnd(), dummy, Helper.bpTOP) || setupEdge(edgeR, dummy, /*flags=*/0) || Merge(edgeR.getArcEnd(), CGraph.getRoot(), dummy)) {
 			return true;
 		}
 		// R is irreflexive if current setting is unsatisfiable
@@ -1183,8 +1167,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		useBackjumping = Options.getBool("useBackjumping");
 		useLazyBlocking = Options.getBool("useLazyBlocking");
 		useAnywhereBlocking = Options.getBool("useAnywhereBlocking");
-		LL.print(Templates.READCONFIG, useSemanticBranching, useBackjumping,
-				useLazyBlocking, useAnywhereBlocking);
+		LL.print(Templates.READCONFIG, useSemanticBranching, useBackjumping, useLazyBlocking, useAnywhereBlocking);
 	}
 
 	protected void prepareReasoner() {
@@ -1200,8 +1183,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		resetSessionFlags();
 	}
 
-	private AddConceptResult checkAddedConcept(final CWDArray lab, int p,
-			DepSet dep) {
+	private AddConceptResult checkAddedConcept(final CWDArray lab, int p, DepSet dep) {
 		assert Helper.isCorrect(p); // sanity checking
 		// constants are not allowed here
 		assert p != Helper.bpTOP;
@@ -1213,8 +1195,8 @@ final class BCStack extends TSaveStack<BranchingContext> {
 			return AddConceptResult.acrExist;
 		}
 		int inv_p = -p;
-		DepSet depset= lab.get(inv_p);
-		if (depset!=null) {
+		DepSet depset = lab.get(inv_p);
+		if (depset != null) {
 			clashSet = DepSetFactory.plus(depset, dep);
 			return AddConceptResult.acrClash;
 		}
@@ -1223,16 +1205,15 @@ final class BCStack extends TSaveStack<BranchingContext> {
 
 	private boolean findConceptClash(final CWDArray lab, int bp, DepSet dep) {
 		stats.nLookups.inc();
-		DepSet depset= lab.get(bp);
-		if (depset!=null) {
+		DepSet depset = lab.get(bp);
+		if (depset != null) {
 			clashSet = DepSetFactory.plus(depset, dep);
 			return true;
 		}
 		return false;
 	}
 
-	private AddConceptResult tryAddConcept(final CWDArray lab, int bp,
-			DepSet dep) {
+	private AddConceptResult tryAddConcept(final CWDArray lab, int bp, DepSet dep) {
 		boolean canC = used.contains(bp);
 		boolean canNegC = used.contains(-bp);
 		if (canC) {
@@ -1240,13 +1221,11 @@ final class BCStack extends TSaveStack<BranchingContext> {
 				return checkAddedConcept(lab, bp, dep);
 			} else {
 				stats.nLookups.inc();
-				return lab.contains(bp) ? AddConceptResult.acrExist
-						: AddConceptResult.acrDone;
+				return lab.contains(bp) ? AddConceptResult.acrExist : AddConceptResult.acrDone;
 			}
 		} else {
 			if (canNegC) {
-				return findConceptClash(lab, -bp, dep) ? AddConceptResult.acrClash
-						: AddConceptResult.acrDone;
+				return findConceptClash(lab, -bp, dep) ? AddConceptResult.acrClash : AddConceptResult.acrDone;
 			} else {
 				return AddConceptResult.acrDone;
 			}
@@ -1256,8 +1235,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 	//	private boolean addToDoEntry(DlCompletionTree n, int bp, DepSet dep) {
 	//		return addToDoEntry(n, bp, dep, null);
 	//	}
-	private boolean addToDoEntry(DlCompletionTree n, int bp, DepSet dep,
-			final String reason) {
+	private boolean addToDoEntry(DlCompletionTree n, int bp, DepSet dep, final String reason) {
 		if (bp == Helper.bpTOP) {
 			return false;
 		}
@@ -1299,8 +1277,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		}
 	}
 
-	private boolean insertToDoEntry(DlCompletionTree n, int bp, DepSet dep,
-			DagTag tag, String reason) {
+	private boolean insertToDoEntry(DlCompletionTree n, int bp, DepSet dep, DagTag tag, String reason) {
 		ConceptWDep p = new ConceptWDep(bp, dep);
 		updateLevel(n, dep);
 		CGraph.addConceptToNode(n, p, tag);
@@ -1361,36 +1338,51 @@ final class BCStack extends TSaveStack<BranchingContext> {
 	 */
 	private void doCacheNode(DlCompletionTree node) {
 		//modelCacheIan cache = new modelCacheIan(true);
-		DepSet dep = DepSetFactory.create();
+		List<DepSet> deps = new ArrayList<DepSet>();
+		//		DepSet dep = DepSetFactory.create();
 		newNodeCache.clear();
 		List<ConceptWDep> beginl_sc = node.beginl_sc();
 		// TODO look at the switches
 		for (int i = 0; i < beginl_sc.size(); i++) {
 			ConceptWDep p = beginl_sc.get(i);
-			dep.add(p.getDep());
-			switch (newNodeCache.merge(DLHeap.getCache(p.getConcept()))) {
-				case csValid:
-					break;
-				case csInvalid:
-					setClashSet(dep);
-					return;
-				default:
-					return;
+			deps.add(p.getDep());
+			ModelCacheState merge = newNodeCache.merge(DLHeap.getCache(p.getConcept()));
+			if (merge != ModelCacheState.csValid) {
+				if (merge == ModelCacheState.csInvalid) {
+					setClashSet(deps);
+				}
+				return;
 			}
+			//			switch (merge) {
+			//				case csValid:
+			//					break;
+			//				case csInvalid:
+			//					setClashSet(dep);
+			//					return;
+			//				default:
+			//					return;
+			//			}
 		}
 		List<ConceptWDep> list = node.beginl_cc();
 		for (int i = 0; i < list.size(); i++) {
 			ConceptWDep p = list.get(i);
-			dep.add(p.getDep());
-			switch (newNodeCache.merge(DLHeap.getCache(p.getConcept()))) {
-				case csValid:
-					break;
-				case csInvalid:
-					setClashSet(dep);
-					return;
-				default:
-					return;
+			deps.add(p.getDep());
+			ModelCacheState merge = newNodeCache.merge(DLHeap.getCache(p.getConcept()));
+			if (merge != ModelCacheState.csValid) {
+				if (merge == ModelCacheState.csInvalid) {
+					setClashSet(deps);
+				}
+				return;
 			}
+			//			switch (merge) {
+			//				case csValid:
+			//					break;
+			//				case csInvalid:
+			//					setClashSet(dep);
+			//					return;
+			//				default:
+			//					return;
+			//			}
 		}
 		// all concepts in label are mergable; now try to add input arc
 		newNodeEdges.clear();
@@ -1465,8 +1457,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 
 	private boolean applyReflexiveRoles(DlCompletionTree node, final DepSet dep) {
 		for (TRole p : ReflexiveRoles) {
-			DlCompletionTreeArc pA = CGraph.addRoleLabel(node, node, false, p,
-					dep);
+			DlCompletionTreeArc pA = CGraph.addRoleLabel(node, node, false, p, dep);
 			if (setupEdge(pA, dep, 0)) {
 				return true;
 			}
@@ -1528,8 +1519,11 @@ final class BCStack extends TSaveStack<BranchingContext> {
 
 	private void restoreBC() {
 		curNode = bContext.node;
-		curConcept = new ConceptWDep(bContext.concept.getConcept(),
-				bContext.concept.getDep());
+		if (bContext.concept == null) {
+			curConcept = new ConceptWDep(Helper.bpINVALID);
+		} else {
+			curConcept = new ConceptWDep(bContext.concept.getConcept(), bContext.concept.getDep());
+		}
 		updateBranchDep();
 		bContext.nextOption();
 	}
@@ -1592,7 +1586,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		if (curConcept.getConcept() < 0) {
 			LL.print("~");
 		}
-		LL.print(DLHeap.get(curConcept.getConcept()).getTagName());
+		LL.print(DLHeap.get(curConcept.getConcept()).Type().getName());
 		LL.print("}:");
 	}
 
@@ -1604,9 +1598,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 	}
 
 	public float printReasoningTime(LogAdapter o) {
-		o.print(String.format(
-				"\n     SAT takes %s seconds\n     SUB takes %s seconds",
-				satTimer, subTimer));
+		o.print(String.format("\n     SAT takes %s seconds\n     SUB takes %s seconds", satTimer, subTimer));
 		return satTimer.calcDelta() + subTimer.calcDelta();
 	}
 
@@ -1688,8 +1680,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 				}
 			case dtProj:
 				assert curConcept.getConcept() > 0;
-				return commonTacticBodyProj(cur.getRole(), cur.getC(),
-						cur.getProjRole());
+				return commonTacticBodyProj(cur.getRole(), cur.getC(), cur.getProjRole());
 			default:
 				throw new UnreachableSituationException();
 		}
@@ -1700,8 +1691,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		stats.nIdCalls.inc();
 		if (IfDefs.RKG_USE_SIMPLE_RULES) {
 			// check if we have some simple rules
-			if (curConcept.getConcept() > 0
-					&& applyExtraRulesIf((TConcept) cur.getConcept())) {
+			if (curConcept.getConcept() > 0 && applyExtraRulesIf((TConcept) cur.getConcept())) {
 				return true;
 			}
 		}
@@ -1764,12 +1754,17 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		// FIXME!! I don't know why, but performance is usually BETTER if using r-iters.
 		// It's their only usage, so after investigation they can be dropped
 		int[] begin = cur.begin();
-		for (int i = begin.length - 1; i >= 0; i--) {
-			int q = begin[i];
+		for (int q : begin) {
 			if (addToDoEntry(curNode, q, dep, null)) {
 				return true;
 			}
 		}
+		//		for (int i = begin.length - 1; i >= 0; i--) {
+		//			int q = begin[i];
+		//			if (addToDoEntry(curNode, q, dep, null)) {
+		//				return true;
+		//			}
+		//		}
 		//		for ( DLVertex::const_reverse_iterator q = cur.rbegin(); q != cur.rend(); ++q )
 		//			if ( addToDoEntry ( curNode, *q, dep ) )return true;
 		return false;
@@ -1779,11 +1774,9 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		assert curConcept.getConcept() < 0 && cur.Type() == dtAnd; // safety check
 		stats.nOrCalls.inc();
 		if (isFirstBranchCall()) {
-			Reference<DepSet> dep = new Reference<DepSet>(
-					DepSetFactory.create());
+			Reference<DepSet> dep = new Reference<DepSet>(DepSetFactory.create());
 			if (planOrProcessing(cur, dep)) {
-				LL.print(Templates.COMMON_TACTIC_BODY_OR,
-						OrConceptsToTest.get(OrConceptsToTest.size() - 1));
+				LL.print(Templates.COMMON_TACTIC_BODY_OR, OrConceptsToTest.get(OrConceptsToTest.size() - 1));
 				return false;
 			}
 			if (OrConceptsToTest.isEmpty()) {
@@ -1792,9 +1785,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 			}
 			if (OrConceptsToTest.size() == 1) {
 				ConceptWDep C = OrConceptsToTest.get(0);
-				return insertToDoEntry(curNode, C.getConcept(),
-						dep.getReference(), DLHeap.get(C.getConcept()).Type(),
-						"bcp");
+				return insertToDoEntry(curNode, C.getConcept(), dep.getReference(), DLHeap.get(C.getConcept()).Type(), "bcp");
 			}
 			createBCOr();
 			bContext.branchDep = DepSetFactory.create(dep.getReference());
@@ -1813,8 +1804,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		for (int q : cur.begin()) {
 			int inverse = -q;
 			//ConceptWDep C = new ConceptWDep(Helper.inverse(q));
-			switch (tryAddConcept(lab.getLabel(DLHeap.get(inverse).Type()),
-					inverse, null)) {
+			switch (tryAddConcept(lab.getLabel(DLHeap.get(inverse).Type()), inverse, null)) {
 				case acrClash: // clash found -- OK
 					dep.getReference().add(getClashSet());
 					continue;
@@ -1865,16 +1855,14 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		if (IfDefs.RKG_USE_DYNAMIC_BACKJUMPING) {
 			return addToDoEntry(curNode, bcOr.orCur().getConcept(), dep, reason);
 		} else {
-			return insertToDoEntry(curNode, bcOr.orCur().getConcept(), dep,
-					DLHeap.get(bcOr.orCur().getConcept()).Type(), reason);
+			return insertToDoEntry(curNode, bcOr.orCur().getConcept(), dep, DLHeap.get(bcOr.orCur().getConcept()).Type(), reason);
 		}
 	}
 
 	private boolean commonTacticBodyAllComplex(DLVertex cur) {
 		int state = cur.getState();
 		int C = curConcept.getConcept() - state; // corresponds to AR{0}.X
-		RAStateTransitions RST = cur.getRole().getAutomaton().getBase()
-				.get(state);
+		RAStateTransitions RST = cur.getRole().getAutomaton().getBase().get(state);
 		// apply all empty transitions
 		if (RST.hasEmptyTransition()) {
 			List<RATransition> list = RST.begin();
@@ -1882,8 +1870,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 				RATransition q = list.get(i);
 				stats.nAutoEmptyLookups.inc();
 				if (q.isEmpty()) {
-					if (addToDoEntry(curNode, C + q.final_state(),
-							curConcept.getDep(), "e")) {
+					if (addToDoEntry(curNode, C + q.final_state(), curConcept.getDep(), "e")) {
 						return true;
 					}
 				}
@@ -1902,9 +1889,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		for (int i = 0; i < list.size(); i++) {
 			DlCompletionTreeArc p = list.get(i);
 			if (RST.recognise(p.getRole())) {
-				if (applyTransitions(p, RST, C,
-						DepSetFactory.plus(curConcept.getDep(), p.getDep()),
-						null)) {
+				if (applyTransitions(p, RST, C, DepSetFactory.plus(curConcept.getDep(), p.getDep()), null)) {
 					return true;
 				}
 			}
@@ -1922,8 +1907,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		// check all neighbours; as the role is simple then recognise() == applicable()
 		for (DlCompletionTreeArc p : curNode.getNeighbour()) {
 			if (RST.recognise(p.getRole())) {
-				if (addToDoEntry(p.getArcEnd(), C,
-						DepSetFactory.plus(dep, p.getDep()), null)) {
+				if (addToDoEntry(p.getArcEnd(), C, DepSetFactory.plus(dep, p.getDep()), null)) {
 					return true;
 				}
 			}
@@ -1931,8 +1915,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		return false;
 	}
 
-	private boolean applyTransitions(DlCompletionTreeArc edge,
-			RAStateTransitions RST, int C, DepSet dep, String reason) {
+	private boolean applyTransitions(DlCompletionTreeArc edge, RAStateTransitions RST, int C, DepSet dep, String reason) {
 		TRole R = edge.getRole();
 		DlCompletionTree node = edge.getArcEnd();
 		// fast lane: the single transition which is applicable
@@ -1958,8 +1941,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 	 * Perform expansion of (\AR.C).DEP to an EDGE for simple R with a given
 	 * reason
 	 */
-	private boolean applyUniversalNR(DlCompletionTree Node,
-			DlCompletionTreeArc arcSample, DepSet dep_, int flags) {
+	private boolean applyUniversalNR(DlCompletionTree Node, DlCompletionTreeArc arcSample, DepSet dep_, int flags) {
 		// check whether a flag is set
 		if (flags == 0) {
 			return false;
@@ -1989,21 +1971,17 @@ final class BCStack extends TSaveStack<BranchingContext> {
 						break;
 					}
 					/** check whether transition is possible */
-					RAStateTransitions RST = vR.getAutomaton().getBase()
-							.get(v.getState());
+					RAStateTransitions RST = vR.getAutomaton().getBase().get(v.getState());
 					if (!RST.recognise(R)) {
 						break;
 					}
 					if (vR.isSimple()) {
 						// R is recognised so just add the final state!
-						if (addToDoEntry(arcSample.getArcEnd(), v.getC(),
-								DepSetFactory.plus(dep, p.getDep()), "ae")) {
+						if (addToDoEntry(arcSample.getArcEnd(), v.getC(), DepSetFactory.plus(dep, p.getDep()), "ae")) {
 							return true;
 						}
 					} else {
-						if (applyTransitions(arcSample, RST,
-								p.getConcept() - v.getState(),
-								DepSetFactory.plus(dep, p.getDep()), "ae")) {
+						if (applyTransitions(arcSample, RST, p.getConcept() - v.getState(), DepSetFactory.plus(dep, p.getDep()), "ae")) {
 							return true;
 						}
 					}
@@ -2011,12 +1989,10 @@ final class BCStack extends TSaveStack<BranchingContext> {
 				}
 				case dtLE:
 					if (isFunctionalVertex(v)) {
-						if ((flags & redoFunc.getValue()) > 0
-								&& R.lesserequal(vR)) {
+						if ((flags & redoFunc.getValue()) > 0 && R.lesserequal(vR)) {
 							addExistingToDoEntry(Node, p, "f");
 						}
-					} else if ((flags & redoAtMost.getValue()) > 0
-							&& R.lesserequal(vR)) {
+					} else if ((flags & redoAtMost.getValue()) > 0 && R.lesserequal(vR)) {
 						addExistingToDoEntry(Node, p, "le");
 					}
 					break;
@@ -2053,19 +2029,15 @@ final class BCStack extends TSaveStack<BranchingContext> {
 			List<TRole> list = R.begin_topfunc();
 			for (int i = 0; i < list.size(); i++) {
 				int functional = list.get(i).getFunctional();
-				switch (tryAddConcept(curNode.label().getLabel(DagTag.dtLE),
-						functional, dep)) {
+				switch (tryAddConcept(curNode.label().getLabel(DagTag.dtLE), functional, dep)) {
 					case acrClash:
 						return true;
 					case acrDone: {
 						updateLevel(curNode, dep);
-						ConceptWDep rFuncRestriction1 = new ConceptWDep(
-								functional, dep);
-						CGraph.addConceptToNode(curNode, rFuncRestriction1,
-								DagTag.dtLE);
+						ConceptWDep rFuncRestriction1 = new ConceptWDep(functional, dep);
+						CGraph.addConceptToNode(curNode, rFuncRestriction1, DagTag.dtLE);
 						used.add(rFuncRestriction1.getConcept());
-						LL.print(Templates.COMMON_TACTIC_BODY_SOME,
-								rFuncRestriction1);
+						LL.print(Templates.COMMON_TACTIC_BODY_SOME, rFuncRestriction1);
 					}
 						break;
 					case acrExist:
@@ -2082,8 +2054,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		for (int i = 0; i < list.size(); i++) {
 			ConceptWDep LC = list.get(i);
 			final DLVertex ver = DLHeap.get(LC.getConcept());
-			if (LC.getConcept() > 0 && isFunctionalVertex(ver)
-					&& R.lesserequal(ver.getRole())) {
+			if (LC.getConcept() > 0 && isFunctionalVertex(ver) && R.lesserequal(ver.getRole())) {
 				if (!rFunc || RF.lesserequal(ver.getRole())) {
 					rFunc = true;
 					RF = ver.getRole();
@@ -2094,8 +2065,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		if (rFunc) {
 			DlCompletionTreeArc functionalArc = null;
 			DepSet newDep = DepSetFactory.create();
-			for (int i = 0; i < curNode.getNeighbour().size()
-					&& functionalArc == null; i++) {
+			for (int i = 0; i < curNode.getNeighbour().size() && functionalArc == null; i++) {
 				DlCompletionTreeArc pr = curNode.getNeighbour().get(i);
 				if (pr.isNeighbour(RF, newDep)) {
 					functionalArc = pr;
@@ -2105,12 +2075,10 @@ final class BCStack extends TSaveStack<BranchingContext> {
 				LL.print(Templates.COMMON_TACTIC_BODY_SOME2, rFuncRestriction);
 				DlCompletionTree succ = functionalArc.getArcEnd();
 				newDep.add(dep);
-				if (R.isDisjoint()
-						&& checkDisjointRoleClash(curNode, succ, R, newDep)) {
+				if (R.isDisjoint() && checkDisjointRoleClash(curNode, succ, R, newDep)) {
 					return true;
 				}
-				functionalArc = CGraph.addRoleLabel(curNode, succ,
-						functionalArc.isPredEdge(), R, newDep);
+				functionalArc = CGraph.addRoleLabel(curNode, succ, functionalArc.isPredEdge(), R, newDep);
 				// adds concept to the end of arc
 				if (addToDoEntry(succ, C, newDep, null)) {
 					return true;
@@ -2128,23 +2096,19 @@ final class BCStack extends TSaveStack<BranchingContext> {
 					// FIXME!! for simplicity, check the functionality here (see bEx017). It seems
 					// only necessary when R has several functional super-roles, so the condition
 					// can be simplified
-					if (applyUniversalNR(curNode, functionalArc, newDep,
-							redoForall.getValue() | redoFunc.getValue())) {
+					if (applyUniversalNR(curNode, functionalArc, newDep, redoForall.getValue() | redoFunc.getValue())) {
 						return true;
 					}
 					// if new role label was added to a functionalArc, some functional restrictions
 					// in the SUCC node might became applicable. See bFunctional1x test
-					if (applyUniversalNR(succ, functionalArc.getReverse(),
-							newDep, redoForall.getValue() | redoFunc.getValue()
-									| redoAtMost.getValue())) {
+					if (applyUniversalNR(succ, functionalArc.getReverse(), newDep, redoForall.getValue() | redoFunc.getValue() | redoAtMost.getValue())) {
 						return true;
 					}
 				}
 				return false;
 			}
 		}
-		return createNewEdge(cur.getRole(), C, Redo.redoForall.getValue()
-				| Redo.redoAtMost.getValue());
+		return createNewEdge(cur.getRole(), C, Redo.redoForall.getValue() | Redo.redoAtMost.getValue());
 	}
 
 	private boolean commonTacticBodyValue(final TRole R, final TIndividual nom) {
@@ -2159,11 +2123,9 @@ final class BCStack extends TSaveStack<BranchingContext> {
 			return true;
 		}
 		encounterNominal = true;
-		DlCompletionTreeArc edge = CGraph.addRoleLabel(curNode, realNode,
-				false, R, dep);
+		DlCompletionTreeArc edge = CGraph.addRoleLabel(curNode, realNode, false, R, dep);
 		// add all necessary concepts to both ends of the edge
-		return setupEdge(edge, dep, redoForall.getValue() | redoFunc.getValue()
-				| redoAtMost.getValue() | redoIrr.getValue());
+		return setupEdge(edge, dep, redoForall.getValue() | redoFunc.getValue() | redoAtMost.getValue() | redoIrr.getValue());
 	}
 
 	private boolean createNewEdge(final TRole R, int C, int flags) {
@@ -2174,17 +2136,14 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		}
 		DlCompletionTreeArc pA = createOneNeighbour(R, curConcept.getDep());
 		// add necessary label
-		return initNewNode(pA.getArcEnd(), curConcept.getDep(), C)
-				|| setupEdge(pA, curConcept.getDep(), flags);
+		return initNewNode(pA.getArcEnd(), curConcept.getDep(), C) || setupEdge(pA, curConcept.getDep(), flags);
 	}
 
-	private DlCompletionTreeArc createOneNeighbour(final TRole R,
-			final DepSet dep) {
+	private DlCompletionTreeArc createOneNeighbour(final TRole R, final DepSet dep) {
 		return createOneNeighbour(R, dep, DlCompletionTree.BlockableLevel);
 	}
 
-	private DlCompletionTreeArc createOneNeighbour(final TRole R,
-			final DepSet dep, int level) {
+	private DlCompletionTreeArc createOneNeighbour(final TRole R, final DepSet dep, int level) {
 		boolean forNN = level != DlCompletionTree.BlockableLevel;
 		DlCompletionTreeArc pA = CGraph.createNeighbour(curNode, forNN, R, dep);
 		DlCompletionTree node = pA.getArcEnd();
@@ -2195,8 +2154,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 			node.setDataNode();
 		}
 		if (IfDefs._USE_LOGGING) {
-			LL.print((R.isDataRole() ? Templates.DN : Templates.CN),
-					node.getId(), dep);
+			LL.print((R.isDataRole() ? Templates.DN : Templates.CN), node.getId(), dep);
 		}
 		return pA;
 	}
@@ -2263,8 +2221,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 	}
 
 	/** add necessary concepts to the head of the new EDGE */
-	private boolean initHeadOfNewEdge(DlCompletionTree node, final TRole R,
-			final DepSet dep, final String reason) {
+	private boolean initHeadOfNewEdge(DlCompletionTree node, final TRole R, final DepSet dep, final String reason) {
 		// if R is functional, then add FR with given DEP-set to NODE
 		if (R.isFunctional()) {
 			for (TRole r : R.begin_topfunc()) {
@@ -2291,8 +2248,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 
 	boolean commonTacticBodyFunc(final DLVertex cur) {
 		assert curConcept.getConcept() > 0 && isFunctionalVertex(cur);
-		if (isNNApplicable(cur.getRole(), Helper.bpTOP,
-				curConcept.getConcept() + 1)) {
+		if (isNNApplicable(cur.getRole(), Helper.bpTOP, curConcept.getConcept() + 1)) {
 			return commonTacticBodyNN(cur);
 		}
 		stats.nFuncCalls.inc();
@@ -2310,8 +2266,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		for (int i = 1; i < EdgesToMerge.size(); i++) {//++q; q != EdgesToMerge.end(); ++q )
 			q = EdgesToMerge.get(i);
 			if (!q.getArcEnd().isPBlocked()) {
-				if (Merge(q.getArcEnd(), sample,
-						DepSetFactory.plus(depF, q.getDep()))) {
+				if (Merge(q.getArcEnd(), sample, DepSetFactory.plus(depF, q.getDep()))) {
 					return true;
 				}
 			}
@@ -2375,11 +2330,9 @@ final class BCStack extends TSaveStack<BranchingContext> {
 					// get from- and to-arcs using corresponding indexes in Edges
 					from = bcLE.getFrom();
 					to = bcLE.getTo();
-					Reference<DepSet> dep = new Reference<DepSet>(
-							DepSetFactory.create()); // empty dep-set
+					Reference<DepSet> dep = new Reference<DepSet>(DepSetFactory.create()); // empty dep-set
 					// fast check for from->end() and to->end() are in \neq
-					if (CGraph.nonMergable(from.getArcEnd(), to.getArcEnd(),
-							dep)) {
+					if (CGraph.nonMergable(from.getArcEnd(), to.getArcEnd(), dep)) {
 						if (C == Helper.bpTOP) {
 							setClashSet(dep.getReference());
 						} else {
@@ -2390,14 +2343,11 @@ final class BCStack extends TSaveStack<BranchingContext> {
 							//									dep.getReference());
 							boolean test;
 							// here dep contains the clash-set
-							test = findConceptClash(from.getArcEnd().label()
-									.getLabel(tag), C, dep.getReference());
+							test = findConceptClash(from.getArcEnd().label().getLabel(tag), C, dep.getReference());
 							assert test;
-							dep.setReference(DepSetFactory.plus(
-									dep.getReference(), getClashSet()));
+							dep.setReference(DepSetFactory.plus(dep.getReference(), getClashSet()));
 							// save new dep-set
-							test = findConceptClash(to.getArcEnd().label()
-									.getLabel(tag), C, dep.getReference());
+							test = findConceptClash(to.getArcEnd().label().getLabel(tag), C, dep.getReference());
 							assert test;
 							// both clash-sets are now in common clash-set
 						}
@@ -2457,11 +2407,9 @@ final class BCStack extends TSaveStack<BranchingContext> {
 							// get from- and to-arcs using corresponding indexes in Edges
 							from = bcLE.getFrom();
 							to = bcLE.getTo();
-							Reference<DepSet> dep = new Reference<DepSet>(
-									DepSetFactory.create()); // empty dep-set
+							Reference<DepSet> dep = new Reference<DepSet>(DepSetFactory.create()); // empty dep-set
 							// fast check for from.end() and to.end() are in \neq
-							if (CGraph.nonMergable(from.getArcEnd(),
-									to.getArcEnd(), dep)) {
+							if (CGraph.nonMergable(from.getArcEnd(), to.getArcEnd(), dep)) {
 								if (C == Helper.bpTOP) {
 									setClashSet(dep.getReference());
 								} else // QCR: update dep-set wrt C
@@ -2472,15 +2420,10 @@ final class BCStack extends TSaveStack<BranchingContext> {
 									//											dep.getReference());
 									boolean test;
 									// here dep contains the clash-set
-									test = findConceptClash(from.getArcEnd()
-											.label().getLabel(tag), C,
-											dep.getReference());
+									test = findConceptClash(from.getArcEnd().label().getLabel(tag), C, dep.getReference());
 									assert test;
-									dep.setReference(DepSetFactory.plus(
-											dep.getReference(), getClashSet())); // save new dep-set
-									test = findConceptClash(to.getArcEnd()
-											.label().getLabel(tag), C,
-											dep.getReference());
+									dep.setReference(DepSetFactory.plus(dep.getReference(), getClashSet())); // save new dep-set
+									test = findConceptClash(to.getArcEnd().label().getLabel(tag), C, dep.getReference());
 									assert test;
 									// both clash-sets are now in common clash-set
 								}
@@ -2540,13 +2483,10 @@ final class BCStack extends TSaveStack<BranchingContext> {
 			return true;
 		}
 		// create N new different edges
-		return createDifferentNeighbours(cur.getRole(), cur.getC(),
-				curConcept.getDep(), cur.getNumberGE(),
-				DlCompletionTree.BlockableLevel);
+		return createDifferentNeighbours(cur.getRole(), cur.getC(), curConcept.getDep(), cur.getNumberGE(), DlCompletionTree.BlockableLevel);
 	}
 
-	private boolean createDifferentNeighbours(final TRole R, int C,
-			final DepSet dep, int n, int level) {
+	private boolean createDifferentNeighbours(final TRole R, int C, final DepSet dep, int n, int level) {
 		DlCompletionTreeArc pA = null;
 		CGraph.initIR();
 		for (int i = 0; i < n; ++i) {
@@ -2563,12 +2503,10 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		}
 		CGraph.finiIR();
 		// re-apply all <= NR in curNode; do it only once for all created nodes; no need for Irr
-		return applyUniversalNR(curNode, pA, dep, redoFunc.getValue()
-				| redoAtMost.getValue());
+		return applyUniversalNR(curNode, pA, dep, redoFunc.getValue() | redoAtMost.getValue());
 	}
 
-	boolean isNRClash(final DLVertex atleast, final DLVertex atmost,
-			final ConceptWDep reason) {
+	boolean isNRClash(final DLVertex atleast, final DLVertex atmost, final ConceptWDep reason) {
 		if (atmost.Type() != DagTag.dtLE || atleast.Type() != DagTag.dtLE) {
 			return false;
 		}
@@ -2582,30 +2520,23 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		return true;
 	}
 
-	boolean checkMergeClash(final CGLabel from, final CGLabel to,
-			final DepSet dep, int nodeId) {
+	boolean checkMergeClash(final CGLabel from, final CGLabel to, final DepSet dep, int nodeId) {
 		DepSet clashDep = DepSetFactory.create(dep);
 		boolean clash = false;
 		for (ConceptWDep p : from.get_sc()) {
 			int inverse = -p.getConcept();
-			if (used.contains(inverse)
-					&& findConceptClash(to.getLabel(dtPConcept), inverse,
-							p.getDep())) {
+			if (used.contains(inverse) && findConceptClash(to.getLabel(dtPConcept), inverse, p.getDep())) {
 				clash = true;
 				clashDep.add(getClashSet());
-				LL.print(Templates.CHECK_MERGE_CLASH, nodeId, p.getConcept(),
-						DepSetFactory.plus(getClashSet(), dep));
+				LL.print(Templates.CHECK_MERGE_CLASH, nodeId, p.getConcept(), DepSetFactory.plus(getClashSet(), dep));
 			}
 		}
 		for (ConceptWDep p : from.get_cc()) {
 			int inverse = -p.getConcept();
-			if (used.contains(inverse)
-					&& findConceptClash(to.getLabel(dtForall), inverse,
-							p.getDep())) {
+			if (used.contains(inverse) && findConceptClash(to.getLabel(dtForall), inverse, p.getDep())) {
 				clash = true;
 				clashDep.add(getClashSet());
-				LL.print(Templates.CHECK_MERGE_CLASH, nodeId, p.getConcept(),
-						DepSetFactory.plus(getClashSet(), dep));
+				LL.print(Templates.CHECK_MERGE_CLASH, nodeId, p.getConcept(), DepSetFactory.plus(getClashSet(), dep));
 			}
 		}
 		if (clash) {
@@ -2614,8 +2545,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		return clash;
 	}
 
-	private boolean mergeLabels(final CGLabel from, DlCompletionTree to,
-			final DepSet dep) {
+	private boolean mergeLabels(final CGLabel from, DlCompletionTree to, final DepSet dep) {
 		CGLabel lab = to.label();
 		CWDArray sc = lab.getLabel(dtPConcept);
 		CWDArray cc = lab.getLabel(dtForall);
@@ -2634,9 +2564,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 					CGraph.saveRareCond(sc.updateDepSet(index, p.getDep()));
 				}
 			} else {
-				if (insertToDoEntry(to, bp,
-						DepSetFactory.plus(dep, p.getDep()), DLHeap.get(bp)
-								.Type(), "M")) {
+				if (insertToDoEntry(to, bp, DepSetFactory.plus(dep, p.getDep()), DLHeap.get(bp).Type(), "M")) {
 					return true;
 				}
 			}
@@ -2652,9 +2580,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 					CGraph.saveRareCond(cc.updateDepSet(index, p.getDep()));
 				}
 			} else {
-				if (insertToDoEntry(to, bp,
-						DepSetFactory.plus(dep, p.getDep()), DLHeap.get(bp)
-								.Type(), "M")) {
+				if (insertToDoEntry(to, bp, DepSetFactory.plus(dep, p.getDep()), DLHeap.get(bp).Type(), "M")) {
 					return true;
 				}
 			}
@@ -2684,9 +2610,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		List<DlCompletionTreeArc> edges = new ArrayList<DlCompletionTreeArc>();
 		CGraph.Merge(from, to, depF, edges);
 		for (DlCompletionTreeArc q : edges) {
-			if (q.getRole().isDisjoint()
-					&& checkDisjointRoleClash(q.getReverse().getArcEnd(),
-							q.getArcEnd(), q.getRole(), depF)) {
+			if (q.getRole().isDisjoint() && checkDisjointRoleClash(q.getReverse().getArcEnd(), q.getArcEnd(), q.getRole(), depF)) {
 				{
 					return true;
 				}
@@ -2696,20 +2620,14 @@ final class BCStack extends TSaveStack<BranchingContext> {
 			return checkDataClash(to);
 		}
 		for (DlCompletionTreeArc q : edges) {
-			if (applyUniversalNR(
-					to,
-					q,
-					depF,
-					redoForall.getValue() | redoFunc.getValue()
-							| redoAtMost.getValue() | redoIrr.getValue())) {
+			if (applyUniversalNR(to, q, depF, redoForall.getValue() | redoFunc.getValue() | redoAtMost.getValue() | redoIrr.getValue())) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	boolean checkDisjointRoleClash(DlCompletionTree from, DlCompletionTree to,
-			final TRole R, final DepSet dep) {
+	boolean checkDisjointRoleClash(DlCompletionTree from, DlCompletionTree to, final TRole R, final DepSet dep) {
 		for (DlCompletionTreeArc p : from.getNeighbour()) {
 			if (checkDisjointRoleClash(p, to, R, dep)) {
 				return true;
@@ -2731,10 +2649,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		EdgesToMerge.clear();
 		DagTag tag = DLHeap.get(c).Type();
 		for (DlCompletionTreeArc p : curNode.getNeighbour()) {
-			if (p.isNeighbour(Role)
-					&& isNewEdge(p.getArcEnd(), EdgesToMerge)
-					&& findChooseRuleConcept(p.getArcEnd().label()
-							.getLabel(tag), c, Dep)) {
+			if (p.isNeighbour(Role) && isNewEdge(p.getArcEnd(), EdgesToMerge) && findChooseRuleConcept(p.getArcEnd().label().getLabel(tag), c, Dep)) {
 				EdgesToMerge.add(p);
 			}
 		}
@@ -2783,18 +2698,15 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		// new (just branched) dep-set
 		DepSet curDep = getCurDepSet();
 		// make a stopper to mark that NN-rule is applied
-		if (addToDoEntry(curNode, curConcept.getConcept() + cur.getNumberLE(),
-				DepSetFactory.create(), "NNs")) {
+		if (addToDoEntry(curNode, curConcept.getConcept() + cur.getNumberLE(), DepSetFactory.create(), "NNs")) {
 			return true;
 		}
 		// create curNN new different edges
-		if (createDifferentNeighbours(cur.getRole(), cur.getC(), curDep, NN,
-				curNode.getNominalLevel() + 1)) {
+		if (createDifferentNeighbours(cur.getRole(), cur.getC(), curDep, NN, curNode.getNominalLevel() + 1)) {
 			return true;
 		}
 		// now remember NR we just created: it is (<= curNN R), so have to find it
-		return addToDoEntry(curNode,
-				curConcept.getConcept() + cur.getNumberLE() - NN, curDep, "NN");
+		return addToDoEntry(curNode, curConcept.getConcept() + cur.getNumberLE() - NN, curDep, "NN");
 	}
 
 	boolean isNNApplicable(final TRole r, int C, int stopper) {
@@ -2815,8 +2727,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 		}
 		final DepSet dep = DepSetFactory.create(curConcept.getDep());
 		DlCompletionTreeArc pA = CGraph.createLoop(curNode, R, dep);
-		return setupEdge(pA, dep, redoForall.getValue() | redoFunc.getValue()
-				| redoAtMost.getValue() | redoIrr.getValue());
+		return setupEdge(pA, dep, redoForall.getValue() | redoFunc.getValue() | redoAtMost.getValue() | redoIrr.getValue());
 	}
 
 	boolean commonTacticBodyIrrefl(final TRole R) {
@@ -2867,9 +2778,7 @@ final class BCStack extends TSaveStack<BranchingContext> {
 			}
 		}
 		DlCompletionTree child = pA.getArcEnd();
-		return setupEdge(CGraph.addRoleLabel(curNode, child, pA.isPredEdge(),
-				ProjR, dep), dep, redoForall.getValue() | redoFunc.getValue()
-				| redoAtMost.getValue() | redoIrr.getValue());
+		return setupEdge(CGraph.addRoleLabel(curNode, child, pA.isPredEdge(), ProjR, dep), dep, redoForall.getValue() | redoFunc.getValue() | redoAtMost.getValue() | redoIrr.getValue());
 	}
 }
 

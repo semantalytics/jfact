@@ -1,15 +1,14 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
@@ -19,7 +18,7 @@ import uk.ac.manchester.cs.jfact.kernel.TConcept.CTTag;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheInterface;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheState;
 
-public  final class DLConceptTaxonomy extends Taxonomy {
+public final class DLConceptTaxonomy extends Taxonomy {
 	/** host tBox */
 	private final TBox tBox;
 	/** common descendants of all parents of currently classified concept */
@@ -109,8 +108,7 @@ public  final class DLConceptTaxonomy extends Taxonomy {
 	public void preClassificationActions() {
 		++nConcepts;
 		if (pTaxProgress != null) {
-			pTaxProgress.reasonerTaskProgressChanged((int) nConcepts,
-					tBox.getNItems());
+			pTaxProgress.reasonerTaskProgressChanged((int) nConcepts, tBox.getNItems());
 		}
 	}
 
@@ -121,8 +119,7 @@ public  final class DLConceptTaxonomy extends Taxonomy {
 	}
 
 	/** the only c'tor */
-	DLConceptTaxonomy(final TConcept pTop, final TConcept pBottom, TBox kb,
-			final TKBFlags GCIs) {
+	DLConceptTaxonomy(final TConcept pTop, final TConcept pBottom, TBox kb, final TKBFlags GCIs) {
 		super(pTop, pBottom);
 		tBox = kb;
 		nConcepts = 0;
@@ -186,8 +183,7 @@ public  final class DLConceptTaxonomy extends Taxonomy {
 		// we DON'T need bottom-up phase for primitive concepts during CD-like reasoning
 		// if no GCIs are in the TBox (C [= T, T [= X or Y, X [= D, Y [= D)
 		// or no reflexive roles w/RnD precent (Refl(R), Range(R)=D)
-		return flagNeedBottomUp || !useCompletelyDefined
-				|| curConcept().isNonPrimitive();
+		return flagNeedBottomUp || !useCompletelyDefined || curConcept().isNonPrimitive();
 	}
 
 	boolean testSub(final TConcept p, final TConcept q) {
@@ -235,17 +231,8 @@ public  final class DLConceptTaxonomy extends Taxonomy {
 
 	@Override
 	public void print(LogAdapter o) {
-		o.print(Templates.DLCONCEPTTAXONOMY,
-				nTries,
-				nPositives,
-				nPositives * 100 / Math.max(1, nTries),
-				nCachedPositive,
-				nCachedNegative,
-				(nSortedNegative > 0 ? String.format(
-						"Sorted reasoning deals with %s non-subsumptions\n",
-						nSortedNegative) : ""), nSearchCalls, nSubCalls,
-				nNonTrivialSubCalls,
-				nEntries * (nEntries - 1) / Math.max(1, nTries));
+		o.print(Templates.DLCONCEPTTAXONOMY, nTries, nPositives, nPositives * 100 / Math.max(1, nTries), nCachedPositive, nCachedNegative, (nSortedNegative > 0 ? String.format("Sorted reasoning deals with %s non-subsumptions\n", nSortedNegative) : ""), nSearchCalls, nSubCalls,
+				nNonTrivialSubCalls, nEntries * (nEntries - 1) / Math.max(1, nTries));
 		super.print(o);
 	}
 
@@ -379,8 +366,7 @@ public  final class DLConceptTaxonomy extends Taxonomy {
 					return true;
 				} else // non-det merge: check whether it is the same
 				{
-					LL.print("\nTAX: trying '" + curI.getName() + "' = '"
-							+ syn.getName() + "'... ");
+					LL.print("\nTAX: trying '" + curI.getName() + "' = '" + syn.getName() + "'... ");
 					if (testSubTBox(curI, syn)) // they are actually the same
 					{
 						insertCurrent(syn.getTaxVertex());

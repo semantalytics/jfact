@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.helpers;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry.resolveSynonym;
 import static uk.ac.manchester.cs.jfact.kernel.Token.*;
 
@@ -20,11 +20,8 @@ import uk.ac.manchester.cs.jfact.kernel.TNamedEntry;
 import uk.ac.manchester.cs.jfact.kernel.TRole;
 import uk.ac.manchester.cs.jfact.kernel.Token;
 
-
 public class DLTreeFactory {
-	private static EnumSet<Token> SNFCalls = EnumSet.of(TOP, BOTTOM, CNAME,
-			INAME, RNAME, DNAME, DATAEXPR, NOT, INV, AND, FORALL, LE,
-			REFLEXIVE, RCOMPOSITION, PROJFROM, PROJINTO);
+	private static EnumSet<Token> SNFCalls = EnumSet.of(TOP, BOTTOM, CNAME, INAME, RNAME, DNAME, DATAEXPR, NOT, INV, AND, FORALL, LE, REFLEXIVE, RCOMPOSITION, PROJFROM, PROJINTO);
 
 	//	private static boolean containsC(DLTree C, DLTree D) {
 	//		switch (C.token()) {
@@ -116,8 +113,7 @@ public class DLTreeFactory {
 		return new NDLTree(new TLexeme(AND), l);
 	}
 
-	public static DLTree createSNFAnd(Collection<DLTree> collection,
-			DLTree ancestor) {
+	public static DLTree createSNFAnd(Collection<DLTree> collection, DLTree ancestor) {
 		boolean hasTop = false;
 		List<DLTree> l = new ArrayList<DLTree>();
 		for (DLTree d : collection) {
@@ -277,8 +273,7 @@ public class DLTreeFactory {
 			//					inverseComposition(tree.Right()),
 			//					inverseComposition(tree.Left()));
 		} else {
-			return new LEAFDLTree(new TLexeme(RNAME, TRole.resolveRole(tree)
-					.inverse()));
+			return new LEAFDLTree(new TLexeme(RNAME, TRole.resolveRole(tree).inverse()));
 		}
 	}
 
@@ -317,9 +312,7 @@ public class DLTreeFactory {
 
 	/** check whether T is an expression in the form (atmost 1 RNAME) */
 	public static boolean isFunctionalExpr(final DLTree t, final TNamedEntry R) {
-		return t != null && t.token() == LE
-				&& R.equals(t.Left().elem().getNE()) && t.elem().getData() == 1
-				&& t.Right().isTOP();
+		return t != null && t.token() == LE && R.equals(t.Left().elem().getNE()) && t.elem().getData() == 1 && t.Right().isTOP();
 	}
 
 	public static boolean isSNF(final DLTree t) {
@@ -458,12 +451,9 @@ public class DLTreeFactory {
 			if (entry.isSynonym()) {
 				entry = resolveSynonym(entry);
 				if (entry.getId() == -1) {
-					desc.elem = new TLexeme(entry.getName().equals("TOP") ? TOP
-							: BOTTOM);
+					desc.elem = new TLexeme(entry.getName().equals("TOP") ? TOP : BOTTOM);
 				} else {
-					desc.elem = new TLexeme(
-							((TConcept) entry).isSingleton() ? INAME : CNAME,
-							entry);
+					desc.elem = new TLexeme(((TConcept) entry).isSingleton() ? INAME : CNAME, entry);
 				}
 				return true;
 			} else {

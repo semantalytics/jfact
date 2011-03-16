@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.helpers.Helper.*;
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
 
@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import org.semanticweb.owlapi.model.OWLRuntimeException;
 
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
@@ -23,18 +22,18 @@ import uk.ac.manchester.cs.jfact.helpers.FastSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
 import uk.ac.manchester.cs.jfact.helpers.IfDefs;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
-import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
+import uk.ac.manchester.cs.jfact.helpers.StatIndex;
+import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheInterface;
 
-public final  class DLDag {
+public final class DLDag {
 	/** body of DAG */
 	private final List<DLVertex> Heap = new ArrayList<DLVertex>();
 	/** all the AND nodes (needs to recompute) */
 	private final FastSet listAnds = FastSetFactory.create();
-	private final EnumMap<DagTag, DLVTable> indexes = new EnumMap<DagTag, DLVTable>(
-			DagTag.class);
+	private final EnumMap<DagTag, DLVTable> indexes = new EnumMap<DagTag, DLVTable>(DagTag.class);
 	/** cache efficiency -- statistic purposes */
 	private int nCacheHits;
 	/** size of sort array */
@@ -64,12 +63,8 @@ public final  class DLDag {
 		if (n < 1 || n > 3) {
 			return false;
 		}
-		char Method = str.charAt(0), Order = n >= 2 ? str.charAt(1) : 'a', NGPref = n == 3 ? str
-				.charAt(2) : 'p';
-		return (Method == 'S' || Method == 'D' || Method == 'F'
-				|| Method == 'B' || Method == 'G' || Method == '0')
-				&& (Order == 'a' || Order == 'd')
-				&& (NGPref == 'p' || NGPref == 'n');
+		char Method = str.charAt(0), Order = n >= 2 ? str.charAt(1) : 'a', NGPref = n == 3 ? str.charAt(2) : 'p';
+		return (Method == 'S' || Method == 'D' || Method == 'F' || Method == 'B' || Method == 'G' || Method == '0') && (Order == 'a' || Order == 'd') && (NGPref == 'p' || NGPref == 'n');
 	}
 
 	/** change order of ADD elements wrt statistic */
@@ -118,7 +113,7 @@ public final  class DLDag {
 
 	/** check if given index points to the last DAG entry */
 	public boolean isLast(int p) {
-		return Math.abs(p) == Heap.size() - 1;
+		return (p == Heap.size() - 1) || (-p == Heap.size() - 1);
 	}
 
 	// access methods
@@ -233,12 +228,9 @@ public final  class DLDag {
 
 	public DLDag(final IFOptionSet Options) {
 		/** hash-table for verteces (and, all, LE) fast search */
-		DLVTable indexAnd = null;
-		DLVTable indexAll = null;
-		DLVTable indexLE = null;
-		indexAnd = new DLVTable(this);
-		indexAll = new DLVTable(this);
-		indexLE = new DLVTable(this);
+		DLVTable indexAnd = new DLVTable(this);
+		DLVTable indexAll = new DLVTable(this);
+		DLVTable indexLE = new DLVTable(this);
 		indexes.put(DagTag.dtCollection, indexAnd);
 		indexes.put(DagTag.dtAnd, indexAnd);
 		indexes.put(DagTag.dtIrr, indexAll);
@@ -254,20 +246,20 @@ public final  class DLDag {
 
 	public void removeAfter(int n) {
 		assert n < size();
-		while (n < Heap.size()) {
-			//TODO check: looks useless
-			//			switch (Heap.get(n).Type()) {
-			//				case dtDataType:
-			//				case dtDataValue:
-			//				case dtDataExpr:
-			//					((TDataEntry) Heap.get(n).getConcept()).setBP(bpINVALID);
-			//					break;
-			//				default:
-			//					break;
-			//			}
-			Heap.remove(n);
-			//delete p;
-		}
+		//while (n < Heap.size()) {
+		//TODO check: looks useless
+		//			switch (Heap.get(n).Type()) {
+		//				case dtDataType:
+		//				case dtDataValue:
+		//				case dtDataExpr:
+		//					((TDataEntry) Heap.get(n).getConcept()).setBP(bpINVALID);
+		//					break;
+		//				default:
+		//					break;
+		//			}
+		//Heap.remove(n);
+		//delete p;
+		//}
 		Helper.resize(Heap, n);
 	}
 
@@ -299,28 +291,23 @@ public final  class DLDag {
 		}
 		sortAscend = opt.charAt(1) == 'a';
 		preferNonGen = opt.charAt(2) == 'p';
-		iSort = opt.charAt(0) == 'S' ? DLVertex.getStatIndexSize(false) : opt
-				.charAt(0) == 'D' ? DLVertex.getStatIndexDepth(false) : opt
-				.charAt(0) == 'B' ? DLVertex.getStatIndexBranch(false) : opt
-				.charAt(0) == 'G' ? DLVertex.getStatIndexGener(false)
-				: DLVertex.getStatIndexFreq(false);
+		iSort = StatIndex.choose(opt.charAt(0));
 		Recompute();
 	}
 
-	private void computeVertexStat(int p) {
-		DLVertex v = get(p);
-		boolean pos = p > 0;
+	private void computeVertexStat(DLVertex v, boolean pos, int depth) {
 		// this vertex is already processed
-		if (v.isProcessed(pos)) {
-			return;
-		}
+		//		if (v.isProcessed(pos)) {
+		//			return;
+		//		}
 		// in case of cycle: mark concept as such
 		if (v.isVisited(pos)) {
 			v.setInCycle(pos);
-			// FIXME!! now the fact of cycle is not used; later on mark a node in cycle iff any child is/
 			return;
 		}
 		v.setVisited(pos);
+		//		System.out.println("DLDag.computeVertexStat() "+depth+" " + pos + "  "
+		//				+ v.toString() + "\t" + v.Type());
 		// ensure that the statistic is gather for all sub-concepts of the expression
 		switch (v.Type()) {
 			case dtCollection: // if pos then behaves like and
@@ -331,7 +318,12 @@ public final  class DLDag {
 				//$FALL-THROUGH$
 			case dtAnd: // check all the conjuncts
 				for (int q : v.begin()) {
-					computeVertexStat(q, pos);
+					int index = createBiPointer(q, pos);
+					DLVertex vertex = get(index);
+					boolean pos2 = index > 0;
+					if (!vertex.isProcessed(pos2)) {
+						computeVertexStat(vertex, pos2, depth + 1);
+					}
 				}
 				break;
 			case dtProj:
@@ -347,21 +339,24 @@ public final  class DLDag {
 			case dtForall:
 			case dtUAll:
 			case dtLE: // check a single referenced concept
-				computeVertexStat(v.getC(), pos);
+				int index = createBiPointer(v.getC(), pos);
+				DLVertex vertex = get(index);
+				boolean pos2 = index > 0;
+				if (!vertex.isProcessed(pos2)) {
+					computeVertexStat(vertex, pos2, depth + 1);
+				}
 				break;
 			default: // nothing to do
 				break;
 		}
 		v.setProcessed(pos);
 		// here all the necessary statistics is gathered -- use it in the init
-		updateVertexStat(p);
+		updateVertexStat(v, pos);
 	}
 
-	private void updateVertexStat(int p) {
-		DLVertex v = get(p);
-		boolean pos = p > 0;
+	private void updateVertexStat(DLVertex v, boolean pos) {
 		int d = 0, s = 1, b = 0, g = 0;
-		if (!v.omitStat(pos)) {
+		if (!v.Type().omitStat(pos)) {
 			if (isValid(v.getC())) {
 				updateVertexStat(v, v.getC(), pos);
 			} else {
@@ -412,7 +407,7 @@ public final  class DLDag {
 		}
 		v.incFreqValue(pos); // increment frequence of current vertex
 		v.setVisited(pos);
-		if (v.omitStat(pos)) {
+		if (v.Type().omitStat(pos)) {
 			return;
 		}
 		// increment frequence of all subvertex
@@ -425,16 +420,12 @@ public final  class DLDag {
 		}
 	}
 
-	private void computeVertexStat(int p, boolean pos) {
-		computeVertexStat(createBiPointer(p, pos));
-	}
-
 	/** helper for the recursion */
 	private void updateVertexStat(DLVertex v, int p, boolean pos) {
 		//		v.getStatsDelegate().updateStatValues(get(p).getStatsDelegate(),
 		//				pos == isPositive(p), pos);
 		DLVertex w = get(p);
-		boolean same = pos && (p > 0);
+		boolean same = pos == (p > 0);
 		//		boolean posW = pos == p>0;
 		// update in-cycle information
 		if (w.isInCycle(same)) {
@@ -451,7 +442,13 @@ public final  class DLDag {
 	public void gatherStatistic() {
 		// gather main statistics for disjunctions
 		for (int i = 0; i < listAnds.size(); i++) {
-			computeVertexStat(-listAnds.get(i));
+			int index = -listAnds.get(i);
+			DLVertex v = get(index);
+			boolean pos = index > 0;
+			if (!v.isProcessed(pos)) {
+				//System.out.println("DLDag.gatherStatistic() "+v.toString()+"\t"+v.Type());
+				computeVertexStat(v, pos, 0);
+			}
 		}
 		// if necessary -- gather frequency
 		if (orSortSat.charAt(0) != 'F' && orSortSub.charAt(0) != 'F') {
@@ -574,8 +571,7 @@ public final  class DLDag {
 				v.merge(v.getRole().getDomainLabel());
 				v.merge(v.getProjRole().getDomainLabel());
 				merge(v.getRole().getDomainLabel(), v.getC());
-				v.getRole().getRangeLabel()
-						.merge(v.getProjRole().getRangeLabel());
+				v.getRole().getRangeLabel().merge(v.getProjRole().getRangeLabel());
 				break;
 			case dtIrr: // equate R&D for role
 				v.merge(v.getRole().getDomainLabel());

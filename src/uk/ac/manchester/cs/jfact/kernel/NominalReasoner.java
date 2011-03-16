@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
 import static uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry.resolveSynonym;
 
@@ -14,11 +14,10 @@ import java.util.List;
 import uk.ac.manchester.cs.jfact.dep.DepSet;
 import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
-import uk.ac.manchester.cs.jfact.helpers.Pair;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
+import uk.ac.manchester.cs.jfact.helpers.Pair;
 
-
-public final  class NominalReasoner extends DlSatTester {
+public final class NominalReasoner extends DlSatTester {
 	/** all nominals defined in TBox */
 	protected List<TIndividual> Nominals = new ArrayList<TIndividual>();
 
@@ -35,8 +34,7 @@ public final  class NominalReasoner extends DlSatTester {
 	//void initNominalVector (  );
 	/** create cache entry for given singleton */
 	protected void registerNominalCache(TIndividual p) {
-		DLHeap.setCache(p.getpName(), createModelCache(p.getNode()
-				.resolvePBlocker()));
+		DLHeap.setCache(p.getpName(), createModelCache(p.getNode().resolvePBlocker()));
 	}
 
 	/** init single nominal node */
@@ -56,12 +54,10 @@ public final  class NominalReasoner extends DlSatTester {
 		registerNominalCache(p);
 		if (p.getNode().isPBlocked()) {
 			// BP of the individual P is merged to
-			int bp = p.getNode().getBlocker().label().get_sc().get(0)
-					.getConcept();
+			int bp = p.getNode().getBlocker().label().get_sc().get(0).getConcept();
 			TIndividual blocker = (TIndividual) DLHeap.get(bp).getConcept();
 			assert blocker.getNode().equals(p.getNode().getBlocker());
-			tBox.SameI.put(p, new Pair<TIndividual, Boolean>(blocker, p
-					.getNode().getPurgeDep().isEmpty()));
+			tBox.SameI.put(p, new Pair<TIndividual, Boolean>(blocker, p.getNode().getPurgeDep().isEmpty()));
 		}
 	}
 
@@ -98,8 +94,7 @@ public final  class NominalReasoner extends DlSatTester {
 	public boolean consistentNominalCloud() {
 		LL.print("\n\nChecking consistency of an ontology with individuals:\n");
 		boolean result = false;
-		if (initNewNode(CGraph.getRoot(), DepSetFactory.create(), Helper.bpTOP)
-				|| initNominalCloud()) {
+		if (initNewNode(CGraph.getRoot(), DepSetFactory.create(), Helper.bpTOP) || initNominalCloud()) {
 			LL.print("\ninit done\n");
 			result = false;
 		} else {
@@ -117,8 +112,7 @@ public final  class NominalReasoner extends DlSatTester {
 			nonDetShift = 1;
 			LL.print("]");
 		}
-		LL.print(Templates.CONSISTENT_NOMINAL, (result ? "consistent"
-				: "INCONSISTENT"));
+		LL.print(Templates.CONSISTENT_NOMINAL, (result ? "consistent" : "INCONSISTENT"));
 		if (!result) {
 			return false;
 		}
@@ -170,8 +164,7 @@ public final  class NominalReasoner extends DlSatTester {
 		for (int i = 0; i < neighbour.size(); i++) {
 			DlCompletionTreeArc p = neighbour.get(i);
 			DlCompletionTree suspect = p.getArcEnd();
-			if (p.isPredEdge() && suspect.isBlockableNode() && p.isNeighbour(r)
-					&& suspect.isLabelledBy(C)) {
+			if (p.isPredEdge() && suspect.isBlockableNode() && p.isNeighbour(r) && suspect.isLabelledBy(C)) {
 				LL.print(Templates.NN, suspect.getId());
 				return true;
 			}

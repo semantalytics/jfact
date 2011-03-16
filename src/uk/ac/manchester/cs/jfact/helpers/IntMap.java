@@ -125,8 +125,7 @@ public final class IntMap<V> {
 		if (c.size > size) {
 			return false;
 		}
-		if (values.get(0).index > c.values.get(0).index
-				|| values.get(size - 1).index < c.values.get(c.size - 1).index) {
+		if (values.get(0).index > c.values.get(0).index || values.get(size - 1).index < c.values.get(c.size - 1).index) {
 			// c boundaries are outside this set
 			return false;
 		}

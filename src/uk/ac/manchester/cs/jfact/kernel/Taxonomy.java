@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
 import static uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry.resolveSynonym;
 
@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
@@ -22,7 +21,7 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.kernel.actors.Actor;
 
-public   class Taxonomy {
+public class Taxonomy {
 	/** array of taxonomy verteces */
 	private final List<TaxonomyVertex> Graph = new ArrayList<TaxonomyVertex>();
 	/** aux. vertex to be included to taxonomy */
@@ -49,8 +48,7 @@ public   class Taxonomy {
 	protected final TLabeller valueLabel = new TLabeller();
 
 	/** apply ACTOR to subgraph starting from NODE as defined by flags */
-	private void getRelativesInfoRec(TaxonomyVertex node, Actor actor,
-			boolean onlyDirect, boolean upDirection) {
+	private void getRelativesInfoRec(TaxonomyVertex node, Actor actor, boolean onlyDirect, boolean upDirection) {
 		// recursive applicability checking
 		if (node.isChecked(checkLabel)) {
 			return;
@@ -69,8 +67,7 @@ public   class Taxonomy {
 	}
 
 	/** apply ACTOR to subgraph starting from NODE as defined by flags; */
-	void getRelativesInfo(TaxonomyVertex node, Actor actor,
-			boolean needCurrent, boolean onlyDirect, boolean upDirection) {
+	void getRelativesInfo(TaxonomyVertex node, Actor actor, boolean needCurrent, boolean onlyDirect, boolean upDirection) {
 		// if current node processed OK and there is no need to continue -- exit
 		// this is the helper to the case like getDomain():
 		//   if there is a named concept that represent's a domain -- that's what we need
@@ -217,9 +214,7 @@ public   class Taxonomy {
 	}
 
 	void print(LogAdapter o) {
-		o.print(String
-				.format("Taxonomy consists of %s entries\n            of which %s are completely defined\n\nAll entries are in format:\n\"entry\" {n: parent_1 ... parent_n} {m: child_1 child_m}\n\n",
-						nEntries, nCDEntries));
+		o.print(String.format("Taxonomy consists of %s entries\n            of which %s are completely defined\n\nAll entries are in format:\n\"entry\" {n: parent_1 ... parent_n} {m: child_1 child_m}\n\n", nEntries, nCDEntries));
 		for (int i = 1; i < Graph.size(); i++) {
 			TaxonomyVertex p = Graph.get(i);
 			p.print(o);
@@ -240,8 +235,7 @@ public   class Taxonomy {
 			if (syn != null) {
 				syn.addSynonym(curEntry);
 				if (IfDefs._USE_LOGGING) {
-					LL.print("\nTAX:set " + curEntry.getName() + " equal "
-							+ syn.getPrimer().getName());
+					LL.print("\nTAX:set " + curEntry.getName() + " equal " + syn.getPrimer().getName());
 				}
 			} else {
 				// just incorporate it as a special entry and save into Graph
@@ -387,9 +381,7 @@ public   class Taxonomy {
 		// load last concept
 		setCurrentEntry(waitStack.peek());
 		if (IfDefs.TMP_PRINT_TAXONOMY_INFO) {
-			LL.print("\nTrying classify"
-					+ (curEntry.isCompletelyDefined() ? " CD " : " ")
-					+ curEntry.getName() + "... ");
+			LL.print("\nTrying classify" + (curEntry.isCompletelyDefined() ? " CD " : " ") + curEntry.getName() + "... ");
 		}
 		performClassification();
 		if (IfDefs.TMP_PRINT_TAXONOMY_INFO) {
@@ -402,8 +394,7 @@ public   class Taxonomy {
 		assert !waitStack.isEmpty();
 		ClassifiableEntry p = waitStack.peek();
 		classifyTop();
-		StringBuilder b = new StringBuilder(
-				"\n* Concept definitions cycle found: ");
+		StringBuilder b = new StringBuilder("\n* Concept definitions cycle found: ");
 		b.append(p.getName());
 		b.append('\n');
 		while (!waitStack.isEmpty()) {

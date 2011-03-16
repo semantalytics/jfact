@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel.datatype;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import java.math.BigDecimal;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -13,7 +13,6 @@ import java.util.Map;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
@@ -34,9 +33,7 @@ public enum Datatypes {
 
 		@Override
 		public boolean compatible(Datatypes d) {
-			return super.compatible(d)
-					|| EnumSet.of(NEGINT, POSINT, NONNEGINT, NONPOSINT)
-							.contains(d);
+			return super.compatible(d) || EnumSet.of(NEGINT, POSINT, NONNEGINT, NONPOSINT).contains(d);
 		}
 	},
 	SHORT {
@@ -49,11 +46,10 @@ public enum Datatypes {
 		public Literal<Short> build(Object s) {
 			return new ShortRep((Short) s);
 		}
-
-//		@Override
-//		public boolean compatible(Datatypes d) {
-//			return super.compatible(d) || d == BYTE;
-//		}
+		//		@Override
+		//		public boolean compatible(Datatypes d) {
+		//			return super.compatible(d) || d == BYTE;
+		//		}
 	},
 	BYTE {
 		@Override
@@ -65,10 +61,10 @@ public enum Datatypes {
 		public Literal<Byte> build(Object s) {
 			return new ByteRep((Byte) s);
 		}
+
 		@Override
 		public boolean compatible(Datatypes d) {
-			
-			return super.compatible(d)||d==SHORT;
+			return super.compatible(d) || d == SHORT;
 		}
 	},
 	BOOLEAN {
@@ -85,8 +81,7 @@ public enum Datatypes {
 	DOUBLE {
 		@Override
 		public Literal<Double> parse(String s) {
-			return new DoubleRep(Double.parseDouble(s
-					.replace("inf", "Infinity").replace("INF", "Infinity")));
+			return new DoubleRep(Double.parseDouble(s.replace("inf", "Infinity").replace("INF", "Infinity")));
 		}
 
 		@Override
@@ -97,8 +92,7 @@ public enum Datatypes {
 	FLOAT {
 		@Override
 		public Literal<Float> parse(String s) {
-			return new FloatRep(Float.parseFloat(s.replace("inf", "Infinity")
-					.replace("INF", "Infinity")));
+			return new FloatRep(Float.parseFloat(s.replace("inf", "Infinity").replace("INF", "Infinity")));
 		}
 
 		@Override
@@ -221,11 +215,7 @@ public enum Datatypes {
 
 		@Override
 		public boolean compatible(Datatypes d) {
-			return super.compatible(d)
-					|| EnumSet
-							.complementOf(
-									EnumSet.of(STRING, LITERAL, DATETIME,
-											DOUBLE, FLOAT)).contains(d);
+			return super.compatible(d) || EnumSet.complementOf(EnumSet.of(STRING, LITERAL, DATETIME, DOUBLE, FLOAT)).contains(d);
 		}
 	},
 	RATIONAL {
@@ -1001,9 +991,7 @@ class RationalRep implements Literal<BigDecimal> {
 	private static BigDecimal parse(String s) {
 		int i = s.indexOf('/');
 		if (i == -1) {
-			throw new IllegalArgumentException(
-					"invalid string used: no '/' character separating longs: "
-							+ s);
+			throw new IllegalArgumentException("invalid string used: no '/' character separating longs: " + s);
 		}
 		double n = Long.parseLong(s.substring(0, i));
 		double d = Long.parseLong(s.substring(i + 1));

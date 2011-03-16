@@ -1,15 +1,14 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.kernel.Token.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 import org.semanticweb.owlapi.model.OWLRuntimeException;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
@@ -19,7 +18,7 @@ import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 
-public final  class RoleMaster {
+public final class RoleMaster {
 	protected static final class RoleCreator implements TNameCreator<TRole> {
 		public TRole makeEntry(String name) {
 			return new TRole(name);
@@ -75,8 +74,7 @@ public final  class RoleMaster {
 		}
 		final TRole R = (TRole) p;
 		int ind = R.getIndex();
-		return ind >= firstRoleIndex && ind < Roles.size()
-				&& Roles.get(ind).equals(p);
+		return ind >= firstRoleIndex && ind < Roles.size() && Roles.get(ind).equals(p);
 	}
 
 	/** get number of roles */
@@ -84,13 +82,10 @@ public final  class RoleMaster {
 		return Roles.size() / 2 - 1;
 	}
 
-	public RoleMaster(boolean dataRoles, final String TopRoleName,
-			final String BotRoleName) {
+	public RoleMaster(boolean dataRoles, final String TopRoleName, final String BotRoleName) {
 		newRoleId = 1;
-		emptyRole = new TRole(BotRoleName.equals("") ? "emptyRole"
-				: BotRoleName);
-		universalRole = new TRole(TopRoleName.equals("") ? "universalRole"
-				: TopRoleName);
+		emptyRole = new TRole(BotRoleName.equals("") ? "emptyRole" : BotRoleName);
+		universalRole = new TRole(TopRoleName.equals("") ? "universalRole" : TopRoleName);
 		roleNS = new TNameSet<TRole>(new RoleCreator());
 		DataRoles = dataRoles;
 		useUndefinedNames = true;
@@ -124,16 +119,14 @@ public final  class RoleMaster {
 		TRole p = roleNS.insert(name);
 		// check what happens
 		if (p == null) {
-			throw new OWLRuntimeException("Unable to register '" + name
-					+ "' as a " + (DataRoles ? "data role" : "role"));
+			throw new OWLRuntimeException("Unable to register '" + name + "' as a " + (DataRoles ? "data role" : "role"));
 		}
 		if (isRegisteredRole(p)) {
 			return p;
 		}
 		if (p.getId() != 0 || // not registered but has non-null ID
 				!useUndefinedNames) {
-			throw new OWLRuntimeException("Unable to register '" + name
-					+ "' as a " + (DataRoles ? "data role" : "role"));
+			throw new OWLRuntimeException("Unable to register '" + name + "' as a " + (DataRoles ? "data role" : "role"));
 		}
 		registerRole(p);
 		return p;
@@ -142,8 +135,7 @@ public final  class RoleMaster {
 	/** add parent for the input role */
 	public void addRoleParent(TRole role, TRole parent) {
 		if (role.isDataRole() != parent.isDataRole()) {
-			throw new ReasonerInternalException(
-					"Mixed object and data roles in role subsumption axiom");
+			throw new ReasonerInternalException("Mixed object and data roles in role subsumption axiom");
 		}
 		role.addParent(parent);
 		role.getInverse().addParent(parent.getInverse());
@@ -224,14 +216,11 @@ public final  class RoleMaster {
 		} else if (tree.token() == PROJINTO) {
 			TRole R = TRole.resolveRole(tree.Left());
 			if (R.isDataRole()) {
-				throw new ReasonerInternalException(
-						"Projection into not implemented for the data role");
+				throw new ReasonerInternalException("Projection into not implemented for the data role");
 			}
 			DLTree C = tree.Right().copy();
-			DLTree InvP = DLTreeFactory.buildTree(new TLexeme(RNAME, parent
-					.inverse()));
-			DLTree InvR = DLTreeFactory.buildTree(new TLexeme(RNAME, R
-					.inverse()));
+			DLTree InvP = DLTreeFactory.buildTree(new TLexeme(RNAME, parent.inverse()));
+			DLTree InvR = DLTreeFactory.buildTree(new TLexeme(RNAME, R.inverse()));
 			// C = PROJINTO(PARENT-,C)
 			C = DLTreeFactory.buildTree(new TLexeme(PROJINTO), InvP, C);
 			// C = PROJFROM(R-,PROJINTO(PARENT-,C))
@@ -246,8 +235,7 @@ public final  class RoleMaster {
 			// C = PROJINTO(PARENT,C)
 			C = DLTreeFactory.buildTree(new TLexeme(PROJINTO), P, C);
 			// C = PROJFROM(R,PROJINTO(PARENT,C))
-			C = DLTreeFactory.buildTree(new TLexeme(PROJFROM), tree.Left()
-					.copy(), C);
+			C = DLTreeFactory.buildTree(new TLexeme(PROJFROM), tree.Left().copy(), C);
 			R.setDomain(C);
 		} else {
 			addRoleParent(TRole.resolveRole(tree), parent);

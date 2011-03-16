@@ -1,16 +1,16 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import uk.ac.manchester.cs.jfact.dep.DepSet;
 import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 
-public  final class DlCompletionTreeArc {
+public final class DlCompletionTreeArc {
 	/** pointer to "to" node */
 	private DlCompletionTree Node;
 	/** role, labelling given arc */
@@ -26,8 +26,7 @@ public  final class DlCompletionTreeArc {
 	 * init an arc with R as a label and NODE on given LEVEL; use it inside
 	 * MAKEARCS only
 	 */
-	protected void init(final TRole role, final DepSet dep,
-			DlCompletionTree node) {
+	protected void init(final TRole role, final DepSet dep, DlCompletionTree node) {
 		Role = role;
 		depSet = DepSetFactory.create(dep);
 		Node = node;
@@ -35,7 +34,7 @@ public  final class DlCompletionTreeArc {
 	}
 
 	/** class for restoring edge */
-	 final static class TCTEdgeRestorer extends TRestorer {
+	final static class TCTEdgeRestorer extends TRestorer {
 		private DlCompletionTreeArc p;
 		private TRole r;
 
@@ -52,7 +51,7 @@ public  final class DlCompletionTreeArc {
 	}
 
 	/** class for restoring dep-set */
-	 final 	static class TCTEdgeDepRestorer extends TRestorer {
+	final static class TCTEdgeDepRestorer extends TRestorer {
 		private DlCompletionTreeArc p;
 		private final DepSet dep;
 
@@ -162,7 +161,6 @@ public  final class DlCompletionTreeArc {
 	// output
 	/** print current arc */
 	protected void Print(LogAdapter o) {
-		o.print(Templates.DLCOMPLETIONTREEARC,
-				(isIBlocked() ? "-" : Role.getName()), depSet);
+		o.print(Templates.DLCOMPLETIONTREEARC, (isIBlocked() ? "-" : Role.getName()), depSet);
 	}
 }

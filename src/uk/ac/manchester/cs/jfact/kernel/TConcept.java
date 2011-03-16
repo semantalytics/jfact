@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.helpers.Helper.*;
 import static uk.ac.manchester.cs.jfact.kernel.Token.*;
 
@@ -22,7 +22,6 @@ import uk.ac.manchester.cs.jfact.helpers.FastSet;
 import uk.ac.manchester.cs.jfact.helpers.FastSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.IfDefs;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
-
 
 public class TConcept extends ClassifiableEntry {
 	public static final TConcept BOTTOM = new TConcept("BOTTOM");
@@ -240,30 +239,24 @@ public class TConcept extends ClassifiableEntry {
 			return;
 		}
 		assert !isNonPrimitive();
+		if (Description == null) {
+			Description = Desc.copy();
+			return;
+		}
 		if (Desc.isAND()) {
-			if (Description == null) {
-				Description = Desc.copy();
+			if (Description.isAND()) {
+				Description.addFirstChildren(Desc.Children());
 			} else {
-				if (Description.isAND()) {
-					for (DLTree c : Desc.Children()) {
-						Description.addChild(c);
-					}
-				} else {
-					// if it's not an AND then a new AND must be created
-					DLTree temp = Description;
-					Description = Desc.copy();
-					Description.addChild(temp);
-				}
+				// if it's not an AND then a new AND must be created
+				DLTree temp = Description;
+				Description = Desc.copy();
+				Description.addChild(temp);
 			}
 		} else {
-			if (Description == null) {
-				Description = Desc.copy();
+			if (Description.isAND()) {
+				Description.addFirstChild(Desc);
 			} else {
-				if (Description.isAND()) {
-					Description.addChild(Desc);
-				} else {
-					Description = DLTreeFactory.createSNFAnd(Description, Desc);
-				}
+				Description = DLTreeFactory.createSNFAnd(Desc, Description);
 			}
 		}
 	}
@@ -289,39 +282,53 @@ public class TConcept extends ClassifiableEntry {
 		if (isSynonym()) {
 			return resolveSynonym(this).getClassTag();
 		}
-		if (!isCompletelyDefined()) {
-			return CTTag.cttRegular;
-		}
+		//		if (!isCompletelyDefined()) {
+		//			return CTTag.cttRegular;
+		//		}
 		if (isNonPrimitive()) {
 			return CTTag.cttNonPrimitive;
 		}
 		if (!hasToldSubsumers()) {
 			return CTTag.cttOrphan;
 		}
+		boolean hasLCD = false;
+		boolean hasOther = false;
+		boolean hasNP = false;
 		for (ClassifiableEntry p : toldSubsumers) {
 			//XXX should not be needed
-			if (!p.getToldSubsumers().contains(this)) {
-				switch (((TConcept) p).getClassTag()) {
-					case cttTrueCompletelyDefined:
-						break;
-					case cttOrphan:
-					case cttLikeCompletelyDefined:
-						return CTTag.cttLikeCompletelyDefined;
-					case cttRegular:
-						return CTTag.cttRegular;
-					case cttHasNonPrimitiveTS:
-					case cttNonPrimitive:
-						return CTTag.cttHasNonPrimitiveTS;
-					default:
-						throw new UnreachableSituationException();
-				}
+			//if (!p.getToldSubsumers().contains(this)) {
+			switch (((TConcept) p).getClassTag()) {
+				case cttTrueCompletelyDefined:
+					break;
+				case cttOrphan:
+				case cttLikeCompletelyDefined:
+					hasLCD = true;
+					break;// CTTag.cttLikeCompletelyDefined;
+				case cttRegular:
+					hasOther = true;
+					break;// CTTag.cttRegular;
+				case cttHasNonPrimitiveTS:
+				case cttNonPrimitive:
+					hasNP = true;
+					break;// CTTag.cttHasNonPrimitiveTS;
+				default:
+					throw new UnreachableSituationException();
 			}
+			//}
 		}
+		// there are non-primitive TS
+		if (hasNP)
+			return CTTag.cttHasNonPrimitiveTS;
+		// has something different from CD-like ones (and not CD)
+		if (hasOther || !isCompletelyDefined())
+			return CTTag.cttRegular;
+		// no more 'other' concepts here, and the CD-like structure
+		if (hasLCD)
+			return CTTag.cttLikeCompletelyDefined;
 		return CTTag.cttTrueCompletelyDefined;
 	}
 
-	private static final EnumSet<Token> replacements = EnumSet.of(CNAME, INAME,
-			RNAME, DNAME);
+	private static final EnumSet<Token> replacements = EnumSet.of(CNAME, INAME, RNAME, DNAME);
 
 	public void push(LinkedList<DLTree> stack, DLTree current) {
 		// push subtrees: stack size increases by one or two, or current is a leaf
@@ -338,9 +345,7 @@ public class TConcept extends ClassifiableEntry {
 		}
 		Token token = t.token();
 		// the three ifs are actually exclusive
-		if (replacements.contains(token)
-				&& resolveSynonym((ClassifiableEntry) t.elem().getNE()).equals(
-						this)) {
+		if (replacements.contains(token) && resolveSynonym((ClassifiableEntry) t.elem().getNE()).equals(this)) {
 			return DLTreeFactory.createTop();
 		}
 		if (token == AND) {
@@ -352,8 +357,7 @@ public class TConcept extends ClassifiableEntry {
 		}
 		if (token == NOT) {
 			if (t.Child().isAND() || replacements.contains(t.Child().token())) {
-				return DLTreeFactory
-						.createSNFNot(replaceWithConstOld(t.Child()));
+				return DLTreeFactory.createSNFNot(replaceWithConstOld(t.Child()));
 			}
 		}
 		return t;
@@ -363,8 +367,7 @@ public class TConcept extends ClassifiableEntry {
 	 * init told subsumers of the concept by given DESCription; @return TRUE iff
 	 * concept is CD
 	 */
-	public boolean initToldSubsumers(final DLTree _desc,
-			Set<TRole> RolesProcessed) {
+	public boolean initToldSubsumers(final DLTree _desc, Set<TRole> RolesProcessed) {
 		if (_desc == null || _desc.isTOP()) {
 			return true;
 		}
@@ -375,8 +378,7 @@ public class TConcept extends ClassifiableEntry {
 		}
 		if (token == NOT) {
 			if (desc.Child().token() == FORALL || desc.Child().token() == LE) {
-				SearchTSbyRoleAndSupers(TRole.resolveRole(desc.Child().Left()),
-						RolesProcessed);
+				SearchTSbyRoleAndSupers(TRole.resolveRole(desc.Child().Left()), RolesProcessed);
 			}
 			return false;
 		}

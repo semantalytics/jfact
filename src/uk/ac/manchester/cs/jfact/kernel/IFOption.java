@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 
 public class IFOption {
@@ -75,8 +75,7 @@ public class IFOption {
 		return tValue;
 	}
 
-	public IFOption(final String name, final String desc, IOType t,
-			final String defVal) {
+	public IFOption(final String name, final String desc, IOType t, final String defVal) {
 		optionName = name;
 		optionDescription = desc;
 		defaultValue = defVal;
@@ -86,11 +85,9 @@ public class IFOption {
 
 	private boolean setAValue(final String s) {
 		if (type == IOType.iotBool) {
-			if (s.equals("0") || s.equals("off") || s.equals("no")
-					|| s.equals("false")) {
+			if (s.equals("0") || s.equals("off") || s.equals("no") || s.equals("false")) {
 				bValue = false;
-			} else if (s.equals("1") || s.equals("on") || s.equals("yes")
-					|| s.equals("true")) {
+			} else if (s.equals("1") || s.equals("on") || s.equals("yes") || s.equals("true")) {
 				bValue = true;
 			} else {
 				return true;
@@ -108,9 +105,6 @@ public class IFOption {
 	}
 
 	public void printConfString(LogAdapter o) {
-		o.print(String
-				.format("\n;---\n;--- Option '%s': %s ---\n;---\n;* %s\n;* Default value: '%s'\n\n; %s = %s\n",
-						optionName, type, optionDescription, defaultValue,
-						optionName, type.get(this)));
+		o.print(String.format("\n;---\n;--- Option '%s': %s ---\n;---\n;* %s\n;* Default value: '%s'\n\n; %s = %s\n", optionName, type, optionDescription, defaultValue, optionName, type.get(this)));
 	}
 }

@@ -1,18 +1,16 @@
 package uk.ac.manchester.cs.jfact.helpers;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
-
 public final class CacheMaster {
-//	public static final CacheMaster instance = new CacheMaster();
-//	static final int size = 2500;
-//	static final int limit = 2000;
-//	private final List<BitSet> containsCaches = new ArrayList<BitSet>(size);
-//	private final List<BitSet> cwdContainsCaches = new ArrayList<BitSet>(size);
-
+	//	public static final CacheMaster instance = new CacheMaster();
+	//	static final int size = 2500;
+	//	static final int limit = 2000;
+	//	private final List<BitSet> containsCaches = new ArrayList<BitSet>(size);
+	//	private final List<BitSet> cwdContainsCaches = new ArrayList<BitSet>(size);
 	//	private final LinkedHashMap<Integer, BitSet> rstContainsCaches = new LinkedHashMap<Integer, BitSet>(
 	//			 size, 0.75F, true) {
 	//		protected boolean removeEldestEntry(

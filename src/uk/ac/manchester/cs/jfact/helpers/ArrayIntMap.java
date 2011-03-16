@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.helpers;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import java.util.Arrays;
 
 public final class ArrayIntMap {
@@ -72,8 +72,7 @@ public final class ArrayIntMap {
 		// i is now the insertion point
 		if (i >= values[0].length || size >= values[0].length) {
 			// no space left, increase
-			int[][] replacementvalues = new int[2][values[0].length
-					+ defaultSize];
+			int[][] replacementvalues = new int[2][values[0].length + defaultSize];
 			for (int j = 0; j < values[0].length; j++) {
 				replacementvalues[0][j] = values[0][j];
 				replacementvalues[1][j] = values[1][j];
@@ -115,8 +114,7 @@ public final class ArrayIntMap {
 		if (c.size() > size) {
 			return false;
 		}
-		if (this.values[0][0] > c.values[0][0]
-				|| this.values[0][size - 1] < c.values[0][c.size() - 1]) {
+		if (this.values[0][0] > c.values[0][0] || this.values[0][size - 1] < c.values[0][c.size() - 1]) {
 			// c boundaries are outside this set
 			return false;
 		}
@@ -254,8 +252,7 @@ public final class ArrayIntMap {
 	@Override
 	public String toString() {
 		if (values != null) {
-			return Arrays.toString(Arrays.copyOf(values[0], size)) + "\n"
-					+ Arrays.toString(Arrays.copyOf(values[1], size));
+			return Arrays.toString(Arrays.copyOf(values[0], size)) + "\n" + Arrays.toString(Arrays.copyOf(values[1], size));
 		}
 		return "[]";
 	}

@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.kernel.InAx.*;
 import static uk.ac.manchester.cs.jfact.kernel.Token.*;
 
@@ -18,8 +18,7 @@ import uk.ac.manchester.cs.jfact.helpers.IfDefs;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 
-
-public  final  class TAxiom {
+public final class TAxiom {
 	// NS for different DLTree matchers for trees in axiom
 	/// absorb into negation of a concept; @return true if absorption is performed
 	boolean absorbIntoNegConcept(TBox KB) {
@@ -28,10 +27,7 @@ public  final  class TAxiom {
 		DLTree bestConcept = null;
 		// finds all primitive negated concept names without description
 		for (DLTree p : Disjuncts) {
-			if (p.token() == NOT && p.Child().isName()
-					&& (Concept = getConcept(p.Child())).isPrimitive()
-					&& !Concept.isSingleton()
-					&& Concept.getDescription() == null) {
+			if (p.token() == NOT && p.Child().isName() && (Concept = getConcept(p.Child())).isPrimitive() && !Concept.isSingleton() && Concept.getDescription() == null) {
 				SAbsNAttempt();
 				Cons.add(p);
 			}
@@ -48,13 +44,11 @@ public  final  class TAxiom {
 		// normal concept absorption
 		Concept = InAx.getConcept(bestConcept.Child());
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.LL_ABSORPTION.print(" N-Absorb GCI to concept "
-					+ Concept.getName());
+			LeveLogger.LL_ABSORPTION.print(" N-Absorb GCI to concept " + Concept.getName());
 			if (Cons.size() > 1) {
 				LeveLogger.LL_ABSORPTION.print(" (other options are");
 				for (int j = 1; j < Cons.size(); ++j) {
-					LeveLogger.LL_ABSORPTION.print(" "
-							+ InAx.getConcept(Cons.get(j).Child()).getName());
+					LeveLogger.LL_ABSORPTION.print(" " + InAx.getConcept(Cons.get(j).Child()).getName());
 				}
 				LeveLogger.LL_ABSORPTION.print(")");
 			}
@@ -85,11 +79,9 @@ public  final  class TAxiom {
 	TAxiom simplifyPosNP(DLTree pos) {
 		SAbsRepCN();
 		TAxiom ret = copy(pos);
-		ret.add(DLTreeFactory.createSNFNot(InAx.getConcept(pos.Child())
-				.getDescription().copy()));
+		ret.add(DLTreeFactory.createSNFNot(InAx.getConcept(pos.Child()).getDescription().copy()));
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.LL_ABSORPTION.print(" simplify CN expression for "
-					+ pos.Child());
+			LeveLogger.LL_ABSORPTION.print(" simplify CN expression for " + pos.Child());
 		}
 		return ret;
 	}
@@ -100,8 +92,7 @@ public  final  class TAxiom {
 		TAxiom ret = copy(pos);
 		ret.add(InAx.getConcept(pos).getDescription().copy());
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.LL_ABSORPTION.print(" simplify ~CN expression for "
-					+ pos);
+			LeveLogger.LL_ABSORPTION.print(" simplify ~CN expression for " + pos);
 		}
 		return ret;
 	}
@@ -130,8 +121,7 @@ public  final  class TAxiom {
 			if (InAx.isAnd(p)) {
 				SAbsSplit();
 				if (LeveLogger.isAbsorptionActive()) {
-					LeveLogger.LL_ABSORPTION.print(" split AND espression "
-							+ p.Child());
+					LeveLogger.LL_ABSORPTION.print(" split AND espression " + p.Child());
 				}
 				acc = split(acc, p, p.Children().iterator().next());
 				// no need to split more than once:
@@ -256,9 +246,7 @@ public  final  class TAxiom {
 				if (q.equals(s)) {
 					SAbsBApply();
 					if (IfDefs.RKG_DEBUG_ABSORPTION) {
-						LeveLogger.LL_ABSORPTION
-								.print(" Absorb into BOTTOM due to (not" + q
-										+ ") and" + s);
+						LeveLogger.LL_ABSORPTION.print(" Absorb into BOTTOM due to (not" + q + ") and" + s);
 					}
 					return true;
 				}
@@ -287,14 +275,12 @@ public  final  class TAxiom {
 		// normal concept absorption
 		TConcept Concept = InAx.getConcept(bestConcept);
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.LL_ABSORPTION.print(" C-Absorb GCI to concept "
-					+ Concept.getName());
+			LeveLogger.LL_ABSORPTION.print(" C-Absorb GCI to concept " + Concept.getName());
 			//dump(LeveLogger.LL_ABSORPTION);
 			if (Cons.size() > 1) {
 				LeveLogger.LL_ABSORPTION.print(" (other options are");
 				for (int j = 1; j < Cons.size(); ++j) {
-					LeveLogger.LL_ABSORPTION.print(" "
-							+ InAx.getConcept(Cons.get(j)).getName());
+					LeveLogger.LL_ABSORPTION.print(" " + InAx.getConcept(Cons.get(j)).getName());
 				}
 				LeveLogger.LL_ABSORPTION.print(")");
 			}
@@ -313,8 +299,7 @@ public  final  class TAxiom {
 		List<DLTree> Cons = new ArrayList<DLTree>();
 		DLTree bestSome = null;
 		for (DLTree p : Disjuncts) {
-			if (p.token() == NOT
-					&& (p.Child().token() == FORALL || p.Child().token() == LE)) {
+			if (p.token() == NOT && (p.Child().token() == FORALL || p.Child().token() == LE)) {
 				SAbsRAttempt();
 				Cons.add(p);
 				if (p.Child().Right().isBOTTOM()) {
@@ -334,15 +319,11 @@ public  final  class TAxiom {
 			Role = TRole.resolveRole(Cons.get(0).Child().Left());
 		}
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.LL_ABSORPTION
-					.print(" R-Absorb GCI to the domain of role "
-							+ Role.getName());
+			LeveLogger.LL_ABSORPTION.print(" R-Absorb GCI to the domain of role " + Role.getName());
 			if (Cons.size() > 1) {
 				LeveLogger.LL_ABSORPTION.print(" (other options are");
 				for (int j = 1; j < Cons.size(); ++j) {
-					LeveLogger.LL_ABSORPTION.print(" "
-							+ TRole.resolveRole(Cons.get(j).Child().Left())
-									.getName());
+					LeveLogger.LL_ABSORPTION.print(" " + TRole.resolveRole(Cons.get(j).Child().Left()).getName());
 				}
 				LeveLogger.LL_ABSORPTION.print(")");
 			}
@@ -378,8 +359,7 @@ public  final  class TAxiom {
 		// make an absorption
 		DLTree desc = KB.makeNonPrimitive(C, DLTreeFactory.createTop());
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.LL_ABSORPTION
-					.println("TAxiom.absorbIntoTop() T-Absorb GCI to axiom");
+			LeveLogger.LL_ABSORPTION.println("TAxiom.absorbIntoTop() T-Absorb GCI to axiom");
 			if (desc != null) {
 				LeveLogger.LL_ABSORPTION.println("s *TOP* [=" + desc + " and");
 			}

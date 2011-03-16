@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.helpers.DLTree.equalTrees;
 import static uk.ac.manchester.cs.jfact.helpers.Helper.bpINVALID;
 import static uk.ac.manchester.cs.jfact.kernel.Token.RCOMPOSITION;
@@ -17,7 +17,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
@@ -121,13 +120,11 @@ public class TRole extends ClassifiableEntry {
 	}
 
 	private void addTrivialTransition(TRole r) {
-		A.addTransitionSafe(RoleAutomaton.initial, new RATransition(
-				RoleAutomaton.final_state, r));
+		A.addTransitionSafe(RoleAutomaton.initial, new RATransition(RoleAutomaton.final_state, r));
 	}
 
 	/** get an automaton by a (possibly synonymical) role */
-	private final RoleAutomaton completeAutomatonByRole(TRole R,
-			Set<TRole> RInProcess) {
+	private final RoleAutomaton completeAutomatonByRole(TRole R, Set<TRole> RInProcess) {
 		assert !R.isSynonym(); // no synonyms here
 		assert R != this; // no case ...*S*... [= S
 		R.completeAutomaton(RInProcess);
@@ -225,9 +222,7 @@ public class TRole extends ClassifiableEntry {
 		if (!hasSpecialDomain() || getTRange() == null) {
 			pSpecialDomain = DLTreeFactory.createTop();
 		} else {
-			pSpecialDomain = DLTreeFactory.createSNFForall(
-					DLTreeFactory.buildTree(new TLexeme(Token.RNAME, this)),
-					getTRange().copy());
+			pSpecialDomain = DLTreeFactory.createSNFForall(DLTreeFactory.buildTree(new TLexeme(Token.RNAME, this)), getTRange().copy());
 		}
 	}
 
@@ -555,16 +550,13 @@ public class TRole extends ClassifiableEntry {
 			return;
 		}
 		if (isFunctional()) {
-			throw new ReasonerInternalException(
-					"Non simple role used as simple: " + getName());
+			throw new ReasonerInternalException("Non simple role used as simple: " + getName());
 		}
 		if (isDataRole()) {
-			throw new ReasonerInternalException(
-					"Non simple role used as simple: " + getName());
+			throw new ReasonerInternalException("Non simple role used as simple: " + getName());
 		}
 		if (isDisjoint()) {
-			throw new ReasonerInternalException(
-					"Non simple role used as simple: " + getName());
+			throw new ReasonerInternalException("Non simple role used as simple: " + getName());
 		}
 	}
 
@@ -662,8 +654,7 @@ public class TRole extends ClassifiableEntry {
 		addParent(syn);
 	}
 
-	private TRole eliminateToldCycles(Set<TRole> RInProcess,
-			List<TRole> ToldSynonyms) {
+	private TRole eliminateToldCycles(Set<TRole> RInProcess, List<TRole> ToldSynonyms) {
 		if (isSynonym()) {
 			return null;
 		}
@@ -675,8 +666,7 @@ public class TRole extends ClassifiableEntry {
 		RInProcess.add(this);
 		removeSynonymsFromParents();
 		for (ClassifiableEntry r : toldSubsumers) {
-			if ((ret = ((TRole) r)
-					.eliminateToldCycles(RInProcess, ToldSynonyms)) != null) {
+			if ((ret = ((TRole) r).eliminateToldCycles(RInProcess, ToldSynonyms)) != null) {
 				if (ret.equals(this)) {
 					Collections.sort(ToldSynonyms, new TRoleCompare());
 					ret = ToldSynonyms.get(0);
@@ -743,23 +733,21 @@ public class TRole extends ClassifiableEntry {
 
 	@Override
 	public void Print(LogAdapter o) {
-		o.print(String.format("Role \"%s\"(%s)%s%s%s%s%s", getName(), getId(),
-				(isTransitive() ? "T" : ""), (isReflexive() ? "R" : ""),
-				(isTopFunc() ? "t" : ""), (isFunctional() ? "F" : ""),
-				(isDataRole() ? "D" : "")));
+		o.print(String.format("Role \"%s\"(%s)%s%s%s%s%s", getName(), getId(), (isTransitive() ? "T" : ""), (isReflexive() ? "R" : ""), (isTopFunc() ? "t" : ""), (isFunctional() ? "F" : ""), (isDataRole() ? "D" : "")));
 		if (isSynonym()) {
 			o.print(String.format(" = \"%s\"\n", getSynonym().getName()));
 			return;
 		}
 		if (!toldSubsumers.isEmpty()) {
 			o.print(" parents={\"");
-			o.print(toldSubsumers.toString());
-			//			for (int i = 0; i < toldSubsumers.size(); i++) {
-			//				if (i > 0) {
-			//					o.print("\", \"");
-			//				}
-			//				o.print(toldSubsumers.get(i).getName());
-			//			}
+			//o.print(toldSubsumers.toString());
+			List<ClassifiableEntry> l = new ArrayList<ClassifiableEntry>(toldSubsumers);
+			for (int i = 0; i < l.size(); i++) {
+				if (i > 0) {
+					o.print("\", \"");
+				}
+				o.print(l.get(i).getName());
+			}
 			o.print("\"}");
 		}
 		if (!Disjoint.isEmpty()) {
@@ -779,8 +767,7 @@ public class TRole extends ClassifiableEntry {
 		if (getTRange() != null) {
 			o.print(String.format(" Range=(%s)=%s", getBPRange(), getTRange()));
 		}
-		o.print(String.format("\nAutomaton (size %s): %s%s", A.size(),
-				(A.isISafe() ? "I" : "i"), (A.isOSafe() ? "O" : "o")));
+		o.print(String.format("\nAutomaton (size %s): %s%s", A.size(), (A.isISafe() ? "I" : "i"), (A.isOSafe() ? "O" : "o")));
 		A.Print(o);
 		o.print("\n");
 	}
@@ -882,8 +869,7 @@ public class TRole extends ClassifiableEntry {
 			TRole p = RS.get(i);
 			TRole R = resolveSynonym(p);
 			if (R.isTop()) {
-				throw new ReasonerInternalException(
-						"Universal role can not be used in role composition chain");
+				throw new ReasonerInternalException("Universal role can not be used in role composition chain");
 			}
 			if (R.isBottom()) {
 				RS.clear();
@@ -891,8 +877,7 @@ public class TRole extends ClassifiableEntry {
 			}
 			if (R.equals(this)) {
 				if (i != 0 && i != last) {
-					throw new ReasonerInternalException("Cycle in RIA "
-							+ getName());
+					throw new ReasonerInternalException("Cycle in RIA " + getName());
 				}
 				if (same) {
 					if (last == 1) {
@@ -900,8 +885,7 @@ public class TRole extends ClassifiableEntry {
 						setTransitive();
 						return;
 					} else {
-						throw new ReasonerInternalException("Cycle in RIA "
-								+ getName());
+						throw new ReasonerInternalException("Cycle in RIA " + getName());
 					}
 				} else {
 					same = true;
@@ -931,8 +915,7 @@ public class TRole extends ClassifiableEntry {
 		}
 		// check for the transitivity
 		if (isTransitive()) {
-			A.addTransitionSafe(RoleAutomaton.final_state, new RATransition(
-					RoleAutomaton.initial));
+			A.addTransitionSafe(RoleAutomaton.final_state, new RATransition(RoleAutomaton.initial));
 		}
 		// here automaton is complete
 		setFinished(true);
@@ -948,8 +931,7 @@ public class TRole extends ClassifiableEntry {
 	}
 
 	/** add automaton for a role composition */
-	private void addSubCompositionAutomaton(List<TRole> RS,
-			Set<TRole> RInProcess) {
+	private void addSubCompositionAutomaton(List<TRole> RS, Set<TRole> RInProcess) {
 		// first preprocess the role chain
 		preprocessComposition(RS);
 		if (RS.isEmpty()) {
@@ -974,8 +956,7 @@ public class TRole extends ClassifiableEntry {
 		boolean oSafe = false; // we couldn't assume that the current role automaton is i- or o-safe
 		A.initChain(from);
 		for (; p != p_last; ++p) {
-			oSafe = A.addToChain(
-					completeAutomatonByRole(RS.get(p), RInProcess), oSafe);
+			oSafe = A.addToChain(completeAutomatonByRole(RS.get(p), RInProcess), oSafe);
 		}
 		// add the last automaton to chain
 		A.addToChain(completeAutomatonByRole(RS.get(p), RInProcess), oSafe, to);

@@ -1,25 +1,52 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import java.util.EnumSet;
 
 /** different Concept Expression tags */
 public enum DagTag {
 	// illegal entry
-	dtBad,
+	dtBad("bad-tag"),
 	// operations
-	dtTop, dtAnd, dtCollection, dtForall, dtLE, dtUAll, // \dall U.C
-	dtIrr, // \neg\exists R.Self
-	dtProj, // aux vertex with Projection FROM the current node
-	dtNN, // NN-rule was applied
+	dtTop("*TOP*"), dtAnd("and"), dtCollection("collection"), dtForall("all"), dtLE("at-most"), dtUAll("all U"), // \dall U.C
+	dtIrr("irreflexive"), // \neg\exists R.Self
+	dtProj("projection"), // aux vertex with Projection FROM the current node
+	dtNN("NN-stopper"), // NN-rule was applied
 	// ID's
-	dtPConcept, // primitive concept
-	dtNConcept, // non-primitive concept
-	dtPSingleton, dtNSingleton, dtDataType, dtDataValue, dtDataExpr;
+	dtPConcept("primconcept"), // primitive concept
+	dtNConcept("concept"), // non-primitive concept
+	dtPSingleton("prim-singleton"), dtNSingleton("singleton"), dtDataType("data-type"), dtDataValue("data-value"), dtDataExpr("data-expr");
+	private static final EnumSet<DagTag> TRUE = EnumSet.of(dtDataType, dtDataValue, dtDataExpr, dtNN, dtBad, dtTop);
+	private static final EnumSet<DagTag> NotPos = EnumSet.of(dtPConcept, dtPSingleton, dtCollection, dtProj);
+
+	/**
+	 * whether statistic's gathering should be omitted due to the type of a
+	 * vertex
+	 */
+	public boolean omitStat(boolean pos) {
+		if (TRUE.contains(this)) {
+			return true;
+		}
+		if (NotPos.contains(this)) {
+			return !pos;
+		}
+		return false;
+	}
+
+	private String name;
+
+	private DagTag(String s) {
+		name = s;
+	}
+
+	public String getName() {
+		return name;
+	}
+
 	// data type with restrictions
 	/** check whether given DagTag is a primitive named concept-like entity */
 	public boolean isPNameTag() {
@@ -36,9 +63,7 @@ public enum DagTag {
 		return isPNameTag() || isNNameTag();
 	}
 
-	private static final EnumSet<DagTag> complexConceptsEnumSet = EnumSet.of(
-			DagTag.dtForall, DagTag.dtLE, DagTag.dtIrr, DagTag.dtUAll,
-			DagTag.dtNN);
+	private static final EnumSet<DagTag> complexConceptsEnumSet = EnumSet.of(DagTag.dtForall, DagTag.dtLE, DagTag.dtIrr, DagTag.dtUAll, DagTag.dtNN);
 
 	/** @return true iff TAG represents complex concept */
 	public boolean isComplexConcept() {

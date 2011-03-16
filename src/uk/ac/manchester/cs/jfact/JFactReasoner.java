@@ -1,11 +1,10 @@
 package uk.ac.manchester.cs.jfact;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -14,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 
 import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLAxiom;
@@ -78,14 +76,9 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	private static final String REASONER_NAME = "JFact";
 	private static final Version VERSION = new Version(0, 0, 0, 0);
 	protected final AtomicBoolean interrupted = new AtomicBoolean(false);
-	//public JNIFaCTPlusPlus kernel = new JNIFaCTPlusPlus();
-	private ReasoningKernel kernel;
+	ReasoningKernel kernel;
 	private TExpressionManager em;
-	private static final EnumSet<InferenceType> SupportedInferenceTypes = EnumSet
-			.of(InferenceType.CLASS_ASSERTIONS, InferenceType.CLASS_HIERARCHY,
-					InferenceType.DATA_PROPERTY_HIERARCHY,
-					InferenceType.OBJECT_PROPERTY_HIERARCHY,
-					InferenceType.SAME_INDIVIDUAL);
+	private static final EnumSet<InferenceType> SupportedInferenceTypes = EnumSet.of(InferenceType.CLASS_ASSERTIONS, InferenceType.CLASS_HIERARCHY, InferenceType.DATA_PROPERTY_HIERARCHY, InferenceType.OBJECT_PROPERTY_HIERARCHY, InferenceType.SAME_INDIVIDUAL);
 	private final OWLOntologyManager manager;
 	private final OWLOntology rootOntology;
 	private final BufferingMode bufferingMode;
@@ -98,8 +91,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	//holds the consistency status: true for consistent, false for inconsistent, null for not verified (or changes received)
 	private Boolean consistencyVerified = null;
 
-	public JFactReasoner(OWLOntology rootOntology,
-			OWLReasonerConfiguration configuration, BufferingMode bufferingMode) {
+	public JFactReasoner(OWLOntology rootOntology, OWLReasonerConfiguration configuration, BufferingMode bufferingMode) {
 		this.rootOntology = rootOntology;
 		df = this.rootOntology.getOWLOntologyManager().getOWLDataFactory();
 		kernel = new ReasoningKernel();
@@ -117,9 +109,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 			}
 		}
 		//this.translationMachinery=new TranslationMachinery(kernel,df);
-		kernel.setTopBottomRoleNames(Vocabulary.TOP_OBJECT_PROPERTY,
-				Vocabulary.BOTTOM_OBJECT_PROPERTY,
-				Vocabulary.TOP_DATA_PROPERTY, Vocabulary.BOTTOM_DATA_PROPERTY);
+		kernel.setTopBottomRoleNames(Vocabulary.TOP_OBJECT_PROPERTY, Vocabulary.BOTTOM_OBJECT_PROPERTY, Vocabulary.TOP_DATA_PROPERTY, Vocabulary.BOTTOM_DATA_PROPERTY);
 		kernel.setProgressMonitor(configuration.getProgressMonitor());
 		kernel.setInterruptedSwitch(interrupted);
 		long millis = configuration.getTimeOut();
@@ -130,19 +120,13 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		loadReasonerAxioms();
 	}
 
-	public synchronized Node<OWLClass> getEquivalentClasses(
-			OWLClassExpression ce) throws InconsistentOntologyException,
-			ClassExpressionNotInProfileException, ReasonerInterruptedException,
-			TimeOutException {
+	public synchronized Node<OWLClass> getEquivalentClasses(OWLClassExpression ce) throws InconsistentOntologyException, ClassExpressionNotInProfileException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		Collection<TDLConceptExpression> pointers = askEquivalentClasses(translationMachinery
-				.toClassPointer(ce));
-		return translationMachinery.getClassExpressionTranslator()
-				.getNodeFromPointers(pointers);
+		Collection<TDLConceptExpression> pointers = askEquivalentClasses(translationMachinery.toClassPointer(ce));
+		return translationMachinery.getClassExpressionTranslator().getNodeFromPointers(pointers);
 	}
 
-	public void ontologiesChanged(List<? extends OWLOntologyChange> changes)
-			throws OWLException {
+	public void ontologiesChanged(List<? extends OWLOntologyChange> changes) throws OWLException {
 		handleRawOntologyChanges(changes);
 	}
 
@@ -173,11 +157,9 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 */
 	private final static boolean log = false;
 
-	private synchronized void handleRawOntologyChanges(
-			List<? extends OWLOntologyChange> changes) {
+	private synchronized void handleRawOntologyChanges(List<? extends OWLOntologyChange> changes) {
 		if (log) {
-			System.out.println(Thread.currentThread().getName()
-					+ " OWLReasonerBase.handleRawOntologyChanges() " + changes);
+			System.out.println(Thread.currentThread().getName() + " OWLReasonerBase.handleRawOntologyChanges() " + changes);
 		}
 		rawChanges.addAll(changes);
 		// We auto-flush the changes if the reasoner is non-buffering
@@ -245,8 +227,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 *            The logical axioms that have been removed from the imports
 	 *            closure of the reasoner root ontology
 	 */
-	private synchronized void computeDiff(Set<OWLAxiom> added,
-			Set<OWLAxiom> removed) {
+	private synchronized void computeDiff(Set<OWLAxiom> added, Set<OWLAxiom> removed) {
 		for (OWLOntology ont : rootOntology.getImportsClosure()) {
 			for (OWLAxiom ax : ont.getLogicalAxioms()) {
 				if (!reasonerAxioms.contains(ax.getAxiomWithoutAnnotations())) {
@@ -301,8 +282,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 * @param removeAxioms
 	 *            The axioms to be removed from the reasoner
 	 */
-	private synchronized void handleChanges(Set<OWLAxiom> addAxioms,
-			Set<OWLAxiom> removeAxioms) {
+	private synchronized void handleChanges(Set<OWLAxiom> addAxioms, Set<OWLAxiom> removeAxioms) {
 		//kernel.startChanges();
 		for (OWLAxiom ax_a : addAxioms) {
 			translationMachinery.loadAxiom(ax_a);
@@ -314,8 +294,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	}
 
 	private synchronized void loadReasonerAxioms() {
-		getReasonerConfiguration().getProgressMonitor().reasonerTaskStarted(
-				ReasonerProgressMonitor.LOADING);
+		getReasonerConfiguration().getProgressMonitor().reasonerTaskStarted(ReasonerProgressMonitor.LOADING);
 		getReasonerConfiguration().getProgressMonitor().reasonerTaskBusy();
 		kernel.clearKB();
 		translationMachinery = new TranslationMachinery(kernel, df);
@@ -338,10 +317,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	}
 
 	// precompute inferences
-	public synchronized void precomputeInferences(
-			InferenceType... inferenceTypes)
-			throws ReasonerInterruptedException, TimeOutException,
-			InconsistentOntologyException {
+	public synchronized void precomputeInferences(InferenceType... inferenceTypes) throws ReasonerInterruptedException, TimeOutException, InconsistentOntologyException {
 		for (InferenceType it : inferenceTypes) {
 			if (SupportedInferenceTypes.contains(it)) {
 				kernel.realiseKB();
@@ -362,8 +338,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	}
 
 	// consistency
-	public synchronized boolean isConsistent()
-			throws ReasonerInterruptedException, TimeOutException {
+	public synchronized boolean isConsistent() throws ReasonerInterruptedException, TimeOutException {
 		if (consistencyVerified == null) {
 			consistencyVerified = kernel.isKBConsistent();
 			//kernel.writeReasoningResult(LeveLogger.LL, 0);
@@ -380,45 +355,30 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		}
 	}
 
-	public synchronized boolean isSatisfiable(OWLClassExpression classExpression)
-			throws ReasonerInterruptedException, TimeOutException,
-			ClassExpressionNotInProfileException, FreshEntitiesException,
-			InconsistentOntologyException {
+	public synchronized boolean isSatisfiable(OWLClassExpression classExpression) throws ReasonerInterruptedException, TimeOutException, ClassExpressionNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
 		checkConsistency();
-		return kernel.isSatisfiable(translationMachinery
-				.toClassPointer(classExpression));
+		return kernel.isSatisfiable(translationMachinery.toClassPointer(classExpression));
 	}
 
-	public Node<OWLClass> getUnsatisfiableClasses()
-			throws ReasonerInterruptedException, TimeOutException,
-			InconsistentOntologyException {
+	public Node<OWLClass> getUnsatisfiableClasses() throws ReasonerInterruptedException, TimeOutException, InconsistentOntologyException {
 		return getBottomClassNode();
 	}
 
 	// entailments
-	public synchronized boolean isEntailed(OWLAxiom axiom)
-			throws ReasonerInterruptedException,
-			UnsupportedEntailmentTypeException, TimeOutException,
-			AxiomNotInProfileException, FreshEntitiesException,
-			InconsistentOntologyException {
+	public synchronized boolean isEntailed(OWLAxiom axiom) throws ReasonerInterruptedException, UnsupportedEntailmentTypeException, TimeOutException, AxiomNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
 		checkConsistency();
 		//		if (rootOntology.containsAxiom(axiom, true)) {
 		//			return true;
 		//		}
 		//TODO have the exception thrown from the entailment checker
-		Boolean entailed = axiom.accept(translationMachinery
-				.getEntailmentChecker());
+		Boolean entailed = axiom.accept(translationMachinery.getEntailmentChecker());
 		if (entailed == null) {
 			throw new UnsupportedEntailmentTypeException(axiom);
 		}
 		return entailed;
 	}
 
-	public synchronized boolean isEntailed(Set<? extends OWLAxiom> axioms)
-			throws ReasonerInterruptedException,
-			UnsupportedEntailmentTypeException, TimeOutException,
-			AxiomNotInProfileException, FreshEntitiesException,
-			InconsistentOntologyException {
+	public synchronized boolean isEntailed(Set<? extends OWLAxiom> axioms) throws ReasonerInterruptedException, UnsupportedEntailmentTypeException, TimeOutException, AxiomNotInProfileException, FreshEntitiesException, InconsistentOntologyException {
 		for (OWLAxiom ax : axioms) {
 			if (!isEntailed(ax)) {
 				return false;
@@ -455,32 +415,17 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		return getEquivalentClasses(getOWLDataFactory().getOWLNothing());
 	}
 
-	public synchronized NodeSet<OWLClass> getSubClasses(OWLClassExpression ce,
-			boolean direct) throws ReasonerInterruptedException,
-			TimeOutException, FreshEntitiesException,
-			InconsistentOntologyException {
+	public synchronized NodeSet<OWLClass> getSubClasses(OWLClassExpression ce, boolean direct) throws ReasonerInterruptedException, TimeOutException, FreshEntitiesException, InconsistentOntologyException {
 		checkConsistency();
-		return translationMachinery.getClassExpressionTranslator()
-				.getNodeSetFromPointers(
-						askSubClasses(translationMachinery.toClassPointer(ce),
-								direct));
+		return translationMachinery.getClassExpressionTranslator().getNodeSetFromPointers(askSubClasses(translationMachinery.toClassPointer(ce), direct));
 	}
 
-	public synchronized NodeSet<OWLClass> getSuperClasses(
-			OWLClassExpression ce, boolean direct)
-			throws InconsistentOntologyException,
-			ClassExpressionNotInProfileException, ReasonerInterruptedException,
-			TimeOutException {
+	public synchronized NodeSet<OWLClass> getSuperClasses(OWLClassExpression ce, boolean direct) throws InconsistentOntologyException, ClassExpressionNotInProfileException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		return translationMachinery
-				.getClassExpressionTranslator()
-				.getNodeSetFromPointers(
-						askSuperClasses(
-								translationMachinery.toClassPointer(ce), direct));
+		return translationMachinery.getClassExpressionTranslator().getNodeSetFromPointers(askSuperClasses(translationMachinery.toClassPointer(ce), direct));
 	}
 
-	public synchronized NodeSet<OWLClass> getDisjointClasses(
-			OWLClassExpression ce) {
+	public synchronized NodeSet<OWLClass> getDisjointClasses(OWLClassExpression ce) {
 		//checkConsistency();
 		// TODO Not supported directly by FaCT++
 		return new OWLClassNodeSet();
@@ -488,210 +433,112 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 
 	// object properties
 	public Node<OWLObjectPropertyExpression> getTopObjectPropertyNode() {
-		return getEquivalentObjectProperties(getOWLDataFactory()
-				.getOWLTopObjectProperty());
+		return getEquivalentObjectProperties(getOWLDataFactory().getOWLTopObjectProperty());
 	}
 
 	public Node<OWLObjectPropertyExpression> getBottomObjectPropertyNode() {
-		return getEquivalentObjectProperties(getOWLDataFactory()
-				.getOWLBottomObjectProperty());
+		return getEquivalentObjectProperties(getOWLDataFactory().getOWLBottomObjectProperty());
 	}
 
-	public synchronized NodeSet<OWLObjectPropertyExpression> getSubObjectProperties(
-			OWLObjectPropertyExpression pe, boolean direct)
-			throws InconsistentOntologyException, ReasonerInterruptedException,
-			TimeOutException {
+	public synchronized NodeSet<OWLObjectPropertyExpression> getSubObjectProperties(OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		return translationMachinery.getObjectPropertyTranslator()
-				.getNodeSetFromPointers(
-						askSubObjectProperties(translationMachinery
-								.toObjectPropertyPointer(pe), direct));
+		return translationMachinery.getObjectPropertyTranslator().getNodeSetFromPointers(askSubObjectProperties(translationMachinery.toObjectPropertyPointer(pe), direct));
 	}
 
-	public synchronized NodeSet<OWLObjectPropertyExpression> getSuperObjectProperties(
-			OWLObjectPropertyExpression pe, boolean direct)
-			throws InconsistentOntologyException, ReasonerInterruptedException,
-			TimeOutException {
+	public synchronized NodeSet<OWLObjectPropertyExpression> getSuperObjectProperties(OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		return translationMachinery.getObjectPropertyTranslator()
-				.getNodeSetFromPointers(
-						askSuperObjectProperties(translationMachinery
-								.toObjectPropertyPointer(pe), direct));
+		return translationMachinery.getObjectPropertyTranslator().getNodeSetFromPointers(askSuperObjectProperties(translationMachinery.toObjectPropertyPointer(pe), direct));
 	}
 
-	public synchronized Node<OWLObjectPropertyExpression> getEquivalentObjectProperties(
-			OWLObjectPropertyExpression pe)
-			throws InconsistentOntologyException, ReasonerInterruptedException,
-			TimeOutException {
+	public synchronized Node<OWLObjectPropertyExpression> getEquivalentObjectProperties(OWLObjectPropertyExpression pe) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		return translationMachinery.getObjectPropertyTranslator()
-				.getNodeFromPointers(
-						askEquivalentObjectProperties(translationMachinery
-								.toObjectPropertyPointer(pe)));
+		return translationMachinery.getObjectPropertyTranslator().getNodeFromPointers(askEquivalentObjectProperties(translationMachinery.toObjectPropertyPointer(pe)));
 	}
 
-	public synchronized NodeSet<OWLObjectPropertyExpression> getDisjointObjectProperties(
-			OWLObjectPropertyExpression pe)
-			throws InconsistentOntologyException, ReasonerInterruptedException,
-			TimeOutException {
+	public synchronized NodeSet<OWLObjectPropertyExpression> getDisjointObjectProperties(OWLObjectPropertyExpression pe) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
 		// TODO:
 		return new OWLObjectPropertyNodeSet();
 	}
 
-	public synchronized Node<OWLObjectPropertyExpression> getInverseObjectProperties(
-			OWLObjectPropertyExpression pe)
-			throws InconsistentOntologyException, ReasonerInterruptedException,
-			TimeOutException {
+	public synchronized Node<OWLObjectPropertyExpression> getInverseObjectProperties(OWLObjectPropertyExpression pe) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		return translationMachinery.getObjectPropertyTranslator()
-				.getNodeFromPointers(
-						askEquivalentObjectProperties(translationMachinery
-								.toObjectPropertyPointer(pe
-										.getInverseProperty())));
+		return translationMachinery.getObjectPropertyTranslator().getNodeFromPointers(askEquivalentObjectProperties(translationMachinery.toObjectPropertyPointer(pe.getInverseProperty())));
 	}
 
-	public synchronized NodeSet<OWLClass> getObjectPropertyDomains(
-			OWLObjectPropertyExpression pe, boolean direct)
-			throws InconsistentOntologyException, ReasonerInterruptedException,
-			TimeOutException {
+	public synchronized NodeSet<OWLClass> getObjectPropertyDomains(OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		TDLConceptExpression subClass = translationMachinery
-				.toClassPointer(getOWLDataFactory().getOWLObjectSomeValuesFrom(
-						pe, getOWLDataFactory().getOWLThing()));
-		return translationMachinery.getClassExpressionTranslator()
-				.getNodeSetFromPointers(askSuperClasses(subClass, direct));
+		TDLConceptExpression subClass = translationMachinery.toClassPointer(getOWLDataFactory().getOWLObjectSomeValuesFrom(pe, getOWLDataFactory().getOWLThing()));
+		return translationMachinery.getClassExpressionTranslator().getNodeSetFromPointers(askSuperClasses(subClass, direct));
 	}
 
-	public NodeSet<OWLClass> getObjectPropertyRanges(
-			OWLObjectPropertyExpression pe, boolean direct)
-			throws InconsistentOntologyException, ReasonerInterruptedException,
-			TimeOutException {
-		return getSuperClasses(
-				getOWLDataFactory().getOWLObjectSomeValuesFrom(
-						pe.getInverseProperty(),
-						getOWLDataFactory().getOWLThing()), direct);
+	public NodeSet<OWLClass> getObjectPropertyRanges(OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
+		return getSuperClasses(getOWLDataFactory().getOWLObjectSomeValuesFrom(pe.getInverseProperty(), getOWLDataFactory().getOWLThing()), direct);
 	}
 
 	// data properties
 	public Node<OWLDataProperty> getTopDataPropertyNode() {
-		return getEquivalentDataProperties(getOWLDataFactory()
-				.getOWLTopDataProperty());
+		return getEquivalentDataProperties(getOWLDataFactory().getOWLTopDataProperty());
 	}
 
 	public Node<OWLDataProperty> getBottomDataPropertyNode() {
-		return getEquivalentDataProperties(getOWLDataFactory()
-				.getOWLBottomDataProperty());
+		return getEquivalentDataProperties(getOWLDataFactory().getOWLBottomDataProperty());
 	}
 
-	public synchronized NodeSet<OWLDataProperty> getSubDataProperties(
-			OWLDataProperty pe, boolean direct)
-			throws InconsistentOntologyException, ReasonerInterruptedException,
-			TimeOutException {
+	public synchronized NodeSet<OWLDataProperty> getSubDataProperties(OWLDataProperty pe, boolean direct) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		return translationMachinery.getDataPropertyTranslator()
-				.getNodeSetFromPointers(
-						askSubDataProperties(
-								translationMachinery.toDataPropertyPointer(pe),
-								direct));
+		return translationMachinery.getDataPropertyTranslator().getNodeSetFromPointers(askSubDataProperties(translationMachinery.toDataPropertyPointer(pe), direct));
 	}
 
-	public synchronized NodeSet<OWLDataProperty> getSuperDataProperties(
-			OWLDataProperty pe, boolean direct)
-			throws InconsistentOntologyException, ReasonerInterruptedException,
-			TimeOutException {
+	public synchronized NodeSet<OWLDataProperty> getSuperDataProperties(OWLDataProperty pe, boolean direct) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		return translationMachinery.getDataPropertyTranslator()
-				.getNodeSetFromPointers(
-						askSuperDataProperties(
-								translationMachinery.toDataPropertyPointer(pe),
-								direct));
+		return translationMachinery.getDataPropertyTranslator().getNodeSetFromPointers(askSuperDataProperties(translationMachinery.toDataPropertyPointer(pe), direct));
 	}
 
-	public synchronized Node<OWLDataProperty> getEquivalentDataProperties(
-			OWLDataProperty pe) throws InconsistentOntologyException,
-			ReasonerInterruptedException, TimeOutException {
+	public synchronized Node<OWLDataProperty> getEquivalentDataProperties(OWLDataProperty pe) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		return translationMachinery.getDataPropertyTranslator()
-				.getNodeFromPointers(
-						askEquivalentDataProperties(translationMachinery
-								.toDataPropertyPointer(pe)));
+		return translationMachinery.getDataPropertyTranslator().getNodeFromPointers(askEquivalentDataProperties(translationMachinery.toDataPropertyPointer(pe)));
 	}
 
-	public synchronized NodeSet<OWLDataProperty> getDisjointDataProperties(
-			OWLDataPropertyExpression pe) throws InconsistentOntologyException,
-			ReasonerInterruptedException, TimeOutException {
+	public synchronized NodeSet<OWLDataProperty> getDisjointDataProperties(OWLDataPropertyExpression pe) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
 		// TODO:
 		return new OWLDataPropertyNodeSet();
 	}
 
-	public NodeSet<OWLClass> getDataPropertyDomains(OWLDataProperty pe,
-			boolean direct) throws InconsistentOntologyException,
-			ReasonerInterruptedException, TimeOutException {
-		return getSuperClasses(
-				getOWLDataFactory().getOWLDataSomeValuesFrom(pe,
-						getOWLDataFactory().getTopDatatype()), direct);
+	public NodeSet<OWLClass> getDataPropertyDomains(OWLDataProperty pe, boolean direct) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
+		return getSuperClasses(getOWLDataFactory().getOWLDataSomeValuesFrom(pe, getOWLDataFactory().getTopDatatype()), direct);
 	}
 
 	// individuals
-	public synchronized NodeSet<OWLClass> getTypes(OWLNamedIndividual ind,
-			boolean direct) throws InconsistentOntologyException,
-			ReasonerInterruptedException, TimeOutException {
+	public synchronized NodeSet<OWLClass> getTypes(OWLNamedIndividual ind, boolean direct) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		return translationMachinery.getClassExpressionTranslator()
-				.getNodeSetFromPointers(
-						askIndividualTypes(
-								translationMachinery.toIndividualPointer(ind),
-								direct));
+		return translationMachinery.getClassExpressionTranslator().getNodeSetFromPointers(askIndividualTypes(translationMachinery.toIndividualPointer(ind), direct));
 	}
 
-	public synchronized NodeSet<OWLNamedIndividual> getInstances(
-			OWLClassExpression ce, boolean direct)
-			throws InconsistentOntologyException,
-			ClassExpressionNotInProfileException, ReasonerInterruptedException,
-			TimeOutException {
+	public synchronized NodeSet<OWLNamedIndividual> getInstances(OWLClassExpression ce, boolean direct) throws InconsistentOntologyException, ClassExpressionNotInProfileException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		return translationMachinery
-				.translateIndividualPointersToNodeSet(askInstances(
-						translationMachinery.toClassPointer(ce), direct));
+		return translationMachinery.translateIndividualPointersToNodeSet(askInstances(translationMachinery.toClassPointer(ce), direct));
 	}
 
-	public synchronized NodeSet<OWLNamedIndividual> getObjectPropertyValues(
-			OWLNamedIndividual ind, OWLObjectPropertyExpression pe)
-			throws InconsistentOntologyException, ReasonerInterruptedException,
-			TimeOutException {
+	public synchronized NodeSet<OWLNamedIndividual> getObjectPropertyValues(OWLNamedIndividual ind, OWLObjectPropertyExpression pe) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		return translationMachinery
-				.translateIndividualPointersToNodeSet(askRelatedIndividuals(
-						translationMachinery.toIndividualPointer(ind),
-						translationMachinery.toObjectPropertyPointer(pe)));
+		return translationMachinery.translateIndividualPointersToNodeSet(askRelatedIndividuals(translationMachinery.toIndividualPointer(ind), translationMachinery.toObjectPropertyPointer(pe)));
 	}
 
-	public synchronized Set<OWLLiteral> getDataPropertyValues(
-			OWLNamedIndividual ind, OWLDataProperty pe)
-			throws InconsistentOntologyException, ReasonerInterruptedException,
-			TimeOutException {
+	public synchronized Set<OWLLiteral> getDataPropertyValues(OWLNamedIndividual ind, OWLDataProperty pe) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		// TODO:
 		//checkConsistency();
 		return Collections.emptySet();
 	}
 
-	public synchronized Node<OWLNamedIndividual> getSameIndividuals(
-			OWLNamedIndividual ind) throws InconsistentOntologyException,
-			ReasonerInterruptedException, TimeOutException {
+	public synchronized Node<OWLNamedIndividual> getSameIndividuals(OWLNamedIndividual ind) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		return translationMachinery
-				.getIndividualTranslator()
-				.getNodeFromPointers(
-						askSameAs(translationMachinery.toIndividualPointer(ind)));
+		return translationMachinery.getIndividualTranslator().getNodeFromPointers(askSameAs(translationMachinery.toIndividualPointer(ind)));
 	}
 
-	public NodeSet<OWLNamedIndividual> getDifferentIndividuals(
-			OWLNamedIndividual ind) throws InconsistentOntologyException,
-			ReasonerInterruptedException, TimeOutException {
-		OWLClassExpression ce = getOWLDataFactory().getOWLObjectOneOf(ind)
-				.getObjectComplementOf();
+	public NodeSet<OWLNamedIndividual> getDifferentIndividuals(OWLNamedIndividual ind) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
+		OWLClassExpression ce = getOWLDataFactory().getOWLObjectOneOf(ind).getObjectComplementOf();
 		return getInstances(ce, false);
 	}
 
@@ -705,122 +552,103 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		dumpSubClasses(getTopClassNode(), pw, 0, includeBottomNode);
 	}
 
-	private void dumpSubClasses(Node<OWLClass> node, LogAdapter pw, int depth,
-			boolean includeBottomNode) {
+	private void dumpSubClasses(Node<OWLClass> node, LogAdapter pw, int depth, boolean includeBottomNode) {
 		if (includeBottomNode || !node.isBottomNode()) {
 			for (int i = 0; i < depth; i++) {
 				pw.print("    ");
 			}
 			pw.println(node.toString());
-			for (Node<OWLClass> sub : getSubClasses(
-					node.getRepresentativeElement(), true)) {
+			for (Node<OWLClass> sub : getSubClasses(node.getRepresentativeElement(), true)) {
 				dumpSubClasses(sub, pw, depth + 1, includeBottomNode);
 			}
 		}
 	}
 
-	public Collection<Collection<TDLConceptExpression>> askSubClasses(
-			TDLConceptExpression arg, boolean direct) {
+	public Collection<Collection<TDLConceptExpression>> askSubClasses(TDLConceptExpression arg, boolean direct) {
 		JTaxonomyActor actor = new JTaxonomyActor(em, new ClassPolicy());
 		TDLConceptExpression p = arg;
 		kernel.getSubConcepts(p, direct, actor);
 		return actor.getClassElements();
 	}
 
-	public Collection<Collection<TDLConceptExpression>> askSuperClasses(
-			TDLConceptExpression arg, boolean direct) {
+	public Collection<Collection<TDLConceptExpression>> askSuperClasses(TDLConceptExpression arg, boolean direct) {
 		JTaxonomyActor actor = new JTaxonomyActor(em, new ClassPolicy());
 		TDLConceptExpression p = arg;
 		kernel.getSupConcepts(p, direct, actor);
 		return actor.getClassElements();
 	}
 
-	public Collection<TDLConceptExpression> askEquivalentClasses(
-			TDLConceptExpression arg) {
+	public Collection<TDLConceptExpression> askEquivalentClasses(TDLConceptExpression arg) {
 		JTaxonomyActor actor = new JTaxonomyActor(em, new ClassPolicy());
 		kernel.getEquivalentConcepts(arg, actor);
 		return actor.getClassSynonyms();
 	}
 
-	public Collection<Collection<TDLObjectRoleExpression>> askSuperObjectProperties(
-			TDLObjectRoleExpression arg, boolean direct) {
-		JTaxonomyActor actor = new JTaxonomyActor(em,
-				new ObjectPropertyPolicy());
+	public Collection<Collection<TDLObjectRoleExpression>> askSuperObjectProperties(TDLObjectRoleExpression arg, boolean direct) {
+		JTaxonomyActor actor = new JTaxonomyActor(em, new ObjectPropertyPolicy());
 		TDLObjectRoleExpression p = arg;
 		kernel.getSupRoles(p, direct, actor);
 		return actor.getObjectPropertyElements();
 	}
 
-	public Collection<Collection<TDLObjectRoleExpression>> askSubObjectProperties(
-			TDLObjectRoleExpression arg, boolean direct) {
-		JTaxonomyActor actor = new JTaxonomyActor(em,
-				new ObjectPropertyPolicy());
+	public Collection<Collection<TDLObjectRoleExpression>> askSubObjectProperties(TDLObjectRoleExpression arg, boolean direct) {
+		JTaxonomyActor actor = new JTaxonomyActor(em, new ObjectPropertyPolicy());
 		TDLObjectRoleExpression p = arg;
 		kernel.getSubRoles(p, direct, actor);
 		return actor.getObjectPropertyElements();
 	}
 
-	public Collection<TDLObjectRoleExpression> askEquivalentObjectProperties(
-			TDLObjectRoleExpression arg) {
-		JTaxonomyActor actor = new JTaxonomyActor(em,
-				new ObjectPropertyPolicy());
+	public Collection<TDLObjectRoleExpression> askEquivalentObjectProperties(TDLObjectRoleExpression arg) {
+		JTaxonomyActor actor = new JTaxonomyActor(em, new ObjectPropertyPolicy());
 		kernel.getEquivalentRoles(arg, actor);
 		return actor.getObjectPropertySynonyms();
 	}
 
-	public Collection<Collection<TDLConceptExpression>> askObjectPropertyDomain(
-			TDLObjectRoleExpression arg) {
+	public Collection<Collection<TDLConceptExpression>> askObjectPropertyDomain(TDLObjectRoleExpression arg) {
 		JTaxonomyActor actor = new JTaxonomyActor(em, new ClassPolicy());
 		kernel.getRoleDomain(arg, true, actor);
 		return actor.getClassElements();
 	}
 
-	public Collection<Collection<TDLConceptExpression>> askObjectPropertyRange(
-			TDLObjectRoleExpression arg) {
+	public Collection<Collection<TDLConceptExpression>> askObjectPropertyRange(TDLObjectRoleExpression arg) {
 		JTaxonomyActor actor = new JTaxonomyActor(em, new ClassPolicy());
 		kernel.getRoleRange(arg, true, actor);
 		return actor.getClassElements();
 	}
 
-	public Collection<Collection<TDLDataRoleExpression>> askSuperDataProperties(
-			TDLDataRoleExpression arg, boolean direct) {
+	public Collection<Collection<TDLDataRoleExpression>> askSuperDataProperties(TDLDataRoleExpression arg, boolean direct) {
 		JTaxonomyActor actor = new JTaxonomyActor(em, new DataPropertyPolicy());
 		TDLDataRoleExpression p = arg;
 		kernel.getSupRoles(p, direct, actor);
 		return actor.getDataPropertyElements();
 	}
 
-	public Collection<Collection<TDLDataRoleExpression>> askSubDataProperties(
-			TDLDataRoleExpression arg, boolean direct) {
+	public Collection<Collection<TDLDataRoleExpression>> askSubDataProperties(TDLDataRoleExpression arg, boolean direct) {
 		JTaxonomyActor actor = new JTaxonomyActor(em, new DataPropertyPolicy());
 		kernel.getSubRoles(arg, direct, actor);
 		return actor.getDataPropertyElements();
 	}
 
-	public Collection<TDLDataRoleExpression> askEquivalentDataProperties(
-			TDLDataRoleExpression arg) {
+	public Collection<TDLDataRoleExpression> askEquivalentDataProperties(TDLDataRoleExpression arg) {
 		JTaxonomyActor actor = new JTaxonomyActor(em, new DataPropertyPolicy());
 		kernel.getEquivalentRoles(arg, actor);
 		return actor.getDataPropertySynonyms();
 	}
 
-	public Collection<Collection<TDLConceptExpression>> askDataPropertyDomain(
-			TDLDataRoleExpression arg) {
+	public Collection<Collection<TDLConceptExpression>> askDataPropertyDomain(TDLDataRoleExpression arg) {
 		JTaxonomyActor actor = new JTaxonomyActor(em, new ClassPolicy());
 		kernel.getRoleDomain(arg, true, actor);
 		return actor.getClassElements();
 	}
 
-	public Collection<Collection<TDLConceptExpression>> askIndividualTypes(
-			TDLIndividualExpression arg, boolean direct) {
+	public Collection<Collection<TDLConceptExpression>> askIndividualTypes(TDLIndividualExpression arg, boolean direct) {
 		JTaxonomyActor actor = new JTaxonomyActor(em, new ClassPolicy());
 		TDLIndividualExpression p = arg;
 		kernel.getTypes(p, direct, actor);
 		return actor.getClassElements();
 	}
 
-	public Collection<TDLObjectRoleExpression> askObjectProperties(
-			TDLIndividualExpression arg) {
+	public Collection<TDLObjectRoleExpression> askObjectProperties(TDLIndividualExpression arg) {
 		List<TNamedEntry> Rs = new ArrayList<TNamedEntry>();
 		kernel.getRelatedRoles(arg, Rs, false, false);
 		List<TDLObjectRoleExpression> acc = new ArrayList<TDLObjectRoleExpression>();
@@ -831,8 +659,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		return acc;
 	}
 
-	public Collection<TDLIndividualExpression> askRelatedIndividuals(
-			TDLIndividualExpression arg1, TDLObjectRoleExpression arg2) {
+	public Collection<TDLIndividualExpression> askRelatedIndividuals(TDLIndividualExpression arg1, TDLObjectRoleExpression arg2) {
 		List<TNamedEntry> Js = new ArrayList<TNamedEntry>();
 		kernel.getRoleFillers(arg1, arg2, Js);
 		List<TDLIndividualExpression> acc = new ArrayList<TDLIndividualExpression>();
@@ -842,8 +669,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		return acc;
 	}
 
-	public Collection<TDLDataRoleExpression> askDataProperties(
-			TDLIndividualExpression arg) {
+	public Collection<TDLDataRoleExpression> askDataProperties(TDLIndividualExpression arg) {
 		List<TNamedEntry> Rs = new ArrayList<TNamedEntry>();
 		kernel.getRelatedRoles(arg, Rs, true, false);
 		List<TDLDataRoleExpression> acc = new ArrayList<TDLDataRoleExpression>();
@@ -853,10 +679,8 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		return acc;
 	}
 
-	public Collection<TDLIndividualExpression> askInstances(
-			TDLConceptExpression arg, boolean direct) {
-		JTaxonomyActor actor = new JTaxonomyActor(em,
-				new IndividualPolicy(true));
+	public Collection<TDLIndividualExpression> askInstances(TDLConceptExpression arg, boolean direct) {
+		JTaxonomyActor actor = new JTaxonomyActor(em, new IndividualPolicy(true));
 		TDLConceptExpression p = arg;
 		if (direct) {
 			kernel.getDirectInstances(p, actor);
@@ -866,10 +690,8 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		return actor.getPlainIndividualElements();
 	}
 
-	public Collection<Collection<TDLIndividualExpression>> askInstancesGrouped(
-			TDLConceptExpression arg, boolean direct) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new IndividualPolicy(
-				false));
+	public Collection<Collection<TDLIndividualExpression>> askInstancesGrouped(TDLConceptExpression arg, boolean direct) {
+		JTaxonomyActor actor = new JTaxonomyActor(em, new IndividualPolicy(false));
 		TDLConceptExpression p = arg;
 		if (direct) {
 			kernel.getDirectInstances(p, actor);
@@ -879,10 +701,8 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		return actor.getIndividualElements();
 	}
 
-	public Collection<TDLIndividualExpression> askSameAs(
-			TDLIndividualExpression arg) {
-		JTaxonomyActor actor = new JTaxonomyActor(em,
-				new IndividualPolicy(true));
+	public Collection<TDLIndividualExpression> askSameAs(TDLIndividualExpression arg) {
+		JTaxonomyActor actor = new JTaxonomyActor(em, new IndividualPolicy(true));
 		kernel.getSameAs(arg, actor);
 		return actor.getIndividualSynonyms();
 	}

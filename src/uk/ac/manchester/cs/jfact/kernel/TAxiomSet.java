@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.*;
 import static uk.ac.manchester.cs.jfact.kernel.InAx.*;
 
@@ -15,8 +15,7 @@ import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
 
-
-public  final class TAxiomSet {
+public final class TAxiomSet {
 	/** host TBox that holds all concepts/etc */
 	private final TBox Host;
 	/** set of axioms that accumilates incoming (and newly created) axioms; Tg */
@@ -167,8 +166,7 @@ public  final class TAxiomSet {
 		// clear absorbed and remove them from Accum
 		Accum = GCIs;
 		if (LeveLogger.isAbsorptionActive()) {
-			LL_ABSORPTION.print("\nAbsorption done with " + Accum.size()
-					+ " GCIs left\n");
+			LL_ABSORPTION.print("\nAbsorption done with " + Accum.size() + " GCIs left\n");
 		}
 		PrintStatistics();
 		return size();
@@ -260,9 +258,7 @@ public  final class TAxiomSet {
 		if (!created.containsKey("SAbsAction")) {
 			return;
 		}
-		LL.print("\nAbsorption dealt with " + get("SAbsInput")
-				+ " input axioms\nThere were made " + get("SAbsAction")
-				+ " absorption actions, of which:");
+		LL.print("\nAbsorption dealt with " + get("SAbsInput") + " input axioms\nThere were made " + get("SAbsAction") + " absorption actions, of which:");
 		if (get("SAbsRepCN") > 0) {
 			LL.print("\n\t" + get("SAbsRepCN") + " concept name replacements");
 		}
@@ -279,18 +275,13 @@ public  final class TAxiomSet {
 			LL.print("\n\t" + get("SAbsTApply") + " TOP absorptions");
 		}
 		if (get("SAbsCApply") > 0) {
-			LL.print("\n\t" + get("SAbsCApply") + " concept absorption with "
-					+ get("SAbsCAttempt") + " possibilities");
+			LL.print("\n\t" + get("SAbsCApply") + " concept absorption with " + get("SAbsCAttempt") + " possibilities");
 		}
 		if (get("SAbsNApply") > 0) {
-			LL.print("\n\t" + get("SAbsNApply")
-					+ " negated concept absorption with " + get("SAbsNAttempt")
-					+ " possibilities");
+			LL.print("\n\t" + get("SAbsNApply") + " negated concept absorption with " + get("SAbsNAttempt") + " possibilities");
 		}
 		if (get("SAbsRApply") > 0) {
-			LL.print("\n\t" + get("SAbsRApply")
-					+ " role domain absorption with " + get("SAbsRAttempt")
-					+ " possibilities");
+			LL.print("\n\t" + get("SAbsRApply") + " role domain absorption with " + get("SAbsRAttempt") + " possibilities");
 		}
 		if (!Accum.isEmpty()) {
 			LL.print("\nThere are " + Accum.size() + " GCIs left");

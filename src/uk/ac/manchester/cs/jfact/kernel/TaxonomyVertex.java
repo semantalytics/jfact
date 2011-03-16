@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
 
 import java.util.ArrayList;
@@ -16,8 +16,7 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 
-
-public  final  class TaxonomyVertex {
+public final class TaxonomyVertex {
 	//TODO check if they need to be list
 	/** immediate parents and children */
 	private final List<TaxonomyVertex>[] Links = new ArrayList[2];
@@ -144,6 +143,9 @@ public  final  class TaxonomyVertex {
 
 	/** add link in given direction to vertex */
 	public void addNeighbour(boolean upDirection, TaxonomyVertex p) {
+		if (p == null) {
+			System.out.println("TaxonomyVertex.addNeighbour() passed in a null");
+		}
 		neigh(upDirection).add(p);
 	}
 
@@ -202,10 +204,8 @@ public  final  class TaxonomyVertex {
 		setSample(entry);
 		// setup links
 		//TODO doublecheck
-		List<TaxonomyVertex> falselist = new ArrayList<TaxonomyVertex>(
-				neigh(false));
-		List<TaxonomyVertex> truelist = new ArrayList<TaxonomyVertex>(
-				neigh(true));
+		List<TaxonomyVertex> falselist = new ArrayList<TaxonomyVertex>(neigh(false));
+		List<TaxonomyVertex> truelist = new ArrayList<TaxonomyVertex>(neigh(true));
 		for (TaxonomyVertex d : falselist) {
 			for (TaxonomyVertex u : truelist) {
 				if (d.removeLink(true, u)) {

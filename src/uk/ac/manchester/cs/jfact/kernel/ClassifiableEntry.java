@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class ClassifiableEntry extends TNamedEntry {
 	/** link to taxonomy entry for current entry */
-	protected TaxonomyVertex taxVertex;
+	protected TaxonomyVertex taxVertex = null;
 	/**
 	 * links to 'told subsumers' (entries that are direct super-entries for
 	 * current)
@@ -28,9 +28,8 @@ public class ClassifiableEntry extends TNamedEntry {
 	/** index as a vertex in the SubsumptionMap */
 	protected int Index;
 
-	protected ClassifiableEntry( String name) {
+	protected ClassifiableEntry(String name) {
 		super(name);
-		taxVertex = null;
 		pSynonym = null;
 		Index = 0;
 	}
@@ -129,12 +128,12 @@ public class ClassifiableEntry extends TNamedEntry {
 	}
 
 	/** get synonym of current entry */
-	protected  final ClassifiableEntry getSynonym() {
+	protected final ClassifiableEntry getSynonym() {
 		return pSynonym;
 	}
 
 	/** make sure that synonym's representative is not a synonym itself */
-	protected  final void canonicaliseSynonym() {
+	protected final void canonicaliseSynonym() {
 		if (isSynonym()) {
 			while (pSynonym.isSynonym()) {
 				pSynonym = pSynonym.pSynonym;
@@ -155,13 +154,7 @@ public class ClassifiableEntry extends TNamedEntry {
 		}
 		if (set.contains(runner.pSynonym)) {
 			// then adding this synonym would cause a loop
-			System.out
-					.println("ClassifiableEntry.setSynonym(): warning: assigning this synonym would create a loop; ignored\nignored synonym: "
-							+ this
-							+ " -> "
-							+ syn
-							+ "\nPrevious synonyms: "
-							+ set);
+			System.out.println("ClassifiableEntry.setSynonym(): warning: assigning this synonym would create a loop; ignored\nignored synonym: " + this + " -> " + syn + "\nPrevious synonyms: " + set);
 		} else {
 			pSynonym = syn;
 			canonicaliseSynonym();
@@ -180,8 +173,7 @@ public class ClassifiableEntry extends TNamedEntry {
 	}
 
 	public final static <T extends ClassifiableEntry> T resolveSynonym(T p) {
-		return p == null ? null
-				: p.isSynonym() ? resolveSynonym((T) p.pSynonym) : p;
+		return p == null ? null : p.isSynonym() ? resolveSynonym((T) p.pSynonym) : p;
 	}
 
 	protected final void addParentIfNew(ClassifiableEntry parent) {

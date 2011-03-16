@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel.datatype;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
 
 import java.util.LinkedHashMap;
@@ -13,14 +13,13 @@ import java.util.Map;
 import uk.ac.manchester.cs.jfact.dep.DepSet;
 import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
+import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.helpers.Reference;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.kernel.DLDag;
 import uk.ac.manchester.cs.jfact.kernel.TNamedEntry;
 import uk.ac.manchester.cs.jfact.kernel.datatype.DataTypeAppearance.DepDTE;
 import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataTypeName;
-
 
 public class DataTypeReasoner {
 	/** vector of a types */
@@ -46,8 +45,7 @@ public class DataTypeReasoner {
 	}
 
 	/** process data expr */
-	private boolean processDataExpr(boolean pos, final TDataEntry c,
-			final DepSet dep) {
+	private boolean processDataExpr(boolean pos, final TDataEntry c, final DepSet dep) {
 		final TDataInterval constraints = c.getFacet();
 		if (constraints.isEmpty()) {
 			return false;
@@ -97,12 +95,8 @@ public class DataTypeReasoner {
 		TNamedEntry dataEntry = getDataEntry(p);
 		switch (v.Type()) {
 			case dtDataType: {
-				DataTypeAppearance type = Map
-						.get(dataEntry instanceof TDataEntry ? ((TDataEntry) dataEntry)
-								.getDatatype() : ((TDLDataTypeName) dataEntry)
-								.getDatatype());
-				LL.print(Templates.INTERVAL, (p > 0 ? "+" : "-"),
-						dataEntry.getName());
+				DataTypeAppearance type = Map.get(dataEntry instanceof TDataEntry ? ((TDataEntry) dataEntry).getDatatype() : ((TDLDataTypeName) dataEntry).getDatatype());
+				LL.print(Templates.INTERVAL, (p > 0 ? "+" : "-"), dataEntry.getName());
 				if (p > 0) {
 					type.setPType(getDTE(p, dep));
 				} else {
@@ -130,17 +124,14 @@ public class DataTypeReasoner {
 				} else {
 					Datatypes type_datatype = type.getPDatatype();
 					Datatypes p_datatype = p.getPDatatype();
-					if (!p_datatype.compatible(type_datatype)
-							&& !type_datatype.compatible(p_datatype)) {
+					if (!p_datatype.compatible(type_datatype) && !type_datatype.compatible(p_datatype)) {
 						LL.print(Templates.CHECKCLASH);
-						clashDep.setReference(DepSetFactory.plus(
-								type.getPType().second, p.getPType().second));
+						clashDep.setReference(DepSetFactory.plus(type.getPType().second, p.getPType().second));
 						return true;
 					}
 					// if one of them is compatible with the other but not the other way around, then replace type with the most restrictive one
 					// XXX this is still dubious
-					if (type_datatype.compatible(p_datatype)
-							&& !p_datatype.compatible(type_datatype)) {
+					if (type_datatype.compatible(p_datatype) && !p_datatype.compatible(type_datatype)) {
 						type = p;
 					}
 					// else irrelevant: type is already the most restrictive

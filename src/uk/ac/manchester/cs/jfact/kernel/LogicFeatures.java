@@ -1,16 +1,16 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.helpers.Helper.bpTOP;
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 
-public  final  class LogicFeatures {
+public final class LogicFeatures {
 	/** all flags in one long */
 	private long flags;
 
@@ -105,8 +105,7 @@ public  final  class LogicFeatures {
 		setX(LFEnum.lfBothRoles);
 	}
 
-	public static LogicFeatures plus(final LogicFeatures f1,
-			final LogicFeatures f2) {
+	public static LogicFeatures plus(final LogicFeatures f1, final LogicFeatures f2) {
 		LogicFeatures f = new LogicFeatures(f1);
 		f.flags |= f2.flags;
 		return f;
@@ -167,23 +166,16 @@ public  final  class LogicFeatures {
 	void writeState() {
 		String NO = "NO ";
 		String Q = "qualified ";
-		LL.print(Templates.WRITE_STATE, (hasInverseRole() ? "" : NO),
-				(hasRoleHierarchy() ? "" : NO),
-				(hasTransitiveRole() ? "" : NO), (hasSomeAll() ? "" : NO),
-				(hasFunctionalRestriction() ? "" : NO),
-				(hasNumberRestriction() ? (hasQNumberRestriction() ? Q : "")
-						: NO), (hasSingletons() ? "" : NO));
+		LL.print(Templates.WRITE_STATE, (hasInverseRole() ? "" : NO), (hasRoleHierarchy() ? "" : NO), (hasTransitiveRole() ? "" : NO), (hasSomeAll() ? "" : NO), (hasFunctionalRestriction() ? "" : NO), (hasNumberRestriction() ? (hasQNumberRestriction() ? Q : "") : NO),
+				(hasSingletons() ? "" : NO));
 	}
 
 	enum LFEnum {
 		lfInvalid(0),
 		// role description
-		lfTransitiveRoles(1 << 0), lfRolesSubsumption(1 << 1), lfDirectRoles(
-				1 << 2), lfInverseRoles(1 << 3), lfRangeAndDomain(1 << 4), lfFunctionalRoles(
-				1 << 5),
+		lfTransitiveRoles(1 << 0), lfRolesSubsumption(1 << 1), lfDirectRoles(1 << 2), lfInverseRoles(1 << 3), lfRangeAndDomain(1 << 4), lfFunctionalRoles(1 << 5),
 		// concept description
-		lfSomeConstructor(1 << 6), lfFConstructor(1 << 7), lfNConstructor(
-				1 << 8), lfQConstructor(1 << 9), lfSingleton(1 << 10),
+		lfSomeConstructor(1 << 6), lfFConstructor(1 << 7), lfNConstructor(1 << 8), lfQConstructor(1 << 9), lfSingleton(1 << 10),
 		// global description
 		lfGeneralAxioms(1 << 11), lfBothRoles(1 << 12),
 		// new constructions

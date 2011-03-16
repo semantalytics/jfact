@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAnnotationPropertyDomainAxiom;
@@ -196,47 +195,37 @@ public final class TranslationMachinery {
 		}
 	}
 
-	protected TDLConceptExpression toClassPointer(
-			OWLClassExpression classExpression) {
+	protected TDLConceptExpression toClassPointer(OWLClassExpression classExpression) {
 		return classExpression.accept(classExpressionTranslator);
 	}
 
-	protected TDLDataExpression toDataTypeExpressionPointer(
-			OWLDataRange dataRange) {
+	protected TDLDataExpression toDataTypeExpressionPointer(OWLDataRange dataRange) {
 		return dataRange.accept(dataRangeTranslator);
 	}
 
-	protected TDLObjectRoleExpression toObjectPropertyPointer(
-			OWLObjectPropertyExpression propertyExpression) {
+	protected TDLObjectRoleExpression toObjectPropertyPointer(OWLObjectPropertyExpression propertyExpression) {
 		OWLObjectPropertyExpression simp = propertyExpression.getSimplified();
 		if (simp.isAnonymous()) {
 			OWLObjectInverseOf inv = (OWLObjectInverseOf) simp;
-			return em.Inverse(objectPropertyTranslator.getPointerFromEntity(inv
-					.getInverse().asOWLObjectProperty()));
+			return em.Inverse(objectPropertyTranslator.getPointerFromEntity(inv.getInverse().asOWLObjectProperty()));
 		} else {
-			return objectPropertyTranslator.getPointerFromEntity(simp
-					.asOWLObjectProperty());
+			return objectPropertyTranslator.getPointerFromEntity(simp.asOWLObjectProperty());
 		}
 	}
 
-	protected TDLDataRoleExpression toDataPropertyPointer(
-			OWLDataPropertyExpression propertyExpression) {
-		return dataPropertyTranslator.getPointerFromEntity(propertyExpression
-				.asOWLDataProperty());
+	protected TDLDataRoleExpression toDataPropertyPointer(OWLDataPropertyExpression propertyExpression) {
+		return dataPropertyTranslator.getPointerFromEntity(propertyExpression.asOWLDataProperty());
 	}
 
-	protected synchronized TDLIndividualExpression toIndividualPointer(
-			OWLIndividual individual) {
+	protected synchronized TDLIndividualExpression toIndividualPointer(OWLIndividual individual) {
 		if (!individual.isAnonymous()) {
-			return individualTranslator.getPointerFromEntity(individual
-					.asOWLNamedIndividual());
+			return individualTranslator.getPointerFromEntity(individual.asOWLNamedIndividual());
 		} else {
 			return em.Individual(individual.toStringID());
 		}
 	}
 
-	protected synchronized TDLDataTypeExpression toDataTypePointer(
-			OWLDatatype datatype) {
+	protected synchronized TDLDataTypeExpression toDataTypePointer(OWLDatatype datatype) {
 		if (datatype == null) {
 			throw new NullPointerException();
 		}
@@ -251,21 +240,18 @@ public final class TranslationMachinery {
 		return em.DataValue(value, toDataTypePointer(literal.getDatatype()));
 	}
 
-	protected NodeSet<OWLNamedIndividual> translateIndividualPointersToNodeSet(
-			Iterable<TDLIndividualExpression> pointers) {
+	protected NodeSet<OWLNamedIndividual> translateIndividualPointersToNodeSet(Iterable<TDLIndividualExpression> pointers) {
 		OWLNamedIndividualNodeSet ns = new OWLNamedIndividualNodeSet();
 		for (TDLIndividualExpression pointer : pointers) {
 			if (pointer != null) {
-				OWLNamedIndividual ind = individualTranslator
-						.getEntityFromPointer(pointer);
+				OWLNamedIndividual ind = individualTranslator.getEntityFromPointer(pointer);
 				ns.addEntity(ind);
 			}
 		}
 		return ns;
 	}
 
-	protected synchronized List<TDLExpression> translateIndividualSet(
-			Set<OWLIndividual> inds) {
+	protected synchronized List<TDLExpression> translateIndividualSet(Set<OWLIndividual> inds) {
 		List<TDLExpression> l = new ArrayList<TDLExpression>();
 		for (OWLIndividual ind : inds) {
 			l.add(toIndividualPointer(ind));
@@ -278,12 +264,10 @@ public final class TranslationMachinery {
 		}
 
 		public Boolean visit(OWLSubClassOfAxiom axiom) {
-			if (axiom.getSuperClass().equals(df.getOWLThing())
-					|| axiom.getSubClass().equals(df.getOWLNothing())) {
+			if (axiom.getSuperClass().equals(df.getOWLThing()) || axiom.getSubClass().equals(df.getOWLNothing())) {
 				return true;
 			}
-			return kernel.isSubsumedBy(toClassPointer(axiom.getSubClass()),
-					toClassPointer(axiom.getSuperClass()));
+			return kernel.isSubsumedBy(toClassPointer(axiom.getSubClass()), toClassPointer(axiom.getSuperClass()));
 		}
 
 		public Boolean visit(OWLNegativeObjectPropertyAssertionAxiom axiom) {
@@ -291,22 +275,18 @@ public final class TranslationMachinery {
 		}
 
 		public Boolean visit(OWLAsymmetricObjectPropertyAxiom axiom) {
-			return kernel.isAsymmetric(toObjectPropertyPointer(axiom
-					.getProperty()));
+			return kernel.isAsymmetric(toObjectPropertyPointer(axiom.getProperty()));
 		}
 
 		public Boolean visit(OWLReflexiveObjectPropertyAxiom axiom) {
-			return kernel.isReflexive(toObjectPropertyPointer(axiom
-					.getProperty()));
+			return kernel.isReflexive(toObjectPropertyPointer(axiom.getProperty()));
 		}
 
 		public Boolean visit(OWLDisjointClassesAxiom axiom) {
-			Set<OWLClassExpression> classExpressions = axiom
-					.getClassExpressions();
+			Set<OWLClassExpression> classExpressions = axiom.getClassExpressions();
 			if (classExpressions.size() == 2) {
 				Iterator<OWLClassExpression> it = classExpressions.iterator();
-				return kernel.isDisjoint(toClassPointer(it.next()),
-						toClassPointer(it.next()));
+				return kernel.isDisjoint(toClassPointer(it.next()), toClassPointer(it.next()));
 			} else {
 				for (OWLAxiom ax : axiom.asOWLSubClassOfAxioms()) {
 					if (!ax.accept(this)) {
@@ -349,13 +329,10 @@ public final class TranslationMachinery {
 
 		// TODO: this check is incomplete
 		public Boolean visit(OWLDisjointDataPropertiesAxiom axiom) {
-			List<OWLDataPropertyExpression> l = new ArrayList<OWLDataPropertyExpression>(
-					axiom.getProperties());
+			List<OWLDataPropertyExpression> l = new ArrayList<OWLDataPropertyExpression>(axiom.getProperties());
 			for (int i = 0; i < l.size() - 1; i++) {
 				for (int j = i + 1; j < l.size(); j++) {
-					if (!kernel.isDisjointRoles(
-							toDataPropertyPointer(l.get(i)),
-							toDataPropertyPointer(l.get(i)))) {
+					if (!kernel.isDisjointRoles(toDataPropertyPointer(l.get(i)), toDataPropertyPointer(l.get(i)))) {
 						return false;
 					}
 				}
@@ -364,13 +341,10 @@ public final class TranslationMachinery {
 		}
 
 		public Boolean visit(OWLDisjointObjectPropertiesAxiom axiom) {
-			List<OWLObjectPropertyExpression> l = new ArrayList<OWLObjectPropertyExpression>(
-					axiom.getProperties());
+			List<OWLObjectPropertyExpression> l = new ArrayList<OWLObjectPropertyExpression>(axiom.getProperties());
 			for (int i = 0; i < l.size() - 1; i++) {
 				for (int j = i + 1; j < l.size(); j++) {
-					if (!kernel.isDisjointRoles(
-							toObjectPropertyPointer(l.get(i)),
-							toObjectPropertyPointer(l.get(i)))) {
+					if (!kernel.isDisjointRoles(toObjectPropertyPointer(l.get(i)), toObjectPropertyPointer(l.get(i)))) {
 						return false;
 					}
 				}
@@ -387,19 +361,15 @@ public final class TranslationMachinery {
 		}
 
 		public Boolean visit(OWLFunctionalObjectPropertyAxiom axiom) {
-			return kernel.isFunctional(toObjectPropertyPointer(axiom
-					.getProperty()));
+			return kernel.isFunctional(toObjectPropertyPointer(axiom.getProperty()));
 		}
 
 		public Boolean visit(OWLSubObjectPropertyOfAxiom axiom) {
-			return kernel.isSubRoles(
-					toObjectPropertyPointer(axiom.getSubProperty()),
-					toObjectPropertyPointer(axiom.getSuperProperty()));
+			return kernel.isSubRoles(toObjectPropertyPointer(axiom.getSubProperty()), toObjectPropertyPointer(axiom.getSuperProperty()));
 		}
 
 		public Boolean visit(OWLDisjointUnionAxiom axiom) {
-			return axiom.getOWLEquivalentClassesAxiom().accept(this)
-					&& axiom.getOWLDisjointClassesAxiom().accept(this);
+			return axiom.getOWLEquivalentClassesAxiom().accept(this) && axiom.getOWLDisjointClassesAxiom().accept(this);
 		}
 
 		public Boolean visit(OWLDeclarationAxiom axiom) {
@@ -411,8 +381,7 @@ public final class TranslationMachinery {
 		}
 
 		public Boolean visit(OWLSymmetricObjectPropertyAxiom axiom) {
-			return kernel.isSymmetric(toObjectPropertyPointer(axiom
-					.getProperty()));
+			return kernel.isSymmetric(toObjectPropertyPointer(axiom.getProperty()));
 		}
 
 		public Boolean visit(OWLDataPropertyRangeAxiom axiom) {
@@ -420,8 +389,7 @@ public final class TranslationMachinery {
 		}
 
 		public Boolean visit(OWLFunctionalDataPropertyAxiom axiom) {
-			return kernel.isFunctional(toDataPropertyPointer(axiom
-					.getProperty()));
+			return kernel.isFunctional(toDataPropertyPointer(axiom.getProperty()));
 		}
 
 		public Boolean visit(OWLEquivalentDataPropertiesAxiom axiom) {
@@ -437,18 +405,14 @@ public final class TranslationMachinery {
 		}
 
 		public Boolean visit(OWLClassAssertionAxiom axiom) {
-			return kernel.isInstance(
-					toIndividualPointer(axiom.getIndividual()),
-					toClassPointer(axiom.getClassExpression()));
+			return kernel.isInstance(toIndividualPointer(axiom.getIndividual()), toClassPointer(axiom.getClassExpression()));
 		}
 
 		public Boolean visit(OWLEquivalentClassesAxiom axiom) {
-			Set<OWLClassExpression> classExpressionSet = axiom
-					.getClassExpressions();
+			Set<OWLClassExpression> classExpressionSet = axiom.getClassExpressions();
 			if (classExpressionSet.size() == 2) {
 				Iterator<OWLClassExpression> it = classExpressionSet.iterator();
-				return kernel.isEquivalent(toClassPointer(it.next()),
-						toClassPointer(it.next()));
+				return kernel.isEquivalent(toClassPointer(it.next()), toClassPointer(it.next()));
 			} else {
 				for (OWLAxiom ax : axiom.asOWLSubClassOfAxioms()) {
 					if (!ax.accept(this)) {
@@ -464,25 +428,20 @@ public final class TranslationMachinery {
 		}
 
 		public Boolean visit(OWLTransitiveObjectPropertyAxiom axiom) {
-			return kernel.isTransitive(toObjectPropertyPointer(axiom
-					.getProperty()));
+			return kernel.isTransitive(toObjectPropertyPointer(axiom.getProperty()));
 		}
 
 		public Boolean visit(OWLIrreflexiveObjectPropertyAxiom axiom) {
-			return kernel.isIrreflexive(toObjectPropertyPointer(axiom
-					.getProperty()));
+			return kernel.isIrreflexive(toObjectPropertyPointer(axiom.getProperty()));
 		}
 
 		// TODO: this is incomplete
 		public Boolean visit(OWLSubDataPropertyOfAxiom axiom) {
-			return kernel.isSubRoles(
-					toDataPropertyPointer(axiom.getSubProperty()),
-					toDataPropertyPointer(axiom.getSuperProperty()));
+			return kernel.isSubRoles(toDataPropertyPointer(axiom.getSubProperty()), toDataPropertyPointer(axiom.getSuperProperty()));
 		}
 
 		public Boolean visit(OWLInverseFunctionalObjectPropertyAxiom axiom) {
-			return kernel.isInverseFunctional(toObjectPropertyPointer(axiom
-					.getProperty()));
+			return kernel.isInverseFunctional(toObjectPropertyPointer(axiom.getProperty()));
 		}
 
 		public Boolean visit(OWLSameIndividualAxiom axiom) {
@@ -490,8 +449,7 @@ public final class TranslationMachinery {
 				Iterator<OWLIndividual> it = ax.getIndividuals().iterator();
 				OWLIndividual indA = it.next();
 				OWLIndividual indB = it.next();
-				if (!kernel.isSameIndividuals(toIndividualPointer(indA),
-						toIndividualPointer(indB))) {
+				if (!kernel.isSameIndividuals(toIndividualPointer(indA), toIndividualPointer(indB))) {
 					return false;
 				}
 			}
@@ -504,8 +462,7 @@ public final class TranslationMachinery {
 				l.add(toObjectPropertyPointer(p));
 			}
 			//kernel.closeArgList();
-			return kernel.isSubChain(
-					toObjectPropertyPointer(axiom.getSuperProperty()), l);
+			return kernel.isSubChain(toObjectPropertyPointer(axiom.getSuperProperty()), l);
 		}
 
 		public Boolean visit(OWLInverseObjectPropertiesAxiom axiom) {
@@ -591,8 +548,7 @@ public final class TranslationMachinery {
 			return node;
 		}
 
-		public NodeSet<E> getNodeSetFromPointers(
-				Collection<Collection<T>> pointers) {
+		public NodeSet<E> getNodeSetFromPointers(Collection<Collection<T>> pointers) {
 			DefaultNodeSet<E> nodeSet = createDefaultNodeSet();
 			for (Collection<T> pointerArray : pointers) {
 				nodeSet.addNode(getNodeFromPointers(pointerArray));
@@ -615,9 +571,7 @@ public final class TranslationMachinery {
 		protected abstract E getBottomEntity();
 	}
 
-	final class ObjectPropertyTranslator
-			extends
-			OWLEntityTranslator<OWLObjectPropertyExpression, TDLObjectRoleExpression> {
+	final class ObjectPropertyTranslator extends OWLEntityTranslator<OWLObjectPropertyExpression, TDLObjectRoleExpression> {
 		public ObjectPropertyTranslator() {
 		}
 
@@ -632,8 +586,7 @@ public final class TranslationMachinery {
 		}
 
 		@Override
-		protected TDLObjectRoleExpression registerNewEntity(
-				OWLObjectPropertyExpression entity) {
+		protected TDLObjectRoleExpression registerNewEntity(OWLObjectPropertyExpression entity) {
 			TDLObjectRoleExpression pointer = createPointerForEntity(entity);
 			FillMaps(entity, pointer);
 			entity = entity.getInverseProperty().getSimplified();
@@ -642,11 +595,9 @@ public final class TranslationMachinery {
 		}
 
 		@Override
-		protected TDLObjectRoleExpression createPointerForEntity(
-				OWLObjectPropertyExpression entity) {
+		protected TDLObjectRoleExpression createPointerForEntity(OWLObjectPropertyExpression entity) {
 			// FIXME!! think later!!
-			TDLObjectRoleExpression p = em.ObjectRole(entity.getNamedProperty()
-					.toStringID());
+			TDLObjectRoleExpression p = em.ObjectRole(entity.getNamedProperty().toStringID());
 			if (entity.isAnonymous()) {
 				p = em.Inverse(p);
 			}
@@ -674,9 +625,7 @@ public final class TranslationMachinery {
 		}
 	}
 
-	final class ComplexObjectPropertyTranslator
-			extends
-			OWLEntityTranslator<OWLObjectPropertyExpression, TDLObjectRoleComplexExpression> {
+	final class ComplexObjectPropertyTranslator extends OWLEntityTranslator<OWLObjectPropertyExpression, TDLObjectRoleComplexExpression> {
 		public ComplexObjectPropertyTranslator() {
 		}
 
@@ -691,8 +640,7 @@ public final class TranslationMachinery {
 		}
 
 		@Override
-		protected TDLObjectRoleComplexExpression registerNewEntity(
-				OWLObjectPropertyExpression entity) {
+		protected TDLObjectRoleComplexExpression registerNewEntity(OWLObjectPropertyExpression entity) {
 			TDLObjectRoleComplexExpression pointer = createPointerForEntity(entity);
 			FillMaps(entity, pointer);
 			entity = entity.getInverseProperty().getSimplified();
@@ -701,10 +649,8 @@ public final class TranslationMachinery {
 		}
 
 		@Override
-		protected TDLObjectRoleComplexExpression createPointerForEntity(
-				OWLObjectPropertyExpression entity) {
-			TDLObjectRoleComplexExpression p = em.ObjectRole(entity
-					.getNamedProperty().toStringID());
+		protected TDLObjectRoleComplexExpression createPointerForEntity(OWLObjectPropertyExpression entity) {
+			TDLObjectRoleComplexExpression p = em.ObjectRole(entity.getNamedProperty().toStringID());
 			return p;
 		}
 
@@ -730,8 +676,7 @@ public final class TranslationMachinery {
 	}
 
 	final class AxiomTranslator implements OWLAxiomVisitorEx<TDLAxiom> {
-		protected final class DeclarationVisitorEx implements
-				OWLEntityVisitorEx<TDLAxiom> {
+		protected final class DeclarationVisitorEx implements OWLEntityVisitorEx<TDLAxiom> {
 			public TDLAxiom visit(OWLClass cls) {
 				return kernel.declare(toClassPointer(cls));
 			}
@@ -769,33 +714,26 @@ public final class TranslationMachinery {
 		}
 
 		public TDLAxiom visit(OWLSubClassOfAxiom axiom) {
-			return kernel.impliesConcepts(toClassPointer(axiom.getSubClass()),
-					toClassPointer(axiom.getSuperClass()));
+			return kernel.impliesConcepts(toClassPointer(axiom.getSubClass()), toClassPointer(axiom.getSuperClass()));
 		}
 
 		public TDLAxiom visit(OWLNegativeObjectPropertyAssertionAxiom axiom) {
-			return kernel.relatedToNot(toIndividualPointer(axiom.getSubject()),
-					toObjectPropertyPointer(axiom.getProperty()),
-					toIndividualPointer(axiom.getObject()));
+			return kernel.relatedToNot(toIndividualPointer(axiom.getSubject()), toObjectPropertyPointer(axiom.getProperty()), toIndividualPointer(axiom.getObject()));
 		}
 
 		public TDLAxiom visit(OWLAsymmetricObjectPropertyAxiom axiom) {
-			return kernel.setAsymmetric(toObjectPropertyPointer(axiom
-					.getProperty()));
+			return kernel.setAsymmetric(toObjectPropertyPointer(axiom.getProperty()));
 		}
 
 		public TDLAxiom visit(OWLReflexiveObjectPropertyAxiom axiom) {
-			return kernel.setReflexive(toObjectPropertyPointer(axiom
-					.getProperty()));
+			return kernel.setReflexive(toObjectPropertyPointer(axiom.getProperty()));
 		}
 
 		public TDLAxiom visit(OWLDisjointClassesAxiom axiom) {
-			return kernel.disjointConcepts(translateClassExpressionSet(axiom
-					.getClassExpressions()));
+			return kernel.disjointConcepts(translateClassExpressionSet(axiom.getClassExpressions()));
 		}
 
-		private List<TDLExpression> translateClassExpressionSet(
-				Set<OWLClassExpression> classExpressions) {
+		private List<TDLExpression> translateClassExpressionSet(Set<OWLClassExpression> classExpressions) {
 			List<TDLExpression> l = new ArrayList<TDLExpression>();
 			for (OWLClassExpression ce : classExpressions) {
 				l.add(toClassPointer(ce));
@@ -804,24 +742,18 @@ public final class TranslationMachinery {
 		}
 
 		public TDLAxiom visit(OWLDataPropertyDomainAxiom axiom) {
-			return kernel.setDDomain(
-					toDataPropertyPointer(axiom.getProperty()),
-					toClassPointer(axiom.getDomain()));
+			return kernel.setDDomain(toDataPropertyPointer(axiom.getProperty()), toClassPointer(axiom.getDomain()));
 		}
 
 		public TDLAxiom visit(OWLObjectPropertyDomainAxiom axiom) {
-			return kernel.setODomain(
-					toObjectPropertyPointer(axiom.getProperty()),
-					toClassPointer(axiom.getDomain()));
+			return kernel.setODomain(toObjectPropertyPointer(axiom.getProperty()), toClassPointer(axiom.getDomain()));
 		}
 
 		public TDLAxiom visit(OWLEquivalentObjectPropertiesAxiom axiom) {
-			return kernel.equalORoles(translateObjectPropertySet(axiom
-					.getProperties()));
+			return kernel.equalORoles(translateObjectPropertySet(axiom.getProperties()));
 		}
 
-		private List<TDLExpression> translateObjectPropertySet(
-				Collection<OWLObjectPropertyExpression> properties) {
+		private List<TDLExpression> translateObjectPropertySet(Collection<OWLObjectPropertyExpression> properties) {
 			List<TDLExpression> l = new ArrayList<TDLExpression>();
 			for (OWLObjectPropertyExpression property : properties) {
 				l.add(toObjectPropertyPointer(property));
@@ -830,23 +762,18 @@ public final class TranslationMachinery {
 		}
 
 		public TDLAxiom visit(OWLNegativeDataPropertyAssertionAxiom axiom) {
-			return kernel.valueOfNot(toIndividualPointer(axiom.getSubject()),
-					toDataPropertyPointer(axiom.getProperty()),
-					toDataValuePointer(axiom.getObject()));
+			return kernel.valueOfNot(toIndividualPointer(axiom.getSubject()), toDataPropertyPointer(axiom.getProperty()), toDataValuePointer(axiom.getObject()));
 		}
 
 		public TDLAxiom visit(OWLDifferentIndividualsAxiom axiom) {
-			return kernel.processDifferent(translateIndividualSet(axiom
-					.getIndividuals()));
+			return kernel.processDifferent(translateIndividualSet(axiom.getIndividuals()));
 		}
 
 		public TDLAxiom visit(OWLDisjointDataPropertiesAxiom axiom) {
-			return kernel.disjointDRoles(translateDataPropertySet(axiom
-					.getProperties()));
+			return kernel.disjointDRoles(translateDataPropertySet(axiom.getProperties()));
 		}
 
-		private List<TDLExpression> translateDataPropertySet(
-				Set<OWLDataPropertyExpression> properties) {
+		private List<TDLExpression> translateDataPropertySet(Set<OWLDataPropertyExpression> properties) {
 			List<TDLExpression> l = new ArrayList<TDLExpression>();
 			for (OWLDataPropertyExpression property : properties) {
 				l.add(toDataPropertyPointer(property));
@@ -855,36 +782,27 @@ public final class TranslationMachinery {
 		}
 
 		public TDLAxiom visit(OWLDisjointObjectPropertiesAxiom axiom) {
-			return kernel.disjointORoles(translateObjectPropertySet(axiom
-					.getProperties()));
+			return kernel.disjointORoles(translateObjectPropertySet(axiom.getProperties()));
 		}
 
 		public TDLAxiom visit(OWLObjectPropertyRangeAxiom axiom) {
-			return kernel.setORange(
-					toObjectPropertyPointer(axiom.getProperty()),
-					toClassPointer(axiom.getRange()));
+			return kernel.setORange(toObjectPropertyPointer(axiom.getProperty()), toClassPointer(axiom.getRange()));
 		}
 
 		public TDLAxiom visit(OWLObjectPropertyAssertionAxiom axiom) {
-			return kernel.relatedTo(toIndividualPointer(axiom.getSubject()),
-					toObjectPropertyPointer(axiom.getProperty()),
-					toIndividualPointer(axiom.getObject()));
+			return kernel.relatedTo(toIndividualPointer(axiom.getSubject()), toObjectPropertyPointer(axiom.getProperty()), toIndividualPointer(axiom.getObject()));
 		}
 
 		public TDLAxiom visit(OWLFunctionalObjectPropertyAxiom axiom) {
-			return kernel.setOFunctional(toObjectPropertyPointer(axiom
-					.getProperty()));
+			return kernel.setOFunctional(toObjectPropertyPointer(axiom.getProperty()));
 		}
 
 		public TDLAxiom visit(OWLSubObjectPropertyOfAxiom axiom) {
-			return kernel.impliesORoles(
-					toObjectPropertyPointer(axiom.getSubProperty()),
-					toObjectPropertyPointer(axiom.getSuperProperty()));
+			return kernel.impliesORoles(toObjectPropertyPointer(axiom.getSubProperty()), toObjectPropertyPointer(axiom.getSuperProperty()));
 		}
 
 		public TDLAxiom visit(OWLDisjointUnionAxiom axiom) {
-			return kernel.disjointUnion(toClassPointer(axiom.getOWLClass()),
-					translateClassExpressionSet(axiom.getClassExpressions()));
+			return kernel.disjointUnion(toClassPointer(axiom.getOWLClass()), translateClassExpressionSet(axiom.getClassExpressions()));
 		}
 
 		public TDLAxiom visit(OWLDeclarationAxiom axiom) {
@@ -898,79 +816,59 @@ public final class TranslationMachinery {
 		}
 
 		public TDLAxiom visit(OWLSymmetricObjectPropertyAxiom axiom) {
-			return kernel.setSymmetric(toObjectPropertyPointer(axiom
-					.getProperty()));
+			return kernel.setSymmetric(toObjectPropertyPointer(axiom.getProperty()));
 		}
 
 		public TDLAxiom visit(OWLDataPropertyRangeAxiom axiom) {
-			return kernel.setDRange(toDataPropertyPointer(axiom.getProperty()),
-					toDataTypeExpressionPointer(axiom.getRange()));
+			return kernel.setDRange(toDataPropertyPointer(axiom.getProperty()), toDataTypeExpressionPointer(axiom.getRange()));
 		}
 
 		public TDLAxiom visit(OWLFunctionalDataPropertyAxiom axiom) {
-			return kernel.setDFunctional(toDataPropertyPointer(axiom
-					.getProperty()));
+			return kernel.setDFunctional(toDataPropertyPointer(axiom.getProperty()));
 		}
 
 		public TDLAxiom visit(OWLEquivalentDataPropertiesAxiom axiom) {
-			return kernel.equalDRoles(translateDataPropertySet(axiom
-					.getProperties()));
+			return kernel.equalDRoles(translateDataPropertySet(axiom.getProperties()));
 		}
 
 		public TDLAxiom visit(OWLClassAssertionAxiom axiom) {
-			return kernel.instanceOf(
-					toIndividualPointer(axiom.getIndividual()),
-					toClassPointer(axiom.getClassExpression()));
+			return kernel.instanceOf(toIndividualPointer(axiom.getIndividual()), toClassPointer(axiom.getClassExpression()));
 		}
 
 		public TDLAxiom visit(OWLEquivalentClassesAxiom axiom) {
-			return kernel.equalConcepts(translateClassExpressionSet(axiom
-					.getClassExpressions()));
+			return kernel.equalConcepts(translateClassExpressionSet(axiom.getClassExpressions()));
 		}
 
 		public TDLAxiom visit(OWLDataPropertyAssertionAxiom axiom) {
-			return kernel.valueOf(toIndividualPointer(axiom.getSubject()),
-					toDataPropertyPointer(axiom.getProperty()),
-					toDataValuePointer(axiom.getObject()));
+			return kernel.valueOf(toIndividualPointer(axiom.getSubject()), toDataPropertyPointer(axiom.getProperty()), toDataValuePointer(axiom.getObject()));
 		}
 
 		public TDLAxiom visit(OWLTransitiveObjectPropertyAxiom axiom) {
-			return kernel.setTransitive(toObjectPropertyPointer(axiom
-					.getProperty()));
+			return kernel.setTransitive(toObjectPropertyPointer(axiom.getProperty()));
 		}
 
 		public TDLAxiom visit(OWLIrreflexiveObjectPropertyAxiom axiom) {
-			return kernel.setIrreflexive(toObjectPropertyPointer(axiom
-					.getProperty()));
+			return kernel.setIrreflexive(toObjectPropertyPointer(axiom.getProperty()));
 		}
 
 		public TDLAxiom visit(OWLSubDataPropertyOfAxiom axiom) {
-			return kernel.impliesDRoles(
-					toDataPropertyPointer(axiom.getSubProperty()),
-					toDataPropertyPointer(axiom.getSuperProperty()));
+			return kernel.impliesDRoles(toDataPropertyPointer(axiom.getSubProperty()), toDataPropertyPointer(axiom.getSuperProperty()));
 		}
 
 		public TDLAxiom visit(OWLInverseFunctionalObjectPropertyAxiom axiom) {
-			return kernel.setInverseFunctional(toObjectPropertyPointer(axiom
-					.getProperty()));
+			return kernel.setInverseFunctional(toObjectPropertyPointer(axiom.getProperty()));
 		}
 
 		public TDLAxiom visit(OWLSameIndividualAxiom axiom) {
-			return kernel.processSame(translateIndividualSet(axiom
-					.getIndividuals()));
+			return kernel.processSame(translateIndividualSet(axiom.getIndividuals()));
 		}
 
 		public TDLAxiom visit(OWLSubPropertyChainOfAxiom axiom) {
-			return kernel.impliesORoles(em
-					.Compose(translateObjectPropertySet(axiom
-							.getPropertyChain())),
-					toObjectPropertyPointer(axiom.getSuperProperty()));
+			return kernel.impliesORoles(em.Compose(translateObjectPropertySet(axiom.getPropertyChain())), toObjectPropertyPointer(axiom.getSuperProperty()));
 		}
 
 		public TDLAxiom visit(OWLInverseObjectPropertiesAxiom axiom) {
-			return kernel.setInverseRoles(
-					toObjectPropertyPointer(axiom.getFirstProperty()),
-					toObjectPropertyPointer(axiom.getSecondProperty()));
+			return kernel.setInverseRoles(toObjectPropertyPointer(axiom.getFirstProperty()), toObjectPropertyPointer(axiom.getSecondProperty()));
 		}
 
 		public TDLAxiom visit(OWLHasKeyAxiom axiom) {
@@ -978,8 +876,7 @@ public final class TranslationMachinery {
 			//			TDLObjectRoleExpression objectPropertyPointer = kernel
 			//					.getObjectPropertyKey();
 			//			translateDataPropertySet(axiom.getDataPropertyExpressions());
-			throw new ReasonerInternalException(
-					"JFact Kernel: unsupported operation 'getDataPropertyKey'");
+			throw new ReasonerInternalException("JFact Kernel: unsupported operation 'getDataPropertyKey'");
 			//			TDLDataRoleExpression dataPropertyPointer = kernel
 			//					.getDataPropertyKey();
 			//			return kernel.tellHasKey(
@@ -988,8 +885,7 @@ public final class TranslationMachinery {
 		}
 
 		public TDLAxiom visit(OWLDatatypeDefinitionAxiom axiom) {
-			throw new ReasonerInternalException(
-					"JFact Kernel: unsupported operation 'getDataSubType'");
+			throw new ReasonerInternalException("JFact Kernel: unsupported operation 'OWLDatatypeDefinitionAxiom'");
 			//			kernel.getDataSubType(axiom.getDatatype().getIRI().toString(),
 			//					toDataTypeExpressionPointer(axiom.getDataRange()));
 		}
@@ -1015,9 +911,7 @@ public final class TranslationMachinery {
 		}
 	}
 
-	final class ClassExpressionTranslator extends
-			OWLEntityTranslator<OWLClass, TDLConceptExpression> implements
-			OWLClassExpressionVisitorEx<TDLConceptExpression> {
+	final class ClassExpressionTranslator extends OWLEntityTranslator<OWLClass, TDLConceptExpression> implements OWLClassExpressionVisitorEx<TDLConceptExpression> {
 		public ClassExpressionTranslator() {
 		}
 
@@ -1064,8 +958,7 @@ public final class TranslationMachinery {
 			return em.And(translateClassExpressionSet(desc.getOperands()));
 		}
 
-		private List<TDLExpression> translateClassExpressionSet(
-				Set<OWLClassExpression> classExpressions) {
+		private List<TDLExpression> translateClassExpressionSet(Set<OWLClassExpression> classExpressions) {
 			List<TDLExpression> l = new ArrayList<TDLExpression>();
 			for (OWLClassExpression ce : classExpressions) {
 				l.add(ce.accept(this));
@@ -1082,41 +975,31 @@ public final class TranslationMachinery {
 		}
 
 		public TDLConceptExpression visit(OWLObjectSomeValuesFrom desc) {
-			return em.Exists(toObjectPropertyPointer(desc.getProperty()), desc
-					.getFiller().accept(this));
+			return em.Exists(toObjectPropertyPointer(desc.getProperty()), desc.getFiller().accept(this));
 		}
 
 		public TDLConceptExpression visit(OWLObjectAllValuesFrom desc) {
-			return em.Forall(toObjectPropertyPointer(desc.getProperty()), desc
-					.getFiller().accept(this));
+			return em.Forall(toObjectPropertyPointer(desc.getProperty()), desc.getFiller().accept(this));
 		}
 
 		public TDLConceptExpression visit(OWLObjectHasValue desc) {
-			return em.Value(toObjectPropertyPointer(desc.getProperty()),
-					toIndividualPointer(desc.getValue()));
+			return em.Value(toObjectPropertyPointer(desc.getProperty()), toIndividualPointer(desc.getValue()));
 		}
 
 		public TDLConceptExpression visit(OWLObjectMinCardinality desc) {
-			return em.MinCardinality(desc.getCardinality(),
-					toObjectPropertyPointer(desc.getProperty()), desc
-							.getFiller().accept(this));
+			return em.MinCardinality(desc.getCardinality(), toObjectPropertyPointer(desc.getProperty()), desc.getFiller().accept(this));
 		}
 
 		public TDLConceptExpression visit(OWLObjectExactCardinality desc) {
-			return em.Cardinality(desc.getCardinality(),
-					toObjectPropertyPointer(desc.getProperty()), desc
-							.getFiller().accept(this));
+			return em.Cardinality(desc.getCardinality(), toObjectPropertyPointer(desc.getProperty()), desc.getFiller().accept(this));
 		}
 
 		public TDLConceptExpression visit(OWLObjectMaxCardinality desc) {
-			return em.MaxCardinality(desc.getCardinality(),
-					toObjectPropertyPointer(desc.getProperty()), desc
-							.getFiller().accept(this));
+			return em.MaxCardinality(desc.getCardinality(), toObjectPropertyPointer(desc.getProperty()), desc.getFiller().accept(this));
 		}
 
 		public TDLConceptExpression visit(OWLObjectHasSelf desc) {
-			return em
-					.SelfReference(toObjectPropertyPointer(desc.getProperty()));
+			return em.SelfReference(toObjectPropertyPointer(desc.getProperty()));
 		}
 
 		public TDLConceptExpression visit(OWLObjectOneOf desc) {
@@ -1124,41 +1007,31 @@ public final class TranslationMachinery {
 		}
 
 		public TDLConceptExpression visit(OWLDataSomeValuesFrom desc) {
-			return em.Exists(toDataPropertyPointer(desc.getProperty()),
-					toDataTypeExpressionPointer(desc.getFiller()));
+			return em.Exists(toDataPropertyPointer(desc.getProperty()), toDataTypeExpressionPointer(desc.getFiller()));
 		}
 
 		public TDLConceptExpression visit(OWLDataAllValuesFrom desc) {
-			return em.Forall(toDataPropertyPointer(desc.getProperty()),
-					toDataTypeExpressionPointer(desc.getFiller()));
+			return em.Forall(toDataPropertyPointer(desc.getProperty()), toDataTypeExpressionPointer(desc.getFiller()));
 		}
 
 		public TDLConceptExpression visit(OWLDataHasValue desc) {
-			return em.Value(toDataPropertyPointer(desc.getProperty()),
-					toDataValuePointer(desc.getValue()));
+			return em.Value(toDataPropertyPointer(desc.getProperty()), toDataValuePointer(desc.getValue()));
 		}
 
 		public TDLConceptExpression visit(OWLDataMinCardinality desc) {
-			return em.MinCardinality(desc.getCardinality(),
-					toDataPropertyPointer(desc.getProperty()),
-					toDataTypeExpressionPointer(desc.getFiller()));
+			return em.MinCardinality(desc.getCardinality(), toDataPropertyPointer(desc.getProperty()), toDataTypeExpressionPointer(desc.getFiller()));
 		}
 
 		public TDLConceptExpression visit(OWLDataExactCardinality desc) {
-			return em.Cardinality(desc.getCardinality(),
-					toDataPropertyPointer(desc.getProperty()),
-					toDataTypeExpressionPointer(desc.getFiller()));
+			return em.Cardinality(desc.getCardinality(), toDataPropertyPointer(desc.getProperty()), toDataTypeExpressionPointer(desc.getFiller()));
 		}
 
 		public TDLConceptExpression visit(OWLDataMaxCardinality desc) {
-			return em.MaxCardinality(desc.getCardinality(),
-					toDataPropertyPointer(desc.getProperty()),
-					toDataTypeExpressionPointer(desc.getFiller()));
+			return em.MaxCardinality(desc.getCardinality(), toDataPropertyPointer(desc.getProperty()), toDataTypeExpressionPointer(desc.getFiller()));
 		}
 	}
 
-	final class DataPropertyTranslator extends
-			OWLEntityTranslator<OWLDataProperty, TDLDataRoleExpression> {
+	final class DataPropertyTranslator extends OWLEntityTranslator<OWLDataProperty, TDLDataRoleExpression> {
 		public DataPropertyTranslator() {
 		}
 
@@ -1173,8 +1046,7 @@ public final class TranslationMachinery {
 		}
 
 		@Override
-		protected TDLDataRoleExpression createPointerForEntity(
-				OWLDataProperty entity) {
+		protected TDLDataRoleExpression createPointerForEntity(OWLDataProperty entity) {
 			return em.DataRole(entity.toStringID());
 		}
 
@@ -1199,9 +1071,7 @@ public final class TranslationMachinery {
 		}
 	}
 
-	final class DataRangeTranslator extends
-			OWLEntityTranslator<OWLDatatype, TDLDataExpression> implements
-			OWLDataRangeVisitorEx<TDLDataExpression> {
+	final class DataRangeTranslator extends OWLEntityTranslator<OWLDatatype, TDLDataExpression> implements OWLDataRangeVisitorEx<TDLDataExpression> {
 		public DataRangeTranslator() {
 		}
 
@@ -1261,8 +1131,7 @@ public final class TranslationMachinery {
 			return em.DataAnd(translateDataRangeSet(node.getOperands()));
 		}
 
-		private List<TDLExpression> translateDataRangeSet(
-				Set<OWLDataRange> dataRanges) {
+		private List<TDLExpression> translateDataRangeSet(Set<OWLDataRange> dataRanges) {
 			List<TDLExpression> l = new ArrayList<TDLExpression>();
 			for (OWLDataRange op : dataRanges) {
 				l.add(op.accept(this));
@@ -1275,51 +1144,38 @@ public final class TranslationMachinery {
 		}
 
 		public TDLDataExpression visit(OWLDatatypeRestriction node) {
-			TDLDataTypeExpression dte = (TDLDataTypeExpression) node
-					.getDatatype().accept(this);
+			TDLDataTypeExpression dte = (TDLDataTypeExpression) node.getDatatype().accept(this);
 			for (OWLFacetRestriction restriction : node.getFacetRestrictions()) {
-				TDLDataValue dv = toDataValuePointer(restriction
-						.getFacetValue());
+				TDLDataValue dv = toDataValuePointer(restriction.getFacetValue());
 				TDLFacetExpression facet;
 				if (restriction.getFacet().equals(OWLFacet.MIN_INCLUSIVE)) {
 					facet = em.FacetMinInclusive(dv);
-				} else if (restriction.getFacet()
-						.equals(OWLFacet.MAX_INCLUSIVE)) {
+				} else if (restriction.getFacet().equals(OWLFacet.MAX_INCLUSIVE)) {
 					facet = em.FacetMaxInclusive(dv);
-				} else if (restriction.getFacet()
-						.equals(OWLFacet.MIN_EXCLUSIVE)) {
+				} else if (restriction.getFacet().equals(OWLFacet.MIN_EXCLUSIVE)) {
 					facet = em.FacetMinExclusive(dv);
-				} else if (restriction.getFacet()
-						.equals(OWLFacet.MAX_EXCLUSIVE)) {
+				} else if (restriction.getFacet().equals(OWLFacet.MAX_EXCLUSIVE)) {
 					facet = em.FacetMaxExclusive(dv);
 				} else if (restriction.getFacet().equals(OWLFacet.LENGTH)) {
 					//facet = kernel.getLength(dv);
-					throw new ReasonerInternalException(
-							"JFact Kernel: unsupported facet 'getLength'");
+					throw new ReasonerInternalException("JFact Kernel: unsupported facet 'getLength'");
 				} else if (restriction.getFacet().equals(OWLFacet.MIN_LENGTH)) {
 					//facet = kernel.getMinLength(dv);
-					throw new ReasonerInternalException(
-							"JFact Kernel: unsupported facet 'getMinLength'");
+					throw new ReasonerInternalException("JFact Kernel: unsupported facet 'getMinLength'");
 				} else if (restriction.getFacet().equals(OWLFacet.MAX_LENGTH)) {
 					//facet = kernel.getMaxLength(dv);
-					throw new ReasonerInternalException(
-							"JFact Kernel: unsupported facet 'getMaxLength'");
-				} else if (restriction.getFacet().equals(
-						OWLFacet.FRACTION_DIGITS)) {
+					throw new ReasonerInternalException("JFact Kernel: unsupported facet 'getMaxLength'");
+				} else if (restriction.getFacet().equals(OWLFacet.FRACTION_DIGITS)) {
 					//facet = kernel.getFractionDigitsFacet(dv);
-					throw new ReasonerInternalException(
-							"JFact Kernel: unsupported facet 'getFractionDigitsFacet'");
+					throw new ReasonerInternalException("JFact Kernel: unsupported facet 'getFractionDigitsFacet'");
 				} else if (restriction.getFacet().equals(OWLFacet.PATTERN)) {
 					//facet = kernel.getPattern(dv);
-					throw new ReasonerInternalException(
-							"JFact Kernel: unsupported facet 'getPattern'");
+					throw new ReasonerInternalException("JFact Kernel: unsupported facet 'getPattern'");
 				} else if (restriction.getFacet().equals(OWLFacet.TOTAL_DIGITS)) {
 					//facet = kernel.getTotalDigitsFacet(dv);
-					throw new ReasonerInternalException(
-							"JFact Kernel: unsupported facet 'getTotalDigitsFacet'");
+					throw new ReasonerInternalException("JFact Kernel: unsupported facet 'getTotalDigitsFacet'");
 				} else {
-					throw new OWLRuntimeException("Unsupported facet: "
-							+ restriction.getFacet());
+					throw new OWLRuntimeException("Unsupported facet: " + restriction.getFacet());
 				}
 				dte = em.RestrictedType(dte, facet);
 			}
@@ -1327,8 +1183,7 @@ public final class TranslationMachinery {
 		}
 	}
 
-	final class IndividualTranslator extends
-			OWLEntityTranslator<OWLNamedIndividual, TDLIndividualExpression> {
+	final class IndividualTranslator extends OWLEntityTranslator<OWLNamedIndividual, TDLIndividualExpression> {
 		public IndividualTranslator() {
 		}
 
@@ -1343,8 +1198,7 @@ public final class TranslationMachinery {
 		}
 
 		@Override
-		protected TDLIndividualExpression createPointerForEntity(
-				OWLNamedIndividual entity) {
+		protected TDLIndividualExpression createPointerForEntity(OWLNamedIndividual entity) {
 			return em.Individual(entity.toStringID());
 		}
 

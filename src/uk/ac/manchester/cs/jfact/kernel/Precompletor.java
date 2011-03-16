@@ -1,19 +1,18 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import java.util.LinkedList;
-
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.Pair;
 
-public final  class Precompletor {
+public final class Precompletor {
 	/** host KB */
 	private final TBox KB;
 	/** ToDo List for precompletion */
@@ -110,30 +109,24 @@ public final  class Precompletor {
 				case BOTTOM:
 					return true;
 				case CNAME:
-					addToDoEntry(cur.first, ((TConcept) cur.second.elem()
-							.getNE()).getDescription());
+					addToDoEntry(cur.first, ((TConcept) cur.second.elem().getNE()).getDescription());
 					break;
 				case AND:
 					processTree(cur.first, cur.second);
 					break;
 				case FORALL:
-					processForall(cur.first, (TRole) cur.second.Left().elem()
-							.getNE(), cur.second.Right());
+					processForall(cur.first, (TRole) cur.second.Left().elem().getNE(), cur.second.Right());
 					break;
 				case NOT:
 					switch (cur.second.Child().token()) {
 						case FORALL:
 							break;
 						default:
-							throw new ReasonerInternalException(
-									"Unsupported concept expression: "
-											+ cur.second.Child() + "\n");
+							throw new ReasonerInternalException("Unsupported concept expression: " + cur.second.Child() + "\n");
 					}
 					break;
 				default:
-					throw new ReasonerInternalException(
-							"Unsupported concept expression: " + cur.second
-									+ "\n");
+					throw new ReasonerInternalException("Unsupported concept expression: " + cur.second + "\n");
 			}
 		}
 		return false;

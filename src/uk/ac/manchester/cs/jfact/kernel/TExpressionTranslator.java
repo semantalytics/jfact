@@ -1,15 +1,14 @@
 package uk.ac.manchester.cs.jfact.kernel;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.kernel.Token.*;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
@@ -85,16 +84,14 @@ public class TExpressionTranslator implements DLExpressionVisitorEx<DLTree> {
 	}
 
 	public DLTree visit(final TDLConceptName expr) {
-		return DLTreeFactory.buildTree(new TLexeme(CNAME, KB.getConcept(expr
-				.getName())));
+		return DLTreeFactory.buildTree(new TLexeme(CNAME, KB.getConcept(expr.getName())));
 	}
 
 	public DLTree visit(final TDLConceptNot expr) {
 		return DLTreeFactory.createSNFNot(expr.getConcept().accept(this));
 	}
 
-	private List<DLTree> visitArgs(
-			TDLNAryExpression<? extends TDLExpression> expr) {
+	private List<DLTree> visitArgs(TDLNAryExpression<? extends TDLExpression> expr) {
 		List<DLTree> args = new ArrayList<DLTree>();
 		List<? extends TDLExpression> list = expr.getArguments();
 		for (int i = 0; i < list.size(); i++) {
@@ -116,96 +113,77 @@ public class TExpressionTranslator implements DLExpressionVisitorEx<DLTree> {
 	}
 
 	public DLTree visit(final TDLConceptObjectSelf expr) {
-		return DLTreeFactory.buildTree(new TLexeme(REFLEXIVE), expr.getOR()
-				.accept(this));
+		return DLTreeFactory.buildTree(new TLexeme(REFLEXIVE), expr.getOR().accept(this));
 	}
 
 	public DLTree visit(final TDLConceptObjectValue expr) {
-		return DLTreeFactory.createSNFExists(expr.getOR().accept(this), expr
-				.getI().accept(this));
+		return DLTreeFactory.createSNFExists(expr.getOR().accept(this), expr.getI().accept(this));
 	}
 
 	public DLTree visit(final TDLConceptObjectExists expr) {
-		return DLTreeFactory.createSNFExists(expr.getOR().accept(this), expr
-				.getConcept().accept(this));
+		return DLTreeFactory.createSNFExists(expr.getOR().accept(this), expr.getConcept().accept(this));
 	}
 
 	public DLTree visit(final TDLConceptObjectForall expr) {
-		return DLTreeFactory.createSNFForall(expr.getOR().accept(this), expr
-				.getConcept().accept(this));
+		return DLTreeFactory.createSNFForall(expr.getOR().accept(this), expr.getConcept().accept(this));
 	}
 
 	public DLTree visit(final TDLConceptObjectMinCardinality expr) {
-		return DLTreeFactory.createSNFGE(expr.getNumber(),
-				expr.getOR().accept(this), expr.getConcept().accept(this));
+		return DLTreeFactory.createSNFGE(expr.getNumber(), expr.getOR().accept(this), expr.getConcept().accept(this));
 	}
 
 	public DLTree visit(final TDLConceptObjectMaxCardinality expr) {
-		return DLTreeFactory.createSNFLE(expr.getNumber(),
-				expr.getOR().accept(this), expr.getConcept().accept(this));
+		return DLTreeFactory.createSNFLE(expr.getNumber(), expr.getOR().accept(this), expr.getConcept().accept(this));
 	}
 
 	public DLTree visit(final TDLConceptObjectExactCardinality expr) {
-		DLTree le = DLTreeFactory.createSNFLE(expr.getNumber(), expr.getOR()
-				.accept(this).copy(), expr.getConcept().accept(this).copy());
-		DLTree ge = DLTreeFactory.createSNFGE(expr.getNumber(), expr.getOR()
-				.accept(this).copy(), expr.getConcept().accept(this).copy());
+		DLTree le = DLTreeFactory.createSNFLE(expr.getNumber(), expr.getOR().accept(this).copy(), expr.getConcept().accept(this).copy());
+		DLTree ge = DLTreeFactory.createSNFGE(expr.getNumber(), expr.getOR().accept(this).copy(), expr.getConcept().accept(this).copy());
 		return DLTreeFactory.createSNFAnd(ge, le);
 	}
 
 	public DLTree visit(final TDLConceptDataValue expr) {
-		return DLTreeFactory.createSNFExists(expr.getDR().accept(this), expr
-				.getExpr().accept(this));
+		return DLTreeFactory.createSNFExists(expr.getDR().accept(this), expr.getExpr().accept(this));
 	}
 
 	public DLTree visit(final TDLConceptDataExists expr) {
-		return DLTreeFactory.createSNFExists(expr.getDR().accept(this), expr
-				.getExpr().accept(this));
+		return DLTreeFactory.createSNFExists(expr.getDR().accept(this), expr.getExpr().accept(this));
 	}
 
 	public DLTree visit(final TDLConceptDataForall expr) {
-		return DLTreeFactory.createSNFForall(expr.getDR().accept(this), expr
-				.getExpr().accept(this));
+		return DLTreeFactory.createSNFForall(expr.getDR().accept(this), expr.getExpr().accept(this));
 	}
 
 	public DLTree visit(final TDLConceptDataMinCardinality expr) {
-		return DLTreeFactory.createSNFGE(expr.getNumber(),
-				expr.getDR().accept(this), expr.getExpr().accept(this));
+		return DLTreeFactory.createSNFGE(expr.getNumber(), expr.getDR().accept(this), expr.getExpr().accept(this));
 	}
 
 	public DLTree visit(final TDLConceptDataMaxCardinality expr) {
-		return DLTreeFactory.createSNFLE(expr.getNumber(),
-				expr.getDR().accept(this), expr.getExpr().accept(this));
+		return DLTreeFactory.createSNFLE(expr.getNumber(), expr.getDR().accept(this), expr.getExpr().accept(this));
 	}
 
 	public DLTree visit(final TDLConceptDataExactCardinality expr) {
-		DLTree le = DLTreeFactory.createSNFLE(expr.getNumber(), expr.getDR()
-				.accept(this).copy(), expr.getExpr().accept(this).copy());
-		DLTree ge = DLTreeFactory.createSNFGE(expr.getNumber(), expr.getDR()
-				.accept(this).copy(), expr.getExpr().accept(this).copy());
+		DLTree le = DLTreeFactory.createSNFLE(expr.getNumber(), expr.getDR().accept(this).copy(), expr.getExpr().accept(this).copy());
+		DLTree ge = DLTreeFactory.createSNFGE(expr.getNumber(), expr.getDR().accept(this).copy(), expr.getExpr().accept(this).copy());
 		return DLTreeFactory.createSNFAnd(ge, le);
 	}
 
 	// individual expressions
 	public DLTree visit(final TDLIndividualName expr) {
-		return DLTreeFactory.buildTree(new TLexeme(INAME, KB.getIndividual(expr
-				.getName())));
+		return DLTreeFactory.buildTree(new TLexeme(INAME, KB.getIndividual(expr.getName())));
 	}
 
 	// object role expressions
 	public DLTree visit(final TDLObjectRoleTop expr) {
-		throw new ReasonerInternalException(
-				"Unsupported expression 'top object role' in transformation");
+		throw new ReasonerInternalException("Unsupported expression 'top object role' in transformation");
 	}
 
 	public DLTree visit(final TDLObjectRoleBottom expr) {
-		throw new ReasonerInternalException(
-				"Unsupported expression 'bottom object role' in transformation");
+		throw new ReasonerInternalException("Unsupported expression 'bottom object role' in transformation");
 	}
 
 	public DLTree visit(final TDLObjectRoleName expr) {
-		return DLTreeFactory.buildTree(new TLexeme(RNAME, KB.getORM()
-				.ensureRoleName(expr.getName())));
+		return DLTreeFactory.buildTree(new TLexeme(RNAME, KB.getORM().ensureRoleName(expr.getName())));
 	}
 
 	public DLTree visit(final TDLObjectRoleInverse expr) {
@@ -213,45 +191,37 @@ public class TExpressionTranslator implements DLExpressionVisitorEx<DLTree> {
 	}
 
 	public DLTree visit(final TDLObjectRoleChain expr) {
-		List<TDLObjectRoleExpression> l = new ArrayList<TDLObjectRoleExpression>(
-				expr.getArguments());
+		List<TDLObjectRoleExpression> l = new ArrayList<TDLObjectRoleExpression>(expr.getArguments());
 		if (l.size() == 0) {
-			throw new ReasonerInternalException(
-					"Unsupported expression 'empty role chain' in transformation");
+			throw new ReasonerInternalException("Unsupported expression 'empty role chain' in transformation");
 		}
 		DLTree acc = l.get(0).accept(this);
 		for (int i = 1; i < l.size(); i++) {
 			//TODO this is still a binary tree while it should be n-ary with enforced order
-			acc = DLTreeFactory.buildTree(new TLexeme(RCOMPOSITION), acc, l
-					.get(i).accept(this));
+			acc = DLTreeFactory.buildTree(new TLexeme(RCOMPOSITION), acc, l.get(i).accept(this));
 		}
 		return acc;
 	}
 
 	public DLTree visit(final TDLObjectRoleProjectionFrom expr) {
-		return DLTreeFactory.buildTree(new TLexeme(PROJFROM), expr.getOR()
-				.accept(this), expr.getConcept().accept(this));
+		return DLTreeFactory.buildTree(new TLexeme(PROJFROM), expr.getOR().accept(this), expr.getConcept().accept(this));
 	}
 
 	public DLTree visit(final TDLObjectRoleProjectionInto expr) {
-		return DLTreeFactory.buildTree(new TLexeme(PROJINTO), expr.getOR()
-				.accept(this), expr.getConcept().accept(this));
+		return DLTreeFactory.buildTree(new TLexeme(PROJINTO), expr.getOR().accept(this), expr.getConcept().accept(this));
 	}
 
 	// data role expressions
 	public DLTree visit(final TDLDataRoleTop expr) {
-		throw new ReasonerInternalException(
-				"Unsupported expression 'top data role' in transformation");
+		throw new ReasonerInternalException("Unsupported expression 'top data role' in transformation");
 	}
 
 	public DLTree visit(final TDLDataRoleBottom expr) {
-		throw new ReasonerInternalException(
-				"Unsupported expression 'bottom data role' in transformation");
+		throw new ReasonerInternalException("Unsupported expression 'bottom data role' in transformation");
 	}
 
 	public DLTree visit(final TDLDataRoleName expr) {
-		return DLTreeFactory.buildTree(new TLexeme(DNAME, KB.getDRM()
-				.ensureRoleName(expr.getName())));
+		return DLTreeFactory.buildTree(new TLexeme(DNAME, KB.getDRM().ensureRoleName(expr.getName())));
 	}
 
 	// data expressions
@@ -273,8 +243,7 @@ public class TExpressionTranslator implements DLExpressionVisitorEx<DLTree> {
 
 	public DLTree visit(final TDLDataValue expr) {
 		// process type
-		return KB.getDataTypeCenter().getDataValue(expr.getName(),
-				expr.getExpr());
+		return KB.getDataTypeCenter().getDataValue(expr.getName(), expr.getExpr());
 	}
 
 	public DLTree visit(final TDLDataNot expr) {
@@ -295,22 +264,18 @@ public class TExpressionTranslator implements DLExpressionVisitorEx<DLTree> {
 
 	// facets
 	public DLTree visit(final TDLFacetMinInclusive expr) {
-		return KB.getDataTypeCenter().getIntervalFacetExpr(
-				expr.getExpr().accept(this), true, false);
+		return KB.getDataTypeCenter().getIntervalFacetExpr(expr.getExpr().accept(this), true, false);
 	}
 
 	public DLTree visit(final TDLFacetMinExclusive expr) {
-		return KB.getDataTypeCenter().getIntervalFacetExpr(
-				expr.getExpr().accept(this), true, true);
+		return KB.getDataTypeCenter().getIntervalFacetExpr(expr.getExpr().accept(this), true, true);
 	}
 
 	public DLTree visit(final TDLFacetMaxInclusive expr) {
-		return KB.getDataTypeCenter().getIntervalFacetExpr(
-				expr.getExpr().accept(this), false, false);
+		return KB.getDataTypeCenter().getIntervalFacetExpr(expr.getExpr().accept(this), false, false);
 	}
 
 	public DLTree visit(final TDLFacetMaxExclusive expr) {
-		return KB.getDataTypeCenter().getIntervalFacetExpr(
-				expr.getExpr().accept(this), false, true);
+		return KB.getDataTypeCenter().getIntervalFacetExpr(expr.getExpr().accept(this), false, true);
 	}
 }

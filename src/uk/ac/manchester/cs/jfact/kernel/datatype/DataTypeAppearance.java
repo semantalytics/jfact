@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel.datatype;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
 
 import java.util.ArrayList;
@@ -13,10 +13,9 @@ import java.util.List;
 
 import uk.ac.manchester.cs.jfact.dep.DepSet;
 import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
-import uk.ac.manchester.cs.jfact.helpers.Reference;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
+import uk.ac.manchester.cs.jfact.helpers.Reference;
 import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataTypeName;
-
 
 public class DataTypeAppearance {
 	public static class DepDTE {
@@ -61,8 +60,7 @@ public class DataTypeAppearance {
 	}
 
 	/** set the local parameters for updating */
-	private void setLocal(boolean min, boolean excl, final Literal value,
-			final DepSet dep) {
+	private void setLocal(boolean min, boolean excl, final Literal value, final DepSet dep) {
 		localMin = min;
 		localExcl = excl;
 		localValue = value.getDatatype().build(value.getValue());
@@ -148,8 +146,7 @@ public class DataTypeAppearance {
 	}
 
 	/** add restrictions [POS]INT to intervals */
-	protected boolean addInterval(boolean pos, final TDataInterval Int,
-			final DepSet dep) {
+	protected boolean addInterval(boolean pos, final TDataInterval Int, final DepSet dep) {
 		LL.print(Templates.INTERVAL, (pos ? "+" : "-"), Int);
 		return pos ? addPosInterval(Int, dep) : addNegInterval(Int, dep);
 	}
@@ -157,8 +154,7 @@ public class DataTypeAppearance {
 	/** @return true iff PType and NType leads to clash */
 	protected boolean checkPNTypeClash() {
 		if (hasNType()) {
-			return reportClash(DepSetFactory.plus(PType.second, NType.second),
-					"TNT");
+			return reportClash(DepSetFactory.plus(PType.second, NType.second), "TNT");
 		}
 		return false;
 	}
@@ -237,8 +233,7 @@ class DepInterval {
 	}
 
 	/** update MIN border of an TYPE's interval with VALUE wrt EXCL */
-	public boolean update(boolean min, boolean excl, final Literal value,
-			final DepSet dep) {
+	public boolean update(boolean min, boolean excl, final Literal value, final DepSet dep) {
 		if (!Constraints.update(min, excl, value)) {
 			return false;
 		}

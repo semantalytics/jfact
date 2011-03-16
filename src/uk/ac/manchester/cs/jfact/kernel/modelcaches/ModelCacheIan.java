@@ -1,14 +1,15 @@
 package uk.ac.manchester.cs.jfact.kernel.modelcaches;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
 import static uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheState.*;
 import static uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheType.mctIan;
 
+import java.util.BitSet;
 import java.util.List;
 
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
@@ -25,17 +26,16 @@ import uk.ac.manchester.cs.jfact.kernel.RAStateTransitions;
 import uk.ac.manchester.cs.jfact.kernel.RATransition;
 import uk.ac.manchester.cs.jfact.kernel.TRole;
 
-
-public class ModelCacheIan extends ModelCacheInterface {
+public final class ModelCacheIan extends ModelCacheInterface {
 	// sets for the cache
 	/** named concepts that appears positively det-lly in a root node of a cache */
-	public final FastSet posDConcepts = FastSetFactory.create();
+	public final BitSet posDConcepts = new BitSet();
 	/** named concepts that appears positively non-det in a root node of a cache */
-	public final FastSet posNConcepts = FastSetFactory.create();
+	public final BitSet posNConcepts = new BitSet();
 	/** named concepts that appears negatively det-lly in a root node of a cache */
-	public final FastSet negDConcepts = FastSetFactory.create();
+	public final BitSet negDConcepts = new BitSet();
 	/** named concepts that appears negatively non-det in a root node of a cache */
-	public final FastSet negNConcepts = FastSetFactory.create();
+	public final BitSet negNConcepts = new BitSet();
 	/** extra det-lly concepts that are (partial) Simple Rule applications */
 	public final FastSet extraDConcepts = FastSetFactory.create();
 	/** extra non-det concepts that are (partial) Simple Rule applications */
@@ -50,8 +50,7 @@ public class ModelCacheIan extends ModelCacheInterface {
 	public ModelCacheState curState;
 
 	/** process CT label in given interval; set Deterministic accordingly */
-	private void processLabelInterval(final DLDag DLHeap,
-			List<ConceptWDep> start) {
+	private void processLabelInterval(final DLDag DLHeap, List<ConceptWDep> start) {
 		for (int i = 0; i < start.size(); i++) {
 			ConceptWDep p = start.get(i);
 			int bp = p.getConcept();
@@ -66,8 +65,7 @@ public class ModelCacheIan extends ModelCacheInterface {
 	}
 
 	/** Create cache model of given CompletionTree using given HEAP */
-	public ModelCacheIan(final DLDag heap, final DlCompletionTree p,
-			boolean flagNominals, int nC, int nR) {
+	public ModelCacheIan(final DLDag heap, final DlCompletionTree p, boolean flagNominals, int nC, int nR) {
 		super(flagNominals);
 		initCacheByLabel(heap, p);
 		initRolesFromArcs(p);
@@ -84,12 +82,12 @@ public class ModelCacheIan extends ModelCacheInterface {
 		return curState;
 	}
 
-	FastSet getDConcepts(boolean pos) {
+	BitSet getDConcepts(boolean pos) {
 		return pos ? posDConcepts : negDConcepts;
 	}
 
 	/** get RW access to N-concepts wrt polarity */
-	FastSet getNConcepts(boolean pos) {
+	BitSet getNConcepts(boolean pos) {
 		return pos ? posNConcepts : negNConcepts;
 	}
 
@@ -103,9 +101,10 @@ public class ModelCacheIan extends ModelCacheInterface {
 	 * of CT edges
 	 */
 	public void initRolesFromArcs(final DlCompletionTree pCT) {
-		for (DlCompletionTreeArc q : pCT.getNeighbour()) {
-			if (!q.isIBlocked()) {
-				addExistsRole(q.getRole());
+		List<DlCompletionTreeArc> list = pCT.getNeighbour();
+		for (int i = 0; i < list.size(); i++) {
+			if (!list.get(i).isIBlocked()) {
+				addExistsRole(list.get(i).getRole());
 			}
 		}
 		curState = csValid;
@@ -151,16 +150,12 @@ public class ModelCacheIan extends ModelCacheInterface {
 			case dtNSingleton:
 			case dtPSingleton:
 				int toAdd = ((ClassifiableEntry) cur.getConcept()).index();
-				//if (isNegative(bp)) {
-				(det ? getDConcepts(pos) : getNConcepts(pos)).add(toAdd);
-				//				} else {
-				//					(det ? posDConcepts : posNConcepts).add(toAdd);
-				//				}
+				(det ? getDConcepts(pos) : getNConcepts(pos)).set(toAdd);
 				break;
 			case dtIrr: // for \neg \ER.Self: add R to AR-set
 			case dtForall: // add AR.C roles to forallRoles
 			case dtLE: // for <= n R: add R to forallRoles
-				if (pos) // no need to deal with existantionals here: they would be created through edges
+				if (pos) // no need to deal with existentials here: they would be created through edges
 				{
 					if (cur.getRole().isSimple()) {
 						forallRoles.add(cur.getRole().index());
@@ -175,8 +170,7 @@ public class ModelCacheIan extends ModelCacheInterface {
 	}
 
 	public void processAutomaton(final DLVertex cur) {
-		RAStateTransitions RST = cur.getRole().getAutomaton().getBase()
-				.get(cur.getState());
+		RAStateTransitions RST = cur.getRole().getAutomaton().getBase().get(cur.getState());
 		// for every transition starting from a given state,
 		// add the role that is accepted by a transition
 		List<RATransition> begin = RST.begin();
@@ -187,18 +181,6 @@ public class ModelCacheIan extends ModelCacheInterface {
 		}
 	}
 
-	//	public void addExistsRole(final TRole R) {
-	//		existsRoles.add(R.index());
-	//		if (R.isTopFunc()) {
-	//			funcRoles.add(R.index());
-	//		}
-	//		for (TRole r : R.begin_anc()) {
-	//			existsRoles.add(r.index());
-	//			if (r.isTopFunc()) {
-	//				funcRoles.add(r.index());
-	//			}
-	//		}
-	//	}
 	/** adds role to exists- and func-role if necessary */
 	void addRoleToCache(TRole R) {
 		existsRoles.add(R.index());
@@ -211,7 +193,8 @@ public class ModelCacheIan extends ModelCacheInterface {
 	void addExistsRole(TRole R) {
 		addRoleToCache(R);
 		List<TRole> list = R.getAncestor();
-		for (int i = 0; i < list.size(); i++) {
+		int size = list.size();
+		for (int i = 0; i < size; i++) {
 			addRoleToCache(list.get(i));
 		}
 	}
@@ -238,55 +221,23 @@ public class ModelCacheIan extends ModelCacheInterface {
 		}
 	}
 
-	//	private ModelCacheState isMergableSingleton(final ModelCacheSingleton p) {
-	//		int Singleton = p.getValue();
-	//		assert isValid(Singleton);
-	//		if (isPositive(Singleton)) {
-	//			if (negDConcepts.contains(Singleton)) {
-	//				return csInvalid;
-	//			} else if (negNConcepts.contains(Singleton)) {
-	//				return csFailed;
-	//			}
-	//		} else {
-	//			Singleton = -Singleton;
-	//			if (posDConcepts.contains(Singleton)) {
-	//				return csInvalid;
-	//			} else if (posNConcepts.contains(Singleton)) {
-	//				return csFailed;
-	//			}
-	//		}
-	//		return csValid;
-	//	}
 	public ModelCacheState isMergableSingleton(int Singleton, boolean pos) {
 		assert Singleton != 0;
 		// deterministic clash
-		if (getDConcepts(!pos).contains(Singleton)) {
+		if (getDConcepts(!pos).get(Singleton)) {
 			return csInvalid;
-		} else if (getNConcepts(!pos).contains(Singleton)) {
+		} else if (getNConcepts(!pos).get(Singleton)) {
 			return csFailed;
 		}
 		return csValid;
 	}
 
 	public ModelCacheState isMergableIan(final ModelCacheIan q) {
-		if (posDConcepts.intersect(q.negDConcepts)
-				|| q.posDConcepts.intersect(negDConcepts)
-				|| IfDefs.RKG_USE_SIMPLE_RULES
-				&& getExtra(true).intersect(q.getExtra(true))) {
+		if (posDConcepts.intersects(q.negDConcepts) || q.posDConcepts.intersects(negDConcepts) || IfDefs.RKG_USE_SIMPLE_RULES && getExtra(true).intersect(q.getExtra(true))) {
 			return csInvalid;
-		} else if (existsRoles.intersect(q.forallRoles)
-				|| q.existsRoles.intersect(forallRoles)
-				|| funcRoles.intersect(q.funcRoles)
-				|| posDConcepts.intersect(q.negNConcepts)
-				|| posNConcepts.intersect(q.negDConcepts)
-				|| posNConcepts.intersect(q.negNConcepts)
-				|| q.posDConcepts.intersect(negNConcepts)
-				|| q.posNConcepts.intersect(negDConcepts)
-				|| q.posNConcepts.intersect(negNConcepts)
-				|| IfDefs.RKG_USE_SIMPLE_RULES
-				&& (getExtra(true).intersect(q.getExtra(false))
-						|| getExtra(false).intersect(q.getExtra(true)) || getExtra(
-						false).intersect(q.getExtra(false)))) {
+		} else if (existsRoles.intersect(q.forallRoles) || q.existsRoles.intersect(forallRoles) || funcRoles.intersect(q.funcRoles) || posDConcepts.intersects(q.negNConcepts) || posNConcepts.intersects(q.negDConcepts) || posNConcepts.intersects(q.negNConcepts)
+				|| q.posDConcepts.intersects(negNConcepts) || q.posNConcepts.intersects(negDConcepts) || q.posNConcepts.intersects(negNConcepts) || IfDefs.RKG_USE_SIMPLE_RULES
+				&& (getExtra(true).intersect(q.getExtra(false)) || getExtra(false).intersect(q.getExtra(true)) || getExtra(false).intersect(q.getExtra(false)))) {
 			return csFailed;
 		} else {
 			return csValid;
@@ -305,11 +256,9 @@ public class ModelCacheIan extends ModelCacheInterface {
 				curState = mergeStatus(curState, p.getState());
 				break;
 			case mctSingleton: // adds Singleton
-			{
 				int Singleton = ((ModelCacheSingleton) p).getValue();
 				mergeSingleton(Math.abs(Singleton), Singleton > 0);
 				break;
-			}
 			case mctIan:
 				mergeIan((ModelCacheIan) p);
 				break;
@@ -326,7 +275,7 @@ public class ModelCacheIan extends ModelCacheInterface {
 		if (newState != csValid) {
 			curState = mergeStatus(curState, newState);
 		} else {
-			getDConcepts(pos).add(Singleton);
+			getDConcepts(pos).set(Singleton);
 		}
 	}
 
@@ -335,10 +284,10 @@ public class ModelCacheIan extends ModelCacheInterface {
 		// setup curState
 		curState = isMergableIan(p);
 		// merge all sets:
-		posDConcepts.addAll(p.posDConcepts);
-		posNConcepts.addAll(p.posNConcepts);
-		negDConcepts.addAll(p.negDConcepts);
-		negNConcepts.addAll(p.negNConcepts);
+		posDConcepts.or(p.posDConcepts);
+		posNConcepts.or(p.posNConcepts);
+		negDConcepts.or(p.negDConcepts);
+		negNConcepts.or(p.negNConcepts);
 		if (IfDefs.RKG_USE_SIMPLE_RULES) {
 			extraDConcepts.addAll(p.extraDConcepts);
 			extraNConcepts.addAll(p.extraNConcepts);
@@ -372,24 +321,6 @@ public class ModelCacheIan extends ModelCacheInterface {
 		LL.print("}");
 	}
 
-	//	private <T> boolean sets_intersect(final Collection<T> s1,
-	//			final Collection<T> s2) {
-	//		Collection<T> it1 = s1;
-	//		Collection<T> it2 = s2;
-	//		if (s2.size() < s1.size()) {
-	//			it1 = s2;
-	//			it2 = s1;
-	//		}
-	//		for (T t : it1) {
-	//			if (it2.contains(t)) {
-	//				return true;
-	//			}
-	//		}
-	//		return false;
-	//		//		Set<T> s = new HashSet<T>(s1);
-	//		//		s.retainAll(s2);
-	//		//		return s.size() > 0;
-	//	}
 	private ModelCacheState mergeStatus(ModelCacheState s1, ModelCacheState s2) {
 		// if one of caches is definitely UNSAT, then merge will be the same
 		if (s1 == csInvalid || s2 == csInvalid) {

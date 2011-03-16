@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.helpers;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-
 import static uk.ac.manchester.cs.jfact.helpers.Helper.*;
 import static uk.ac.manchester.cs.jfact.kernel.DagTag.*;
 
@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
@@ -26,32 +25,7 @@ import uk.ac.manchester.cs.jfact.kernel.TRole;
 import uk.ac.manchester.cs.jfact.kernel.datatype.TDataEntry;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheInterface;
 
-public final class DLVertex extends DLVertexCache {
-	/** get access to statistic by the depth of a concept */
-	public static int getStatIndexDepth(boolean pos) {
-		return pos ? 0 : 1;
-	}
-
-	/** get access to statistic by the size of a concept */
-	public static int getStatIndexSize(boolean pos) {
-		return pos ? 2 : 3;
-	}
-
-	/** get access to statistic by the # of branching rules of a concept */
-	public static int getStatIndexBranch(boolean pos) {
-		return pos ? 4 : 5;
-	}
-
-	/** get access to statistic by the # of generating rules of a concept */
-	public static int getStatIndexGener(boolean pos) {
-		return pos ? 6 : 7;
-	}
-
-	/** get access to statistic by the freq of a concept */
-	public static int getStatIndexFreq(boolean pos) {
-		return pos ? 8 : 9;
-	}
-
+public final class DLVertex extends DLVertexTagDFS {
 	static class ChildSet {
 		private Comparator<Integer> c = new Comparator<Integer>() {
 			public int compare(Integer o1, Integer o2) {
@@ -65,6 +39,7 @@ public final class DLVertex extends DLVertexCache {
 			}
 		};
 		private final FastSet set = FastSetFactory.create();
+		private final SortedIntList original = new SortedIntList();
 		int[] sorted = null;
 		protected DLDag sorter = null;
 
@@ -98,7 +73,8 @@ public final class DLVertex extends DLVertexCache {
 				sorted = new int[set.size()];
 				if (sorter == null) {
 					for (int i = 0; i < set.size(); i++) {
-						sorted[i] = set.get(i);
+						// if the re is no sorting, use the original insertion order
+						sorted[i] = original.get(i);
 					}
 				} else {
 					List<Integer> l = new ArrayList<Integer>();
@@ -123,16 +99,22 @@ public final class DLVertex extends DLVertexCache {
 			sorted = null;
 		}
 
-		public void add(int p) {
+		public boolean add(int p) {
+			int size = set.size();
 			set.add(p);
-			sorted = null;
+			if (set.size() > size) {
+				original.add(p);
+				sorted = null;
+				return true;
+			}
+			return false;
 		}
 	}
 
 	/** set of arguments (CEs, numbers for NR) */
 	private final ChildSet Child = new ChildSet();
 	/** pointer to concept-like entry (for PConcept, etc) */
-	private TNamedEntry Concept;
+	private TNamedEntry Concept = null;
 	/** pointer to role (for E\A, NR) */
 	private final TRole Role;
 	/** projection role (used for projection op only) */
@@ -156,52 +138,16 @@ public final class DLVertex extends DLVertexCache {
 
 	/** c'tor for Top/CN/And (before adding any operands) */
 	public DLVertex(DagTag op) {
-		super(op);
-		Concept = null;
-		Role = null;
-		ProjRole = null;
-		C = bpINVALID;
-		n = 0;
-	}
-
-	/** c'tor for Refl/Irr */
-	public DLVertex(DagTag op, final TRole R) {
-		super(op);
-		Concept = null;
-		Role = R;
-		ProjRole = null;
-		C = bpINVALID;
-		n = 0;
-	}
-
-	/** c'tor for CN/DE; C is an operand */
-	public DLVertex(DagTag op, int c) {
-		super(op);
-		Concept = null;
-		Role = null;
-		ProjRole = null;
-		C = c;
-		n = 0;
+		this(op, 0, null, bpINVALID, null);
 	}
 
 	/** c'tor for <= n R_C; and for \A R{n}_C; Note order C, n, R.pointer */
-	public DLVertex(DagTag op, int m, final TRole R, int c) {
+	public DLVertex(DagTag op, int m, final TRole R, int c, TRole ProjR) {
 		super(op);
-		Concept = null;
-		Role = R;
-		ProjRole = null;
-		C = c;
-		n = m;
-	}
-
-	/** c'tor for ProjFrom R C ProjR */
-	public DLVertex(final TRole R, int c, final TRole ProjR) {
-		super(DagTag.dtProj);
-		Concept = null;
 		Role = R;
 		ProjRole = ProjR;
 		C = c;
-		n = 0;
+		n = m;
 	}
 
 	@Override
@@ -214,9 +160,7 @@ public final class DLVertex extends DLVertexCache {
 		}
 		if (obj instanceof DLVertex) {
 			DLVertex v = (DLVertex) obj;
-			return Type() == v.Type() && compare(Role, v.Role)
-					&& compare(ProjRole, v.ProjRole) && C == v.C && n == v.n
-					&& Child.equals(v.Child);
+			return Op == v.Op && compare(Role, v.Role) && compare(ProjRole, v.ProjRole) && C == v.C && n == v.n && Child.equals(v.Child);
 		}
 		return false;
 	}
@@ -230,10 +174,7 @@ public final class DLVertex extends DLVertexCache {
 
 	@Override
 	public int hashCode() {
-		return (Type() == null ? 0 : Type().hashCode())
-				+ (Role == null ? 0 : Role.hashCode())
-				+ (ProjRole == null ? 0 : ProjRole.hashCode()) + C + n
-				+ (Child == null ? 0 : Child.hashCode());
+		return (Op == null ? 0 : Op.hashCode()) + (Role == null ? 0 : Role.hashCode()) + (ProjRole == null ? 0 : ProjRole.hashCode()) + C + n + (Child == null ? 0 : Child.hashCode());
 	}
 
 	/** return C for concepts/quantifiers/NR verteces */
@@ -259,26 +200,8 @@ public final class DLVertex extends DLVertexCache {
 	/** return pointer to the first concept name of the entry */
 	public int[] begin() {
 		return Child.sorted();
-		//		List<Integer> toReturn = new ArrayList<Integer>(Child.size());
-		//		for (int i : Child.toIntArray()) {
-		//			toReturn.add(i);
-		//		}
-		//		if (sorter != null) {
-		//			comparator.setSorter(sorter);
-		//			Collections.sort(toReturn, comparator);
-		//		}
-		//		return toReturn;
 	}
 
-	/**
-	 * return pointer to the last concept name of the entry; WARNING!! works for
-	 * AND only
-	 */
-	//	public List<Integer> rbegin() {
-	//		List<Integer> toReturn = new ArrayList<Integer>(Child);
-	//		Collections.reverse(toReturn);
-	//		return toReturn;
-	//	}
 	/** return pointer to Role for the Role-like verteces */
 	public TRole getRole() {
 		return Role;
@@ -304,35 +227,12 @@ public final class DLVertex extends DLVertexCache {
 		C = p;
 	}
 
-	/**
-	 * whether statistic's gathering should be omitted due to the type of a
-	 * vertex
-	 */
-	public boolean omitStat(boolean pos) {
-		switch (Type()) {
-			case dtDataType:
-			case dtDataValue:
-			case dtDataExpr:
-			case dtNN:
-			case dtBad:
-			case dtTop:
-				return true;
-			case dtPConcept:
-			case dtPSingleton:
-			case dtCollection:
-			case dtProj:
-				return !pos;
-			default:
-				return false;
-		}
-	}
-
 	public boolean addChild(int p) {
-		if (Op == dtBad) {
-			return true;
-		}
 		if (p == bpTOP) {
 			return false;
+		}
+		if (Op == dtBad) {
+			return true;
 		}
 		if (p == bpBOTTOM) {
 			//clash:
@@ -340,97 +240,35 @@ public final class DLVertex extends DLVertexCache {
 			Op = dtBad;
 			return true;
 		}
-		int v = Math.abs(p);
-		int i;
-		int[] elems = Child.sorted();
-		for (i = 0; i < elems.length && Math.abs(elems[i]) < v; ++i) {
-		}
-		if (i == elems.length) {
-			Child.add(p);
-			return false;
-		}
-		if (elems[i] == p) {
-			return false;
-		} else if (elems[i] == -p) {
+		if (Child.contains(-p)) {
 			Child.clear();
 			Op = dtBad;
 			return true;
 		}
 		Child.add(p);
-		//		Child.get(Child.size() - 1));
-		//		for (j = Child.size() - 1; j > i; --j) {
-		//			Child.set(j, Child.get(j - 1));
-		//		}
-		//		Child.set(i, p);
 		return false;
 	}
 
+	public int getAndToDagValue() {
+		if (Child.set.size() == 0) {
+			return bpTOP;
+		}
+		if (Child.set.size() == 1) {
+			return Child.set.get(0);
+		}
+		return bpINVALID;
+	}
+
 	public void sortEntry(final DLDag dag) {
-		if (Type() != dtAnd) {
+		if (Op != dtAnd) {
 			return;
 		}
 		Child.setSorter(dag);
-		//		sorter = dag;
-		//		int x;
-		//		int j;
-		//		int size = Child.size();
-		//		for (int i = 1; i < size; ++i) {
-		//			x = Child.get(i);
-		//			for (j = i - 1; j >= 0 && dag.less(x, Child.get(j)); --j) {
-		//				Child.set(j + 1, Child.get(j));
-		//			}
-		//			Child.set(j + 1, x);
-		//		}
-	}
-
-	//TODO move to the enum
-	public final String getTagName() {
-		switch (Op) {
-			case dtTop:
-				return "*TOP*";
-			case dtBad:
-				return "bad-tag";
-			case dtNConcept:
-				return "concept";
-			case dtPConcept:
-				return "primconcept";
-			case dtPSingleton:
-				return "prim-singleton";
-			case dtNSingleton:
-				return "singleton";
-			case dtDataType:
-				return "data-type";
-			case dtDataValue:
-				return "data-value";
-			case dtDataExpr:
-				return "data-expr";
-			case dtAnd:
-				return "and";
-			case dtCollection:
-				return "collection";
-			case dtForall:
-				return "all";
-			case dtLE:
-				return "at-most";
-			case dtUAll:
-				return "all U";
-			case dtIrr:
-				return "irreflexive";
-			case dtProj:
-				return "projection";
-			case dtNN:
-				return "NN-stopper";
-			default:
-				return "UNKNOWN";
-		}
 	}
 
 	public void Print(LeveLogger.LogAdapter o) {
-		o.print(Templates.DLVERTEXPrint, getDepth(true), getDepth(false),
-				getSize(true), getSize(false), getBranch(true),
-				getBranch(false), getGener(true), getGener(false),
-				getFreq(true), getFreq(false), getTagName());
-		switch (Type()) {
+		o.print(Templates.DLVERTEXPrint, stat[0], stat[1], stat[2], stat[3], stat[4], stat[5], stat[6], stat[7], stat[8], stat[9], Op.getName());
+		switch (Op) {
 			case dtAnd:
 			case dtCollection:
 				break;
@@ -447,8 +285,7 @@ public final class DLVertex extends DLVertexCache {
 			case dtNConcept:
 			case dtPSingleton:
 			case dtNSingleton:
-				o.print(Templates.DLVERTEXPrint2, Concept.getName(), (Type()
-						.isNNameTag() ? "=" : "[="), C);
+				o.print(Templates.DLVERTEXPrint2, Concept.getName(), (Op.isNNameTag() ? "=" : "[="), C);
 				return;
 			case dtLE:
 				o.print(Templates.SPACE, n);
@@ -462,13 +299,10 @@ public final class DLVertex extends DLVertexCache {
 				o.print(Templates.SPACE, Role.getName());
 				return;
 			case dtProj:
-				o.print(Templates.DLVERTEXPrint4, Role.getName(), C,
-						ProjRole.getName());
+				o.print(Templates.DLVERTEXPrint4, Role.getName(), C, ProjRole.getName());
 				return;
 			default:
-				throw new ReasonerInternalException(String.format(
-						"Error printing vertex of type %s(%s)", getTagName(),
-						Type()));
+				throw new ReasonerInternalException(String.format("Error printing vertex of type %s(%s)", Op.getName(), Op));
 		}
 		for (int q : Child.sorted()) {
 			o.print(Templates.SPACE, q);
@@ -487,23 +321,17 @@ public final class DLVertex extends DLVertexCache {
 
 	/** add-up all stat values at once by explicit values */
 	public void updateStatValues(int d, int s, int b, int g, boolean pos) {
-		stat[DLVertex.getStatIndexSize(pos)] += s;
-		stat[DLVertex.getStatIndexBranch(pos)] += b;
-		stat[DLVertex.getStatIndexGener(pos)] += g;
-		if (d > stat[DLVertex.getStatIndexDepth(pos)]) {
-			stat[DLVertex.getStatIndexDepth(pos)] = d;
-		}
+		StatIndex.updateStatValues(d, s, b, g, pos, stat);
 	}
 
 	/** add-up all values at once by a given vertex */
 	public void updateStatValues(DLVertex v, boolean posV, boolean pos) {
-		updateStatValues(v.getDepth(posV), v.getSize(posV), v.getBranch(posV),
-				v.getGener(posV), pos);
+		StatIndex.updateStatValues(v, posV, pos, stat);
 	}
 
 	/** increment frequency value */
 	public void incFreqValue(boolean pos) {
-		++stat[DLVertex.getStatIndexFreq(pos)];
+		StatIndex.incFreqValue(pos, stat);
 	}
 
 	// get methods
@@ -514,27 +342,7 @@ public final class DLVertex extends DLVertexCache {
 
 	/** general access to a stat value by index */
 	public int getDepth(boolean pos) {
-		return stat[DLVertex.getStatIndexDepth(pos)];
-	}
-
-	/** general access to a stat value by index */
-	protected int getSize(boolean pos) {
-		return stat[DLVertex.getStatIndexSize(pos)];
-	}
-
-	/** general access to a stat value by index */
-	protected int getBranch(boolean pos) {
-		return stat[DLVertex.getStatIndexBranch(pos)];
-	}
-
-	/** general access to a stat value by index */
-	protected int getGener(boolean pos) {
-		return stat[DLVertex.getStatIndexGener(pos)];
-	}
-
-	/** general access to a stat value by index */
-	protected int getFreq(boolean pos) {
-		return stat[DLVertex.getStatIndexFreq(pos)];
+		return StatIndex.getDepth(pos, stat);
 	}
 
 	/** usage statistic for pos- and neg occurences of a vertex */
@@ -547,56 +355,23 @@ public final class DLVertex extends DLVertexCache {
 	}
 }
 
-class DLVertexCache extends DLVertexTagDFS {
-	/** cache for the positive entry */
-	protected ModelCacheInterface pCache;
-	/** cache for the negative entry */
-	protected ModelCacheInterface nCache;
-
-	protected DLVertexCache(DagTag op) {
-		super(op);
-		pCache = null;
-		nCache = null;
-	}
-
-	/** return cache wrt positive flag */
-	public ModelCacheInterface getCache(boolean pos) {
-		return pos ? pCache : nCache;
-	}
-
-	/** set cache wrt positive flag; note that cache is set up only once */
-	public void setCache(boolean pos, final ModelCacheInterface p) {
-		if (pos) {
-			pCache = p;
-		} else {
-			nCache = p;
-		}
-	}
-}
-
 class DLVertexTagDFS {
 	protected DagTag Op; // 17 types
 	/** aux field for DFS in presence of cycles */
-	protected boolean VisitedPos = true;
+	protected boolean VisitedPos = false;
 	/** aux field for DFS in presence of cycles */
-	protected boolean ProcessedPos = true;
+	protected boolean ProcessedPos = false;
 	/** true iff node is involved in cycle */
-	protected boolean inCyclePos = true;
+	protected boolean inCyclePos = false;
 	/** aux field for DFS in presence of cycles */
-	protected boolean VisitedNeg = true;
+	protected boolean VisitedNeg = false;
 	/** aux field for DFS in presence of cycles */
-	protected boolean ProcessedNeg = true;
+	protected boolean ProcessedNeg = false;
 	/** true iff node is involved in cycle */
-	protected boolean inCycleNeg = true;
+	protected boolean inCycleNeg = false;
 
 	protected DLVertexTagDFS(DagTag op) {
 		Op = op;
-		VisitedPos = false;
-		ProcessedPos = false;
-		inCyclePos = false;
-		VisitedNeg = false;
-		ProcessedNeg = false;
-		inCycleNeg = false;
 	}
 
 	// tag access
@@ -638,7 +413,10 @@ class DLVertexTagDFS {
 
 	/** clear DFS flags */
 	public void clearDFS() {
-		ProcessedPos = VisitedPos = ProcessedNeg = VisitedNeg = false;
+		ProcessedPos = false;
+		VisitedPos = false;
+		ProcessedNeg = false;
+		VisitedNeg = false;
 	}
 
 	/** check whether concept is in cycle */
@@ -652,6 +430,25 @@ class DLVertexTagDFS {
 			inCyclePos = true;
 		} else {
 			inCycleNeg = true;
+		}
+	}
+
+	/** cache for the positive entry */
+	protected ModelCacheInterface pCache = null;
+	/** cache for the negative entry */
+	protected ModelCacheInterface nCache = null;
+
+	/** return cache wrt positive flag */
+	public ModelCacheInterface getCache(boolean pos) {
+		return pos ? pCache : nCache;
+	}
+
+	/** set cache wrt positive flag; note that cache is set up only once */
+	public void setCache(boolean pos, ModelCacheInterface p) {
+		if (pos) {
+			pCache = p;
+		} else {
+			nCache = p;
 		}
 	}
 }
