@@ -28,6 +28,7 @@ import uk.ac.manchester.cs.jfact.dep.TSaveStack;
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
 import uk.ac.manchester.cs.jfact.helpers.FastSet;
 import uk.ac.manchester.cs.jfact.helpers.FastSetFactory;
+import uk.ac.manchester.cs.jfact.helpers.FastSetSimple;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
 import uk.ac.manchester.cs.jfact.helpers.IfDefs;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
@@ -454,7 +455,8 @@ public class DlSatTester {
 	/** currently processed CTree node */
 	protected DlCompletionTree curNode;
 	/** currently processed Concept */
-	private ConceptWDep curConcept;
+	private DepSet curConceptDepSet;
+	private int curConceptConcept;
 	/** last processed d-blocked node */
 	//private DlCompletionTree dBlocked;
 	/** size of the DAG with some extra space */
@@ -603,8 +605,8 @@ public class DlSatTester {
 		//XXX move to BranchingContext
 		// save reasoning context
 		c.node = curNode;
-		c.concept = new ConceptWDep(curConcept.getConcept(), curConcept.getDep());
-		c.branchDep = DepSetFactory.create(curConcept.getDep());
+		c.concept = new ConceptWDep(curConceptConcept, curConceptDepSet);
+		c.branchDep = DepSetFactory.create(curConceptDepSet);
 	}
 
 	/** create BC for Or rule */
@@ -1123,7 +1125,7 @@ public class DlSatTester {
 	}
 
 	private boolean commonTacticBodyAll(final DLVertex cur) {
-		assert curConcept.getConcept() > 0 && cur.Type() == dtForall;
+		assert curConceptConcept > 0 && cur.Type() == dtForall;
 		// can't skip singleton models for complex roles due to empty transitions
 		if (cur.getRole().isSimple()) {
 			return commonTacticBodyAllSimple(cur);
@@ -1254,12 +1256,18 @@ public class DlSatTester {
 			}
 			stats.nTacticCalls.inc();
 			DlCompletionTree oldNode = curNode;
-			ConceptWDep oldConcept = curConcept;
+			int oldConceptConcept = curConceptConcept;
+			FastSetSimple oldConceptDepSetDelegate = curConceptDepSet.getDelegate();
+			//			ConceptWDep oldConcept = curConcept;
 			curNode = n;
-			curConcept = new ConceptWDep(bp, dep);
+			curConceptConcept = bp;
+			curConceptDepSet = DepSetFactory.create(curConceptDepSet);
+			//= new ConceptWDep(bp, dep);
 			boolean ret = commonTacticBodyAnd(v);
 			curNode = oldNode;
-			curConcept = oldConcept;
+			//curConcept = oldConcept;
+			curConceptConcept = oldConceptConcept;
+			curConceptDepSet = new DepSet(oldConceptDepSetDelegate);
 			return ret;
 		}
 		switch (tryAddConcept(n.label().getLabel(tag), bp, dep)) {
@@ -1490,7 +1498,8 @@ public class DlSatTester {
 				final ToDoEntry curTDE = TODO.getNextEntry();
 				assert curTDE != null;
 				curNode = curTDE.getNode();
-				curConcept = curTDE.getOffset();
+				curConceptConcept = curTDE.getOffsetConcept();
+				curConceptDepSet=new DepSet(curTDE.getOffsetDepSet());
 			}
 			if (++loop == 5000) {
 				loop = 0;
@@ -1520,9 +1529,11 @@ public class DlSatTester {
 	private void restoreBC() {
 		curNode = bContext.node;
 		if (bContext.concept == null) {
-			curConcept = new ConceptWDep(Helper.bpINVALID);
+			curConceptConcept = Helper.bpINVALID;
+			curConceptDepSet=new DepSet();
 		} else {
-			curConcept = new ConceptWDep(bContext.concept.getConcept(), bContext.concept.getDep());
+			curConceptConcept = bContext.concept.getConcept();
+curConceptDepSet=DepSetFactory.create( bContext.concept.getDep());
 		}
 		updateBranchDep();
 		bContext.nextOption();
@@ -1581,12 +1592,16 @@ public class DlSatTester {
 		LL.print("[*(");
 		curNode.logNode();
 		LL.print(",");
-		curConcept.print(LL);
+		LL.print(curConceptConcept);
+		if (curConceptDepSet != null) {
+			curConceptDepSet.Print(LL);
+		}
+//		curConcept.print(LL);
 		LL.print("){");
-		if (curConcept.getConcept() < 0) {
+		if (curConceptConcept < 0) {
 			LL.print("~");
 		}
-		LL.print(DLHeap.get(curConcept.getConcept()).Type().getName());
+		LL.print(DLHeap.get(curConceptConcept).Type().getName());
 		LL.print("}:");
 	}
 
@@ -1621,7 +1636,7 @@ public class DlSatTester {
 		}
 		boolean ret = false;
 		if (!isIBlocked()) {
-			ret = commonTacticBody(DLHeap.get(curConcept.getConcept()));
+			ret = commonTacticBody(DLHeap.get(curConceptConcept));
 		}
 		if (IfDefs._USE_LOGGING) {
 			logFinishEntry(ret);
@@ -1642,7 +1657,7 @@ public class DlSatTester {
 			case dtPSingleton:
 			case dtNSingleton:
 				//dBlocked = null;
-				if (curConcept.getConcept() > 0) {
+				if (curConceptConcept > 0) {
 					return commonTacticBodySingleton(cur);
 				} else {
 					return commonTacticBodyId(cur);
@@ -1653,24 +1668,24 @@ public class DlSatTester {
 				return commonTacticBodyId(cur);
 			case dtAnd:
 				//dBlocked = null;
-				if (curConcept.getConcept() > 0) {
+				if (curConceptConcept > 0) {
 					return commonTacticBodyAnd(cur);
 				} else {
 					return commonTacticBodyOr(cur);
 				}
 			case dtForall:
-				if (curConcept.getConcept() < 0) {
+				if (curConceptConcept < 0) {
 					return commonTacticBodySome(cur);
 				}
 				return commonTacticBodyAll(cur);
 			case dtIrr:
-				if (curConcept.getConcept() < 0) {
+				if (curConceptConcept < 0) {
 					return commonTacticBodySomeSelf(cur.getRole());
 				} else {
 					return commonTacticBodyIrrefl(cur.getRole());
 				}
 			case dtLE:
-				if (curConcept.getConcept() < 0) {
+				if (curConceptConcept < 0) {
 					return commonTacticBodyGE(cur);
 				}
 				if (isFunctionalVertex(cur)) {
@@ -1679,7 +1694,7 @@ public class DlSatTester {
 					return commonTacticBodyLE(cur);
 				}
 			case dtProj:
-				assert curConcept.getConcept() > 0;
+				assert curConceptConcept > 0;
 				return commonTacticBodyProj(cur.getRole(), cur.getC(), cur.getProjRole());
 			default:
 				throw new UnreachableSituationException();
@@ -1691,21 +1706,21 @@ public class DlSatTester {
 		stats.nIdCalls.inc();
 		if (IfDefs.RKG_USE_SIMPLE_RULES) {
 			// check if we have some simple rules
-			if (curConcept.getConcept() > 0 && applyExtraRulesIf((TConcept) cur.getConcept())) {
+			if (curConceptConcept > 0 && applyExtraRulesIf((TConcept) cur.getConcept())) {
 				return true;
 			}
 		}
 		// get either body(p) or inverse(body(p)), depends on sign of current ID
-		int C = curConcept.getConcept() > 0 ? cur.getC() : -cur.getC();
-		return addToDoEntry(curNode, C, curConcept.getDep(), null);
+		int C = curConceptConcept > 0 ? cur.getC() : -cur.getC();
+		return addToDoEntry(curNode, C, curConceptDepSet, null);
 	}
 
 	boolean applicable(final TSimpleRule rule) {
-		int bp = curConcept.getConcept();
+		//int bp = curConcept.getConcept();
 		final CWDArray lab = curNode.label().getLabel(DagTag.dtPConcept);
-		DepSet loc = DepSetFactory.create(curConcept.getDep());
+		DepSet loc = DepSetFactory.create(curConceptDepSet);
 		for (TConcept p : rule.getBody()) {
-			if (p.getpName() != bp) {
+			if (p.getpName() != curConceptConcept) {
 				if (findConceptClash(lab, p.getpName(), loc)) {
 					loc.add(getClashSet());
 				} else {
@@ -1740,7 +1755,7 @@ public class DlSatTester {
 		encounterNominal = true;
 		final TIndividual C = (TIndividual) cur.getConcept();
 		assert C.getNode() != null;
-		DepSet dep = DepSetFactory.create(curConcept.getDep());
+		DepSet dep = DepSetFactory.create(curConceptDepSet);
 		DlCompletionTree realNode = C.getNode().resolvePBlocker(dep);
 		if (!realNode.equals(curNode)) {
 			return Merge(curNode, realNode, dep);
@@ -1750,12 +1765,12 @@ public class DlSatTester {
 
 	private boolean commonTacticBodyAnd(final DLVertex cur) {
 		stats.nAndCalls.inc();
-		DepSet dep = curConcept.getDep();
+//		DepSet dep = curConceptDepSet;
 		// FIXME!! I don't know why, but performance is usually BETTER if using r-iters.
 		// It's their only usage, so after investigation they can be dropped
 		int[] begin = cur.begin();
 		for (int q : begin) {
-			if (addToDoEntry(curNode, q, dep, null)) {
+			if (addToDoEntry(curNode, q, curConceptDepSet, null)) {
 				return true;
 			}
 		}
@@ -1771,7 +1786,7 @@ public class DlSatTester {
 	}
 
 	private boolean commonTacticBodyOr(final DLVertex cur) {
-		assert curConcept.getConcept() < 0 && cur.Type() == dtAnd; // safety check
+		assert curConceptConcept < 0 && cur.Type() == dtAnd; // safety check
 		stats.nOrCalls.inc();
 		if (isFirstBranchCall()) {
 			Reference<DepSet> dep = new Reference<DepSet>(DepSetFactory.create());
@@ -1798,7 +1813,7 @@ public class DlSatTester {
 
 	private boolean planOrProcessing(final DLVertex cur, Reference<DepSet> dep) {
 		OrConceptsToTest.clear();
-		dep.setReference(DepSetFactory.create(curConcept.getDep()));
+		dep.setReference(DepSetFactory.create(curConceptDepSet));
 		// check all OR components for the clash
 		CGLabel lab = curNode.label();
 		for (int q : cur.begin()) {
@@ -1861,7 +1876,7 @@ public class DlSatTester {
 
 	private boolean commonTacticBodyAllComplex(DLVertex cur) {
 		int state = cur.getState();
-		int C = curConcept.getConcept() - state; // corresponds to AR{0}.X
+		int C = curConceptConcept - state; // corresponds to AR{0}.X
 		RAStateTransitions RST = cur.getRole().getAutomaton().getBase().get(state);
 		// apply all empty transitions
 		if (RST.hasEmptyTransition()) {
@@ -1870,7 +1885,7 @@ public class DlSatTester {
 				RATransition q = list.get(i);
 				stats.nAutoEmptyLookups.inc();
 				if (q.isEmpty()) {
-					if (addToDoEntry(curNode, C + q.final_state(), curConcept.getDep(), "e")) {
+					if (addToDoEntry(curNode, C + q.final_state(), curConceptDepSet, "e")) {
 						return true;
 					}
 				}
@@ -1878,7 +1893,7 @@ public class DlSatTester {
 		}
 		// apply final-state rule
 		if (state == 1) {
-			if (addToDoEntry(curNode, cur.getC(), curConcept.getDep(), null)) {
+			if (addToDoEntry(curNode, cur.getC(), curConceptDepSet, null)) {
 				return true;
 			}
 		}
@@ -1889,7 +1904,7 @@ public class DlSatTester {
 		for (int i = 0; i < list.size(); i++) {
 			DlCompletionTreeArc p = list.get(i);
 			if (RST.recognise(p.getRole())) {
-				if (applyTransitions(p, RST, C, DepSetFactory.plus(curConcept.getDep(), p.getDep()), null)) {
+				if (applyTransitions(p, RST, C, DepSetFactory.plus(curConceptDepSet, p.getDep()), null)) {
 					return true;
 				}
 			}
@@ -1900,14 +1915,16 @@ public class DlSatTester {
 	private boolean commonTacticBodyAllSimple(DLVertex cur) {
 		//tacticUsage ret = tacticUsage.utUnusable;
 		RAStateTransitions RST = cur.getRole().getAutomaton().getBase().get(0);
-		DepSet dep = curConcept.getDep();
+		//DepSet dep = curConcept.getDep();
 		int C = cur.getC();
 		// check whether automaton applicable to any edges
 		stats.nAllCalls.inc();
 		// check all neighbours; as the role is simple then recognise() == applicable()
-		for (DlCompletionTreeArc p : curNode.getNeighbour()) {
+		List<DlCompletionTreeArc> neighbour = curNode.getNeighbour();
+		int size=neighbour.size();
+		for (int i=0;i<size;i++){DlCompletionTreeArc p = neighbour.get(i);
 			if (RST.recognise(p.getRole())) {
-				if (addToDoEntry(p.getArcEnd(), C, DepSetFactory.plus(dep, p.getDep()), null)) {
+				if (addToDoEntry(p.getArcEnd(), C, DepSetFactory.plus(curConceptDepSet, p.getDep()), null)) {
 					return true;
 				}
 			}
@@ -2004,8 +2021,8 @@ public class DlSatTester {
 	}
 
 	private boolean commonTacticBodySome(final DLVertex cur) {
-		final DepSet dep = curConcept.getDep();
-		final TRole R = cur.getRole();
+		//DepSet dep = curConcept.getDep();
+		TRole R = cur.getRole();
 		int C = -cur.getC();
 		//	tacticUsage ret = tacticUsage.utUnusable;
 		if (isSomeExists(R, C)) {
@@ -2029,12 +2046,12 @@ public class DlSatTester {
 			List<TRole> list = R.begin_topfunc();
 			for (int i = 0; i < list.size(); i++) {
 				int functional = list.get(i).getFunctional();
-				switch (tryAddConcept(curNode.label().getLabel(DagTag.dtLE), functional, dep)) {
+				switch (tryAddConcept(curNode.label().getLabel(DagTag.dtLE), functional, curConceptDepSet)) {
 					case acrClash:
 						return true;
 					case acrDone: {
-						updateLevel(curNode, dep);
-						ConceptWDep rFuncRestriction1 = new ConceptWDep(functional, dep);
+						updateLevel(curNode, curConceptDepSet);
+						ConceptWDep rFuncRestriction1 = new ConceptWDep(functional, curConceptDepSet);
 						CGraph.addConceptToNode(curNode, rFuncRestriction1, DagTag.dtLE);
 						used.add(rFuncRestriction1.getConcept());
 						LL.print(Templates.COMMON_TACTIC_BODY_SOME, rFuncRestriction1);
@@ -2074,7 +2091,7 @@ public class DlSatTester {
 			if (functionalArc != null) {
 				LL.print(Templates.COMMON_TACTIC_BODY_SOME2, rFuncRestriction);
 				DlCompletionTree succ = functionalArc.getArcEnd();
-				newDep.add(dep);
+				newDep.add(curConceptDepSet);
 				if (R.isDisjoint() && checkDisjointRoleClash(curNode, succ, R, newDep)) {
 					return true;
 				}
@@ -2112,7 +2129,7 @@ public class DlSatTester {
 	}
 
 	private boolean commonTacticBodyValue(final TRole R, final TIndividual nom) {
-		DepSet dep = DepSetFactory.create(curConcept.getDep());
+		DepSet dep = DepSetFactory.create(curConceptDepSet);
 		if (isCurNodeBlocked()) {
 			return false;
 		}
@@ -2134,9 +2151,9 @@ public class DlSatTester {
 			stats.nUseless.inc();
 			return false;
 		}
-		DlCompletionTreeArc pA = createOneNeighbour(R, curConcept.getDep());
+		DlCompletionTreeArc pA = createOneNeighbour(R, curConceptDepSet);
 		// add necessary label
-		return initNewNode(pA.getArcEnd(), curConcept.getDep(), C) || setupEdge(pA, curConcept.getDep(), flags);
+		return initNewNode(pA.getArcEnd(), curConceptDepSet, C) || setupEdge(pA, curConceptDepSet, flags);
 	}
 
 	private DlCompletionTreeArc createOneNeighbour(final TRole R, final DepSet dep) {
@@ -2165,7 +2182,7 @@ public class DlSatTester {
 			return curNode.isBlocked();
 		}
 		if (!curNode.isBlocked() && curNode.isAffected()) {
-			updateLevel(curNode, curConcept.getDep());
+			updateLevel(curNode, curConceptDepSet);
 			CGraph.detectBlockedStatus(curNode);
 		}
 		return curNode.isBlocked();
@@ -2247,8 +2264,8 @@ public class DlSatTester {
 	}
 
 	boolean commonTacticBodyFunc(final DLVertex cur) {
-		assert curConcept.getConcept() > 0 && isFunctionalVertex(cur);
-		if (isNNApplicable(cur.getRole(), Helper.bpTOP, curConcept.getConcept() + 1)) {
+		assert curConceptConcept > 0 && isFunctionalVertex(cur);
+		if (isNNApplicable(cur.getRole(), Helper.bpTOP, curConceptConcept + 1)) {
 			return commonTacticBodyNN(cur);
 		}
 		stats.nFuncCalls.inc();
@@ -2261,7 +2278,7 @@ public class DlSatTester {
 		}
 		DlCompletionTreeArc q = EdgesToMerge.get(0);//.begin();
 		DlCompletionTree sample = q.getArcEnd();
-		DepSet depF = DepSetFactory.create(curConcept.getDep());
+		DepSet depF = DepSetFactory.create(curConceptDepSet);
 		depF.add(q.getDep());
 		for (int i = 1; i < EdgesToMerge.size(); i++) {//++q; q != EdgesToMerge.end(); ++q )
 			q = EdgesToMerge.get(i);
@@ -2287,7 +2304,7 @@ public class DlSatTester {
 		}
 		// check whether we need to apply NN rule first
 		if (isNNApplicable(R, C, /*stopper=*/
-		curConcept.getConcept() + cur.getNumberLE())) {
+		curConceptConcept + cur.getNumberLE())) {
 			//applyNN: 
 			return commonTacticBodyNN(cur); // after application <=-rule would be checked again
 		}
@@ -2376,7 +2393,7 @@ public class DlSatTester {
 	}
 
 	private boolean commonTacticBodyLE(final DLVertex cur) {
-		assert curConcept.getConcept() > 0 && cur.Type() == dtLE;
+		assert curConceptConcept > 0 && cur.Type() == dtLE;
 		stats.nLeCalls.inc();
 		int C = cur.getC();
 		TRole R = cur.getRole();
@@ -2483,7 +2500,7 @@ public class DlSatTester {
 			return true;
 		}
 		// create N new different edges
-		return createDifferentNeighbours(cur.getRole(), cur.getC(), curConcept.getDep(), cur.getNumberGE(), DlCompletionTree.BlockableLevel);
+		return createDifferentNeighbours(cur.getRole(), cur.getC(), curConceptDepSet, cur.getNumberGE(), DlCompletionTree.BlockableLevel);
 	}
 
 	private boolean createDifferentNeighbours(final TRole R, int C, final DepSet dep, int n, int level) {
@@ -2513,7 +2530,7 @@ public class DlSatTester {
 		if (!checkNRclash(atleast, atmost)) {
 			return false;
 		}
-		setClashSet(DepSetFactory.plus(curConcept.getDep(), reason.getDep()));
+		setClashSet(DepSetFactory.plus(curConceptDepSet, reason.getDep()));
 		if (IfDefs._USE_LOGGING) {
 			logClash(curNode, reason.getConcept(), reason.getDep());
 		}
@@ -2698,7 +2715,7 @@ public class DlSatTester {
 		// new (just branched) dep-set
 		DepSet curDep = getCurDepSet();
 		// make a stopper to mark that NN-rule is applied
-		if (addToDoEntry(curNode, curConcept.getConcept() + cur.getNumberLE(), DepSetFactory.create(), "NNs")) {
+		if (addToDoEntry(curNode, curConceptConcept + cur.getNumberLE(), DepSetFactory.create(), "NNs")) {
 			return true;
 		}
 		// create curNN new different edges
@@ -2706,7 +2723,7 @@ public class DlSatTester {
 			return true;
 		}
 		// now remember NR we just created: it is (<= curNN R), so have to find it
-		return addToDoEntry(curNode, curConcept.getConcept() + cur.getNumberLE() - NN, curDep, "NN");
+		return addToDoEntry(curNode, curConceptConcept + cur.getNumberLE() - NN, curDep, "NN");
 	}
 
 	boolean isNNApplicable(final TRole r, int C, int stopper) {
@@ -2725,14 +2742,14 @@ public class DlSatTester {
 				return false;
 			}
 		}
-		final DepSet dep = DepSetFactory.create(curConcept.getDep());
+		final DepSet dep = DepSetFactory.create(curConceptDepSet);
 		DlCompletionTreeArc pA = CGraph.createLoop(curNode, R, dep);
 		return setupEdge(pA, dep, redoForall.getValue() | redoFunc.getValue() | redoAtMost.getValue() | redoIrr.getValue());
 	}
 
 	boolean commonTacticBodyIrrefl(final TRole R) {
 		for (DlCompletionTreeArc p : curNode.getNeighbour()) {
-			if (checkIrreflexivity(p, R, curConcept.getDep())) {
+			if (checkIrreflexivity(p, R, curConceptDepSet)) {
 				return true;
 			}
 		}
@@ -2761,7 +2778,7 @@ public class DlSatTester {
 			return false;
 		}
 		//tacticUsage ret = tacticUsage.utUnusable;
-		DepSet dep = DepSetFactory.create(curConcept.getDep());
+		DepSet dep = DepSetFactory.create(curConceptDepSet);
 		dep.add(pA.getDep());
 		if (!curNode.isLabelledBy(C)) {
 			if (isFirstBranchCall()) {

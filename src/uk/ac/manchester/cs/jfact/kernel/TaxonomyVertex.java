@@ -8,7 +8,9 @@ You should have received a copy of the GNU Lesser General Public License along w
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import uk.ac.manchester.cs.jfact.helpers.Helper;
 import uk.ac.manchester.cs.jfact.helpers.IfDefs;
@@ -24,7 +26,7 @@ public final class TaxonomyVertex {
 	private ClassifiableEntry sample;
 	//TODO this can be a set, but there is no advantage
 	/** synonyms of the sample entry */
-	private final List<ClassifiableEntry> synonyms = new ArrayList<ClassifiableEntry>();
+	private final Set<ClassifiableEntry> synonyms = new LinkedHashSet<ClassifiableEntry>();
 	/** labellers for marking taxonomy */
 	//private final static TLabeller valuedLab = new TLabeller();
 	// labels for different purposes. all for 2 directions: top-down and bottom-up search
@@ -49,25 +51,26 @@ public final class TaxonomyVertex {
 	}
 
 	// checked part
-	public boolean isChecked(TLabeller checkLab) {
-		return checkLab.isLabelled(theChecked);
+
+	public boolean isChecked(long checkLab) {
+		return checkLab==theChecked;
 	}
 
-	public void setChecked(TLabeller checkLab) {
-		theChecked = checkLab.getLabel();
+	public void setChecked(long checkLab) {
+		theChecked = checkLab;
 	}
 
 	// value part
-	public boolean isValued(TLabeller valueLab) {
-		return valueLab.isLabelled(theValued);
+	public boolean isValued(long valueLab) {
+		return valueLab==theValued;
 	}
 
 	public boolean getValue() {
 		return checkValue;
 	}
 
-	public boolean setValued(boolean val, TLabeller valueLab) {
-		theValued = valueLab.getLabel();
+	public boolean setValued(boolean val, long valueLab) {
+		theValued = valueLab;
 		checkValue = val;
 		return val;
 	}
@@ -102,7 +105,7 @@ public final class TaxonomyVertex {
 	}
 
 	// get info about taxonomy structure
-	public List<ClassifiableEntry> begin_syn() {
+	public Set<ClassifiableEntry> begin_syn() {
 		return synonyms;
 	}
 

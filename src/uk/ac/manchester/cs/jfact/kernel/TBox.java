@@ -2506,28 +2506,30 @@ class DumpInterface {
 	public void dumpBottom() {
 	}
 
+	@SuppressWarnings("unused")
 	public void dumpNumber(int n) {
 	}
-
+	@SuppressWarnings("unused")
 	public void startOp(DIOp Op) {
 	}
 
 	/** start operation >=/<= with number */
+	@SuppressWarnings("unused")
 	public void startOp(DIOp Op, int n) {
 	}
-
+	@SuppressWarnings("unused")
 	public void contOp(DIOp Op) {
 	}
-
+	@SuppressWarnings("unused")
 	public void finishOp(DIOp Op) {
 	}
-
+	@SuppressWarnings("unused")
 	public void startAx(DIOp Ax) {
 	}
-
+	@SuppressWarnings("unused")
 	public void contAx(DIOp Ax) {
 	}
-
+	@SuppressWarnings("unused")
 	public void finishAx(DIOp Ax) {
 	}
 
@@ -2537,10 +2539,12 @@ class DumpInterface {
 	}
 
 	/** dump concept atom (as used in expression) */
+	@SuppressWarnings("unused")
 	public void dumpConcept(final TConcept p) {
 	}
 
 	/** dump role atom (as used in expression) */
+	@SuppressWarnings("unused")
 	public void dumpRole(final TRole p) {
 	}
 
@@ -2612,11 +2616,13 @@ final class DumpLisp extends DumpInterface {
 
 	//abstract void startAx ( diAx Ax );
 	@Override
+	@SuppressWarnings("unused")
 	public void contAx(DIOp Ax) {
 		o.print(" ");
 	}
 
 	@Override
+	@SuppressWarnings("unused")
 	public void finishAx(DIOp Ax) {
 		o.print(")\n");
 	}

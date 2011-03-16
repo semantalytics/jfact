@@ -149,7 +149,9 @@ public final class DlCompletionGraph {
 
 	/** propagate i-blocked status to all children of NODE */
 	private void propagateIBlockedStatus(DlCompletionTree node, final DlCompletionTree blocker) {
-		for (DlCompletionTreeArc q : node.getNeighbour()) {
+		List<DlCompletionTreeArc> neighbour = node.getNeighbour();
+		int size=neighbour.size();
+		for (int i=0;i<size;i++) {DlCompletionTreeArc q = neighbour.get(i);
 			if (q.isSuccEdge() && !q.isIBlocked()) {
 				setNodeIBlocked(q.getArcEnd(), blocker);
 			}

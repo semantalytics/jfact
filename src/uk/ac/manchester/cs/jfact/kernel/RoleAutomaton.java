@@ -30,7 +30,7 @@ public final class RoleAutomaton {
 	/** flag whether automaton is output safe */
 	private boolean OSafe;
 	/** flag for the automaton to be completed */
-	private boolean Complete;
+	//private boolean Complete;
 
 	/** make sure that STATE exists in the automaton (update ton's size) */
 	private void ensureState(int state) {
@@ -54,7 +54,7 @@ public final class RoleAutomaton {
 		OSafe = true;
 		//	chainBeg = 0;
 		//	chainEnd = 0;
-		Complete = false;
+		//Complete = false;
 		ensureState(1);
 	}
 

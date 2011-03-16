@@ -24,9 +24,12 @@ public class SupConceptActor implements Actor {
 
 	public boolean apply(TaxonomyVertex v) {
 		entry(v.getPrimer());
-		for (ClassifiableEntry p : v.begin_syn()) {
-			entry(p);
+		if(v.begin_syn().contains(pe)) {
+			throw new RuntimeException();
 		}
+//		for (ClassifiableEntry p : v.begin_syn()) {
+//			entry(p);
+//		}
 		return true;
 	}
 }

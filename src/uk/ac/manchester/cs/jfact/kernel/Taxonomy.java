@@ -44,8 +44,8 @@ public class Taxonomy {
 	/** told subsumers corresponding to a given entry */
 	private final LinkedList<Collection<ClassifiableEntry>> ksStack = new LinkedList<Collection<ClassifiableEntry>>();
 	/** labellers for marking taxonomy */
-	protected final TLabeller checkLabel = new TLabeller();
-	protected final TLabeller valueLabel = new TLabeller();
+	protected long checkLabel = 1;
+	protected long valueLabel = 1;
 
 	/** apply ACTOR to subgraph starting from NODE as defined by flags */
 	private void getRelativesInfoRec(TaxonomyVertex node, Actor actor, boolean onlyDirect, boolean upDirection) {
@@ -71,25 +71,31 @@ public class Taxonomy {
 		// if current node processed OK and there is no need to continue -- exit
 		// this is the helper to the case like getDomain():
 		//   if there is a named concept that represent's a domain -- that's what we need
-		if (needCurrent) {
-			if (actor.apply(node) && onlyDirect) {
-				return;
-			}
+		if (needCurrent && actor.apply(node) && onlyDirect) {
+			return;
 		}
 		for (TaxonomyVertex p : node.neigh(upDirection)) {
 			getRelativesInfoRec(p, actor, onlyDirect, upDirection);
 		}
+		//List<TaxonomyVertex> neigh = node.neigh(upDirection);
+		//int size = neigh.size();
+		//for (int i = 0; i < size; i++) {
+		//	TaxonomyVertex p = neigh.get(i);
+		//	if (!node.isChecked(checkLabel)) {
+		//		getRelativesInfoRec(p, actor, onlyDirect, upDirection);
+		//	}
+		//}
 		clearCheckedLabel();
 	}
 
 	/** clear the CHECKED label from all the taxonomy vertex */
-	void clearCheckedLabel() {
-		checkLabel.newLabel();
+	protected final void clearCheckedLabel() {
+		checkLabel++;
 	}
 
 	private void clearLabels() {
-		checkLabel.newLabel();
-		valueLabel.newLabel();
+		checkLabel++;
+		valueLabel++;
 	}
 
 	/** initialise aux entry with given concept p */

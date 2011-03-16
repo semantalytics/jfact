@@ -38,7 +38,7 @@ public final class DLVertex extends DLVertexTagDFS {
 				return 1;
 			}
 		};
-		private final FastSet set = FastSetFactory.create();
+		 final FastSet set = FastSetFactory.create();
 		private final SortedIntList original = new SortedIntList();
 		int[] sorted = null;
 		protected DLDag sorter = null;
