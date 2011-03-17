@@ -51,7 +51,6 @@ public final class RATransition {
 
 	/** check whether transition is applicable wrt role R */
 	public boolean applicable(TRole R) {
-		//TODO check this: here I use getIndex but in other places index() is used, and it is different; TRole.equals() does not use either.
 		if (cache == null) {
 			cache = new BitSet();
 			for (TRole t : label) {
@@ -59,7 +58,6 @@ public final class RATransition {
 			}
 		}
 		return cache.get(R.getIndex());
-		//		return label.contains(R);
 	}
 
 	/** check whether transition is empty */
@@ -82,15 +80,6 @@ public final class RATransition {
 				o.print(l.get(i).getName());
 				o.print("\"");
 			}
-			//			o.print(label.toString());
-			//			for (int i = 0; i < label.size(); i++) {
-			//				if (i > 0) {
-			//					o.print(",");
-			//				}
-			//				o.print("\"");
-			//				o.print(label.get(i).getName());
-			//				o.print("\"");
-			//			}
 		}
 		o.print(" -> ");
 		o.print(final_state());

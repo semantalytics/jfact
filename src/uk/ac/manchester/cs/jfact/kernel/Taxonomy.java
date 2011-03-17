@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
@@ -20,6 +21,7 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.kernel.actors.Actor;
+import uk.ac.manchester.cs.jfact.kernel.actors.SupConceptActor;
 
 public class Taxonomy {
 	/** array of taxonomy verteces */
@@ -47,23 +49,49 @@ public class Taxonomy {
 	protected long checkLabel = 1;
 	protected long valueLabel = 1;
 
-	/** apply ACTOR to subgraph starting from NODE as defined by flags */
-	private void getRelativesInfoRec(TaxonomyVertex node, Actor actor, boolean onlyDirect, boolean upDirection) {
-		// recursive applicability checking
-		if (node.isChecked(checkLabel)) {
-			return;
-		}
-		// label node as visited
-		node.setChecked(checkLabel);
+	/**
+	 * apply ACTOR to subgraph starting from NODE as defined by flags; this
+	 * version is intended to work only with SupConceptActor, which requires the
+	 * method to return as soon as the apply() method returns false
+	 */
+	boolean getRelativesInfo(TaxonomyVertex node, SupConceptActor actor, boolean needCurrent, boolean onlyDirect, boolean upDirection) {
 		// if current node processed OK and there is no need to continue -- exit
-		// if node is NOT processed for some reasons -- go to another level
-		if (actor.apply(node) && onlyDirect) {
-			return;
+		// this is the helper to the case like getDomain():
+		//   if there is a named concept that represent's a domain -- that's what we need
+		if (needCurrent) {
+			if (!actor.apply(node)) {
+				return false;
+			}
+			if (onlyDirect) {
+				return true;
+			}
 		}
-		// apply method to the proper neighbours with proper parameters
-		for (TaxonomyVertex p : node.neigh(upDirection)) {
-			getRelativesInfoRec(p, actor, onlyDirect, upDirection);
+		Queue<List<TaxonomyVertex>> queue = new LinkedList<List<TaxonomyVertex>>();
+		queue.add(node.neigh(upDirection));
+		while (queue.size() > 0) {
+			List<TaxonomyVertex> neigh = queue.remove();// node.neigh(upDirection);
+			int size = neigh.size();
+			for (int i = 0; i < size; i++) {
+				TaxonomyVertex _node = neigh.get(i);
+				// recursive applicability checking
+				if (!_node.isChecked(checkLabel)) {
+					// label node as visited
+					_node.setChecked(checkLabel);
+					// if current node processed OK and there is no need to continue -- exit
+					// if node is NOT processed for some reasons -- go to another level
+					if (!actor.apply(_node)) {
+						return false;
+					}
+					if (onlyDirect) {
+						continue;
+					}
+					// apply method to the proper neighbours with proper parameters
+					queue.add(_node.neigh(upDirection));
+				}
+			}
 		}
+		clearCheckedLabel();
+		return true;
 	}
 
 	/** apply ACTOR to subgraph starting from NODE as defined by flags; */
@@ -74,17 +102,27 @@ public class Taxonomy {
 		if (needCurrent && actor.apply(node) && onlyDirect) {
 			return;
 		}
-		for (TaxonomyVertex p : node.neigh(upDirection)) {
-			getRelativesInfoRec(p, actor, onlyDirect, upDirection);
+		Queue<List<TaxonomyVertex>> queue = new LinkedList<List<TaxonomyVertex>>();
+		queue.add(node.neigh(upDirection));
+		while (queue.size() > 0) {
+			List<TaxonomyVertex> neigh = queue.remove();// node.neigh(upDirection);
+			int size = neigh.size();
+			for (int i = 0; i < size; i++) {
+				TaxonomyVertex _node = neigh.get(i);
+				// recursive applicability checking
+				if (!_node.isChecked(checkLabel)) {
+					// label node as visited
+					_node.setChecked(checkLabel);
+					// if current node processed OK and there is no need to continue -- exit
+					// if node is NOT processed for some reasons -- go to another level
+					if (actor.apply(_node) && onlyDirect) {
+						continue;
+					}
+					// apply method to the proper neighbours with proper parameters
+					queue.add(_node.neigh(upDirection));
+				}
+			}
 		}
-		//List<TaxonomyVertex> neigh = node.neigh(upDirection);
-		//int size = neigh.size();
-		//for (int i = 0; i < size; i++) {
-		//	TaxonomyVertex p = neigh.get(i);
-		//	if (!node.isChecked(checkLabel)) {
-		//		getRelativesInfoRec(p, actor, onlyDirect, upDirection);
-		//	}
-		//}
 		clearCheckedLabel();
 	}
 

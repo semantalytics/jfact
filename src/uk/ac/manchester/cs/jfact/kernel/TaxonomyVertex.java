@@ -21,9 +21,10 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 public final class TaxonomyVertex {
 	//TODO check if they need to be list
 	/** immediate parents and children */
-	private final List<TaxonomyVertex>[] Links = new ArrayList[2];
+	private final List<TaxonomyVertex> LinksUp = new ArrayList<TaxonomyVertex>();
+	private final List<TaxonomyVertex> LinksDown = new ArrayList<TaxonomyVertex>();
 	/** entry corresponding to current tax vertex */
-	private ClassifiableEntry sample;
+	private ClassifiableEntry sample = null;
 	//TODO this can be a set, but there is no advantage
 	/** synonyms of the sample entry */
 	private final Set<ClassifiableEntry> synonyms = new LinkedHashSet<ClassifiableEntry>();
@@ -40,20 +41,19 @@ public final class TaxonomyVertex {
 	private boolean checkValue;
 
 	/** set sample to ENTRY */
-	void setSample(ClassifiableEntry entry) {
+	public void setSample(ClassifiableEntry entry) {
 		sample = entry;
 		entry.setTaxVertex(this);
 	}
 
 	/** indirect RW access to Links */
 	public List<TaxonomyVertex> neigh(boolean upDirection) {
-		return upDirection ? Links[0] : Links[1];
+		return upDirection ? LinksUp : LinksDown;
 	}
 
 	// checked part
-
 	public boolean isChecked(long checkLab) {
-		return checkLab==theChecked;
+		return checkLab == theChecked;
 	}
 
 	public void setChecked(long checkLab) {
@@ -62,7 +62,7 @@ public final class TaxonomyVertex {
 
 	// value part
 	public boolean isValued(long valueLab) {
-		return valueLab==theValued;
+		return valueLab == theValued;
 	}
 
 	public boolean getValue() {
@@ -93,7 +93,7 @@ public final class TaxonomyVertex {
 		if (common == n) {
 			return true;
 		}
-		clearCommon();
+		common = 0;
 		return false;
 	}
 
@@ -101,7 +101,7 @@ public final class TaxonomyVertex {
 	private void initFlags() {
 		theChecked = 0;
 		theValued = 0;
-		clearCommon();
+		common = 0;
 	}
 
 	// get info about taxonomy structure
@@ -110,19 +110,13 @@ public final class TaxonomyVertex {
 	}
 
 	public TaxonomyVertex() {
-		sample = null;
-		Links[0] = new ArrayList<TaxonomyVertex>();
-		Links[1] = new ArrayList<TaxonomyVertex>();
 		initFlags();
 	}
 
 	/** init c'tor; use it only for Top/Bot initialisations */
 	public TaxonomyVertex(final ClassifiableEntry p) {
-		sample = p;
 		initFlags();
-		p.setTaxVertex(this);
-		Links[0] = new ArrayList<TaxonomyVertex>();
-		Links[1] = new ArrayList<TaxonomyVertex>();
+		setSample(p);
 	}
 
 	/** add P as a synonym to curent vertex */
@@ -134,13 +128,13 @@ public final class TaxonomyVertex {
 
 	/** clears the vertex */
 	public void clear() {
-		Links[0].clear();
-		Links[1].clear();
+		LinksUp.clear();
+		LinksDown.clear();
 		sample = null;
 		initFlags();
 	}
 
-	public final ClassifiableEntry getPrimer() {
+	public ClassifiableEntry getPrimer() {
 		return sample;
 	}
 

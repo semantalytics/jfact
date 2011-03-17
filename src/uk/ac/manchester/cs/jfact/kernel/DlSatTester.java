@@ -996,12 +996,14 @@ public class DlSatTester {
 	}
 
 	private final ModelCacheInterface buildCache(int p) {
-		LL.print("\nChecking satisfiability of DAG entry ");
-		LL.print(p);
-		tBox.PrintDagEntry(LL, p);
+		if (IfDefs._USE_LOGGING) {
+			LL.print("\nChecking satisfiability of DAG entry ");
+			LL.print(p);
+			tBox.PrintDagEntry(LL, p);
+		}
 		LL.print(":\n");
 		boolean sat = runSat(p, Helper.bpTOP);
-		if (!sat) {
+		if (!sat && IfDefs._USE_LOGGING) {
 			LL.print(Templates.BUILD_CACHE_UNSAT, p);
 		}
 		return buildCacheByCGraph(sat);
@@ -1192,7 +1194,6 @@ public class DlSatTester {
 		assert p != Helper.bpBOTTOM;
 		stats.nLookups.inc();
 		stats.nLookups.inc();
-		//TODO check this new version
 		if (lab.contains(p)) {
 			return AddConceptResult.acrExist;
 		}
@@ -1345,12 +1346,9 @@ public class DlSatTester {
 	 * newNodeCache
 	 */
 	private void doCacheNode(DlCompletionTree node) {
-		//modelCacheIan cache = new modelCacheIan(true);
 		List<DepSet> deps = new ArrayList<DepSet>();
-		//		DepSet dep = DepSetFactory.create();
 		newNodeCache.clear();
 		List<ConceptWDep> beginl_sc = node.beginl_sc();
-		// TODO look at the switches
 		for (int i = 0; i < beginl_sc.size(); i++) {
 			ConceptWDep p = beginl_sc.get(i);
 			deps.add(p.getDep());
@@ -1361,15 +1359,6 @@ public class DlSatTester {
 				}
 				return;
 			}
-			//			switch (merge) {
-			//				case csValid:
-			//					break;
-			//				case csInvalid:
-			//					setClashSet(dep);
-			//					return;
-			//				default:
-			//					return;
-			//			}
 		}
 		List<ConceptWDep> list = node.beginl_cc();
 		for (int i = 0; i < list.size(); i++) {
@@ -1382,15 +1371,6 @@ public class DlSatTester {
 				}
 				return;
 			}
-			//			switch (merge) {
-			//				case csValid:
-			//					break;
-			//				case csInvalid:
-			//					setClashSet(dep);
-			//					return;
-			//				default:
-			//					return;
-			//			}
 		}
 		// all concepts in label are mergable; now try to add input arc
 		newNodeEdges.clear();
@@ -1475,8 +1455,6 @@ public class DlSatTester {
 
 	private boolean checkSatisfiability() {
 		int loop = 0;
-		//		CGraph.prepareForContains();
-		//		try {
 		for (;;) {
 			if (curNode == null) {
 				if (TODO.isEmpty()) {
@@ -1489,8 +1467,6 @@ public class DlSatTester {
 					if (IfDefs._USE_LOGGING) {
 						LL.print("]");
 					}
-					//TODO just added from FaCT
-					//dBlocked = null;
 					if (TODO.isEmpty()) {
 						return true;
 					}
@@ -1499,7 +1475,7 @@ public class DlSatTester {
 				assert curTDE != null;
 				curNode = curTDE.getNode();
 				curConceptConcept = curTDE.getOffsetConcept();
-				curConceptDepSet=new DepSet(curTDE.getOffsetDepSet());
+				curConceptDepSet = new DepSet(curTDE.getOffsetDepSet());
 			}
 			if (++loop == 5000) {
 				loop = 0;
@@ -1511,29 +1487,23 @@ public class DlSatTester {
 				}
 			}
 			if (commonTactic()) {
-				//System.out.print("DlSatTester.checkSatisfiability()");
 				if (tunedRestore()) {
-					//System.out.println(" exit");
 					return false;
 				}
-				//				System.out.println(" another round");
 			} else {
 				curNode = null;
 			}
 		}
-		//		} finally {
-		//			CGraph.clearForContains();
-		//		}
 	}
 
 	private void restoreBC() {
 		curNode = bContext.node;
 		if (bContext.concept == null) {
 			curConceptConcept = Helper.bpINVALID;
-			curConceptDepSet=new DepSet();
+			curConceptDepSet = new DepSet();
 		} else {
 			curConceptConcept = bContext.concept.getConcept();
-curConceptDepSet=DepSetFactory.create( bContext.concept.getDep());
+			curConceptDepSet = DepSetFactory.create(bContext.concept.getDep());
 		}
 		updateBranchDep();
 		bContext.nextOption();
@@ -1596,7 +1566,7 @@ curConceptDepSet=DepSetFactory.create( bContext.concept.getDep());
 		if (curConceptDepSet != null) {
 			curConceptDepSet.Print(LL);
 		}
-//		curConcept.print(LL);
+		//		curConcept.print(LL);
 		LL.print("){");
 		if (curConceptConcept < 0) {
 			LL.print("~");
@@ -1765,7 +1735,7 @@ curConceptDepSet=DepSetFactory.create( bContext.concept.getDep());
 
 	private boolean commonTacticBodyAnd(final DLVertex cur) {
 		stats.nAndCalls.inc();
-//		DepSet dep = curConceptDepSet;
+		//		DepSet dep = curConceptDepSet;
 		// FIXME!! I don't know why, but performance is usually BETTER if using r-iters.
 		// It's their only usage, so after investigation they can be dropped
 		int[] begin = cur.begin();
@@ -1921,8 +1891,9 @@ curConceptDepSet=DepSetFactory.create( bContext.concept.getDep());
 		stats.nAllCalls.inc();
 		// check all neighbours; as the role is simple then recognise() == applicable()
 		List<DlCompletionTreeArc> neighbour = curNode.getNeighbour();
-		int size=neighbour.size();
-		for (int i=0;i<size;i++){DlCompletionTreeArc p = neighbour.get(i);
+		int size = neighbour.size();
+		for (int i = 0; i < size; i++) {
+			DlCompletionTreeArc p = neighbour.get(i);
 			if (RST.recognise(p.getRole())) {
 				if (addToDoEntry(p.getArcEnd(), C, DepSetFactory.plus(curConceptDepSet, p.getDep()), null)) {
 					return true;
@@ -2654,8 +2625,9 @@ curConceptDepSet=DepSetFactory.create( bContext.concept.getDep());
 	}
 
 	boolean isNewEdge(final DlCompletionTree node, List<DlCompletionTreeArc> e) {
-		for (DlCompletionTreeArc q : e) {
-			if (q.getArcEnd().equals(node)) {
+		int size = e.size();
+		for (int i = 0; i < size; i++) {
+			if (e.get(i).getArcEnd().equals(node)) {
 				return false;
 			}
 		}

@@ -156,7 +156,6 @@ public final class NominalReasoner extends DlSatTester {
 		if (!curNode.isNominalNode()) {
 			return false;
 		}
-		//XXX in this reasoner this should not happen - should be in nominalreasoner
 		if (curNode.isLabelledBy(stopper)) {
 			return false;
 		}

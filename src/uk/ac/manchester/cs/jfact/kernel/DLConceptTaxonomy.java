@@ -241,8 +241,9 @@ public final class DLConceptTaxonomy extends Taxonomy {
 		++nSearchCalls;
 		boolean noPosSucc = true;
 		List<TaxonomyVertex> neigh = cur.neigh(upDirection);
-		int size=neigh.size();
-		for (int i=0;i<size;i++) { TaxonomyVertex p = neigh.get(i);
+		int size = neigh.size();
+		for (int i = 0; i < size; i++) {
+			TaxonomyVertex p = neigh.get(i);
 			if (enhancedSubs(upDirection, p)) {
 				if (!p.isChecked(checkLabel)) {
 					searchBaader(upDirection, p);
@@ -263,7 +264,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 		++nNonTrivialSubCalls;
 		List<TaxonomyVertex> neigh = cur.neigh(!upDirection);
 		int size = neigh.size();
-		for (int i=0;i<size;i++) {
+		for (int i = 0; i < size; i++) {
 			if (!enhancedSubs(upDirection, neigh.get(i))) {
 				return false;
 			}

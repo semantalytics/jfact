@@ -95,7 +95,8 @@ public class TBox {
 		}
 	}
 
-	private final TLabeller relevance = new TLabeller();
+	//private final TLabeller relevance = new TLabeller();
+	private long relevance = 1;
 	private DLDag DLHeap;
 	/** reasoner for TBox-related queries w/o nominals */
 	private DlSatTester stdReasoner;
@@ -494,7 +495,7 @@ public class TBox {
 
 	/** clear all relevance info */
 	public void clearRelevanceInfo() {
-		relevance.newLabel();
+		relevance++;
 	}
 
 	/** get fresh concept */
@@ -1281,13 +1282,13 @@ public class TBox {
 		if (cache != null) {
 			return cache.getState() != ModelCacheState.csInvalid;
 		}
-		LL.println(String.format("\n-----------\nChecking satisfiability of '%s':", pConcept.getName()));
+		LL.println(Templates.IS_SATISFIABLE, pConcept.getName());
 		prepareFeatures(pConcept, null);
 		boolean result = getReasoner().runSat(pConcept.resolveId(), bpTOP);
 		cache = getReasoner().buildCacheByCGraph(result);
 		DLHeap.setCache(pConcept.getpName(), cache);
 		clearFeatures();
-		LL.print(String.format("\nThe '%s' concept is %ssatisfiable w.r.t. TBox", pConcept.getName(), (!result ? "un" : "")));
+		LL.print(Templates.IS_SATISFIABLE1, pConcept.getName(), (!result ? "un" : ""));
 		return result;
 	}
 
@@ -2509,6 +2510,7 @@ class DumpInterface {
 	@SuppressWarnings("unused")
 	public void dumpNumber(int n) {
 	}
+
 	@SuppressWarnings("unused")
 	public void startOp(DIOp Op) {
 	}
@@ -2517,18 +2519,23 @@ class DumpInterface {
 	@SuppressWarnings("unused")
 	public void startOp(DIOp Op, int n) {
 	}
+
 	@SuppressWarnings("unused")
 	public void contOp(DIOp Op) {
 	}
+
 	@SuppressWarnings("unused")
 	public void finishOp(DIOp Op) {
 	}
+
 	@SuppressWarnings("unused")
 	public void startAx(DIOp Ax) {
 	}
+
 	@SuppressWarnings("unused")
 	public void contAx(DIOp Ax) {
 	}
+
 	@SuppressWarnings("unused")
 	public void finishAx(DIOp Ax) {
 	}

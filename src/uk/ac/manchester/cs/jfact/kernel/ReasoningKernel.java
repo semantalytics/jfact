@@ -186,12 +186,9 @@ public final class ReasoningKernel {
 		// classified => do the taxonomy traversal
 		SupConceptActor actor = new SupConceptActor(D);
 		Taxonomy tax = getCTaxonomy();
-		//TODO this appears to be a use of exceptions as a means of breaking through a cycle
-		try {
-			tax.getRelativesInfo(C.getTaxVertex(), actor, true, false, true);
+		if (tax.getRelativesInfo(C.getTaxVertex(), actor, true, false, true)) {
 			return false;
-		} catch (RuntimeException e) {
-			//e.printStackTrace();
+		} else {
 			tax.clearCheckedLabel();
 			return true;
 		}

@@ -246,20 +246,6 @@ public final class DLDag {
 
 	public void removeAfter(int n) {
 		assert n < size();
-		//while (n < Heap.size()) {
-		//TODO check: looks useless
-		//			switch (Heap.get(n).Type()) {
-		//				case dtDataType:
-		//				case dtDataValue:
-		//				case dtDataExpr:
-		//					((TDataEntry) Heap.get(n).getConcept()).setBP(bpINVALID);
-		//					break;
-		//				default:
-		//					break;
-		//			}
-		//Heap.remove(n);
-		//delete p;
-		//}
 		Helper.resize(Heap, n);
 	}
 

@@ -21,9 +21,8 @@ public final class CWDArray {
 	private final List<ConceptWDep> Base = new ArrayList<ConceptWDep>();
 	private BitSet cache;
 	private final ArrayIntMap indexes = new ArrayIntMap();
-	private boolean createCache=false;
-	
-	private final static int cacheLimit=8;
+	private boolean createCache = false;
+	private final static int cacheLimit = 8;
 
 	//private FastSet containedConcepts =  new IntSet();
 	/** init/clear label */
@@ -31,7 +30,7 @@ public final class CWDArray {
 		Base.clear();
 		cache = null;
 		indexes.clear();
-		createCache=false;
+		createCache = false;
 	}
 
 	public List<ConceptWDep> getBase() {
@@ -50,7 +49,7 @@ public final class CWDArray {
 			cache.set(asPositive(p.getConcept()));
 		}
 		indexes.put(p.getConcept(), Base.size() - 1);
-		createCache=Base.size()>cacheLimit;
+		createCache = Base.size() > cacheLimit;
 	}
 
 	/** check whether label contains BP (ignoring dep-set) */

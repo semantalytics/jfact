@@ -29,9 +29,9 @@ public final class RoleAutomaton {
 	private boolean ISafe;
 	/** flag whether automaton is output safe */
 	private boolean OSafe;
+
 	/** flag for the automaton to be completed */
 	//private boolean Complete;
-
 	/** make sure that STATE exists in the automaton (update ton's size) */
 	private void ensureState(int state) {
 		//if(Base.size()==state+1) {

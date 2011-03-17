@@ -20,7 +20,7 @@ public final class LeveLogger {
 				"Init useSemanticBranching = %s\nInit useBackjumping = %s\nInit useLazyBlocking  = %s\nInit useAnywhereBlocking = %s\n"), PRINT_STAT("Heap size = %s nodes\nThere were %s cache hits\n"), REPORT1(" cached(%s)"), SAVE(" ss(%s)"), ISSUBHOLDS1(
 				"\n----------------------\nChecking subsumption '%s [= %s':\n"), ISSUBHOLDS2("\nThe '%s [= %s' subsumption%s holds w.r.t. TBox"), INCORPORATE("\nTAX:inserting '%s' with up = {"), MERGE(" m(%s->%s)"), RESTORE(" sr(%s)"), CLASSIFY_CONCEPTS(
 				"\n\n---Start classifying %s concepts"), CLASSIFY_CONCEPTS2("\n---Done: %s %s concepts classified"), READ_CONFIG("Init useCompletelyDefined = %s\nInit useRelevantOnly = %s\nInit dumpQuery = %s\nInit alwaysPreferEquals = %s\nInit usePrecompletion = %s"), TOLD_SUBSUMERS(
-				" '%s'"), TRANSFORM_TOLD_CYCLES("\nTold cycle elimination done with %s synonyms created");
+				" '%s'"), TRANSFORM_TOLD_CYCLES("\nTold cycle elimination done with %s synonyms created"), IS_SATISFIABLE("\n-----------\nChecking satisfiability of '%s':"), IS_SATISFIABLE1("\nThe '%s' concept is %ssatisfiable w.r.t. TBox");
 		private final String template;
 
 		private Templates(String s) {

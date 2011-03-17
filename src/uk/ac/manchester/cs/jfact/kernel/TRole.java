@@ -394,13 +394,13 @@ public class TRole extends ClassifiableEntry {
 
 	// relevance
 	/** is given role relevant to given Labeller's state */
-	public boolean isRelevant(final TLabeller lab) {
-		return lab.isLabelled(rel);
+	public boolean isRelevant(long lab) {
+		return lab == rel;
 	}
 
 	/** make given role relevant to given Labeller's state */
-	public void setRelevant(final TLabeller lab) {
-		rel = lab.getLabel();
+	public void setRelevant(long lab) {
+		rel = lab;
 	}
 
 	// Sorted reasoning interface

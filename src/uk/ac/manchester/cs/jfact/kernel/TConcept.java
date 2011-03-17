@@ -538,17 +538,17 @@ public class TConcept extends ClassifiableEntry {
 
 	// relevance part
 	/** is given concept relevant to given Labeller's state */
-	public boolean isRelevant(final TLabeller lab) {
-		return lab.isLabelled(rel);
+	public boolean isRelevant(long lab) {
+		return lab == rel;
 	}
 
 	/** make given concept relevant to given Labeller's state */
-	public void setRelevant(final TLabeller lab) {
-		rel = lab.getLabel();
+	public void setRelevant(long lab) {
+		rel = lab;
 	}
 
 	/** make given concept irrelevant to given Labeller's state */
-	public void dropRelevant(final TLabeller lab) {
+	public void dropRelevant(long lab) {
 		rel = 0;//lab.clear(rel); 
 	}
 }

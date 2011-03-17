@@ -12,24 +12,25 @@ import uk.ac.manchester.cs.jfact.kernel.TaxonomyVertex;
 public class SupConceptActor implements Actor {
 	protected final ClassifiableEntry pe;
 
-	private void entry(ClassifiableEntry q) {
-		if (pe.equals(q)) {
-			throw new RuntimeException();
-		}
-	}
-
+	//	private void entry(ClassifiableEntry q) {
+	//		if (pe.equals(q)) {
+	//			throw new RuntimeException();
+	//		}
+	//	}
 	public SupConceptActor(ClassifiableEntry q) {
 		pe = q;
 	}
 
 	public boolean apply(TaxonomyVertex v) {
-		entry(v.getPrimer());
-		if(v.begin_syn().contains(pe)) {
-			throw new RuntimeException();
+		//entry(v.getPrimer());
+		//XXX this needs refining, it's using exceptions to close cycles early
+		if (pe.equals(v.getPrimer()) || v.begin_syn().contains(pe)) {
+			return false;
+			//throw new RuntimeException();
 		}
-//		for (ClassifiableEntry p : v.begin_syn()) {
-//			entry(p);
-//		}
+		//		for (ClassifiableEntry p : v.begin_syn()) {
+		//			entry(p);
+		//		}
 		return true;
 	}
 }

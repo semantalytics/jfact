@@ -11,8 +11,6 @@ import static uk.ac.manchester.cs.jfact.kernel.ToDoPriorMatrix.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
@@ -205,9 +203,8 @@ public class ToDoList {
 			} else {
 				// save just end pointer
 				Helper.resize(_Wait, tss.ep);
-				size=tss.ep;
+				size = tss.ep;
 			}
-
 		}
 
 		@Override
@@ -232,51 +229,50 @@ public class ToDoList {
 		TODOListSaveState() {
 		}
 
-//		private static final ConcurrentLinkedQueue<SaveState> states = new ConcurrentLinkedQueue<ToDoList.SaveState>();
-//		private static final AtomicInteger statesSize = new AtomicInteger(0);
-//		private final static int limit=100;
-//		static {
-//			
-//			Thread stateFiller = new Thread() {
-//				@Override
-//				public void run() {
-//					while (true) {
-//						if (statesSize.get() < limit) {
-//							for (int i = 0; i < limit; i++) {
-//								states.add(new SaveState());
-//							}
-//							statesSize.addAndGet(limit);
-//						}
-////						try {
-////							Thread.currentThread().sleep(5);
-////						} catch (InterruptedException e) {
-////							e.printStackTrace();
-////						}
-//					}
-//				}
-//			};
-//			stateFiller.setDaemon(true);
-//			stateFiller.start();
-//		}
-//
-//		public static final SaveState getInstance() {
-//			if(statesSize.get()==0) {
-//				System.err.println("ToDoList.SaveState.getInstance() waiting...");
-//while(statesSize.get()==0) {
-//	//wait
-//}
-//			}
-//			SaveState toReturn =  states.poll();
-//			if (toReturn == null) {
-//				System.err.println("ToDoList.SaveState.getInstance() STILL waiting...");
-//				while (toReturn == null) {
-//					toReturn = states.poll();
-//				}
-//			}
-//			statesSize.decrementAndGet();
-//			return toReturn;
-//		}
-
+		//		private static final ConcurrentLinkedQueue<SaveState> states = new ConcurrentLinkedQueue<ToDoList.SaveState>();
+		//		private static final AtomicInteger statesSize = new AtomicInteger(0);
+		//		private final static int limit=100;
+		//		static {
+		//			
+		//			Thread stateFiller = new Thread() {
+		//				@Override
+		//				public void run() {
+		//					while (true) {
+		//						if (statesSize.get() < limit) {
+		//							for (int i = 0; i < limit; i++) {
+		//								states.add(new SaveState());
+		//							}
+		//							statesSize.addAndGet(limit);
+		//						}
+		////						try {
+		////							Thread.currentThread().sleep(5);
+		////						} catch (InterruptedException e) {
+		////							e.printStackTrace();
+		////						}
+		//					}
+		//				}
+		//			};
+		//			stateFiller.setDaemon(true);
+		//			stateFiller.start();
+		//		}
+		//
+		//		public static final SaveState getInstance() {
+		//			if(statesSize.get()==0) {
+		//				System.err.println("ToDoList.SaveState.getInstance() waiting...");
+		//while(statesSize.get()==0) {
+		//	//wait
+		//}
+		//			}
+		//			SaveState toReturn =  states.poll();
+		//			if (toReturn == null) {
+		//				System.err.println("ToDoList.SaveState.getInstance() STILL waiting...");
+		//				while (toReturn == null) {
+		//					toReturn = states.poll();
+		//				}
+		//			}
+		//			statesSize.decrementAndGet();
+		//			return toReturn;
+		//		}
 		@Override
 		public String toString() {
 			return "" + noe + " " + backupID_sp + "," + backupID_ep + " " + backupNN + " " + Arrays.toString(backup);
