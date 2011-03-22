@@ -10,10 +10,9 @@ import java.util.Arrays;
 public final class IntList extends AbstractFastSet {
 	protected int[] values;
 	protected int size = 0;
-	protected static int defaultSize = 16;
+	protected static final int defaultSize = 16;
 
 	public IntList() {
-		//cache = new IntCache();
 	}
 
 	public final int get(int i) {
@@ -36,7 +35,6 @@ public final class IntList extends AbstractFastSet {
 		if (size >= values.length) {
 			// no space left, increase
 			values = Arrays.copyOf(values, values.length + defaultSize);
-			//pad(size);
 		}
 		values[size] = e;
 		size++;
@@ -46,7 +44,6 @@ public final class IntList extends AbstractFastSet {
 		if (c.isEmpty()) {
 			return;
 		}
-		//		cache.resetNotContained();
 		// merge two sorted arrays: how bad can it be?
 		if (values == null) {
 			//extreme case: just copy the other set
@@ -156,6 +153,11 @@ public final class IntList extends AbstractFastSet {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public final int hashCode() {
+		return super.hashCode();
 	}
 
 	public final void removeAt(int i) {

@@ -5,7 +5,7 @@ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
+import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 import static uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry.resolveSynonym;
 
 import java.util.ArrayList;
@@ -25,9 +25,9 @@ import uk.ac.manchester.cs.jfact.kernel.actors.SupConceptActor;
 
 public class Taxonomy {
 	/** array of taxonomy verteces */
-	private final List<TaxonomyVertex> Graph = new ArrayList<TaxonomyVertex>();
+	private final List<TaxonomyVertex> graph = new ArrayList<TaxonomyVertex>();
 	/** aux. vertex to be included to taxonomy */
-	protected TaxonomyVertex Current;
+	protected TaxonomyVertex current;
 	/** pointer to currently classified entry */
 	protected ClassifiableEntry curEntry;
 	/** number of tested entryes */
@@ -54,7 +54,7 @@ public class Taxonomy {
 	 * version is intended to work only with SupConceptActor, which requires the
 	 * method to return as soon as the apply() method returns false
 	 */
-	boolean getRelativesInfo(TaxonomyVertex node, SupConceptActor actor, boolean needCurrent, boolean onlyDirect, boolean upDirection) {
+	public boolean getRelativesInfo(TaxonomyVertex node, SupConceptActor actor, boolean needCurrent, boolean onlyDirect, boolean upDirection) {
 		// if current node processed OK and there is no need to continue -- exit
 		// this is the helper to the case like getDomain():
 		//   if there is a named concept that represent's a domain -- that's what we need
@@ -69,7 +69,7 @@ public class Taxonomy {
 		Queue<List<TaxonomyVertex>> queue = new LinkedList<List<TaxonomyVertex>>();
 		queue.add(node.neigh(upDirection));
 		while (queue.size() > 0) {
-			List<TaxonomyVertex> neigh = queue.remove();// node.neigh(upDirection);
+			List<TaxonomyVertex> neigh = queue.remove();
 			int size = neigh.size();
 			for (int i = 0; i < size; i++) {
 				TaxonomyVertex _node = neigh.get(i);
@@ -95,7 +95,7 @@ public class Taxonomy {
 	}
 
 	/** apply ACTOR to subgraph starting from NODE as defined by flags; */
-	void getRelativesInfo(TaxonomyVertex node, Actor actor, boolean needCurrent, boolean onlyDirect, boolean upDirection) {
+	public void getRelativesInfo(TaxonomyVertex node, Actor actor, boolean needCurrent, boolean onlyDirect, boolean upDirection) {
 		// if current node processed OK and there is no need to continue -- exit
 		// this is the helper to the case like getDomain():
 		//   if there is a named concept that represent's a domain -- that's what we need
@@ -138,35 +138,35 @@ public class Taxonomy {
 
 	/** initialise aux entry with given concept p */
 	private void setCurrentEntry(final ClassifiableEntry p) {
-		Current.clear();
+		current.clear();
 		curEntry = p;
 	}
 
 	/** check if no classification needed (synonym, orphan, unsatisfiable) */
-	boolean immediatelyClassified() {
+	protected boolean immediatelyClassified() {
 		return classifySynonym();
 	}
 
 	/** check if it is possible to skip TD phase */
-	boolean needTopDown() {
+	protected boolean needTopDown() {
 		return false;
 	}
 
 	/** explicitely run TD phase */
-	void runTopDown() {
+	protected void runTopDown() {
 	}
 
 	/** check if it is possible to skip BU phase */
-	boolean needBottomUp() {
+	protected boolean needBottomUp() {
 		return false;
 	}
 
 	/** explicitely run BU phase */
-	void runBottomUp() {
+	protected void runBottomUp() {
 	}
 
 	/** actions that to be done BEFORE entry will be classified */
-	void preClassificationActions() {
+	protected void preClassificationActions() {
 	}
 
 	//--	DFS-based classification
@@ -177,59 +177,51 @@ public class Taxonomy {
 	}
 
 	/** remove top entry */
-	void removeTop() {
+	protected void removeTop() {
 		waitStack.pop();
-		//delete ksStack.top();
 		ksStack.pop();
 	}
 
-	//	int told_begin() {
-	//		return ksStack.peek().s_begin();
-	//	}
-	//
-	//	int told_end() {
-	//		return ksStack.peek().s_end();
-	//	}
 	/** check if it is necessary to log taxonomy action */
-	boolean needLogging() {
+	protected boolean needLogging() {
 		return true;
 	}
 
-	Taxonomy(final ClassifiableEntry pTop, final ClassifiableEntry pBottom) {
-		Current = new TaxonomyVertex();
+	public Taxonomy(final ClassifiableEntry pTop, final ClassifiableEntry pBottom) {
+		current = new TaxonomyVertex();
 		curEntry = null;
 		nEntries = 0;
 		nCDEntries = 0;
 		useCompletelyDefined = false;
 		willInsertIntoTaxonomy = true;
-		Graph.add(new TaxonomyVertex(pBottom)); // bottom
-		Graph.add(new TaxonomyVertex(pTop)); // top
+		graph.add(new TaxonomyVertex(pBottom)); // bottom
+		graph.add(new TaxonomyVertex(pTop)); // top
 	}
 
 	/** special access to TOP of taxonomy */
-	TaxonomyVertex getTopVertex() {
-		return Graph.get(1);
+	public TaxonomyVertex getTopVertex() {
+		return graph.get(1);
 	}
 
 	/** special access to BOTTOM of taxonomy */
-	TaxonomyVertex getBottomVertex() {
-		return Graph.get(0);
+	public TaxonomyVertex getBottomVertex() {
+		return graph.get(0);
 	}
 
 	//--	classification interface
 	// flags interface
 	/** set Completely Defined flag */
-	void setCompletelyDefined(boolean use) {
+	public void setCompletelyDefined(boolean use) {
 		useCompletelyDefined = use;
 	}
 
 	/** call this method after taxonomy is built */
-	void finalise() {
+	public void finalise() {
 		// create links from leaf concepts to bottom
 		final boolean upDirection = false;
 		// TODO maybe useful to index Graph
-		for (int i = 1; i < Graph.size(); i++) {
-			TaxonomyVertex p = Graph.get(i);
+		for (int i = 1; i < graph.size(); i++) {
+			TaxonomyVertex p = graph.get(i);
 			if (p.noNeighbours(upDirection)) {
 				p.addNeighbour(upDirection, getBottomVertex());
 				getBottomVertex().addNeighbour(!upDirection, p);
@@ -238,18 +230,7 @@ public class Taxonomy {
 		willInsertIntoTaxonomy = false; // after finalisation one shouldn't add new entries to taxonomy
 	}
 
-	/** unlink the bottom from the taxonomy */
-	void deFinalise() {
-		boolean upDirection = true;
-		TaxonomyVertex bot = getBottomVertex();
-		for (TaxonomyVertex p : bot.neigh(upDirection)) {
-			p.removeLink(!upDirection, bot);
-		}
-		bot.clearLinks(upDirection);
-		willInsertIntoTaxonomy = true; // it's possible again to add entries
-	}
-
-	void setupTopDown() {
+	private void setupTopDown() {
 		setToldSubsumers();
 		if (!needTopDown()) {
 			++nCDEntries;
@@ -257,10 +238,10 @@ public class Taxonomy {
 		}
 	}
 
-	void print(LogAdapter o) {
+	public void print(LogAdapter o) {
 		o.print(String.format("Taxonomy consists of %s entries\n            of which %s are completely defined\n\nAll entries are in format:\n\"entry\" {n: parent_1 ... parent_n} {m: child_1 child_m}\n\n", nEntries, nCDEntries));
-		for (int i = 1; i < Graph.size(); i++) {
-			TaxonomyVertex p = Graph.get(i);
+		for (int i = 1; i < graph.size(); i++) {
+			TaxonomyVertex p = graph.get(i);
 			p.print(o);
 		}
 		getBottomVertex().print(o);
@@ -273,38 +254,37 @@ public class Taxonomy {
 		return l.toString();
 	}
 
-	void insertCurrent(TaxonomyVertex syn) {
+	public void insertCurrent(TaxonomyVertex syn) {
 		if (willInsertIntoTaxonomy) {
 			// check if current concept is synonym to someone
 			if (syn != null) {
 				syn.addSynonym(curEntry);
-				if (IfDefs._USE_LOGGING) {
-					LL.print("\nTAX:set " + curEntry.getName() + " equal " + syn.getPrimer().getName());
+				if (IfDefs.USE_LOGGING) {
+					logger.print("\nTAX:set " + curEntry.getName() + " equal " + syn.getPrimer().getName());
 				}
 			} else {
 				// just incorporate it as a special entry and save into Graph
-				Current.incorporate(curEntry);
-				Graph.add(Current);
+				current.incorporate(curEntry);
+				graph.add(current);
 				// we used the Current so need to create a new one
-				Current = new TaxonomyVertex();
+				current = new TaxonomyVertex();
 			}
 		} else // check if node is synonym of existing one and copy EXISTING info to Current
 		{
 			if (syn != null) {
-				//				syn.setHostVertex(curEntry);
 				curEntry.setTaxVertex(syn);
 			} else {
-				Current.setSample(curEntry);
+				current.setSample(curEntry);
 			}
 		}
 	}
 
-	void performClassification() {
+	private void performClassification() {
 		// do something before classification (tunable)
 		preClassificationActions();
 		++nEntries;
-		LL.print("\n\nTAX: start classifying entry ");
-		LL.print(curEntry.getName());
+		logger.print("\n\nTAX: start classifying entry ");
+		logger.print(curEntry.getName());
 		// if no classification needed -- nothing to do
 		if (immediatelyClassified()) {
 			return;
@@ -312,12 +292,12 @@ public class Taxonomy {
 		// perform main classification
 		generalTwoPhaseClassification();
 		// create new vertex
-		insertCurrent(Current.isSynonymNode());
+		insertCurrent(current.isSynonymNode());
 		// clear all labels
 		clearLabels();
 	}
 
-	void generalTwoPhaseClassification() {
+	private void generalTwoPhaseClassification() {
 		setupTopDown();
 		if (needTopDown()) {
 			getTopVertex().setValued(true, valueLabel);
@@ -332,7 +312,7 @@ public class Taxonomy {
 		clearLabels();
 	}
 
-	boolean classifySynonym() {
+	protected boolean classifySynonym() {
 		final ClassifiableEntry syn = resolveSynonym(curEntry);
 		if (syn.equals(curEntry)) {
 			return false;
@@ -343,12 +323,12 @@ public class Taxonomy {
 		return true;
 	}
 
-	void setNonRedundantCandidates() {
+	private void setNonRedundantCandidates() {
 		if (!curEntry.hasToldSubsumers()) {
-			LL.print("\nTAX: TOP");
+			logger.print("\nTAX: TOP");
 		}
-		LL.print(" completely defines concept ");
-		LL.print(curEntry.getName());
+		logger.print(" completely defines concept ");
+		logger.print(curEntry.getName());
 		for (ClassifiableEntry p : ksStack.peek()) {
 			TaxonomyVertex par = p.getTaxVertex();
 			boolean stillParent = true;
@@ -359,20 +339,20 @@ public class Taxonomy {
 				}
 			}
 			if (stillParent) {
-				Current.addNeighbour(true, par);
+				current.addNeighbour(true, par);
 			}
 		}
 	}
 
-	void setToldSubsumers() {
+	private void setToldSubsumers() {
 		Collection<ClassifiableEntry> top = ksStack.peek();
 		if (needLogging() && !top.isEmpty()) {
-			LL.print("\nTAX: told subsumers");
+			logger.print("\nTAX: told subsumers");
 		}
 		for (ClassifiableEntry p : top) {
 			if (p.isClassified()) {
 				if (needLogging()) {
-					LL.print(Templates.TOLD_SUBSUMERS, p.getName());
+					logger.print(Templates.TOLD_SUBSUMERS, p.getName());
 				}
 				propagateTrueUp(p.getTaxVertex());
 			}
@@ -386,7 +366,7 @@ public class Taxonomy {
 		//		}
 	}
 
-	void classifyEntry(ClassifiableEntry p) {
+	public void classifyEntry(ClassifiableEntry p) {
 		assert waitStack.isEmpty();
 		if (p.isNonClassifiable()) {
 			return;
@@ -420,21 +400,21 @@ public class Taxonomy {
 		return ret;
 	}
 
-	void classifyTop() {
+	private void classifyTop() {
 		assert !waitStack.isEmpty();
 		// load last concept
 		setCurrentEntry(waitStack.peek());
 		if (IfDefs.TMP_PRINT_TAXONOMY_INFO) {
-			LL.print("\nTrying classify" + (curEntry.isCompletelyDefined() ? " CD " : " ") + curEntry.getName() + "... ");
+			logger.print("\nTrying classify" + (curEntry.isCompletelyDefined() ? " CD " : " ") + curEntry.getName() + "... ");
 		}
 		performClassification();
 		if (IfDefs.TMP_PRINT_TAXONOMY_INFO) {
-			LL.print("done");
+			logger.print("done");
 		}
 		removeTop();
 	}
 
-	void classifyCycle() {
+	private void classifyCycle() {
 		assert !waitStack.isEmpty();
 		ClassifiableEntry p = waitStack.peek();
 		classifyTop();
@@ -451,7 +431,7 @@ public class Taxonomy {
 		throw new ReasonerInternalException(b.toString());
 	}
 
-	void propagateTrueUp(TaxonomyVertex node) {
+	private void propagateTrueUp(TaxonomyVertex node) {
 		// if taxonomy class already checked -- do nothing
 		if (node.isValued(valueLabel)) {
 			assert node.getValue();
@@ -465,18 +445,4 @@ public class Taxonomy {
 			propagateTrueUp(list.get(i));
 		}
 	}
-	//	void propagateOneCommon(TaxonomyVertex node, List<TaxonomyVertex> visited) {
-	//		// checked if node already was visited this session
-	//		if (node.isChecked(checkLabel)) {
-	//			return;
-	//		}
-	//		// mark node visited
-	//		node.setChecked(checkLabel);
-	//		node.setCommon();
-	//		visited.add(node);
-	//		// mark all children
-	//		for (TaxonomyVertex p : node.begin(/*upDirection=*/false)) {
-	//			propagateOneCommon(p, visited);
-	//		}
-	//	}
 }

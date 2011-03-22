@@ -9,7 +9,6 @@ import java.util.Arrays;
 
 public final class IntSet extends AbstractFastSet {
 	private final static int size = 17;
-	//private final static int hashbase = size - 1;
 	FastSetSimple[] hashvalues = new FastSetSimple[size];
 
 	private int hash(int value) {
@@ -22,19 +21,6 @@ public final class IntSet extends AbstractFastSet {
 	}
 
 	public boolean contains(int key) {
-		//		{
-		//			StringBuilder b = new StringBuilder("IntSet[");
-		//			for (FastSet f : hashvalues) {
-		//				if (f != null) {
-		//					b.append(f.size());
-		//				} else {
-		//					b.append("0");
-		//				}
-		//				b.append(',');
-		//			}
-		//			b.append(']');
-		//			System.out.println(b.toString());
-		//		}
 		int hash = hash(key);
 		if (hashvalues[hash] == null) {
 			return false;
@@ -145,7 +131,7 @@ public final class IntSet extends AbstractFastSet {
 			}
 			Arrays.sort(allValues);
 		}
-		return allValues;
+		return Arrays.copyOf(allValues, size);
 	}
 
 	public boolean intersect(FastSet f) {

@@ -5,143 +5,143 @@ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import uk.ac.manchester.cs.jfact.kernel.datatype.TDLDataValue;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptAnd;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptBottom;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptDataExactCardinality;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptDataExists;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptDataForall;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptDataMaxCardinality;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptDataMinCardinality;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptDataValue;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptName;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptNot;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptObjectExactCardinality;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptObjectExists;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptObjectForall;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptObjectMaxCardinality;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptObjectMinCardinality;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptObjectSelf;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptObjectValue;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptOneOf;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptOr;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLConceptTop;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataAnd;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataBottom;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataNot;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataOneOf;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataOr;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataRoleBottom;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataRoleName;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataRoleTop;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataTop;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataTypeName;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataTypeRestriction;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLFacetMaxExclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLFacetMaxInclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLFacetMinExclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLFacetMinInclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLIndividualName;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLObjectRoleBottom;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLObjectRoleChain;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLObjectRoleInverse;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLObjectRoleName;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLObjectRoleProjectionFrom;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLObjectRoleProjectionInto;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLObjectRoleTop;
+import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptAnd;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptBottom;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataExactCardinality;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataExists;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataForall;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataMaxCardinality;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataMinCardinality;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataValue;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptName;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptNot;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptObjectExactCardinality;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptObjectExists;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptObjectForall;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptObjectMaxCardinality;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptObjectMinCardinality;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptObjectSelf;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptObjectValue;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptOneOf;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptOr;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptTop;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataAnd;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataBottom;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataNot;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataOneOf;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataOr;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleBottom;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleName;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleTop;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataTop;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeRestriction;
+import uk.ac.manchester.cs.jfact.kernel.dl.FacetMaxExclusive;
+import uk.ac.manchester.cs.jfact.kernel.dl.FacetMaxInclusive;
+import uk.ac.manchester.cs.jfact.kernel.dl.FacetMinExclusive;
+import uk.ac.manchester.cs.jfact.kernel.dl.FacetMinInclusive;
+import uk.ac.manchester.cs.jfact.kernel.dl.IndividualName;
+import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleBottom;
+import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleChain;
+import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleInverse;
+import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleName;
+import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionFrom;
+import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionInto;
+import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleTop;
 
 public interface DLExpressionVisitorEx<O> {
 	// concept expressions
-	public O visit(TDLConceptTop expr);
+	public O visit(ConceptTop expr);
 
-	public O visit(TDLConceptBottom expr);
+	public O visit(ConceptBottom expr);
 
-	public O visit(TDLConceptName expr);
+	public O visit(ConceptName expr);
 
-	public O visit(TDLConceptNot expr);
+	public O visit(ConceptNot expr);
 
-	public O visit(TDLConceptAnd expr);
+	public O visit(ConceptAnd expr);
 
-	public O visit(TDLConceptOr expr);
+	public O visit(ConceptOr expr);
 
-	public O visit(TDLConceptOneOf expr);
+	public O visit(ConceptOneOf expr);
 
-	public O visit(TDLConceptObjectSelf expr);
+	public O visit(ConceptObjectSelf expr);
 
-	public O visit(TDLConceptObjectValue expr);
+	public O visit(ConceptObjectValue expr);
 
-	public O visit(TDLConceptObjectExists expr);
+	public O visit(ConceptObjectExists expr);
 
-	public O visit(TDLConceptObjectForall expr);
+	public O visit(ConceptObjectForall expr);
 
-	public O visit(TDLConceptObjectMinCardinality expr);
+	public O visit(ConceptObjectMinCardinality expr);
 
-	public O visit(TDLConceptObjectMaxCardinality expr);
+	public O visit(ConceptObjectMaxCardinality expr);
 
-	public O visit(TDLConceptObjectExactCardinality expr);
+	public O visit(ConceptObjectExactCardinality expr);
 
-	public O visit(TDLConceptDataValue expr);
+	public O visit(ConceptDataValue expr);
 
-	public O visit(TDLConceptDataExists expr);
+	public O visit(ConceptDataExists expr);
 
-	public O visit(TDLConceptDataForall expr);
+	public O visit(ConceptDataForall expr);
 
-	public O visit(TDLConceptDataMinCardinality expr);
+	public O visit(ConceptDataMinCardinality expr);
 
-	public O visit(TDLConceptDataMaxCardinality expr);
+	public O visit(ConceptDataMaxCardinality expr);
 
-	public O visit(TDLConceptDataExactCardinality expr);
+	public O visit(ConceptDataExactCardinality expr);
 
 	// individual expressions
-	public O visit(TDLIndividualName expr);
+	public O visit(IndividualName expr);
 
 	// object role expressions
-	public O visit(TDLObjectRoleTop expr);
+	public O visit(ObjectRoleTop expr);
 
-	public O visit(TDLObjectRoleBottom expr);
+	public O visit(ObjectRoleBottom expr);
 
-	public O visit(TDLObjectRoleName expr);
+	public O visit(ObjectRoleName expr);
 
-	public O visit(TDLObjectRoleInverse expr);
+	public O visit(ObjectRoleInverse expr);
 
-	public O visit(TDLObjectRoleChain expr);
+	public O visit(ObjectRoleChain expr);
 
-	public O visit(TDLObjectRoleProjectionFrom expr);
+	public O visit(ObjectRoleProjectionFrom expr);
 
-	public O visit(TDLObjectRoleProjectionInto expr);
+	public O visit(ObjectRoleProjectionInto expr);
 
 	// data role expressions
-	public O visit(TDLDataRoleTop expr);
+	public O visit(DataRoleTop expr);
 
-	public O visit(TDLDataRoleBottom expr);
+	public O visit(DataRoleBottom expr);
 
-	public O visit(TDLDataRoleName expr);
+	public O visit(DataRoleName expr);
 
 	// data expressions
-	public O visit(TDLDataTop expr);
+	public O visit(DataTop expr);
 
-	public O visit(TDLDataBottom expr);
+	public O visit(DataBottom expr);
 
-	public O visit(TDLDataTypeName expr);
+	public O visit(DataTypeName expr);
 
-	public O visit(TDLDataTypeRestriction expr);
+	public O visit(DataTypeRestriction expr);
 
-	public O visit(TDLDataValue expr);
+	public O visit(DataValue expr);
 
-	public O visit(TDLDataNot expr);
+	public O visit(DataNot expr);
 
-	public O visit(TDLDataAnd expr);
+	public O visit(DataAnd expr);
 
-	public O visit(TDLDataOr expr);
+	public O visit(DataOr expr);
 
-	public O visit(TDLDataOneOf expr);
+	public O visit(DataOneOf expr);
 
 	// facets
-	public O visit(TDLFacetMinInclusive expr);
+	public O visit(FacetMinInclusive expr);
 
-	public O visit(TDLFacetMinExclusive expr);
+	public O visit(FacetMinExclusive expr);
 
-	public O visit(TDLFacetMaxInclusive expr);
+	public O visit(FacetMaxInclusive expr);
 
-	public O visit(TDLFacetMaxExclusive expr);
+	public O visit(FacetMaxExclusive expr);
 }

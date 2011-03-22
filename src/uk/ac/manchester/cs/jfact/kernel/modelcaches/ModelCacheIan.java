@@ -5,7 +5,7 @@ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
+import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 import static uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheState.*;
 import static uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheType.mctIan;
 
@@ -24,7 +24,7 @@ import uk.ac.manchester.cs.jfact.kernel.DlCompletionTree;
 import uk.ac.manchester.cs.jfact.kernel.DlCompletionTreeArc;
 import uk.ac.manchester.cs.jfact.kernel.RAStateTransitions;
 import uk.ac.manchester.cs.jfact.kernel.RATransition;
-import uk.ac.manchester.cs.jfact.kernel.TRole;
+import uk.ac.manchester.cs.jfact.kernel.Role;
 
 public final class ModelCacheIan extends ModelCacheInterface {
 	// sets for the cache
@@ -82,17 +82,17 @@ public final class ModelCacheIan extends ModelCacheInterface {
 		return curState;
 	}
 
-	BitSet getDConcepts(boolean pos) {
+	private BitSet getDConcepts(boolean pos) {
 		return pos ? posDConcepts : negDConcepts;
 	}
 
 	/** get RW access to N-concepts wrt polarity */
-	BitSet getNConcepts(boolean pos) {
+	private BitSet getNConcepts(boolean pos) {
 		return pos ? posNConcepts : negNConcepts;
 	}
 
 	/** get RW access to extra concepts wrt deterministic flag */
-	FastSet getExtra(boolean det) {
+	private FastSet getExtra(boolean det) {
 		return det ? extraDConcepts : extraNConcepts;
 	}
 
@@ -139,7 +139,7 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	}
 
 	public void processConcept(final DLVertex cur, boolean pos, boolean det) {
-		switch (cur.Type()) {
+		switch (cur.getType()) {
 			case dtTop:
 			case dtDataType:
 			case dtDataValue:
@@ -175,14 +175,14 @@ public final class ModelCacheIan extends ModelCacheInterface {
 		// add the role that is accepted by a transition
 		List<RATransition> begin = RST.begin();
 		for (int i = 0; i < begin.size(); i++) {
-			for (TRole r : begin.get(i).begin()) {
+			for (Role r : begin.get(i).begin()) {
 				forallRoles.add(r.index());
 			}
 		}
 	}
 
 	/** adds role to exists- and func-role if necessary */
-	void addRoleToCache(TRole R) {
+	private void addRoleToCache(Role R) {
 		existsRoles.add(R.index());
 		if (R.isTopFunc()) {
 			funcRoles.add(R.index());
@@ -190,9 +190,9 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	}
 
 	/** adds role (and all its super-roles) to exists- and funcRoles */
-	void addExistsRole(TRole R) {
+	private void addExistsRole(Role R) {
 		addRoleToCache(R);
-		List<TRole> list = R.getAncestor();
+		List<Role> list = R.getAncestor();
 		int size = list.size();
 		for (int i = 0; i < size; i++) {
 			addRoleToCache(list.get(i));
@@ -270,7 +270,7 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	}
 
 	/** actual merge with a singleton cache */
-	void mergeSingleton(int Singleton, boolean pos) {
+	private void mergeSingleton(int Singleton, boolean pos) {
 		ModelCacheState newState = isMergableSingleton(Singleton, pos);
 		if (newState != csValid) {
 			curState = mergeStatus(curState, newState);
@@ -280,7 +280,7 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	}
 
 	/** actual merge with an Ian's cache */
-	void mergeIan(ModelCacheIan p) {
+	private void mergeIan(ModelCacheIan p) {
 		// setup curState
 		curState = isMergableIan(p);
 		// merge all sets:
@@ -299,26 +299,26 @@ public final class ModelCacheIan extends ModelCacheInterface {
 
 	@Override
 	public void logCacheEntry(int level) {
-		LL.print("\nIan cache: posDConcepts = ");
+		logger.print("\nIan cache: posDConcepts = ");
 		logCacheSet(posDConcepts.toString());
-		LL.print(", posNConcepts = ");
+		logger.print(", posNConcepts = ");
 		logCacheSet(posNConcepts.toString());
-		LL.print(", negDConcepts = ");
+		logger.print(", negDConcepts = ");
 		logCacheSet(negDConcepts.toString());
-		LL.print(", negNConcepts = ");
+		logger.print(", negNConcepts = ");
 		logCacheSet(negNConcepts.toString());
-		LL.print(", existsRoles = ");
+		logger.print(", existsRoles = ");
 		logCacheSet(existsRoles.toString());
-		LL.print(", forallRoles = ");
+		logger.print(", forallRoles = ");
 		logCacheSet(forallRoles.toString());
-		LL.print(", funcRoles = ");
+		logger.print(", funcRoles = ");
 		logCacheSet(funcRoles.toString());
 	}
 
 	private void logCacheSet(String s) {
-		LL.print("{");
-		LL.print(s);
-		LL.print("}");
+		logger.print("{");
+		logger.print(s);
+		logger.print("}");
 	}
 
 	private ModelCacheState mergeStatus(ModelCacheState s1, ModelCacheState s2) {

@@ -68,8 +68,5 @@ public enum DagTag {
 	/** @return true iff TAG represents complex concept */
 	public boolean isComplexConcept() {
 		return complexConceptsEnumSet.contains(this);
-		//		tag == DagTag.dtForall || tag == DagTag.dtLE
-		//				|| tag == DagTag.dtIrr || tag == DagTag.dtUAll
-		//				|| tag == DagTag.dtNN;
 	}
 }

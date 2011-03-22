@@ -10,10 +10,10 @@ import java.util.Map;
 
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 
-public class InAx {
+public final class InAx {
 	/** build an RW concept from a given [C|I]NAME-rooted DLTree */
-	static TConcept getConcept(DLTree p) {
-		return (TConcept) p.elem().getNE();
+	static Concept getConcept(DLTree p) {
+		return (Concept) p.elem().getNE();
 	}
 
 	/// @return true iff P is a TOP
@@ -28,17 +28,17 @@ public class InAx {
 
 	/// @return true iff P is a positive concept name
 	static boolean isPosCN(DLTree p) {
-		return p.isNOT() && p.Child().isName();
+		return p.isNOT() && p.getChild().isName();
 	}
 
 	/// @return true iff P is a positive non-primitive CN
 	static boolean isPosNP(DLTree p) {
-		return isPosCN(p) && !getConcept(p.Child()).isPrimitive();
+		return isPosCN(p) && !getConcept(p.getChild()).isPrimitive();
 	}
 
 	/// @return true iff P is a positive primitive CN
 	static boolean isPosPC(DLTree p) {
-		return isPosCN(p) && getConcept(p.Child()).isPrimitive();
+		return isPosCN(p) && getConcept(p.getChild()).isPrimitive();
 	}
 
 	/// @return true iff P is a negative concept name
@@ -58,7 +58,7 @@ public class InAx {
 
 	/** check whether P is in the form (and C D) */
 	static boolean isAnd(final DLTree p) {
-		return p.isNOT() && p.Child().isAND();
+		return p.isNOT() && p.getChild().isAND();
 	}
 
 	/// @return true iff P is an OR expression
@@ -68,19 +68,19 @@ public class InAx {
 
 	/// @return true iff P is a general FORALL expression
 	static boolean isForall(DLTree p) {
-		return p.isNOT() && p.Child().token() == Token.FORALL;
+		return p.isNOT() && p.getChild().token() == Token.FORALL;
 	}
 
 	/// @return true iff P is an object FORALL expression
 	static boolean isOForall(DLTree p) {
-		return isForall(p) && !TRole.resolveRole(p.Child().Left()).isDataRole();
+		return isForall(p) && !Role.resolveRole(p.getChild().getLeft()).isDataRole();
 	}
 
 	/// @return true iff P is a FORALL expression suitable for absorption
 	static boolean isAbsForall(DLTree p) {
 		if (!isOForall(p))
 			return false;
-		DLTree C = p.Child().Right();
+		DLTree C = p.getChild().getRight();
 		if (isTop(C)) // no sense to replace \AR.BOTTOM as it well lead to the same GCI
 			return false;
 		return !C.isName() || !getConcept(C).isSystem();

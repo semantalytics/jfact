@@ -8,8 +8,6 @@ You should have received a copy of the GNU Lesser General Public License along w
 public interface Literal<O> extends Comparable<Literal<O>> {
 	public O getValue();
 
-	/** check whether the comparator is compatible with another one */
-	//public boolean compatible(ComparableDatatype<?> other);
 	/**
 	 * correct min value if the DT is discrete and EXCL is true; @return new
 	 * EXCL value

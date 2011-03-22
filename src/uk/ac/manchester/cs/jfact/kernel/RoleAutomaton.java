@@ -14,53 +14,38 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 
 public final class RoleAutomaton {
 	/** all transitions of the automaton, groupped by a starting state */
-	private final List<RAStateTransitions> Base = new ArrayList<RAStateTransitions>();
-	/** first state of the (temporary) chain of the automata; set by initChain() */
-	//private final int chainBeg;
-	/**
-	 * final state of the (temporary) chain of the automata; set by addToChain()
-	 */
-	//private final int chainEnd;
+	private final List<RAStateTransitions> base = new ArrayList<RAStateTransitions>();
 	/** maps original automata state into the new ones (used in copyRA) */
 	private int[] map = new int[0];
 	/** initial state of the next automaton in chain */
-	private int iRA;
+	private int initialRA;
 	/** flag whether automaton is input safe */
-	private boolean ISafe;
+	private boolean inputSafe;
 	/** flag whether automaton is output safe */
-	private boolean OSafe;
+	private boolean outputSafe;
 
-	/** flag for the automaton to be completed */
-	//private boolean Complete;
 	/** make sure that STATE exists in the automaton (update ton's size) */
 	private void ensureState(int state) {
-		//if(Base.size()==state+1) {
-		//	return;
-		//}
-		if (state >= Base.size()) {
-			Helper.resize(Base, state + 1);
+		if (state >= base.size()) {
+			Helper.resize(base, state + 1);
 		}
-		//		Helper.resize(Base, state + 1);
-		for (int i = 0; i < Base.size(); i++) {
-			if (Base.get(i) == null) {
-				Base.set(i, new RAStateTransitions());
+		for (int i = 0; i < base.size(); i++) {
+			if (base.get(i) == null) {
+				base.set(i, new RAStateTransitions());
 			}
 		}
 	}
 
 	public RoleAutomaton() {
-		iRA = 0;
-		ISafe = true;
-		OSafe = true;
-		//	chainBeg = 0;
-		//	chainEnd = 0;
-		//Complete = false;
+		initialRA = 0;
+		inputSafe = true;
+		outputSafe = true;
 		ensureState(1);
 	}
 
 	/** make the beginning of the chain */
 	public void initChain(int from) {
-		iRA = from;
+		initialRA = from;
 	}
 
 	/** add an Automaton to the chain with a default final state */
@@ -71,18 +56,18 @@ public final class RoleAutomaton {
 	// i/o safety
 	/** get the i-safe value */
 	public boolean isISafe() {
-		return ISafe;
+		return inputSafe;
 	}
 
 	/** get the o-safe value */
 	public boolean isOSafe() {
-		return OSafe;
+		return outputSafe;
 	}
 
 	// add single RA
 	/** add RA from simple subrole to given one */
 	public void addSimpleRA(RoleAutomaton RA) {
-		boolean ok = Base.get(initial).addToExisting(RA.Base.get(initial).begin().get(0));
+		boolean ok = base.get(initial).addToExisting(RA.base.get(initial).begin().get(0));
 		assert ok;
 	}
 
@@ -104,12 +89,12 @@ public final class RoleAutomaton {
 
 	/** state that the automaton is i-unsafe */
 	public void setIUnsafe() {
-		ISafe = false;
+		inputSafe = false;
 	}
 
 	/** state that the automaton is o-unsafe */
 	public void setOUnsafe() {
-		OSafe = false;
+		outputSafe = false;
 	}
 
 	/** check whether transition between FROM and TO breaks safety */
@@ -128,13 +113,13 @@ public final class RoleAutomaton {
 	 */
 	public void addTransition(int from, RATransition trans) {
 		checkTransition(from, trans.final_state());
-		Base.get(from).add(trans);
+		base.get(from).add(trans);
 	}
 
 	/** make the internal chain transition (between chainState and TO) */
 	public void nextChainTransition(int to) {
-		addTransition(iRA, new RATransition(to));
-		iRA = to;
+		addTransition(initialRA, new RATransition(to));
+		initialRA = to;
 	}
 
 	/** get the initial state */
@@ -144,40 +129,39 @@ public final class RoleAutomaton {
 
 	/** create new state */
 	public int newState() {
-		int ret = Base.size();
-		//Base.add(new RAStateTransitions());
+		int ret = base.size();
 		ensureState(ret);
 		return ret;
 	}
 
 	/** get the 1st (multi-)transition starting in STATE */
 	public RAStateTransitions begin(int state) {
-		return Base.get(state);
+		return base.get(state);
 	}
 
 	/** return number of distinct states */
 	public int size() {
-		return Base.size();
+		return base.size();
 	}
 
 	/** set up all transitions passing number of roles */
 	public void setup(int nRoles, boolean data) {
-		for (int i = 0; i < Base.size(); ++i) {
-			Base.get(i).setup(i, nRoles, data);
+		for (int i = 0; i < base.size(); ++i) {
+			base.get(i).setup(i, nRoles, data);
 		}
 	}
 
-	public void Print(LogAdapter o) {
-		for (int state = 0; state < Base.size(); ++state) {
-			Base.get(state).Print(o);
+	public void print(LogAdapter o) {
+		for (int state = 0; state < base.size(); ++state) {
+			base.get(state).print(o);
 		}
 	}
 
 	public void addCopy(RoleAutomaton RA) {
 		for (int i = 0; i < RA.size(); ++i) {
 			int from = map[i];
-			RAStateTransitions RST = Base.get(from);
-			RAStateTransitions RSTOrig = RA.Base.get(i);
+			RAStateTransitions RST = base.get(from);
+			RAStateTransitions RSTOrig = RA.base.get(i);
 			if (RSTOrig.isEmpty()) {
 				continue;
 			}
@@ -207,7 +191,7 @@ public final class RoleAutomaton {
 		// new state in the automaton
 		int newState = size() - 1;
 		// fill initial state; it is always known in the automata
-		map[0] = iRA;
+		map[0] = initialRA;
 		// fills the final state; if it is not known -- adjust newState
 		if (fRA >= size()) {
 			fRA = size(); // make sure we don't create an extra unused state
@@ -215,9 +199,9 @@ public final class RoleAutomaton {
 		}
 		map[1] = fRA;
 		// check transitions as it may turns out to be a single transition
-		checkTransition(iRA, fRA);
+		checkTransition(initialRA, fRA);
 		// set new initial state
-		iRA = fRA;
+		initialRA = fRA;
 		// fills the rest of map
 		for (int i = 2; i < RASize; ++i) {
 			map[i] = ++newState;
@@ -246,6 +230,6 @@ public final class RoleAutomaton {
 	}
 
 	public List<RAStateTransitions> getBase() {
-		return Base;
+		return base;
 	}
 }

@@ -11,24 +11,24 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 
 public final class ConceptWDep {
 	/** "pointer" to a concept in DAG */
-	private final int Concept;
+	private final int concept;
 	/** dep-set for a concept */
 	private final DepSet depSet;
 
 	/** c'tor with empty dep-set */
 	public ConceptWDep(int p) {
-		Concept = p;
+		concept = p;
 		depSet = DepSetFactory.create();
 	}
 
 	/** usual c'tor */
-	protected ConceptWDep(int p, final DepSet dep) {
-		Concept = p;
+	public ConceptWDep(int p, final DepSet dep) {
+		concept = p;
 		depSet = DepSetFactory.create(dep);
 	}
 
 	public int getConcept() {
-		return Concept;
+		return concept;
 	}
 
 	/** get dep-set part */
@@ -37,20 +37,20 @@ public final class ConceptWDep {
 	}
 
 	/** add dep-set to a CWD */
-	protected void addDep(final DepSet d) {
+	public void addDep(final DepSet d) {
 		depSet.add(d);
 	}
 
 	/** print concept and a dep-set */
 	@Override
 	public String toString() {
-		String string = Concept + depSet.toString();
+		String string = concept + depSet.toString();
 		return string;
 	}
 
 	@Override
 	public int hashCode() {
-		return Concept;
+		return concept;
 	}
 
 	@Override
@@ -62,15 +62,15 @@ public final class ConceptWDep {
 			return true;
 		}
 		if (obj instanceof ConceptWDep) {
-			return Concept == ((ConceptWDep) obj).Concept;
+			return concept == ((ConceptWDep) obj).concept;
 		}
 		return false;
 	}
 
 	public void print(LogAdapter lL) {
-		lL.print(Concept);
+		lL.print(concept);
 		if (depSet != null) {
-			depSet.Print(lL);
+			depSet.print(lL);
 		}
 	}
 }

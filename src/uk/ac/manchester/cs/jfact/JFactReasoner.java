@@ -51,18 +51,18 @@ import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
 import org.semanticweb.owlapi.util.Version;
 
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
+import uk.ac.manchester.cs.jfact.kernel.ExpressionManager;
+import uk.ac.manchester.cs.jfact.kernel.NamedEntry;
 import uk.ac.manchester.cs.jfact.kernel.ReasoningKernel;
-import uk.ac.manchester.cs.jfact.kernel.TExpressionManager;
-import uk.ac.manchester.cs.jfact.kernel.TNamedEntry;
 import uk.ac.manchester.cs.jfact.kernel.actors.ClassPolicy;
 import uk.ac.manchester.cs.jfact.kernel.actors.DataPropertyPolicy;
 import uk.ac.manchester.cs.jfact.kernel.actors.IndividualPolicy;
-import uk.ac.manchester.cs.jfact.kernel.actors.JTaxonomyActor;
+import uk.ac.manchester.cs.jfact.kernel.actors.TaxonomyActor;
 import uk.ac.manchester.cs.jfact.kernel.actors.ObjectPropertyPolicy;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.TDLConceptExpression;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.TDLDataRoleExpression;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.TDLIndividualExpression;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.TDLObjectRoleExpression;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ConceptExpression;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataRoleExpression;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.IndividualExpression;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.kernel.voc.Vocabulary;
 
 /**
@@ -77,8 +77,8 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	private static final Version VERSION = new Version(0, 0, 0, 0);
 	protected final AtomicBoolean interrupted = new AtomicBoolean(false);
 	ReasoningKernel kernel;
-	private TExpressionManager em;
-	private static final EnumSet<InferenceType> SupportedInferenceTypes = EnumSet.of(InferenceType.CLASS_ASSERTIONS, InferenceType.CLASS_HIERARCHY, InferenceType.DATA_PROPERTY_HIERARCHY, InferenceType.OBJECT_PROPERTY_HIERARCHY, InferenceType.SAME_INDIVIDUAL);
+	private ExpressionManager em;
+	private static final EnumSet<InferenceType> supportedInferenceTypes = EnumSet.of(InferenceType.CLASS_ASSERTIONS, InferenceType.CLASS_HIERARCHY, InferenceType.DATA_PROPERTY_HIERARCHY, InferenceType.OBJECT_PROPERTY_HIERARCHY, InferenceType.SAME_INDIVIDUAL);
 	private final OWLOntologyManager manager;
 	private final OWLOntology rootOntology;
 	private final BufferingMode bufferingMode;
@@ -108,7 +108,6 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 				reasonerAxioms.add(ax.getAxiomWithoutAnnotations());
 			}
 		}
-		//this.translationMachinery=new TranslationMachinery(kernel,df);
 		kernel.setTopBottomRoleNames(Vocabulary.TOP_OBJECT_PROPERTY, Vocabulary.BOTTOM_OBJECT_PROPERTY, Vocabulary.TOP_DATA_PROPERTY, Vocabulary.BOTTOM_DATA_PROPERTY);
 		kernel.setProgressMonitor(configuration.getProgressMonitor());
 		kernel.setInterruptedSwitch(interrupted);
@@ -122,7 +121,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 
 	public synchronized Node<OWLClass> getEquivalentClasses(OWLClassExpression ce) throws InconsistentOntologyException, ClassExpressionNotInProfileException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		Collection<TDLConceptExpression> pointers = askEquivalentClasses(translationMachinery.toClassPointer(ce));
+		Collection<ConceptExpression> pointers = askEquivalentClasses(translationMachinery.toClassPointer(ce));
 		return translationMachinery.getClassExpressionTranslator().getNodeFromPointers(pointers);
 	}
 
@@ -319,7 +318,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	// precompute inferences
 	public synchronized void precomputeInferences(InferenceType... inferenceTypes) throws ReasonerInterruptedException, TimeOutException, InconsistentOntologyException {
 		for (InferenceType it : inferenceTypes) {
-			if (SupportedInferenceTypes.contains(it)) {
+			if (supportedInferenceTypes.contains(it)) {
 				kernel.realiseKB();
 				return;
 			}
@@ -327,21 +326,20 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	}
 
 	public boolean isPrecomputed(InferenceType inferenceType) {
-		if (SupportedInferenceTypes.contains(inferenceType)) {
+		if (supportedInferenceTypes.contains(inferenceType)) {
 			return kernel.isKBRealised();
 		}
 		return true;
 	}
 
 	public Set<InferenceType> getPrecomputableInferenceTypes() {
-		return SupportedInferenceTypes;
+		return supportedInferenceTypes;
 	}
 
 	// consistency
 	public synchronized boolean isConsistent() throws ReasonerInterruptedException, TimeOutException {
 		if (consistencyVerified == null) {
 			consistencyVerified = kernel.isKBConsistent();
-			//kernel.writeReasoningResult(LeveLogger.LL, 0);
 		}
 		return consistencyVerified;
 	}
@@ -399,7 +397,6 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 */
 	public synchronized Set<OWLAxiom> getTrace(OWLAxiom axiom) {
 		kernel.needTracing();
-		//Set<OWLAxiom> ret = new HashSet<OWLAxiom>();
 		if (isEntailed(axiom)) {
 			return translationMachinery.translateTAxiomSet(kernel.getTrace());
 		}
@@ -426,7 +423,6 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	}
 
 	public synchronized NodeSet<OWLClass> getDisjointClasses(OWLClassExpression ce) {
-		//checkConsistency();
 		// TODO Not supported directly by FaCT++
 		return new OWLClassNodeSet();
 	}
@@ -468,7 +464,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 
 	public synchronized NodeSet<OWLClass> getObjectPropertyDomains(OWLObjectPropertyExpression pe, boolean direct) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
-		TDLConceptExpression subClass = translationMachinery.toClassPointer(getOWLDataFactory().getOWLObjectSomeValuesFrom(pe, getOWLDataFactory().getOWLThing()));
+		ConceptExpression subClass = translationMachinery.toClassPointer(getOWLDataFactory().getOWLObjectSomeValuesFrom(pe, getOWLDataFactory().getOWLThing()));
 		return translationMachinery.getClassExpressionTranslator().getNodeSetFromPointers(askSuperClasses(subClass, direct));
 	}
 
@@ -528,7 +524,6 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 
 	public synchronized Set<OWLLiteral> getDataPropertyValues(OWLNamedIndividual ind, OWLDataProperty pe) throws InconsistentOntologyException, ReasonerInterruptedException, TimeOutException {
 		// TODO:
-		//checkConsistency();
 		return Collections.emptySet();
 	}
 
@@ -564,124 +559,124 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		}
 	}
 
-	public Collection<Collection<TDLConceptExpression>> askSubClasses(TDLConceptExpression arg, boolean direct) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new ClassPolicy());
-		TDLConceptExpression p = arg;
+	public Collection<Collection<ConceptExpression>> askSubClasses(ConceptExpression arg, boolean direct) {
+		TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
+		ConceptExpression p = arg;
 		kernel.getSubConcepts(p, direct, actor);
 		return actor.getClassElements();
 	}
 
-	public Collection<Collection<TDLConceptExpression>> askSuperClasses(TDLConceptExpression arg, boolean direct) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new ClassPolicy());
-		TDLConceptExpression p = arg;
+	public Collection<Collection<ConceptExpression>> askSuperClasses(ConceptExpression arg, boolean direct) {
+		TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
+		ConceptExpression p = arg;
 		kernel.getSupConcepts(p, direct, actor);
 		return actor.getClassElements();
 	}
 
-	public Collection<TDLConceptExpression> askEquivalentClasses(TDLConceptExpression arg) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new ClassPolicy());
+	public Collection<ConceptExpression> askEquivalentClasses(ConceptExpression arg) {
+		TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
 		kernel.getEquivalentConcepts(arg, actor);
 		return actor.getClassSynonyms();
 	}
 
-	public Collection<Collection<TDLObjectRoleExpression>> askSuperObjectProperties(TDLObjectRoleExpression arg, boolean direct) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new ObjectPropertyPolicy());
-		TDLObjectRoleExpression p = arg;
+	public Collection<Collection<ObjectRoleExpression>> askSuperObjectProperties(ObjectRoleExpression arg, boolean direct) {
+		TaxonomyActor actor = new TaxonomyActor(em, new ObjectPropertyPolicy());
+		ObjectRoleExpression p = arg;
 		kernel.getSupRoles(p, direct, actor);
 		return actor.getObjectPropertyElements();
 	}
 
-	public Collection<Collection<TDLObjectRoleExpression>> askSubObjectProperties(TDLObjectRoleExpression arg, boolean direct) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new ObjectPropertyPolicy());
-		TDLObjectRoleExpression p = arg;
+	public Collection<Collection<ObjectRoleExpression>> askSubObjectProperties(ObjectRoleExpression arg, boolean direct) {
+		TaxonomyActor actor = new TaxonomyActor(em, new ObjectPropertyPolicy());
+		ObjectRoleExpression p = arg;
 		kernel.getSubRoles(p, direct, actor);
 		return actor.getObjectPropertyElements();
 	}
 
-	public Collection<TDLObjectRoleExpression> askEquivalentObjectProperties(TDLObjectRoleExpression arg) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new ObjectPropertyPolicy());
+	public Collection<ObjectRoleExpression> askEquivalentObjectProperties(ObjectRoleExpression arg) {
+		TaxonomyActor actor = new TaxonomyActor(em, new ObjectPropertyPolicy());
 		kernel.getEquivalentRoles(arg, actor);
 		return actor.getObjectPropertySynonyms();
 	}
 
-	public Collection<Collection<TDLConceptExpression>> askObjectPropertyDomain(TDLObjectRoleExpression arg) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new ClassPolicy());
+	public Collection<Collection<ConceptExpression>> askObjectPropertyDomain(ObjectRoleExpression arg) {
+		TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
 		kernel.getRoleDomain(arg, true, actor);
 		return actor.getClassElements();
 	}
 
-	public Collection<Collection<TDLConceptExpression>> askObjectPropertyRange(TDLObjectRoleExpression arg) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new ClassPolicy());
+	public Collection<Collection<ConceptExpression>> askObjectPropertyRange(ObjectRoleExpression arg) {
+		TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
 		kernel.getRoleRange(arg, true, actor);
 		return actor.getClassElements();
 	}
 
-	public Collection<Collection<TDLDataRoleExpression>> askSuperDataProperties(TDLDataRoleExpression arg, boolean direct) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new DataPropertyPolicy());
-		TDLDataRoleExpression p = arg;
+	public Collection<Collection<DataRoleExpression>> askSuperDataProperties(DataRoleExpression arg, boolean direct) {
+		TaxonomyActor actor = new TaxonomyActor(em, new DataPropertyPolicy());
+		DataRoleExpression p = arg;
 		kernel.getSupRoles(p, direct, actor);
 		return actor.getDataPropertyElements();
 	}
 
-	public Collection<Collection<TDLDataRoleExpression>> askSubDataProperties(TDLDataRoleExpression arg, boolean direct) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new DataPropertyPolicy());
+	public Collection<Collection<DataRoleExpression>> askSubDataProperties(DataRoleExpression arg, boolean direct) {
+		TaxonomyActor actor = new TaxonomyActor(em, new DataPropertyPolicy());
 		kernel.getSubRoles(arg, direct, actor);
 		return actor.getDataPropertyElements();
 	}
 
-	public Collection<TDLDataRoleExpression> askEquivalentDataProperties(TDLDataRoleExpression arg) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new DataPropertyPolicy());
+	public Collection<DataRoleExpression> askEquivalentDataProperties(DataRoleExpression arg) {
+		TaxonomyActor actor = new TaxonomyActor(em, new DataPropertyPolicy());
 		kernel.getEquivalentRoles(arg, actor);
 		return actor.getDataPropertySynonyms();
 	}
 
-	public Collection<Collection<TDLConceptExpression>> askDataPropertyDomain(TDLDataRoleExpression arg) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new ClassPolicy());
+	public Collection<Collection<ConceptExpression>> askDataPropertyDomain(DataRoleExpression arg) {
+		TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
 		kernel.getRoleDomain(arg, true, actor);
 		return actor.getClassElements();
 	}
 
-	public Collection<Collection<TDLConceptExpression>> askIndividualTypes(TDLIndividualExpression arg, boolean direct) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new ClassPolicy());
-		TDLIndividualExpression p = arg;
+	public Collection<Collection<ConceptExpression>> askIndividualTypes(IndividualExpression arg, boolean direct) {
+		TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
+		IndividualExpression p = arg;
 		kernel.getTypes(p, direct, actor);
 		return actor.getClassElements();
 	}
 
-	public Collection<TDLObjectRoleExpression> askObjectProperties(TDLIndividualExpression arg) {
-		List<TNamedEntry> Rs = new ArrayList<TNamedEntry>();
+	public Collection<ObjectRoleExpression> askObjectProperties(IndividualExpression arg) {
+		List<NamedEntry> Rs = new ArrayList<NamedEntry>();
 		kernel.getRelatedRoles(arg, Rs, false, false);
-		List<TDLObjectRoleExpression> acc = new ArrayList<TDLObjectRoleExpression>();
-		for (TNamedEntry p : Rs) {
-			TDLObjectRoleExpression oName = em.ObjectRole(p.getName());
+		List<ObjectRoleExpression> acc = new ArrayList<ObjectRoleExpression>();
+		for (NamedEntry p : Rs) {
+			ObjectRoleExpression oName = em.objectRole(p.getName());
 			acc.add(oName);
 		}
 		return acc;
 	}
 
-	public Collection<TDLIndividualExpression> askRelatedIndividuals(TDLIndividualExpression arg1, TDLObjectRoleExpression arg2) {
-		List<TNamedEntry> Js = new ArrayList<TNamedEntry>();
+	public Collection<IndividualExpression> askRelatedIndividuals(IndividualExpression arg1, ObjectRoleExpression arg2) {
+		List<NamedEntry> Js = new ArrayList<NamedEntry>();
 		kernel.getRoleFillers(arg1, arg2, Js);
-		List<TDLIndividualExpression> acc = new ArrayList<TDLIndividualExpression>();
-		for (TNamedEntry p : Js) {
-			acc.add(em.Individual(p.getName()));
+		List<IndividualExpression> acc = new ArrayList<IndividualExpression>();
+		for (NamedEntry p : Js) {
+			acc.add(em.individual(p.getName()));
 		}
 		return acc;
 	}
 
-	public Collection<TDLDataRoleExpression> askDataProperties(TDLIndividualExpression arg) {
-		List<TNamedEntry> Rs = new ArrayList<TNamedEntry>();
+	public Collection<DataRoleExpression> askDataProperties(IndividualExpression arg) {
+		List<NamedEntry> Rs = new ArrayList<NamedEntry>();
 		kernel.getRelatedRoles(arg, Rs, true, false);
-		List<TDLDataRoleExpression> acc = new ArrayList<TDLDataRoleExpression>();
-		for (TNamedEntry p : Rs) {
-			acc.add(em.DataRole(p.getName()));
+		List<DataRoleExpression> acc = new ArrayList<DataRoleExpression>();
+		for (NamedEntry p : Rs) {
+			acc.add(em.dataRole(p.getName()));
 		}
 		return acc;
 	}
 
-	public Collection<TDLIndividualExpression> askInstances(TDLConceptExpression arg, boolean direct) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new IndividualPolicy(true));
-		TDLConceptExpression p = arg;
+	public Collection<IndividualExpression> askInstances(ConceptExpression arg, boolean direct) {
+		TaxonomyActor actor = new TaxonomyActor(em, new IndividualPolicy(true));
+		ConceptExpression p = arg;
 		if (direct) {
 			kernel.getDirectInstances(p, actor);
 		} else {
@@ -690,9 +685,9 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		return actor.getPlainIndividualElements();
 	}
 
-	public Collection<Collection<TDLIndividualExpression>> askInstancesGrouped(TDLConceptExpression arg, boolean direct) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new IndividualPolicy(false));
-		TDLConceptExpression p = arg;
+	public Collection<Collection<IndividualExpression>> askInstancesGrouped(ConceptExpression arg, boolean direct) {
+		TaxonomyActor actor = new TaxonomyActor(em, new IndividualPolicy(false));
+		ConceptExpression p = arg;
 		if (direct) {
 			kernel.getDirectInstances(p, actor);
 		} else {
@@ -701,8 +696,8 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		return actor.getIndividualElements();
 	}
 
-	public Collection<TDLIndividualExpression> askSameAs(TDLIndividualExpression arg) {
-		JTaxonomyActor actor = new JTaxonomyActor(em, new IndividualPolicy(true));
+	public Collection<IndividualExpression> askSameAs(IndividualExpression arg) {
+		TaxonomyActor actor = new TaxonomyActor(em, new IndividualPolicy(true));
 		kernel.getSameAs(arg, actor);
 		return actor.getIndividualSynonyms();
 	}

@@ -8,9 +8,9 @@ You should have received a copy of the GNU Lesser General Public License along w
 import java.util.HashMap;
 import java.util.Map;
 
-public class IFOptionSet {
+public final class IFOptionSet {
 	/** set of all avaliable (given) options */
-	private final Map<String, IFOption> Base = new HashMap<String, IFOption>();
+	private final Map<String, IFOption> base = new HashMap<String, IFOption>();
 
 	/** empty c'tor */
 	public IFOptionSet() {
@@ -20,11 +20,11 @@ public class IFOptionSet {
 	 * an option with given name, description, type and default. @return true
 	 * iff such option exists
 	 */
-	public boolean RegisterOption(final String name, final String desc, IFOption.IOType t, final String defVal) {
+	public boolean registerOption(final String name, final String desc, IFOption.IOType t, final String defVal) {
 		if (locateOption(name) != null) {
 			return true;
 		}
-		Base.put(name, new IFOption(name, desc, t, defVal));
+		base.put(name, new IFOption(name, desc, t, defVal));
 		return false;
 	}
 
@@ -43,6 +43,6 @@ public class IFOptionSet {
 	}
 
 	private IFOption locateOption(final String name) {
-		return Base.get(name);
+		return base.get(name);
 	}
 }

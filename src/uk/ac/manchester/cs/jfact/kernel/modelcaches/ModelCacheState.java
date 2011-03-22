@@ -16,6 +16,9 @@ public enum ModelCacheState {
 	 * > incorrect model/merging fails because of incompleteness of
 	 * procedure;
 	 */
-	csUnknown
+	csUnknown;
 	/** > untested model cache. */
+	public boolean usageByState() {
+		return this == csInvalid;
+	}
 }

@@ -12,26 +12,26 @@ public final class IntCache {
 	int lastnotcontained = Integer.MAX_VALUE;
 
 	public final boolean isContained(int key) {
-		if (lastcontained == key) {
-			hits++;
-		} else {
-			miss++;
-		}
-		if (hits % 100000 == 0 || miss % 100000 == 0) {
-			System.out.println("LightIntCache.isContained() " + miss / (hits + 1));
-		}
+		//		if (lastcontained == key) {
+		//			hits++;
+		//		} else {
+		//			miss++;
+		//		}
+		//		if (hits % 100000 == 0 || miss % 100000 == 0) {
+		//			System.out.println("LightIntCache.isContained() " + miss / (hits + 1));
+		//		}
 		return lastcontained == key;
 	}
 
 	public final boolean isNotContained(int key) {
-		if (lastnotcontained == key) {
-			hits++;
-		} else {
-			miss++;
-		}
-		if (hits % 100000 == 0 || miss % 100000 == 0) {
-			System.out.println("LightIntCache.isContained() " + miss / (hits + 1));
-		}
+		//		if (lastnotcontained == key) {
+		//			hits++;
+		//		} else {
+		//			miss++;
+		//		}
+		//		if (hits % 100000 == 0 || miss % 100000 == 0) {
+		//			System.out.println("LightIntCache.isContained() " + miss / (hits + 1));
+		//		}
 		return lastnotcontained == key;
 	}
 

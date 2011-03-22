@@ -20,9 +20,9 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.kernel.DLDag;
 import uk.ac.manchester.cs.jfact.kernel.DagTag;
 import uk.ac.manchester.cs.jfact.kernel.MergableLabel;
-import uk.ac.manchester.cs.jfact.kernel.TNamedEntry;
-import uk.ac.manchester.cs.jfact.kernel.TRole;
-import uk.ac.manchester.cs.jfact.kernel.datatype.TDataEntry;
+import uk.ac.manchester.cs.jfact.kernel.NamedEntry;
+import uk.ac.manchester.cs.jfact.kernel.Role;
+import uk.ac.manchester.cs.jfact.kernel.datatype.DataEntry;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheInterface;
 
 public final class DLVertex extends DLVertexTagDFS {
@@ -112,28 +112,28 @@ public final class DLVertex extends DLVertexTagDFS {
 	}
 
 	/** set of arguments (CEs, numbers for NR) */
-	private final ChildSet Child = new ChildSet();
+	private final ChildSet child = new ChildSet();
 	/** pointer to concept-like entry (for PConcept, etc) */
-	private TNamedEntry Concept = null;
+	private NamedEntry concept = null;
 	/** pointer to role (for E\A, NR) */
-	private final TRole Role;
+	private final Role role;
 	/** projection role (used for projection op only) */
-	private final TRole ProjRole;
+	private final Role projRole;
 	/** C if available */
-	private int C;
+	private int conceptIndex;
 	/** n if available */
 	private final int n;
 	/** maximal depth, size and frequency of reference of the expression */
-	private final MergableLabel Sort = new MergableLabel();
+	private final MergableLabel sort = new MergableLabel();
 
 	/** get RW access to the label */
 	public MergableLabel getSort() {
-		return Sort;
+		return sort;
 	}
 
 	/** merge local label to label LABEL */
 	public void merge(MergableLabel label) {
-		Sort.merge(label);
+		sort.merge(label);
 	}
 
 	/** c'tor for Top/CN/And (before adding any operands) */
@@ -142,11 +142,11 @@ public final class DLVertex extends DLVertexTagDFS {
 	}
 
 	/** c'tor for <= n R_C; and for \A R{n}_C; Note order C, n, R.pointer */
-	public DLVertex(DagTag op, int m, final TRole R, int c, TRole ProjR) {
+	public DLVertex(DagTag op, int m, final Role R, int c, Role ProjR) {
 		super(op);
-		Role = R;
-		ProjRole = ProjR;
-		C = c;
+		role = R;
+		projRole = ProjR;
+		conceptIndex = c;
 		n = m;
 	}
 
@@ -160,7 +160,7 @@ public final class DLVertex extends DLVertexTagDFS {
 		}
 		if (obj instanceof DLVertex) {
 			DLVertex v = (DLVertex) obj;
-			return Op == v.Op && compare(Role, v.Role) && compare(ProjRole, v.ProjRole) && C == v.C && n == v.n && Child.equals(v.Child);
+			return op == v.op && compare(role, v.role) && compare(projRole, v.projRole) && conceptIndex == v.conceptIndex && n == v.n && child.equals(v.child);
 		}
 		return false;
 	}
@@ -174,12 +174,12 @@ public final class DLVertex extends DLVertexTagDFS {
 
 	@Override
 	public int hashCode() {
-		return (Op == null ? 0 : Op.hashCode()) + (Role == null ? 0 : Role.hashCode()) + (ProjRole == null ? 0 : ProjRole.hashCode()) + C + n + (Child == null ? 0 : Child.hashCode());
+		return (op == null ? 0 : op.hashCode()) + (role == null ? 0 : role.hashCode()) + (projRole == null ? 0 : projRole.hashCode()) + conceptIndex + n + (child == null ? 0 : child.hashCode());
 	}
 
 	/** return C for concepts/quantifiers/NR verteces */
-	public int getC() {
-		return C;
+	public int getConceptIndex() {
+		return conceptIndex;
 	}
 
 	/** return N for the (<= n R) vertex */
@@ -199,76 +199,76 @@ public final class DLVertex extends DLVertexTagDFS {
 
 	/** return pointer to the first concept name of the entry */
 	public int[] begin() {
-		return Child.sorted();
+		return child.sorted();
 	}
 
 	/** return pointer to Role for the Role-like verteces */
-	public TRole getRole() {
-		return Role;
+	public Role getRole() {
+		return role;
 	}
 
 	/** return pointer to Projection Role for the Projection verteces */
-	public TRole getProjRole() {
-		return ProjRole;
+	public Role getProjRole() {
+		return projRole;
 	}
 
 	/** get (RW) TConcept for concept-like fields */
-	public TNamedEntry getConcept() {
-		return Concept;
+	public NamedEntry getConcept() {
+		return concept;
 	}
 
 	/** set TConcept value to entry */
-	public void setConcept(TNamedEntry p) {
-		Concept = p;
+	public void setConcept(NamedEntry p) {
+		concept = p;
 	}
 
 	/** set a concept (child) to Name-like vertex */
 	public void setChild(int p) {
-		C = p;
+		conceptIndex = p;
 	}
 
 	public boolean addChild(int p) {
 		if (p == bpTOP) {
 			return false;
 		}
-		if (Op == dtBad) {
+		if (op == dtBad) {
 			return true;
 		}
 		if (p == bpBOTTOM) {
 			//clash:
-			Child.clear();
-			Op = dtBad;
+			child.clear();
+			op = dtBad;
 			return true;
 		}
-		if (Child.contains(-p)) {
-			Child.clear();
-			Op = dtBad;
+		if (child.contains(-p)) {
+			child.clear();
+			op = dtBad;
 			return true;
 		}
-		Child.add(p);
+		child.add(p);
 		return false;
 	}
 
 	public int getAndToDagValue() {
-		if (Child.set.size() == 0) {
+		if (child.set.size() == 0) {
 			return bpTOP;
 		}
-		if (Child.set.size() == 1) {
-			return Child.set.get(0);
+		if (child.set.size() == 1) {
+			return child.set.get(0);
 		}
 		return bpINVALID;
 	}
 
 	public void sortEntry(final DLDag dag) {
-		if (Op != dtAnd) {
+		if (op != dtAnd) {
 			return;
 		}
-		Child.setSorter(dag);
+		child.setSorter(dag);
 	}
 
-	public void Print(LeveLogger.LogAdapter o) {
-		o.print(Templates.DLVERTEXPrint, stat[0], stat[1], stat[2], stat[3], stat[4], stat[5], stat[6], stat[7], stat[8], stat[9], Op.getName());
-		switch (Op) {
+	public void print(LeveLogger.LogAdapter o) {
+		o.print(Templates.DLVERTEXPrint, stat[0], stat[1], stat[2], stat[3], stat[4], stat[5], stat[6], stat[7], stat[8], stat[9], op.getName());
+		switch (op) {
 			case dtAnd:
 			case dtCollection:
 				break;
@@ -277,7 +277,7 @@ public final class DLVertex extends DLVertexTagDFS {
 			case dtNN:
 				return;
 			case dtDataExpr:
-				o.print(Templates.SPACE, ((TDataEntry) Concept).getFacet());
+				o.print(Templates.SPACE, ((DataEntry) concept).getFacet());
 				return;
 			case dtDataValue:
 			case dtDataType:
@@ -285,26 +285,26 @@ public final class DLVertex extends DLVertexTagDFS {
 			case dtNConcept:
 			case dtPSingleton:
 			case dtNSingleton:
-				o.print(Templates.DLVERTEXPrint2, Concept.getName(), (Op.isNNameTag() ? "=" : "[="), C);
+				o.print(Templates.DLVERTEXPrint2, concept.getName(), (op.isNNameTag() ? "=" : "[="), conceptIndex);
 				return;
 			case dtLE:
 				o.print(Templates.SPACE, n);
-				o.print(Templates.SPACE, Role.getName());
-				o.print(Templates.SPACE, C);
+				o.print(Templates.SPACE, role.getName());
+				o.print(Templates.SPACE, conceptIndex);
 				return;
 			case dtForall:
-				o.print(Templates.DLVERTEXPrint3, Role.getName(), n, C);
+				o.print(Templates.DLVERTEXPrint3, role.getName(), n, conceptIndex);
 				return;
 			case dtIrr:
-				o.print(Templates.SPACE, Role.getName());
+				o.print(Templates.SPACE, role.getName());
 				return;
 			case dtProj:
-				o.print(Templates.DLVERTEXPrint4, Role.getName(), C, ProjRole.getName());
+				o.print(Templates.DLVERTEXPrint4, role.getName(), conceptIndex, projRole.getName());
 				return;
 			default:
-				throw new ReasonerInternalException(String.format("Error printing vertex of type %s(%s)", Op.getName(), Op));
+				throw new ReasonerInternalException(String.format("Error printing vertex of type %s(%s)", op.getName(), op));
 		}
-		for (int q : Child.sorted()) {
+		for (int q : child.sorted()) {
 			o.print(Templates.SPACE, q);
 		}
 	}
@@ -312,7 +312,7 @@ public final class DLVertex extends DLVertexTagDFS {
 	@Override
 	public String toString() {
 		LogAdapter l = new LeveLogger.LogAdapterStringBuilder();
-		Print(l);
+		print(l);
 		return l.toString();
 	}
 
@@ -356,67 +356,67 @@ public final class DLVertex extends DLVertexTagDFS {
 }
 
 class DLVertexTagDFS {
-	protected DagTag Op; // 17 types
+	protected DagTag op; // 17 types
 	/** aux field for DFS in presence of cycles */
-	protected boolean VisitedPos = false;
+	protected boolean visitedPos = false;
 	/** aux field for DFS in presence of cycles */
-	protected boolean ProcessedPos = false;
+	protected boolean processedPos = false;
 	/** true iff node is involved in cycle */
 	protected boolean inCyclePos = false;
 	/** aux field for DFS in presence of cycles */
-	protected boolean VisitedNeg = false;
+	protected boolean visitedNeg = false;
 	/** aux field for DFS in presence of cycles */
-	protected boolean ProcessedNeg = false;
+	protected boolean processedNeg = false;
 	/** true iff node is involved in cycle */
 	protected boolean inCycleNeg = false;
 
 	protected DLVertexTagDFS(DagTag op) {
-		Op = op;
+		this.op = op;
 	}
 
 	// tag access
 	/** return tag of the CE */
-	public DagTag Type() {
-		return Op;
+	public DagTag getType() {
+		return op;
 	}
 
 	// DFS-related method
 	/** check whether current Vertex is being visited */
 	public boolean isVisited(boolean pos) {
-		return pos ? VisitedPos : VisitedNeg;
+		return pos ? visitedPos : visitedNeg;
 	}
 
 	/** check whether current Vertex is processed */
 	public boolean isProcessed(boolean pos) {
-		return pos ? ProcessedPos : ProcessedNeg;
+		return pos ? processedPos : processedNeg;
 	}
 
 	/** set that the node is being visited */
 	public void setVisited(boolean pos) {
 		if (pos) {
-			VisitedPos = true;
+			visitedPos = true;
 		} else {
-			VisitedNeg = true;
+			visitedNeg = true;
 		}
 	}
 
 	/** set that the node' DFS processing is completed */
 	public void setProcessed(boolean pos) {
 		if (pos) {
-			ProcessedPos = true;
-			VisitedPos = false;
+			processedPos = true;
+			visitedPos = false;
 		} else {
-			ProcessedNeg = true;
-			VisitedNeg = false;
+			processedNeg = true;
+			visitedNeg = false;
 		}
 	}
 
 	/** clear DFS flags */
 	public void clearDFS() {
-		ProcessedPos = false;
-		VisitedPos = false;
-		ProcessedNeg = false;
-		VisitedNeg = false;
+		processedPos = false;
+		visitedPos = false;
+		processedNeg = false;
+		visitedNeg = false;
 	}
 
 	/** check whether concept is in cycle */

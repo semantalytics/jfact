@@ -12,7 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ClassifiableEntry extends TNamedEntry {
+public class ClassifiableEntry extends NamedEntry {
 	/** link to taxonomy entry for current entry */
 	protected TaxonomyVertex taxVertex = null;
 	/**
@@ -26,85 +26,81 @@ public class ClassifiableEntry extends TNamedEntry {
 	 */
 	protected ClassifiableEntry pSynonym;
 	/** index as a vertex in the SubsumptionMap */
-	protected int Index;
+	protected int index;
 
 	protected ClassifiableEntry(String name) {
 		super(name);
 		pSynonym = null;
-		Index = 0;
+		index = 0;
 	}
 
 	/** is current entry classified */
-	protected final boolean isClassified() {
+	public final boolean isClassified() {
 		return taxVertex != null;
 	}
 
 	/** set up given entry */
-	protected final void setTaxVertex(TaxonomyVertex vertex) {
+	public final void setTaxVertex(TaxonomyVertex vertex) {
 		taxVertex = vertex;
 	}
 
 	/** get taxonomy vertex of the entry */
-	protected final TaxonomyVertex getTaxVertex() {
+	public final TaxonomyVertex getTaxVertex() {
 		return taxVertex;
 	}
 
+	private boolean completelyDefined;
+
 	// completely defined interface
 	/** a Completely Defined flag */
-	protected final boolean isCompletelyDefined() {
-		return bits.get(Flags.CompletelyDefined.ordinal());
+	public final boolean isCompletelyDefined() {
+		return completelyDefined;
 	}
 
 	public final void clearCompletelyDefined() {
-		bits.clear(Flags.CompletelyDefined.ordinal());
+		completelyDefined = false;
 	}
 
-	protected final void setCompletelyDefined(boolean action) {
-		if (action) {
-			bits.set(Flags.CompletelyDefined.ordinal(), action);
-		} else {
-			bits.clear(Flags.CompletelyDefined.ordinal());
-		}
+	public final void setCompletelyDefined(boolean action) {
+		completelyDefined = action;
 	}
+
+	private boolean nonClassifiable;
 
 	/** a non-classifiable flag */
-	protected final boolean isNonClassifiable() {
-		return bits.get(Flags.NonClassifiable.ordinal());
+	public final boolean isNonClassifiable() {
+		return nonClassifiable;
 	}
 
-	protected final void setNonClassifiable() {
-		bits.set(Flags.NonClassifiable.ordinal());
+	public final void setNonClassifiable() {
+		nonClassifiable = true;
 	}
 
 	public final void clearNonClassifiable() {
-		bits.clear(Flags.NonClassifiable.ordinal());
+		nonClassifiable = false;
 	}
 
 	public final void setNonClassifiable(boolean action) {
-		if (action) {
-			bits.set(Flags.NonClassifiable.ordinal(), action);
-		} else {
-			bits.clear(Flags.NonClassifiable.ordinal());
-		}
+		nonClassifiable = action;
 	}
 
 	/** told subsumers */
-	protected final Collection<ClassifiableEntry> getToldSubsumers() {
+	public final Collection<ClassifiableEntry> getToldSubsumers() {
 		return toldSubsumers;
 	}
 
 	/** check whether entry ihas any TS */
-	protected final boolean hasToldSubsumers() {
+	public final boolean hasToldSubsumers() {
 		return !toldSubsumers.isEmpty();
 	}
 
 	/** add told subsumer of entry (duplications possible) */
-	protected final void addParent(ClassifiableEntry parent) {
+	public final void addParent(ClassifiableEntry parent) {
 		toldSubsumers.add(parent);
 	}
 
 	/** add all parents (with duplicates) from the range to current node */
-	protected final void addParents(Collection<ClassifiableEntry> entries) {
+	public final void addParents(Collection<ClassifiableEntry> entries) {
 		for (ClassifiableEntry c : entries) {
 			addParentIfNew(c);
 		}
@@ -113,12 +109,12 @@ public class ClassifiableEntry extends TNamedEntry {
 	// index interface
 	/** get the index value */
 	public final int index() {
-		return Index;
+		return index;
 	}
 
 	/** set the index value */
 	public void setIndex(int ind) {
-		Index = ind;
+		index = ind;
 	}
 
 	// synonym interface
@@ -128,12 +124,12 @@ public class ClassifiableEntry extends TNamedEntry {
 	}
 
 	/** get synonym of current entry */
-	protected final ClassifiableEntry getSynonym() {
+	public final ClassifiableEntry getSynonym() {
 		return pSynonym;
 	}
 
 	/** make sure that synonym's representative is not a synonym itself */
-	protected final void canonicaliseSynonym() {
+	public final void canonicaliseSynonym() {
 		if (isSynonym()) {
 			while (pSynonym.isSynonym()) {
 				pSynonym = pSynonym.pSynonym;
@@ -142,7 +138,7 @@ public class ClassifiableEntry extends TNamedEntry {
 	}
 
 	/** add entry's synonym */
-	protected final void setSynonym(ClassifiableEntry syn) {
+	public final void setSynonym(ClassifiableEntry syn) {
 		assert pSynonym == null; // do it only once
 		// check there are no cycles
 		Set<ClassifiableEntry> set = new HashSet<ClassifiableEntry>();
@@ -162,7 +158,7 @@ public class ClassifiableEntry extends TNamedEntry {
 	}
 
 	/** if two synonyms are in 'told' list, merge them */
-	protected final void removeSynonymsFromParents() {
+	public final void removeSynonymsFromParents() {
 		List<ClassifiableEntry> toRemove = new ArrayList<ClassifiableEntry>();
 		for (ClassifiableEntry c : toldSubsumers) {
 			if (this == resolveSynonym(c)) {
@@ -176,7 +172,7 @@ public class ClassifiableEntry extends TNamedEntry {
 		return p == null ? null : p.isSynonym() ? resolveSynonym((T) p.pSynonym) : p;
 	}
 
-	protected final void addParentIfNew(ClassifiableEntry parent) {
+	public final void addParentIfNew(ClassifiableEntry parent) {
 		// resolve synonyms
 		parent = resolveSynonym(parent);
 		// node can not be its own parent

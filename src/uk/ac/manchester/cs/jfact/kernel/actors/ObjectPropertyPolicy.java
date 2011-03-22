@@ -6,12 +6,12 @@ This library is free software; you can redistribute it and/or modify it under th
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry;
-import uk.ac.manchester.cs.jfact.kernel.TExpressionManager;
-import uk.ac.manchester.cs.jfact.kernel.TRole;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.TDLExpression;
+import uk.ac.manchester.cs.jfact.kernel.ExpressionManager;
+import uk.ac.manchester.cs.jfact.kernel.Role;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Expression;
 
 /** policy for object properties */
-public class ObjectPropertyPolicy implements Policy {
+public final class ObjectPropertyPolicy implements Policy {
 	public boolean applicable(ClassifiableEntry p) {
 		return true;
 	}
@@ -20,7 +20,7 @@ public class ObjectPropertyPolicy implements Policy {
 		return false;
 	}
 
-	public TDLExpression buildTree(TExpressionManager EM, ClassifiableEntry p) {
-		return p.getId() >= 0 ? EM.ObjectRole(p.getName()) : EM.Inverse(EM.ObjectRole(((TRole) p).realInverse().getName()));
+	public Expression buildTree(ExpressionManager EM, ClassifiableEntry p) {
+		return p.getId() >= 0 ? EM.objectRole(p.getName()) : EM.inverse(EM.objectRole(((Role) p).realInverse().getName()));
 	}
 }

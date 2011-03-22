@@ -33,7 +33,7 @@ public final class LeveLogger {
 	}
 
 	public static boolean isAbsorptionActive() {
-		return IfDefs.RKG_DEBUG_ABSORPTION; //!(LL instanceof LogAdapterImpl);
+		return IfDefs.RKG_DEBUG_ABSORPTION;
 	}
 
 	public static interface LogAdapter {
@@ -336,7 +336,6 @@ public final class LeveLogger {
 		}
 	}
 
-	public static final LogAdapter LL = IfDefs._USE_LOGGING ? new LogAdapterStream() : new LogAdapterImpl();
-	public static final LogAdapter LL_ABSORPTION = IfDefs.RKG_DEBUG_ABSORPTION ? new LogAdapterStream() : new LogAdapterImpl();
-	//public static final PrintStream LL = System.out;
+	public static final LogAdapter logger = IfDefs.USE_LOGGING ? new LogAdapterStream() : new LogAdapterImpl();
+	public static final LogAdapter logger_absorption = IfDefs.RKG_DEBUG_ABSORPTION ? new LogAdapterStream() : new LogAdapterImpl();
 }

@@ -42,19 +42,6 @@ abstract class AbstractFastSet implements FastSet {
 				}
 			}
 			return true;
-			//			int[] f1 = f.toIntArray();
-			//			int[] f2 = toIntArray();
-			//			if (f1.length != f2.length) {
-			//				return false;
-			//			}
-			//			Arrays.sort(f1);
-			//			Arrays.sort(f2);
-			//			for (int i = 0; i < f1.length; i++) {
-			//				if (f1[i] != f2[i]) {
-			//					return false;
-			//				}
-			//			}
-			//			return true;
 		}
 		return false;
 	}

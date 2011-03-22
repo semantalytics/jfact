@@ -48,7 +48,7 @@ public enum Token {
 		this.s = s;
 	}
 
-	public String TokenName() {
+	public String getName() {
 		if (s.length() > 0) {
 			return s;
 		}

@@ -6,12 +6,12 @@ This library is free software; you can redistribute it and/or modify it under th
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry;
-import uk.ac.manchester.cs.jfact.kernel.TConcept;
-import uk.ac.manchester.cs.jfact.kernel.TExpressionManager;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.TDLExpression;
+import uk.ac.manchester.cs.jfact.kernel.Concept;
+import uk.ac.manchester.cs.jfact.kernel.ExpressionManager;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Expression;
 
 /** policy for individuals */
-public class IndividualPolicy implements Policy {
+public final class IndividualPolicy implements Policy {
 	private final boolean plain;
 
 	public IndividualPolicy(boolean plain) {
@@ -19,14 +19,14 @@ public class IndividualPolicy implements Policy {
 	}
 
 	public boolean applicable(ClassifiableEntry p) {
-		return ((TConcept) p).isSingleton();
+		return ((Concept) p).isSingleton();
 	}
 
 	public boolean needPlain() {
 		return plain;
 	}
 
-	public TDLExpression buildTree(TExpressionManager EM, ClassifiableEntry p) {
-		return EM.Individual(p.getName());
+	public Expression buildTree(ExpressionManager EM, ClassifiableEntry p) {
+		return EM.individual(p.getName());
 	}
 }

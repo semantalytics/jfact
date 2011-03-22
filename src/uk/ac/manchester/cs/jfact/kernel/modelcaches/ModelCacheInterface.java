@@ -55,9 +55,4 @@ public abstract class ModelCacheInterface {
 	public boolean isHasNominalNode() {
 		return hasNominalNode;
 	}
-
-	/** state the precense of a nominals in cache wrt FLAG */
-	void setFlagNominals(boolean flag) {
-		hasNominalNode = flag;
-	}
 }

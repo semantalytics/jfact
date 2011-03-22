@@ -10,25 +10,12 @@ import java.util.Arrays;
 public final class FastSetSimple extends AbstractFastSet {
 	protected int[] values;
 	protected int size = 0;
-	protected static int defaultSize = 16;
+	protected static final int defaultSize = 16;
 
-	// caching of the last requests
-	//IntCache cache;
 	protected final int insertionIndex(int key) {
-		//		if (size == 0) {
-		//			return -1;
-		//		}
 		if (key < values[0]) {
 			return -1;
 		}
-		//		if (size == 1) {
-		//			if (key == values[0]) {
-		//				return 0;
-		//			}
-		//			if (key > values[0]) {
-		//				return -2;
-		//			}
-		//		}
 		if (key > values[size - 1]) {
 			return -size - 1;
 		}
@@ -45,26 +32,8 @@ public final class FastSetSimple extends AbstractFastSet {
 			return -lowerbound - 1;
 		}
 		int upperbound = size - 1;
-		//		if (values[lowerbound] == key) {
-		//			return lowerbound;
-		//		}
-		//		if (values[upperbound] == key) {
-		//			return upperbound;
-		//		}
 		while (lowerbound <= upperbound) {
 			int delta = upperbound - lowerbound;
-			//			if (delta < AbstractFastSet.limit) {
-			//				for (; lowerbound <= upperbound; lowerbound++) {
-			//					
-			//					if (values[lowerbound] > key) {
-			//						return -lowerbound - 1;
-			//					}
-			//					if (values[lowerbound] == key) {
-			//						return lowerbound;
-			//					}
-			//				}
-			//				return -lowerbound - 1;
-			//			}
 			int intermediate = lowerbound + delta / 2;
 			if (values[intermediate] == key) {
 				return intermediate;
@@ -79,7 +48,6 @@ public final class FastSetSimple extends AbstractFastSet {
 	}
 
 	public FastSetSimple() {
-		//cache = new IntCache();
 	}
 
 	public FastSetSimple(FastSetSimple c1, FastSetSimple c2) {
@@ -127,23 +95,10 @@ public final class FastSetSimple extends AbstractFastSet {
 
 	protected final void init() {
 		values = new int[defaultSize];
-		//Arrays.fill(values, Integer.MAX_VALUE);
 		size = 0;
-		//cache.resetContained();
 	}
 
-	//	private void init(int minValue) {
-	//		values = new int[minValue / defaultSize * defaultSize + defaultSize];
-	//		Arrays.fill(values, Integer.MAX_VALUE);
-	//		size = 0;
-	//	}
-	//	protected void pad(int s) {
-	//		Arrays.fill(values, s, values.length, Integer.MAX_VALUE);
-	//	}
 	public final void add(int e) {
-		//		if (cache.isContained(e)) {
-		//			return;
-		//		}
 		int pos = -1;
 		if (values == null) {
 			init();
@@ -155,13 +110,11 @@ public final class FastSetSimple extends AbstractFastSet {
 		if (pos > -1) {
 			return;
 		}
-		//cache.add(e);
 		int i = -pos - 1;
 		// i is now the insertion point
 		if (i >= values.length || size >= values.length) {
 			// no space left, increase
 			values = Arrays.copyOf(values, values.length + defaultSize);
-			//pad(size);
 		}
 		// size ensured, shift and insert now
 		for (int j = size - 1; j >= i; j--) {
@@ -176,7 +129,6 @@ public final class FastSetSimple extends AbstractFastSet {
 		if (c.isEmpty()) {
 			return;
 		}
-		//		cache.resetNotContained();
 		// merge two sorted arrays: how bad can it be?
 		if (values == null) {
 			//extreme case: just copy the other set
@@ -211,18 +163,12 @@ public final class FastSetSimple extends AbstractFastSet {
 			}
 			// new size here
 			newsize = index;
-			//			for (; index < merge.length; index++) {
-			//				merge[index] = Integer.MAX_VALUE;
-			//			}
 		} else {
 			for (; j < c.size(); j++, index++) {
 				merge[index] = c.get(j);
 			}
 			// new size here
 			newsize = index;
-			//			for (; index < merge.length; index++) {
-			//				merge[index] = Integer.MAX_VALUE;
-			//			}
 		}
 		values = merge;
 		size = newsize;
@@ -231,24 +177,12 @@ public final class FastSetSimple extends AbstractFastSet {
 	public final void clear() {
 		values = null;
 		size = 0;
-		//	cache.resetContained();
 	}
 
 	public final boolean contains(int o) {
 		if (values != null) {
-			//			if (cache.isContained(o)) {
-			//				return true;
-			//			}
-			//			if (cache.isNotContained(o)) {
-			//				return false;
-			//			}
 			int i = insertionIndex(o);
 			boolean toReturn = i > -1;
-			//			if (toReturn) {
-			//				cache.hit(o);
-			//			} else {
-			//				cache.miss(o);
-			//			}
 			return toReturn;
 		}
 		return false;
@@ -327,14 +261,10 @@ public final class FastSetSimple extends AbstractFastSet {
 	}
 
 	public final void remove(int o) {
-		//		if (cache.isNotContained(o)) {
-		//			return;
-		//		}
 		if (values == null) {
 			return;
 		}
 		int i = insertionIndex(o);
-		//cache.delete(o);
 		removeAt(i);
 	}
 
@@ -351,31 +281,6 @@ public final class FastSetSimple extends AbstractFastSet {
 
 	public final boolean intersect(FastSet f) {
 		return containsAny(f);
-		//		// either one empty, return false
-		//		if (values == null || f.size() == 0) {
-		//			return false;
-		//		}
-		//		int bottom = f.get(0);
-		//		int top = f.get(f.size() - 1);
-		//		// if true, all elements in one set are bigger than the ones in the other
-		//		if (values[0] > top || values[size - 1] < bottom) {
-		//			return false;
-		//		}
-		//		// c1 is the smallest set (less calls to the logn search)
-		//		FastSet c1, c2;
-		//		if (size < f.size()) {
-		//			c1 = this;
-		//			c2 = f;
-		//		} else {
-		//			c2 = this;
-		//			c1 = f;
-		//		}
-		//		for (int i = 0; i < c1.size(); i++) {
-		//			if (c2.contains(c1.get(i))) {
-		//				return true;
-		//			}
-		//		}
-		//		return false;
 	}
 
 	@Override
@@ -401,6 +306,11 @@ public final class FastSetSimple extends AbstractFastSet {
 		return false;
 	}
 
+	@Override
+	public final int hashCode() {
+		return super.hashCode();
+	}
+
 	public final void removeAt(int i) {
 		if (values == null) {
 			return;
@@ -414,7 +324,6 @@ public final class FastSetSimple extends AbstractFastSet {
 			for (int j = i; j < size - 1; j++) {
 				values[j] = values[j + 1];
 			}
-			//	values[size - 1] = Integer.MAX_VALUE;
 			size--;
 		}
 		if (size == 0) {
@@ -423,7 +332,6 @@ public final class FastSetSimple extends AbstractFastSet {
 	}
 
 	public final void removeAll(int i, int end) {
-		//cache.resetContained();
 		if (values == null) {
 			return;
 		}
@@ -436,18 +344,12 @@ public final class FastSetSimple extends AbstractFastSet {
 			return;
 		}
 		if (end == size) {
-			//			for (int j = i; j < size - 1; j++) {
-			//				values[j] = Integer.MAX_VALUE;
-			//			}
 			size = i;
 		} else {
 			int delta = end - i;
 			for (int j = i; j < size - delta; j++) {
 				values[j] = values[j + delta];
 			}
-			//			for (int j = size - delta; j < size; j++) {
-			//				values[j] = Integer.MAX_VALUE;
-			//			}
 			size -= delta;
 		}
 		if (size == 0) {
@@ -456,7 +358,6 @@ public final class FastSetSimple extends AbstractFastSet {
 	}
 
 	public final void removeAllValues(int... vals) {
-		//		cache.resetContained();
 		if (values == null) {
 			return;
 		}

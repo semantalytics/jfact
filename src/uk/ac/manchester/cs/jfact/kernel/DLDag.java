@@ -6,7 +6,7 @@ This library is free software; you can redistribute it and/or modify it under th
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.Helper.*;
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
+import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -30,7 +30,7 @@ import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheInterface;
 
 public final class DLDag {
 	/** body of DAG */
-	private final List<DLVertex> Heap = new ArrayList<DLVertex>();
+	private final List<DLVertex> heap = new ArrayList<DLVertex>();
 	/** all the AND nodes (needs to recompute) */
 	private final FastSet listAnds = FastSetFactory.create();
 	private final EnumMap<DagTag, DLVTable> indexes = new EnumMap<DagTag, DLVTable>(DagTag.class);
@@ -68,15 +68,15 @@ public final class DLDag {
 	}
 
 	/** change order of ADD elements wrt statistic */
-	private void Recompute() {
+	private void recompute() {
 		for (int p = 0; p < listAnds.size(); p++) {
-			Heap.get(listAnds.get(p)).sortEntry(this);
+			heap.get(listAnds.get(p)).sortEntry(this);
 		}
 	}
 
 	/** clear all DFS info from elements of DAG */
 	private void clearDFS() {
-		for (DLVertex d : Heap) {
+		for (DLVertex d : heap) {
 			d.clearDFS();
 		}
 	}
@@ -94,9 +94,9 @@ public final class DLDag {
 
 	/** add vertex to the end of DAG and calculate it's statistic if necessary */
 	public int directAdd(DLVertex v) {
-		Heap.add(v);
+		heap.add(v);
 		// return an index of just added entry
-		return Heap.size() - 1;
+		return heap.size() - 1;
 	}
 
 	/**
@@ -106,14 +106,14 @@ public final class DLDag {
 	public int directAddAndCache(DLVertex v) {
 		int ret = directAdd(v);
 		if (useDLVCache) {
-			updateIndex(v.Type(), ret);
+			updateIndex(v.getType(), ret);
 		}
 		return ret;
 	}
 
 	/** check if given index points to the last DAG entry */
 	public boolean isLast(int p) {
-		return (p == Heap.size() - 1) || (-p == Heap.size() - 1);
+		return (p == heap.size() - 1) || (-p == heap.size() - 1);
 	}
 
 	// access methods
@@ -125,13 +125,12 @@ public final class DLDag {
 	/** access by index */
 	public final DLVertex get(int i) {
 		assert isValid(i);
-		//assert(Math.abs(i) < Heap.size());
-		return Heap.get(i < 0 ? -i : i);//Math.abs(i));
+		return heap.get(i < 0 ? -i : i);
 	}
 
 	/** get size of DAG */
 	public int size() {
-		return Heap.size();
+		return heap.size();
 	}
 
 	/** get approximation of the size after query is added */
@@ -188,21 +187,21 @@ public final class DLDag {
 
 	// output interface
 	/** print DAG size and number of cache hits, together with DAG usage */
-	public void PrintStat(LogAdapter o) {
-		o.print(Templates.PRINT_STAT, Heap.size(), nCacheHits);
+	public void printStat(LogAdapter o) {
+		o.print(Templates.PRINT_STAT, heap.size(), nCacheHits);
 		if (IfDefs.RKG_PRINT_DAG_USAGE) {
-			PrintDAGUsage(o);
+			printDAGUsage(o);
 		}
 	}
 
 	/** print the whole DAG */
-	public void Print(LogAdapter o) {
+	public void print(LogAdapter o) {
 		o.print("\nDag structure");
 		for (int i = 1; i < size(); ++i) {
 			o.print("\n");
 			o.print(i);
 			o.print(" ");
-			get(i).Print(o);
+			get(i).print(o);
 		}
 		o.print("\n");
 	}
@@ -210,13 +209,13 @@ public final class DLDag {
 	@Override
 	public String toString() {
 		LogAdapter l = new LeveLogger.LogAdapterStringBuilder();
-		Print(l);
+		print(l);
 		return l.toString();
 	}
 
 	// save/load interface; implementation is in SaveLoad.cpp
 	public int add(DLVertex v) {
-		int ret = useDLVCache ? indexes.get(v.Type()).locate(v) : bpINVALID;
+		int ret = useDLVCache ? indexes.get(v.getType()).locate(v) : bpINVALID;
 		if (!isValid(ret)) {
 			ret = directAddAndCache(v);
 			return ret;
@@ -239,14 +238,14 @@ public final class DLDag {
 		indexes.put(DagTag.dtLE, indexLE);
 		nCacheHits = 0;
 		useDLVCache = true;
-		Heap.add(new DLVertex(DagTag.dtBad));
-		Heap.add(new DLVertex(DagTag.dtTop));
+		heap.add(new DLVertex(DagTag.dtBad));
+		heap.add(new DLVertex(DagTag.dtTop));
 		readConfig(Options);
 	}
 
 	public void removeAfter(int n) {
 		assert n < size();
-		Helper.resize(Heap, n);
+		Helper.resize(heap, n);
 	}
 
 	public void readConfig(final IFOptionSet Options) {
@@ -260,15 +259,15 @@ public final class DLDag {
 
 	public void setOrderDefaults(final String defSat, final String defSub) {
 		assert isCorrectOption(defSat) && isCorrectOption(defSub);
-		LL.print(Templates.SET_ORDER_DEFAULTS1, orSortSat, defSat);
+		logger.print(Templates.SET_ORDER_DEFAULTS1, orSortSat, defSat);
 		if (orSortSat.charAt(0) == '0') {
 			orSortSat = defSat;
 		}
-		LL.print(Templates.SET_ORDER_DEFAULTS2, orSortSat, orSortSub, defSub);
+		logger.print(Templates.SET_ORDER_DEFAULTS2, orSortSat, orSortSub, defSub);
 		if (orSortSub.charAt(0) == '0') {
 			orSortSub = defSub;
 		}
-		LL.print(Templates.SET_ORDER_DEFAULTS3, orSortSub);
+		logger.print(Templates.SET_ORDER_DEFAULTS3, orSortSub);
 	}
 
 	public void setOrderOptions(final String opt) {
@@ -278,24 +277,18 @@ public final class DLDag {
 		sortAscend = opt.charAt(1) == 'a';
 		preferNonGen = opt.charAt(2) == 'p';
 		iSort = StatIndex.choose(opt.charAt(0));
-		Recompute();
+		recompute();
 	}
 
 	private void computeVertexStat(DLVertex v, boolean pos, int depth) {
-		// this vertex is already processed
-		//		if (v.isProcessed(pos)) {
-		//			return;
-		//		}
 		// in case of cycle: mark concept as such
 		if (v.isVisited(pos)) {
 			v.setInCycle(pos);
 			return;
 		}
 		v.setVisited(pos);
-		//		System.out.println("DLDag.computeVertexStat() "+depth+" " + pos + "  "
-		//				+ v.toString() + "\t" + v.Type());
 		// ensure that the statistic is gather for all sub-concepts of the expression
-		switch (v.Type()) {
+		switch (v.getType()) {
 			case dtCollection: // if pos then behaves like and
 				if (!pos) {
 					break;
@@ -325,7 +318,7 @@ public final class DLDag {
 			case dtForall:
 			case dtUAll:
 			case dtLE: // check a single referenced concept
-				int index = createBiPointer(v.getC(), pos);
+				int index = createBiPointer(v.getConceptIndex(), pos);
 				DLVertex vertex = get(index);
 				boolean pos2 = index > 0;
 				if (!vertex.isProcessed(pos2)) {
@@ -342,9 +335,9 @@ public final class DLDag {
 
 	private void updateVertexStat(DLVertex v, boolean pos) {
 		int d = 0, s = 1, b = 0, g = 0;
-		if (!v.Type().omitStat(pos)) {
-			if (isValid(v.getC())) {
-				updateVertexStat(v, v.getC(), pos);
+		if (!v.getType().omitStat(pos)) {
+			if (isValid(v.getConceptIndex())) {
+				updateVertexStat(v, v.getConceptIndex(), pos);
 			} else {
 				for (int q : v.begin()) {
 					updateVertexStat(v, q, pos);
@@ -353,7 +346,7 @@ public final class DLDag {
 		}
 		// correct values wrt POS
 		d = v.getDepth(pos);
-		switch (v.Type()) {
+		switch (v.getType()) {
 			case dtAnd:
 				if (!pos) {
 					++b; // OR is branching
@@ -393,12 +386,12 @@ public final class DLDag {
 		}
 		v.incFreqValue(pos); // increment frequence of current vertex
 		v.setVisited(pos);
-		if (v.Type().omitStat(pos)) {
+		if (v.getType().omitStat(pos)) {
 			return;
 		}
 		// increment frequence of all subvertex
-		if (isValid(v.getC())) {
-			computeVertexFreq(v.getC(), pos);
+		if (isValid(v.getConceptIndex())) {
+			computeVertexFreq(v.getConceptIndex(), pos);
 		} else {
 			for (int q : v.begin()) {
 				computeVertexFreq(q, pos);
@@ -408,11 +401,8 @@ public final class DLDag {
 
 	/** helper for the recursion */
 	private void updateVertexStat(DLVertex v, int p, boolean pos) {
-		//		v.getStatsDelegate().updateStatValues(get(p).getStatsDelegate(),
-		//				pos == isPositive(p), pos);
 		DLVertex w = get(p);
 		boolean same = pos == (p > 0);
-		//		boolean posW = pos == p>0;
 		// update in-cycle information
 		if (w.isInCycle(same)) {
 			v.setInCycle(pos);
@@ -432,7 +422,6 @@ public final class DLDag {
 			DLVertex v = get(index);
 			boolean pos = index > 0;
 			if (!v.isProcessed(pos)) {
-				//System.out.println("DLDag.gatherStatistic() "+v.toString()+"\t"+v.Type());
 				computeVertexStat(v, pos, 0);
 			}
 		}
@@ -442,7 +431,7 @@ public final class DLDag {
 		}
 		clearDFS();
 		for (int i = size() - 1; i > 1; --i) {
-			if (get(i).Type().isCNameTag()) {
+			if (get(i).getType().isCNameTag()) {
 				computeVertexFreq(i);
 			}
 		}
@@ -468,10 +457,10 @@ public final class DLDag {
 		}
 	}
 
-	public void PrintDAGUsage(LogAdapter o) {
+	public void printDAGUsage(LogAdapter o) {
 		int n = 0; // number of no-used DAG entries
-		int total = Heap.size() * 2 - 2; // number of total DAG entries
-		for (DLVertex i : Heap) {
+		int total = heap.size() * 2 - 2; // number of total DAG entries
+		for (DLVertex i : heap) {
 			if (i.getUsage(true) == 0) {
 				++n;
 			}
@@ -484,32 +473,32 @@ public final class DLDag {
 
 	/** build the sort system for given TBox */
 	public void determineSorts(RoleMaster ORM, RoleMaster DRM) {
-		sortArraySize = Heap.size();
+		sortArraySize = heap.size();
 		// init roles R&D sorts
-		List<TRole> ORM_Begin = ORM.getRoles();
-		for (TRole p : ORM_Begin) {
+		List<Role> ORM_Begin = ORM.getRoles();
+		for (Role p : ORM_Begin) {
 			if (!p.isSynonym()) {
 				mergeSorts(p);
 			}
 		}
-		List<TRole> DRM_Begin = DRM.getRoles();
-		for (TRole p : DRM_Begin) {
+		List<Role> DRM_Begin = DRM.getRoles();
+		for (Role p : DRM_Begin) {
 			if (!p.isSynonym()) {
 				mergeSorts(p);
 			}
 		}
-		for (int i = 2; i < Heap.size(); ++i) {
-			mergeSorts(Heap.get(i));
+		for (int i = 2; i < heap.size(); ++i) {
+			mergeSorts(heap.get(i));
 		}
 		int sum = 0;
-		for (int i = 2; i < Heap.size(); ++i) {
-			MergableLabel lab = Heap.get(i).getSort();
+		for (int i = 2; i < heap.size(); ++i) {
+			MergableLabel lab = heap.get(i).getSort();
 			lab.resolve();
 			if (lab.isSample()) {
 				++sum;
 			}
 		}
-		for (TRole p : ORM_Begin) {
+		for (Role p : ORM_Begin) {
 			if (!p.isSynonym()) {
 				MergableLabel lab = p.getDomainLabel();
 				lab.resolve();
@@ -518,7 +507,7 @@ public final class DLDag {
 				}
 			}
 		}
-		for (TRole p : DRM_Begin) {
+		for (Role p : DRM_Begin) {
 			if (!p.isSynonym()) {
 				MergableLabel lab = p.getDomainLabel();
 				lab.resolve();
@@ -531,32 +520,32 @@ public final class DLDag {
 		if (sum > 0) {
 			sum--;
 		}
-		LL.print(Templates.DETERMINE_SORTS, (sum > 0 ? sum : "no"));
+		logger.print(Templates.DETERMINE_SORTS, (sum > 0 ? sum : "no"));
 	}
 
 	/** merge sorts for a given role */
-	void mergeSorts(TRole R) {
+	private void mergeSorts(Role R) {
 		// associate role domain labels
 		R.mergeSupersDomain();
 		merge(R.getDomainLabel(), R.getBPDomain());
 		// also associate functional nodes (if any)
-		for (TRole q : R.begin_topfunc()) {
+		for (Role q : R.begin_topfunc()) {
 			merge(R.getDomainLabel(), q.getFunctional());
 		}
 	}
 
 	/** merge sorts for a given vertex */
-	void mergeSorts(DLVertex v) {
-		switch (v.Type()) {
+	private void mergeSorts(DLVertex v) {
+		switch (v.getType()) {
 			case dtLE: // set R&D for role
 			case dtForall:
 				v.merge(v.getRole().getDomainLabel()); // domain(role)=cur
-				merge(v.getRole().getRangeLabel(), v.getC());
+				merge(v.getRole().getRangeLabel(), v.getConceptIndex());
 				break;
 			case dtProj: // projection: equate R&D of R and ProjR, and D(R) with C
 				v.merge(v.getRole().getDomainLabel());
 				v.merge(v.getProjRole().getDomainLabel());
-				merge(v.getRole().getDomainLabel(), v.getC());
+				merge(v.getRole().getDomainLabel(), v.getConceptIndex());
 				v.getRole().getRangeLabel().merge(v.getProjRole().getRangeLabel());
 				break;
 			case dtIrr: // equate R&D for role
@@ -573,7 +562,7 @@ public final class DLDag {
 			case dtPSingleton:
 			case dtPConcept:
 			case dtNConcept: // merge with description
-				merge(v.getSort(), v.getC());
+				merge(v.getSort(), v.getConceptIndex());
 				break;
 			case dtDataType: // nothing to do
 			case dtDataValue:
@@ -587,7 +576,7 @@ public final class DLDag {
 	}
 
 	/** update sorts for <a,b>:R construction */
-	void updateSorts(int a, TRole R, int b) {
+	public void updateSorts(int a, Role R, int b) {
 		merge(R.getDomainLabel(), a);
 		merge(R.getRangeLabel(), b);
 	}
@@ -597,7 +586,7 @@ final class DLVTable {
 	/** host DAG that contains actual nodes; */
 	private final DLDag host;
 	/** HT for nodes */
-	private final Map<DLVertex, FastSet> Table = new HashMap<DLVertex, FastSet>();
+	private final Map<DLVertex, FastSet> table = new HashMap<DLVertex, FastSet>();
 
 	protected DLVTable(final DLDag dag) {
 		host = dag;
@@ -614,21 +603,21 @@ final class DLVTable {
 	}
 
 	protected int locate(final DLVertex v) {
-		FastSet p = Table.get(v);
+		FastSet p = table.get(v);
 		return p == null ? bpINVALID : locate(p, v);
 	}
 
 	protected void addElement(int pos) {
-		FastSet leaf = Table.get(host.get(pos));
+		FastSet leaf = table.get(host.get(pos));
 		if (leaf == null) {
 			leaf = FastSetFactory.create();
-			Table.put(host.get(pos), leaf);
+			table.put(host.get(pos), leaf);
 		}
 		leaf.add(pos);
 	}
 
 	@Override
 	public String toString() {
-		return Table.toString() + "\n" + host.toString();
+		return table.toString() + "\n" + host.toString();
 	}
 }

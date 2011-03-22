@@ -5,7 +5,7 @@ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
+import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 import static uk.ac.manchester.cs.jfact.kernel.ToDoPriorMatrix.*;
 
 import java.util.ArrayList;
@@ -15,47 +15,47 @@ import java.util.List;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
 import uk.ac.manchester.cs.jfact.dep.DepSet;
-import uk.ac.manchester.cs.jfact.dep.TSaveStack;
 import uk.ac.manchester.cs.jfact.helpers.FastSetSimple;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
 import uk.ac.manchester.cs.jfact.helpers.IfDefs;
+import uk.ac.manchester.cs.jfact.helpers.SaveStack;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 
-public class ToDoList {
+public final class ToDoList {
 	/** the entry of Todo table */
 	public static class ToDoEntry {
 		/** node to include concept */
-		private final DlCompletionTree Node;
-		private int Concept;
-		private FastSetSimple Delegate;
+		private final DlCompletionTree node;
+		private int concept;
+		private FastSetSimple delegate;
 
 		ToDoEntry(DlCompletionTree n, ConceptWDep off) {
-			Node = n;
-			Concept = off.getConcept();
-			Delegate = off.getDep().getDelegate();
+			node = n;
+			concept = off.getConcept();
+			delegate = off.getDep().getDelegate();
 		}
 
 		protected DlCompletionTree getNode() {
-			return Node;
+			return node;
 		}
 
 		protected int getOffsetConcept() {
-			return Concept;
+			return concept;
 		}
 
 		protected FastSetSimple getOffsetDepSet() {
-			return Delegate;
+			return delegate;
 		}
 
 		@Override
 		public String toString() {
-			return "Node(" + Node.getId() + "), offset(" + new ConceptWDep(Concept, new DepSet(Delegate)) + ")";
+			return "Node(" + node.getId() + "), offset(" + new ConceptWDep(concept, new DepSet(delegate)) + ")";
 		}
 
-		public void Print(LogAdapter l) {
-			l.print("Node(" + Node.getId() + "), offset(");
-			new ConceptWDep(Concept, new DepSet(Delegate)).print(l);
+		public void print(LogAdapter l) {
+			l.print("Node(" + node.getId() + "), offset(");
+			new ConceptWDep(concept, new DepSet(delegate)).print(l);
 			l.print(")");
 		}
 	}
@@ -90,14 +90,14 @@ public class ToDoList {
 
 		/** save queue content to the given entry */
 		public void save(int[][] tss, int pos) {
-			tss[pos][0] = sPointer;//.sp = sPointer;
-			tss[pos][1] = Wait.size();// .ep = Wait.size();
+			tss[pos][0] = sPointer;
+			tss[pos][1] = Wait.size();
 		}
 
 		/** restore queue content from the given entry */
 		public void restore(int[][] tss, int pos) {
-			sPointer = tss[pos][0];//.sp;
-			Helper.resize(Wait, tss[pos][1]);//.ep);
+			sPointer = tss[pos][0];
+			Helper.resize(Wait, tss[pos][1]);
 		}
 
 		public void restore(int sp, int ep) {
@@ -105,10 +105,10 @@ public class ToDoList {
 			Helper.resize(Wait, ep);
 		}
 
-		public void Print(LogAdapter l) {
+		public void print(LogAdapter l) {
 			l.print("ArrayQueue{" + sPointer + ",");
 			for (ToDoEntry t : Wait) {
-				t.Print(l);
+				t.print(l);
 				l.print(" ");
 			}
 			l.print("}");
@@ -118,7 +118,7 @@ public class ToDoList {
 	/** class for saving/restoring priority queue Todo */
 	static final class QueueQueueSaveState {
 		/** save whole array */
-		protected List<ToDoEntry> Wait;// = new ArrayList<ToDoEntry>();
+		protected List<ToDoEntry> waitingQueue;
 		/** save start point of queue of entries */
 		protected int sp;
 		/** save end point of queue of entries */
@@ -183,10 +183,10 @@ public class ToDoList {
 			tss.queueBroken = queueBroken;
 			tss.sp = sPointer;
 			if (queueBroken) {
-				tss.Wait = new ArrayList<ToDoList.ToDoEntry>(_Wait);
+				tss.waitingQueue = new ArrayList<ToDoEntry>(_Wait);
 			} else {
 				// save just end pointer
-				tss.ep = _Wait.size();
+				tss.ep = size;
 			}
 			queueBroken = false; // clear flag for the next session
 		}
@@ -197,9 +197,8 @@ public class ToDoList {
 			sPointer = tss.sp;
 			if (queueBroken) {
 				// the tss variable is discarded at the end of the restore, so no need to copy
-				_Wait = tss.Wait;
+				_Wait = tss.waitingQueue;
 				size = _Wait.size();
-				//_Wait = new ArrayList<ToDoList.ToDoEntry>(tss.Wait);
 			} else {
 				// save just end pointer
 				Helper.resize(_Wait, tss.ep);
@@ -215,64 +214,63 @@ public class ToDoList {
 
 	/** class for saving/restoring array Todo table */
 	static final class TODOListSaveState {
-		/** save state for queueID */
-		//protected ArrayQueueSaveState backupID = new ArrayQueueSaveState();
 		protected int backupID_sp;
 		protected int backupID_ep;
 		/** save state for queueNN */
 		protected QueueQueueSaveState backupNN = new QueueQueueSaveState();
 		/** save state of all regular queues */
-		protected int[][] backup = new int[nRegularOps][2];
+		protected int[][] backup = new int[nRegularOptions][2];
 		/** save number-of-entries to do */
 		protected int noe;
 
 		TODOListSaveState() {
 		}
 
-		//		private static final ConcurrentLinkedQueue<SaveState> states = new ConcurrentLinkedQueue<ToDoList.SaveState>();
-		//		private static final AtomicInteger statesSize = new AtomicInteger(0);
-		//		private final static int limit=100;
-		//		static {
-		//			
-		//			Thread stateFiller = new Thread() {
-		//				@Override
-		//				public void run() {
-		//					while (true) {
-		//						if (statesSize.get() < limit) {
-		//							for (int i = 0; i < limit; i++) {
-		//								states.add(new SaveState());
-		//							}
-		//							statesSize.addAndGet(limit);
-		//						}
-		////						try {
-		////							Thread.currentThread().sleep(5);
-		////						} catch (InterruptedException e) {
-		////							e.printStackTrace();
-		////						}
-		//					}
-		//				}
-		//			};
-		//			stateFiller.setDaemon(true);
-		//			stateFiller.start();
-		//		}
-		//
-		//		public static final SaveState getInstance() {
-		//			if(statesSize.get()==0) {
-		//				System.err.println("ToDoList.SaveState.getInstance() waiting...");
-		//while(statesSize.get()==0) {
-		//	//wait
-		//}
-		//			}
-		//			SaveState toReturn =  states.poll();
-		//			if (toReturn == null) {
-		//				System.err.println("ToDoList.SaveState.getInstance() STILL waiting...");
-		//				while (toReturn == null) {
-		//					toReturn = states.poll();
-		//				}
-		//			}
-		//			statesSize.decrementAndGet();
-		//			return toReturn;
-		//		}
+		final static int limit = 1000;
+		static final TODOListSaveState[] states = new TODOListSaveState[limit];
+		static int nextState = 0;
+		static volatile boolean change = true;
+		static {
+			Thread stateFiller = new Thread() {
+				@Override
+				public void run() {
+					while (true) {
+						if (change) {
+							for (int i = 0; i < limit; i++) {
+								if (states[i] == null) {
+									states[i] = new TODOListSaveState();
+								}
+							}
+							change = false;
+						}
+						try {
+							Thread.sleep(5);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			};
+			stateFiller.setPriority(Thread.MIN_PRIORITY);
+			stateFiller.setDaemon(true);
+			stateFiller.start();
+		}
+
+		public static final TODOListSaveState getInstance() {
+			if (nextState == limit) {
+				nextState = 0;
+			}
+			TODOListSaveState toReturn = states[nextState];
+			if (toReturn != null) {
+				states[nextState++] = null;
+				change = true;
+				return toReturn;
+			} else {
+				//	System.err.println("ToDoList.SaveState.getInstance() STILL waiting...");
+				return new TODOListSaveState();
+			}
+		}
+
 		@Override
 		public String toString() {
 			return "" + noe + " " + backupID_sp + "," + backupID_ep + " " + backupNN + " " + Arrays.toString(backup);
@@ -284,64 +282,61 @@ public class ToDoList {
 	/** waiting ops queue for <= ops in nominal nodes */
 	private QueueQueue queueNN = new QueueQueue();
 	/** waiting ops queues */
-	private List<ArrayQueue> Wait = new ArrayList<ArrayQueue>(nRegularOps);
+	private List<ArrayQueue> waitQueue = new ArrayList<ArrayQueue>(nRegularOptions);
 	/** stack of saved states */
-	private TSaveStack<TODOListSaveState> SaveStack = new TSaveStack<TODOListSaveState>();
+	private SaveStack<TODOListSaveState> saveStack = new SaveStack<TODOListSaveState>();
 	/** priority matrix */
-	private ToDoPriorMatrix Matrix = new ToDoPriorMatrix();
+	private ToDoPriorMatrix matrix = new ToDoPriorMatrix();
 	/** number of un-processed entries */
 	private int noe;
 
 	/** save current Todo table content to given saveState entry */
-	void saveState(TODOListSaveState tss) {
-		//queueID.save(tss.backupID);
+	public void saveState(TODOListSaveState tss) {
 		tss.backupID_sp = queueID.sPointer;
 		tss.backupID_ep = queueID.Wait.size();
 		queueNN.save(tss.backupNN);
-		for (int i = nRegularOps - 1; i >= 0; --i) {
-			//tss.backup[i] = new ArrayQueueSaveState();
-			Wait.get(i).save(tss.backup, i);
+		for (int i = nRegularOptions - 1; i >= 0; --i) {
+			waitQueue.get(i).save(tss.backup, i);
 		}
 		tss.noe = noe;
 	}
 
 	/** restore Todo table content from given saveState entry */
-	void restoreState(final TODOListSaveState tss) {
-		//queueID.restore(tss.backupID);
+	public void restoreState(final TODOListSaveState tss) {
 		queueID.restore(tss.backupID_sp, tss.backupID_ep);
 		queueNN.restore(tss.backupNN);
-		for (int i = nRegularOps - 1; i >= 0; --i) {
-			Wait.get(i).restore(tss.backup[i][0], tss.backup[i][1]);
+		for (int i = nRegularOptions - 1; i >= 0; --i) {
+			waitQueue.get(i).restore(tss.backup[i][0], tss.backup[i][1]);
 		}
 		noe = tss.noe;
 	}
 
-	ToDoList() {
+	public ToDoList() {
 		noe = 0;
 		//		Helper.resize(Wait, nRegularOps);
-		for (int i = 0; i < nRegularOps; i++) {
-			Wait.add(new ArrayQueue());
+		for (int i = 0; i < nRegularOptions; i++) {
+			waitQueue.add(new ArrayQueue());
 		}
 	}
 
 	/** init priorities via Options */
-	void initPriorities(final IFOptionSet Options, final String optionName) {
-		Matrix.initPriorities(Options.getText(optionName), optionName);
+	public void initPriorities(final IFOptionSet Options, final String optionName) {
+		matrix.initPriorities(Options.getText(optionName), optionName);
 	}
 
 	/** clear Todo table */
-	void clear() {
+	public void clear() {
 		queueID.clear();
 		queueNN.clear();
-		for (int i = nRegularOps - 1; i >= 0; --i) {
-			Wait.get(i).clear();
+		for (int i = nRegularOptions - 1; i >= 0; --i) {
+			waitQueue.get(i).clear();
 		}
-		SaveStack.clear();
+		saveStack.clear();
 		noe = 0;
 	}
 
 	/** check if Todo table is empty */
-	boolean isEmpty() {
+	public boolean isEmpty() {
 		return noe == 0;
 	}
 
@@ -349,37 +344,37 @@ public class ToDoList {
 	/**
 	 * add entry with given NODE and CONCEPT with given OFFSET to the Todo table
 	 */
-	void addEntry(DlCompletionTree node, DagTag type, ConceptWDep C) {
-		int index = Matrix.getIndex(type, C.getConcept() > 0, node.isNominalNode());
+	public void addEntry(DlCompletionTree node, DagTag type, ConceptWDep C) {
+		int index = matrix.getIndex(type, C.getConcept() > 0, node.isNominalNode());
 		switch (index) {
-			case nRegularOps: // unused entry
+			case nRegularOptions: // unused entry
 				return;
-			case iId: // ID
+			case priorityIndexID: // ID
 				queueID.add(node, C);
 				break;
-			case iNN: // NN
+			case priorityIndexNominalNode: // NN
 				queueNN.add(node, C);
 				break;
 			default: // regular queue
-				Wait.get(index).add(node, C);
+				waitQueue.get(index).add(node, C);
 				break;
 		}
 		++noe;
 	}
 
 	/** save current state using internal stack */
-	void save() {
-		TODOListSaveState state = new TODOListSaveState();
+	public void save() {
+		TODOListSaveState state = TODOListSaveState.getInstance();
 		saveState(state);
-		SaveStack.push(state);
+		saveStack.push(state);
 	}
 
 	/** restore state to the given level using internal stack */
-	void restore(int level) {
-		restoreState(SaveStack.pop(level));
+	public void restore(int level) {
+		restoreState(saveStack.pop(level));
 	}
 
-	final ToDoEntry getNextEntry() {
+	public ToDoEntry getNextEntry() {
 		assert !isEmpty(); // safety check
 		// decrease amount of elements-to-process
 		--noe;
@@ -392,8 +387,8 @@ public class ToDoList {
 			return queueNN.get();
 		}
 		// check regular queues
-		for (int i = 0; i < nRegularOps; ++i) {
-			ArrayQueue arrayQueue = Wait.get(i);
+		for (int i = 0; i < nRegularOptions; ++i) {
+			ArrayQueue arrayQueue = waitQueue.get(i);
 			if (!arrayQueue.isEmpty()) {
 				return arrayQueue.get();
 			}
@@ -402,13 +397,13 @@ public class ToDoList {
 		return null;
 	}
 
-	public void Print(LogAdapter lL) {
+	public void print(LogAdapter lL) {
 		lL.print("Todolist{");
 		lL.println();
-		queueID.Print(lL);
+		queueID.print(lL);
 		lL.println();
-		for (int i = 0; i < nRegularOps; ++i) {
-			Wait.get(i).Print(lL);
+		for (int i = 0; i < nRegularOptions; ++i) {
+			waitQueue.get(i).print(lL);
 			lL.println();
 		}
 		lL.println();
@@ -418,25 +413,25 @@ public class ToDoList {
 
 class ToDoPriorMatrix {
 	// regular operation indexes
-	private int iAnd;
-	private int iOr;
-	private int iExists;
-	private int iForall;
-	private int iLE;
-	private int iGE;
+	private int indexAnd;
+	private int indexOr;
+	private int indexExists;
+	private int indexForall;
+	private int indexLE;
+	private int indexGE;
 
 	public ToDoPriorMatrix() {
 	}
 
 	/** number of regular options (o- and NN-rules are not included) */
-	protected static final int nRegularOps = 7;
+	protected static final int nRegularOptions = 7;
 	/**
 	 * priority index for o- and ID operations (note that these ops have the
 	 * highest priority)
 	 */
-	protected static final int iId = nRegularOps + 1;
+	protected static final int priorityIndexID = nRegularOptions + 1;
 	/** priority index for <= operation in nominal node */
-	protected static final int iNN = nRegularOps + 2;
+	protected static final int priorityIndexNominalNode = nRegularOptions + 2;
 
 	/** Auxiliary class to get priorities on operations */
 	public void initPriorities(final String options, final String optionName) {
@@ -445,49 +440,48 @@ class ToDoPriorMatrix {
 			throw new ReasonerInternalException("ToDo List option string should have length 7");
 		}
 		// init values by symbols loaded
-		iAnd = options.charAt(1) - '0';
-		iOr = options.charAt(2) - '0';
-		iExists = options.charAt(3) - '0';
-		iForall = options.charAt(4) - '0';
-		iLE = options.charAt(5) - '0';
-		iGE = options.charAt(6) - '0';
+		indexAnd = options.charAt(1) - '0';
+		indexOr = options.charAt(2) - '0';
+		indexExists = options.charAt(3) - '0';
+		indexForall = options.charAt(4) - '0';
+		indexLE = options.charAt(5) - '0';
+		indexGE = options.charAt(6) - '0';
 		// correctness checking
-		if (iAnd >= nRegularOps || iOr >= nRegularOps || iExists >= nRegularOps || iForall >= nRegularOps || iGE >= nRegularOps || iLE >= nRegularOps) {
+		if (indexAnd >= nRegularOptions || indexOr >= nRegularOptions || indexExists >= nRegularOptions || indexForall >= nRegularOptions || indexGE >= nRegularOptions || indexLE >= nRegularOptions) {
 			throw new ReasonerInternalException("ToDo List option out of range");
 		}
 		// inform about used rules order
-		if (IfDefs._USE_LOGGING) {
-			LL.print(String.format("\nInit %s = %s%s%s%s%s%s", optionName, iAnd, iOr, iExists, iForall, iLE, iGE));
+		if (IfDefs.USE_LOGGING) {
+			logger.print(String.format("\nInit %s = %s%s%s%s%s%s", optionName, indexAnd, indexOr, indexExists, indexForall, indexLE, indexGE));
 		}
 	}
 
 	public int getIndex(DagTag Op, boolean Sign, boolean NominalNode) {
 		switch (Op) {
 			case dtAnd:
-				return Sign ? iAnd : iOr;
+				return Sign ? indexAnd : indexOr;
 			case dtForall:
 			case dtUAll:
 			case dtIrr: // process local (ir-)reflexivity as a FORALL
-				return Sign ? iForall : iExists;
+				return Sign ? indexForall : indexExists;
 			case dtProj: // it should be the lowest priority but now just OR's one
-				return iOr;
+				return indexOr;
 			case dtLE:
-				return Sign ? (NominalNode ? iNN : iLE) : iGE;
+				return Sign ? (NominalNode ? priorityIndexNominalNode : indexLE) : indexGE;
 			case dtDataType:
 			case dtDataValue:
 			case dtDataExpr:
 			case dtNN:
 			case dtTop: // no need to process these ops
-				return nRegularOps;
+				return nRegularOptions;
 			case dtPSingleton:
 			case dtPConcept: // no need to process neg of PC
-				return Sign ? iId : nRegularOps;
+				return Sign ? priorityIndexID : nRegularOptions;
 			case dtNSingleton:
 			case dtNConcept: // both NC and neg NC are processed
-				return iId;
+				return priorityIndexID;
 			default: // safety check
 				throw new UnreachableSituationException();
-				//				return -1;
 		}
 	}
 }

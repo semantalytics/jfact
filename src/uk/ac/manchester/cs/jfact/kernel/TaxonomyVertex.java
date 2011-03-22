@@ -5,7 +5,7 @@ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
+import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -21,20 +21,18 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 public final class TaxonomyVertex {
 	//TODO check if they need to be list
 	/** immediate parents and children */
-	private final List<TaxonomyVertex> LinksUp = new ArrayList<TaxonomyVertex>();
-	private final List<TaxonomyVertex> LinksDown = new ArrayList<TaxonomyVertex>();
+	private final List<TaxonomyVertex> linksParent = new ArrayList<TaxonomyVertex>();
+	private final List<TaxonomyVertex> linksChild = new ArrayList<TaxonomyVertex>();
 	/** entry corresponding to current tax vertex */
 	private ClassifiableEntry sample = null;
 	//TODO this can be a set, but there is no advantage
 	/** synonyms of the sample entry */
 	private final Set<ClassifiableEntry> synonyms = new LinkedHashSet<ClassifiableEntry>();
-	/** labellers for marking taxonomy */
-	//private final static TLabeller valuedLab = new TLabeller();
 	// labels for different purposes. all for 2 directions: top-down and bottom-up search
 	/** flag if given vertex was checked; connected with checkLab */
-	private long theChecked;
+	private long checked;
 	/** flag if given vertex has value; connected with valuedLab */
-	private long theValued;
+	private long isValued;
 	/** number of common parents of a node */
 	private int common;
 	/** satisfiability value of a valued vertex */
@@ -48,21 +46,21 @@ public final class TaxonomyVertex {
 
 	/** indirect RW access to Links */
 	public List<TaxonomyVertex> neigh(boolean upDirection) {
-		return upDirection ? LinksUp : LinksDown;
+		return upDirection ? linksParent : linksChild;
 	}
 
 	// checked part
 	public boolean isChecked(long checkLab) {
-		return checkLab == theChecked;
+		return checkLab == checked;
 	}
 
 	public void setChecked(long checkLab) {
-		theChecked = checkLab;
+		checked = checkLab;
 	}
 
 	// value part
 	public boolean isValued(long valueLab) {
-		return valueLab == theValued;
+		return valueLab == isValued;
 	}
 
 	public boolean getValue() {
@@ -70,7 +68,7 @@ public final class TaxonomyVertex {
 	}
 
 	public boolean setValued(boolean val, long valueLab) {
-		theValued = valueLab;
+		isValued = valueLab;
 		checkValue = val;
 		return val;
 	}
@@ -99,8 +97,8 @@ public final class TaxonomyVertex {
 
 	/** put initial values on the flags */
 	private void initFlags() {
-		theChecked = 0;
-		theValued = 0;
+		checked = 0;
+		isValued = 0;
 		common = 0;
 	}
 
@@ -122,14 +120,13 @@ public final class TaxonomyVertex {
 	/** add P as a synonym to curent vertex */
 	public void addSynonym(final ClassifiableEntry p) {
 		synonyms.add(p);
-		//p.setTaxVertex(this);
 		p.setTaxVertex(this);
 	}
 
 	/** clears the vertex */
 	public void clear() {
-		LinksUp.clear();
-		LinksDown.clear();
+		linksParent.clear();
+		linksChild.clear();
 		sample = null;
 		initFlags();
 	}
@@ -214,22 +211,22 @@ public final class TaxonomyVertex {
 		for (TaxonomyVertex u : truelist) {
 			u.addNeighbour(false, this);
 		}
-		if (IfDefs._USE_LOGGING) {
-			LL.print(Templates.INCORPORATE, sample.getName());
+		if (IfDefs.USE_LOGGING) {
+			logger.print(Templates.INCORPORATE, sample.getName());
 			for (int i = 0; i < truelist.size(); i++) {
 				if (i > 0) {
-					LL.print(",");
+					logger.print(",");
 				}
-				LL.print(truelist.get(i).sample.getName());
+				logger.print(truelist.get(i).sample.getName());
 			}
-			LL.print("} and down = {");
+			logger.print("} and down = {");
 			for (int i = 0; i < falselist.size(); i++) {
 				if (i > 0) {
-					LL.print(",");
+					logger.print(",");
 				}
-				LL.print(falselist.get(i).sample.getName());
+				logger.print(falselist.get(i).sample.getName());
 			}
-			LL.print("}");
+			logger.print("}");
 		}
 	}
 

@@ -50,7 +50,7 @@ public final class DepSet {
 		return delegate != null && delegate.contains(level);
 	}
 
-	public void Print(LogAdapter o) {
+	public void print(LogAdapter o) {
 		o.print(toString());
 	}
 
@@ -82,7 +82,7 @@ public final class DepSet {
 		}
 		if (obj instanceof DepSet) {
 			DepSet obj2 = (DepSet) obj;
-			return (delegate == null && obj2.delegate == null) || delegate != null ? delegate.equals(obj2.delegate) : false; //obj2.delegate.equals(delegate);
+			return (delegate == null && obj2.delegate == null) || (delegate != null ? delegate.equals(obj2.delegate) : false); //obj2.delegate.equals(delegate);
 		}
 		return false;
 	}

@@ -9,18 +9,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry;
-import uk.ac.manchester.cs.jfact.kernel.TConcept;
-import uk.ac.manchester.cs.jfact.kernel.TIndividual;
+import uk.ac.manchester.cs.jfact.kernel.Concept;
+import uk.ac.manchester.cs.jfact.kernel.Individual;
 import uk.ac.manchester.cs.jfact.kernel.TaxonomyVertex;
 
-public class RIActor implements Actor {
-	private final List<TIndividual> acc = new ArrayList<TIndividual>();
+public final class RIActor implements Actor {
+	private final List<Individual> acc = new ArrayList<Individual>();
 
 	private boolean tryEntry(ClassifiableEntry p) {
-		if (p.isSystem() || !((TConcept) p).isSingleton()) {
+		if (p.isSystem() || !((Concept) p).isSingleton()) {
 			return false;
 		}
-		acc.add((TIndividual) p);
+		acc.add((Individual) p);
 		return true;
 	}
 
@@ -35,7 +35,7 @@ public class RIActor implements Actor {
 		return ret;
 	}
 
-	public List<TIndividual> getAcc() {
+	public List<Individual> getAcc() {
 		return acc;
 	}
 }

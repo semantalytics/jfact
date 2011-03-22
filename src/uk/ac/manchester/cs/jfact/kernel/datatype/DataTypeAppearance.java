@@ -5,7 +5,7 @@ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
+import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,9 +15,9 @@ import uk.ac.manchester.cs.jfact.dep.DepSet;
 import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.helpers.Reference;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataTypeName;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 
-public class DataTypeAppearance {
+public final class DataTypeAppearance {
 	public static class DepDTE {
 		protected DepDTE(Object e, DepSet s) {
 			first = e;
@@ -29,12 +29,12 @@ public class DataTypeAppearance {
 	}
 
 	/** positive type appearance */
-	private DepDTE PType;
+	private DepDTE pType;
 	private Datatypes pdatatype;
 	/** negative type appearance */
-	private DepDTE NType;
+	private DepDTE nType;
 	/** interval of possible values */
-	private List<DepInterval> Constraints = new ArrayList<DepInterval>();
+	private List<DepInterval> constraints = new ArrayList<DepInterval>();
 	/** accumulated dep-set */
 	private DepSet accDep = DepSetFactory.create();
 	/** dep-set for the clash */
@@ -54,7 +54,7 @@ public class DataTypeAppearance {
 	 * simplify callers
 	 */
 	private boolean reportClash(final DepSet dep, final String reason) {
-		LL.print(Templates.CLASH, reason); // inform about clash...
+		logger.print(Templates.CLASH, reason); // inform about clash...
 		clashDep.setReference(dep);
 		return true;
 	}
@@ -78,11 +78,11 @@ public class DataTypeAppearance {
 			return reportClash(localDep, "C-IT");
 		}
 		if (!i.update(localMin, localExcl, localValue, localDep)) {
-			Constraints.add(i);
+			constraints.add(i);
 		}
 		ref = new Reference<DepSet>(accDep);
 		if (!hasPType() || !i.checkMinMaxClash(ref)) {
-			Constraints.add(i);
+			constraints.add(i);
 		}
 		accDep = ref.getReference();
 		return false;
@@ -107,36 +107,35 @@ public class DataTypeAppearance {
 
 	/** clear the appearance flags */
 	protected void clear() {
-		PType = null;//new DepDTE(null, new DepSet());
+		pType = null;
 		pdatatype = null;
-		NType = null;//new DepDTE(null, new DepSet());
-		//			std__make_pair(null,new DepSet());
-		Constraints.clear();
-		Constraints.add(new DepInterval());
+		nType = null;
+		constraints.clear();
+		constraints.add(new DepInterval());
 		accDep.clear();
 	}
 
 	// presence interface
 	/** check if type is present positively in the node */
 	protected boolean hasPType() {
-		return PType != null;
+		return pType != null;
 	}
 
 	/** check if type is present negatively in the node */
 	private boolean hasNType() {
-		return NType != null;
+		return nType != null;
 	}
 
 	/** set the precense of the PType */
 	protected void setPType(final DepDTE type) {
 		if (!hasPType()) {
-			PType = type;
+			pType = type;
 			// XXX this would be better with a visitor
-			if (PType.first instanceof TDataEntry) {
-				pdatatype = ((TDataEntry) PType.first).getDatatype();
+			if (pType.first instanceof DataEntry) {
+				pdatatype = ((DataEntry) pType.first).getDatatype();
 			}
-			if (PType.first instanceof TDLDataTypeName) {
-				pdatatype = ((TDLDataTypeName) PType.first).getDatatype();
+			if (pType.first instanceof DataTypeName) {
+				pdatatype = ((DataTypeName) pType.first).getDatatype();
 			}
 		}
 	}
@@ -146,24 +145,23 @@ public class DataTypeAppearance {
 	}
 
 	/** add restrictions [POS]INT to intervals */
-	protected boolean addInterval(boolean pos, final TDataInterval Int, final DepSet dep) {
-		LL.print(Templates.INTERVAL, (pos ? "+" : "-"), Int);
+	protected boolean addInterval(boolean pos, final DataInterval Int, final DepSet dep) {
+		logger.print(Templates.INTERVAL, (pos ? "+" : "-"), Int);
 		return pos ? addPosInterval(Int, dep) : addNegInterval(Int, dep);
 	}
 
 	/** @return true iff PType and NType leads to clash */
 	protected boolean checkPNTypeClash() {
 		if (hasNType()) {
-			return reportClash(DepSetFactory.plus(PType.second, NType.second), "TNT");
+			return reportClash(DepSetFactory.plus(pType.second, nType.second), "TNT");
 		}
 		return false;
 	}
 
-	private boolean addPosInterval(final TDataInterval Int, final DepSet dep) {
+	private boolean addPosInterval(final DataInterval Int, final DepSet dep) {
 		if (Int.hasMin()) {
-			List<DepInterval> aux = new ArrayList<DepInterval>(Constraints);
-			Constraints.clear();
-			//Constraints.swap(aux);
+			List<DepInterval> aux = new ArrayList<DepInterval>(constraints);
+			constraints.clear();
 			setLocal(true, Int.minExcl, Int.min, dep);
 			if (addIntervals(aux)) {
 				return true;
@@ -171,24 +169,23 @@ public class DataTypeAppearance {
 			aux.clear();
 		}
 		if (Int.hasMax()) {
-			List<DepInterval> aux = new ArrayList<DepInterval>(Constraints);
-			Constraints.clear();
-			//  Constraints.swap(aux);
+			List<DepInterval> aux = new ArrayList<DepInterval>(constraints);
+			constraints.clear();
 			setLocal(false, Int.maxExcl, Int.max, dep);
 			if (addIntervals(aux)) {
 				return true;
 			}
 			aux.clear();
 		}
-		if (Constraints.isEmpty()) {
+		if (constraints.isEmpty()) {
 			return reportClash(accDep, "C-MM");
 		}
 		return false;
 	}
 
-	private boolean addNegInterval(final TDataInterval Int, final DepSet dep) {
-		List<DepInterval> aux = new ArrayList<DepInterval>(Constraints);
-		Constraints.clear();
+	private boolean addNegInterval(final DataInterval Int, final DepSet dep) {
+		List<DepInterval> aux = new ArrayList<DepInterval>(constraints);
+		constraints.clear();
 		if (Int.hasMin()) {
 			setLocal(false, !Int.minExcl, Int.min, dep);
 			if (addIntervals(aux)) {
@@ -202,25 +199,25 @@ public class DataTypeAppearance {
 			}
 		}
 		aux.clear();
-		if (Constraints.isEmpty()) {
+		if (constraints.isEmpty()) {
 			return reportClash(accDep, "C-MM");
 		}
 		return false;
 	}
 
-	protected void setNType(DepDTE nType) {
-		NType = nType;
+	protected void setNType(DepDTE t) {
+		nType = t;
 	}
 
 	protected DepDTE getPType() {
-		return PType;
+		return pType;
 	}
 }
 
 /** data interval with dep-sets */
 class DepInterval {
 	/** interval itself */
-	private TDataInterval Constraints = new TDataInterval();
+	private DataInterval constraints = new DataInterval();
 	/** local dep-set */
 	private DepSet locDep;
 
@@ -228,13 +225,13 @@ class DepInterval {
 	}
 
 	public DepInterval(DepInterval d) {
-		Constraints = new TDataInterval(d.Constraints);
+		constraints = new DataInterval(d.constraints);
 		locDep = DepSetFactory.create(d.locDep);
 	}
 
 	/** update MIN border of an TYPE's interval with VALUE wrt EXCL */
 	public boolean update(boolean min, boolean excl, final Literal value, final DepSet dep) {
-		if (!Constraints.update(min, excl, value)) {
+		if (!constraints.update(min, excl, value)) {
 			return false;
 		}
 		locDep = DepSetFactory.create(dep);
@@ -243,7 +240,7 @@ class DepInterval {
 
 	/** check if the interval is consistent wrt given type */
 	public boolean consistent(final Literal type, Reference<DepSet> dep) {
-		if (Constraints.consistent(type)) {
+		if (constraints.consistent(type)) {
 			return true;
 		}
 		dep.getReference().add(locDep);
@@ -251,15 +248,15 @@ class DepInterval {
 	}
 
 	public boolean checkMinMaxClash(Reference<DepSet> dep) {
-		if (!Constraints.closed()) {
+		if (!constraints.closed()) {
 			return false;
 		}
-		final Literal Min = Constraints.min;
-		final Literal Max = Constraints.max;
+		final Literal Min = constraints.min;
+		final Literal Max = constraints.max;
 		if (Min.lesser(Max)) {
 			return false;
 		}
-		if (Max.lesser(Min) || Constraints.minExcl || Constraints.maxExcl) {
+		if (Max.lesser(Min) || constraints.minExcl || constraints.maxExcl) {
 			dep.getReference().add(locDep);
 			return true;
 		}
@@ -268,6 +265,6 @@ class DepInterval {
 
 	@Override
 	public String toString() {
-		return Constraints.toString();
+		return constraints.toString();
 	}
 }

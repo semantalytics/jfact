@@ -14,46 +14,28 @@ import java.util.EnumSet;
 import java.util.List;
 
 import uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry;
-import uk.ac.manchester.cs.jfact.kernel.TConcept;
-import uk.ac.manchester.cs.jfact.kernel.TLexeme;
-import uk.ac.manchester.cs.jfact.kernel.TNamedEntry;
-import uk.ac.manchester.cs.jfact.kernel.TRole;
+import uk.ac.manchester.cs.jfact.kernel.Concept;
+import uk.ac.manchester.cs.jfact.kernel.Lexeme;
+import uk.ac.manchester.cs.jfact.kernel.NamedEntry;
+import uk.ac.manchester.cs.jfact.kernel.Role;
 import uk.ac.manchester.cs.jfact.kernel.Token;
 
-public class DLTreeFactory {
-	private static EnumSet<Token> SNFCalls = EnumSet.of(TOP, BOTTOM, CNAME, INAME, RNAME, DNAME, DATAEXPR, NOT, INV, AND, FORALL, LE, REFLEXIVE, RCOMPOSITION, PROJFROM, PROJINTO);
+public final class DLTreeFactory {
+	private static EnumSet<Token> snfCalls = EnumSet.of(TOP, BOTTOM, CNAME, INAME, RNAME, DNAME, DATAEXPR, NOT, INV, AND, FORALL, LE, REFLEXIVE, RCOMPOSITION, PROJFROM, PROJINTO);
 
-	//	private static boolean containsC(DLTree C, DLTree D) {
-	//		switch (C.token()) {
-	//			case CNAME:
-	//				return C.equals(D);
-	//			case AND:
-	//				boolean ret = false;
-	//				for (DLTree d : C.Children()) {
-	//					ret |= containsC(d, D);
-	//					if (ret) {
-	//						return ret;
-	//					}
-	//				}
-	//				return ret;
-	//				//				return containsC(C.Left(), D) || containsC(C.Right(), D);
-	//			default:
-	//				return false;
-	//		}
-	//	}
 	/** create BOTTOM element */
 	public static DLTree createBottom() {
-		return new LEAFDLTree(new TLexeme(BOTTOM));
+		return new LEAFDLTree(new Lexeme(BOTTOM));
 	}
 
 	public static DLTree createInverse(DLTree R) {
 		assert R != null;
 		if (R.token() == INV) {
-			DLTree p = R.Child().copy();
+			DLTree p = R.getChild().copy();
 			return p;
 		}
 		if (R.token() == RNAME) {
-			return new ONEDLTree(new TLexeme(INV), R);
+			return new ONEDLTree(new Lexeme(INV), R);
 		}
 		throw new UnreachableSituationException();
 	}
@@ -80,7 +62,7 @@ public class DLTreeFactory {
 		if (D.isTOP() || C.isBOTTOM()) {
 			return C;
 		}
-		return new NDLTree(new TLexeme(AND), C, D);
+		return new NDLTree(new Lexeme(AND), C, D);
 	}
 
 	public static DLTree createSNFAnd(Collection<DLTree> collection) {
@@ -99,7 +81,7 @@ public class DLTreeFactory {
 				return createBottom();
 			}
 			if (d.isAND()) {
-				l.addAll(d.Children());
+				l.addAll(d.getChildren());
 			} else {
 				l.add(d);
 			}
@@ -110,7 +92,7 @@ public class DLTreeFactory {
 		if (l.size() == 1) {
 			return l.get(0);
 		}
-		return new NDLTree(new TLexeme(AND), l);
+		return new NDLTree(new Lexeme(AND), l);
 	}
 
 	public static DLTree createSNFAnd(Collection<DLTree> collection, DLTree ancestor) {
@@ -124,7 +106,7 @@ public class DLTreeFactory {
 				return createBottom();
 			}
 			if (d.isAND()) {
-				l.addAll(d.Children());
+				l.addAll(d.getChildren());
 			} else {
 				l.add(d);
 			}
@@ -136,7 +118,7 @@ public class DLTreeFactory {
 			// no changes, return the ancestor
 			return ancestor;
 		}
-		return new NDLTree(new TLexeme(AND), l);
+		return new NDLTree(new Lexeme(AND), l);
 	}
 
 	/** create existential restriction of given formulas (\ER.C) */
@@ -149,7 +131,7 @@ public class DLTreeFactory {
 		if (C.isTOP()) {
 			return C;
 		} else {
-			return new TWODLTree(new TLexeme(FORALL), R, C);
+			return new TWODLTree(new Lexeme(FORALL), R, C);
 		}
 	}
 
@@ -173,7 +155,7 @@ public class DLTreeFactory {
 		if (n == 0) {
 			return createSNFForall(R, createSNFNot(C));
 		}
-		return new TWODLTree(new TLexeme(LE, n), R, C);
+		return new TWODLTree(new Lexeme(LE, n), R, C);
 	}
 
 	public static DLTree createSNFNot(DLTree C) {
@@ -188,10 +170,10 @@ public class DLTreeFactory {
 		}
 		if (C.token() == NOT) {
 			// \not\not C = C
-			return C.Child().copy();
+			return C.getChild().copy();
 		}
 		// general case
-		return new ONEDLTree(new TLexeme(NOT), C);
+		return new ONEDLTree(new Lexeme(NOT), C);
 	}
 
 	public static DLTree createSNFNot(DLTree C, DLTree ancestor) {
@@ -206,7 +188,7 @@ public class DLTreeFactory {
 		}
 		if (C.token() == NOT) {
 			// \not\not C = C
-			return C.Child().copy();
+			return C.getChild().copy();
 		}
 		// general case
 		return ancestor;
@@ -222,46 +204,9 @@ public class DLTreeFactory {
 		return createSNFNot(createSNFAnd(list));
 	}
 
-	//	@Deprecated
-	//	public static DLTree createSNFReducedAnd(DLTree C, DLTree D) {
-	//		if (C == null || D == null) {
-	//			return createSNFAnd(C, D);
-	//		}
-	//		if (D.token() == CNAME && containsC(C, D)) {
-	//			return C;
-	//		} else if (D.isAND()) {
-	//			
-	//			
-	//			
-	//			
-	//			DLTree toReturn = D.copy();
-	//			toReturn.addChild(C);
-	//			//C = toReturn;
-	//			return toReturn;
-	//		} else {
-	//			return createSNFAnd(C, D);
-	//		}
-	//	}
-	//
-	//	@Deprecated
-	//	public static DLTree createSNFReducedAnd(DLTree C, DLTree D, DLTree ancestor) {
-	//		if (C == null || D == null) {
-	//			return ancestor;
-	//		}
-	//		if (D.token() == CNAME && containsC(C, D)) {
-	//			return C;
-	//		} else if (D.isAND()) {
-	//			DLTree toReturn = createSNFReducedAnd(C, D.Left(), ancestor);
-	//			toReturn = createSNFReducedAnd(toReturn, D.Right(), ancestor);
-	//			//C = toReturn;
-	//			return toReturn;
-	//		} else {
-	//			return ancestor;
-	//		}
-	//	}
 	/** create TOP element */
 	public static DLTree createTop() {
-		return new LEAFDLTree(new TLexeme(TOP));
+		return new LEAFDLTree(new Lexeme(TOP));
 	}
 
 	public static DLTree inverseComposition(final DLTree tree) {
@@ -269,33 +214,30 @@ public class DLTreeFactory {
 		// see rolemaster.cpp, inverseComposition
 		if (tree.token() == RCOMPOSITION) {
 			return tree.accept(new ReverseCloningVisitor());
-			//			return new DLTree(new TLexeme(RCOMPOSITION),
-			//					inverseComposition(tree.Right()),
-			//					inverseComposition(tree.Left()));
 		} else {
-			return new LEAFDLTree(new TLexeme(RNAME, TRole.resolveRole(tree).inverse()));
+			return new LEAFDLTree(new Lexeme(RNAME, Role.resolveRole(tree).inverse()));
 		}
 	}
 
 	/** get DLTree by a given TDE */
-	public static DLTree wrap(TNamedEntry t) {
-		return new LEAFDLTree(new TLexeme(Token.DATAEXPR, t));
+	public static DLTree wrap(NamedEntry t) {
+		return new LEAFDLTree(new Lexeme(Token.DATAEXPR, t));
 	}
 
 	/** get TDE by a given DLTree */
-	public static TNamedEntry unwrap(final DLTree t) {
+	public static NamedEntry unwrap(final DLTree t) {
 		return t.elem().getNE();
 	}
 
-	public static DLTree buildTree(TLexeme t, DLTree t1, DLTree t2) {
+	public static DLTree buildTree(Lexeme t, DLTree t1, DLTree t2) {
 		return new TWODLTree(t, t1, t2);
 	}
 
-	public static DLTree buildTree(TLexeme t, DLTree t1) {
+	public static DLTree buildTree(Lexeme t, DLTree t1) {
 		return new ONEDLTree(t, t1);
 	}
 
-	public static DLTree buildTree(TLexeme t) {
+	public static DLTree buildTree(Lexeme t) {
 		return new LEAFDLTree(t);
 	}
 
@@ -311,16 +253,16 @@ public class DLTreeFactory {
 	}
 
 	/** check whether T is an expression in the form (atmost 1 RNAME) */
-	public static boolean isFunctionalExpr(final DLTree t, final TNamedEntry R) {
-		return t != null && t.token() == LE && R.equals(t.Left().elem().getNE()) && t.elem().getData() == 1 && t.Right().isTOP();
+	public static boolean isFunctionalExpr(final DLTree t, final NamedEntry R) {
+		return t != null && t.token() == LE && R.equals(t.getLeft().elem().getNE()) && t.elem().getData() == 1 && t.getRight().isTOP();
 	}
 
 	public static boolean isSNF(final DLTree t) {
 		if (t == null) {
 			return true;
 		}
-		if (SNFCalls.contains(t.token())) {
-			return isSNF(t.Left()) && isSNF(t.Right());
+		if (snfCalls.contains(t.token())) {
+			return isSNF(t.getLeft()) && isSNF(t.getRight());
 		}
 		return false;
 	}
@@ -333,22 +275,20 @@ public class DLTreeFactory {
 			return false;
 		}
 		if (t1.isAND()) {
-			for (DLTree t : t1.Children()) {
+			for (DLTree t : t1.getChildren()) {
 				if (!isSubTree(t, t2)) {
 					return false;
 				}
 			}
 			return true;
-			//			return isSubTree(t1.Left(), t2) && isSubTree(t1.Right(), t2);
 		}
 		if (t2.isAND()) {
-			for (DLTree t : t2.Children()) {
+			for (DLTree t : t2.getChildren()) {
 				if (isSubTree(t1, t)) {
 					return true;
 				}
 			}
 			return false;
-			//			return isSubTree(t1, t2.Left()) || isSubTree(t1, t2.Right());
 		}
 		return t1.equals(t2);
 	}
@@ -358,90 +298,6 @@ public class DLTreeFactory {
 		return isRName(t) && t.elem().getNE().isTop();
 	}
 
-	/**
-	 * reshapes the tree to balance ANDs and remove duplicates; note: it is hard
-	 * to guarantee that ALL unbalanced AND subtrees have been balanced. For
-	 * now, rebalance the highest tree.
-	 */
-	//	public static DLTree rebalance(DLTree t) {
-	//		List<DLTree> visit = treeAsList(t);
-	//		// now visit has all nodes, the highest AND is first in the list
-	//		DLTree base = null;
-	//		for (int i = 0; base == null && i < visit.size(); i++) {
-	//			if (visit.get(i).isAND()) {
-	//				base = visit.get(i);
-	//			}
-	//		}
-	//		if (base == null) {
-	//			// can't find any AND: return the argument
-	//			return t;
-	//		}
-	//		// now base is the highest AND node
-	//		// find the AND nodes in this AND tree and its leaves
-	//		List<DLTree> subtree = new ArrayList<DLTree>();
-	//		List<DLTree> leaves = new ArrayList<DLTree>();
-	//		subtree.add(base);
-	//		computeLeaves(subtree, leaves);
-	//		// subtree rooted at subtree[0]
-	//		// leaves in AND, order irrelevant
-	//		//There is at least one AND node and two leaves: "no AND nodes" would have returned already and less than two leaves means at least one AND node is malformed.
-	//		//a balanced tree wound have 2N leaves and N-1 ANDs, so |subtree| / |leaves| must be close 0.5; however leaves must be unique
-	//		int unbalanced = 0;
-	//		for (DLTree d : subtree) {
-	//			if ((d.Left().token() != AND && d.Right().isAND())
-	//					|| (d.Left().isAND() && d.Right().token() != AND)) {
-	//				// then one side is unbalanced
-	//				unbalanced++;
-	//			}
-	//		}
-	//		boolean checkBottomsOnly = false;
-	//		if (unbalanced > subtree.size() / 2) {
-	//			// not worth if not at least half the nodes are unbalanced; in this case, just check if there are any BOTTOMS (much greater advantage)
-	//			checkBottomsOnly = true;
-	//		}
-	//		// check basic cases: drop TOPs from the leaves and if there is a BOTTOM drop the whole subtree and replace the root with BOTTOM
-	//		for (int i = 0; i < leaves.size();) {
-	//			DLTree tree = leaves.get(i);
-	//			if (tree.isBOTTOM()) {
-	//				// then replace the whole subtree
-	//				if (base == t) {
-	//					return createBottom();
-	//				}
-	//				// else replace the root in its ancestor
-	//				if (base == base.Ancestor().Left()) {
-	//					base.Ancestor().SetLeft(createBottom());
-	//				} else {
-	//					base.Ancestor().SetRight(createBottom());
-	//				}
-	//				return t;
-	//			}
-	//			if (tree.isTOP()) {
-	//				leaves.remove(i);
-	//			} else {
-	//				i++;
-	//			}
-	//		}
-	//		if (!checkBottomsOnly) {
-	//			Set<DLTree> leafset = new HashSet<DLTree>(leaves);
-	//			leaves.clear();
-	//			leaves.addAll(leafset);
-	//			//		double d=((double)subtree.size())/leaves.size();
-	//			//		if(d>0.5) {
-	//			// then it's worth rebalancing
-	//			//}
-	//			// build a tree to attach the leaves to
-	//			DLTree newBase = buildBalancedAndTree(leaves);
-	//			if (base == t) {
-	//				return newBase;
-	//			}
-	//			if (base.Ancestor().Left() == base) {
-	//				base.Ancestor().SetLeft(newBase);
-	//			} else {
-	//				base.Ancestor().SetRight(newBase);
-	//			}
-	//		}
-	//		return t;
-	//	}
 	public static boolean replaceSynonymsFromTree(DLTree desc) {
 		if (desc == null) {
 			return false;
@@ -451,9 +307,9 @@ public class DLTreeFactory {
 			if (entry.isSynonym()) {
 				entry = resolveSynonym(entry);
 				if (entry.getId() == -1) {
-					desc.elem = new TLexeme(entry.getName().equals("TOP") ? TOP : BOTTOM);
+					desc.elem = new Lexeme(entry.getName().equals("TOP") ? TOP : BOTTOM);
 				} else {
-					desc.elem = new TLexeme(((TConcept) entry).isSingleton() ? INAME : CNAME, entry);
+					desc.elem = new Lexeme(((Concept) entry).isSingleton() ? INAME : CNAME, entry);
 				}
 				return true;
 			} else {
@@ -461,7 +317,7 @@ public class DLTreeFactory {
 			}
 		} else {
 			boolean ret = false;
-			for (DLTree d : desc.Children()) {
+			for (DLTree d : desc.getChildren()) {
 				ret |= replaceSynonymsFromTree(d);
 			}
 			return ret;

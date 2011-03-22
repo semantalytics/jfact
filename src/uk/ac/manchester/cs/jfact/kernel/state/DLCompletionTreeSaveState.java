@@ -6,23 +6,16 @@ This library is free software; you can redistribute it and/or modify it under th
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 /** class for saving Completion Tree nodes state */
-public class DLCompletionTreeSaveState {
+public final class DLCompletionTreeSaveState {
 	/** saving status of the label */
-	protected final SaveState lab;
+	private final SaveState lab;
 	/** curLevel of the Node structure */
-	protected int curLevel;
+	private int curLevel;
 	/** amount of neighbours */
-	protected int nNeighbours;
+	private int nNeighbours;
 
 	public DLCompletionTreeSaveState() {
 		lab = new SaveState();
-	}
-
-	/** copy c'tor */
-	DLCompletionTreeSaveState(DLCompletionTreeSaveState node) {
-		lab = new SaveState(node.lab);
-		curLevel = node.curLevel;
-		nNeighbours = node.nNeighbours;
 	}
 
 	/** get level of a saved node */

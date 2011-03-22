@@ -15,7 +15,7 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 
 public final class RATransition {
 	/** set of roles that may affect the transition */
-	private final LinkedHashSet<TRole> label;// = new ArrayList<TRole>();
+	private final LinkedHashSet<Role> label;
 	BitSet cache = null;
 	/** final state of the transition */
 	private final int state;
@@ -23,11 +23,11 @@ public final class RATransition {
 	/** create a transition to given state */
 	public RATransition(int st) {
 		state = st;
-		label = new LinkedHashSet<TRole>();
+		label = new LinkedHashSet<Role>();
 	}
 
 	/** create a transition with a given label R to given state ST */
-	public RATransition(int st, TRole R) {
+	public RATransition(int st, Role R) {
 		this(st);
 		label.add(R);
 	}
@@ -40,7 +40,7 @@ public final class RATransition {
 
 	// query the transition
 	/** get the 1st role in (multi-)transition */
-	public Collection<TRole> begin() {
+	public Collection<Role> begin() {
 		return label;
 	}
 
@@ -50,14 +50,14 @@ public final class RATransition {
 	}
 
 	/** check whether transition is applicable wrt role R */
-	public boolean applicable(TRole R) {
+	public boolean applicable(Role R) {
 		if (cache == null) {
 			cache = new BitSet();
-			for (TRole t : label) {
-				cache.set(t.getIndex());
+			for (Role t : label) {
+				cache.set(t.getAbsoluteIndex());
 			}
 		}
-		return cache.get(R.getIndex());
+		return cache.get(R.getAbsoluteIndex());
 	}
 
 	/** check whether transition is empty */
@@ -66,12 +66,12 @@ public final class RATransition {
 	}
 
 	/** print the transition starting from FROM */
-	public void Print(LogAdapter o, int from) {
+	public void print(LogAdapter o, int from) {
 		o.print(String.format("\n%s -- ", from));
 		if (isEmpty()) {
 			o.print("e");
 		} else {
-			List<TRole> l = new ArrayList<TRole>(label);
+			List<Role> l = new ArrayList<Role>(label);
 			for (int i = 0; i < l.size(); i++) {
 				if (i > 0) {
 					o.print(",");

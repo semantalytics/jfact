@@ -10,10 +10,8 @@ import java.util.Arrays;
 public final class SortedIntList {
 	protected int[] values;
 	protected int size = 0;
-	protected static int defaultSize = 16;
+	protected static final int defaultSize = 16;
 
-	// caching of the last requests
-	//IntCache cache;
 	protected final int insertionIndex(int key) {
 		if (size == 0) {
 			return 0;
@@ -46,9 +44,6 @@ public final class SortedIntList {
 	}
 
 	public final void add(int e) {
-		//		if (cache.isContained(e)) {
-		//			return;
-		//		}
 		int pos = -1;
 		if (values == null) {
 			init();
@@ -59,13 +54,11 @@ public final class SortedIntList {
 		if (pos < 0) {
 			return;
 		}
-		//cache.add(e);
 		int i = pos;
 		// i is now the insertion point
 		if (i >= values.length || size >= values.length) {
 			// no space left, increase
 			values = Arrays.copyOf(values, values.length + defaultSize);
-			//pad(size);
 		}
 		// size ensured, shift and insert now
 		for (int j = size - 1; j >= i; j--) {
@@ -79,24 +72,12 @@ public final class SortedIntList {
 	public final void clear() {
 		values = null;
 		size = 0;
-		//	cache.resetContained();
 	}
 
 	public final boolean contains(int o) {
 		if (values != null) {
-			//			if (cache.isContained(o)) {
-			//				return true;
-			//			}
-			//			if (cache.isNotContained(o)) {
-			//				return false;
-			//			}
 			int i = insertionIndex(o);
 			boolean toReturn = i > -1;
-			//			if (toReturn) {
-			//				cache.hit(o);
-			//			} else {
-			//				cache.miss(o);
-			//			}
 			return toReturn;
 		}
 		return false;
@@ -107,14 +88,10 @@ public final class SortedIntList {
 	}
 
 	public final void remove(int o) {
-		//		if (cache.isNotContained(o)) {
-		//			return;
-		//		}
 		if (values == null) {
 			return;
 		}
 		int i = insertionIndex(o);
-		//cache.delete(o);
 		removeAt(i);
 	}
 
@@ -142,7 +119,6 @@ public final class SortedIntList {
 			for (int j = i; j < size - 1; j++) {
 				values[j] = values[j + 1];
 			}
-			//	values[size - 1] = Integer.MAX_VALUE;
 			size--;
 		}
 		if (size == 0) {

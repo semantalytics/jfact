@@ -10,68 +10,66 @@ import java.util.Map;
 
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataTypeName;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 
-public class DataTypeCenter {
+public final class DataTypeCenter {
 	/**
 	 * vector of registered data types; initially contains unrestricted NUMBER
 	 * and STRING
 	 */
-	private final Map<Datatypes, TDataType> Types = new HashMap<Datatypes, TDataType>();
+	private final Map<Datatypes, DataType> Types = new HashMap<Datatypes, DataType>();
 
 	public DataTypeCenter() {
 		// primitive DataTypes
 		//XXX all this is not really needed
 		for (Datatypes d : Datatypes.values()) {
-			Types.put(d, new TDataType(new TDLDataTypeName(d)));
+			Types.put(d, new DataType(new DataTypeName(d)));
 		}
 	}
 
 	/** get NUMBER DT that can be used in TBox */
 	public DLTree getNumberType() {
-		return DLTreeFactory.wrap(new TDLDataTypeName(Datatypes.INT));
+		return DLTreeFactory.wrap(new DataTypeName(Datatypes.INT));
 	}
 
 	/** get STRING DT that can be used in TBox */
 	public DLTree getStringType() {
-		return DLTreeFactory.wrap(new TDLDataTypeName(Datatypes.STRING));
+		return DLTreeFactory.wrap(new DataTypeName(Datatypes.STRING));
 	}
 
 	/** get REAL DT that can be used in TBox */
 	public DLTree getRealType() {
 		//XXX needs extension
-		return DLTreeFactory.wrap(new TDLDataTypeName(Datatypes.FLOAT));
+		return DLTreeFactory.wrap(new DataTypeName(Datatypes.FLOAT));
 	}
 
 	/** get BOOL DT that can be used in TBox */
 	public DLTree getBoolType() {
-		return DLTreeFactory.wrap(new TDLDataTypeName(Datatypes.BOOLEAN));
+		return DLTreeFactory.wrap(new DataTypeName(Datatypes.BOOLEAN));
 	}
 
 	/** return registered data value by given NAME of a Type, given by SAMPLE */
 	public DLTree getDataValue(final String name, Datatypes type) {
 		//TODO this is possibly a problem
-		//		TDataType type = sample.isConst() ? getStringDataType() : // data top
-		//				getTypeBySample(DLTreeFactory.unwrap(sample));
 		return DLTreeFactory.wrap(create(name, type)); // may throw
 	}
 
 	/** facet for >=/>/</<= */
 	public DLTree getIntervalFacetExpr(DLTree val, boolean min, boolean excl) {
 		// get value as an DTE
-		TDataEntry value = (TDataEntry) DLTreeFactory.unwrap(val);
+		DataEntry value = (DataEntry) DLTreeFactory.unwrap(val);
 		// create new (unnamed) expression
-		TDataEntry ret = createFacet(value.getDatatype());
+		DataEntry ret = createFacet(value.getDatatype());
 		// apply appropriate facet to it
 		ret.getFacet().update(min, excl, value.getComp());
 		return DLTreeFactory.wrap(ret);
 	}
 
-	private TDataEntry create(String name, Datatypes type) {
+	private DataEntry create(String name, Datatypes type) {
 		return this.Types.get(type).get(name);
 	}
 
-	private TDataEntry createFacet(Datatypes type) {
+	private DataEntry createFacet(Datatypes type) {
 		return this.Types.get(type).getExpr();
 	}
 

@@ -18,23 +18,22 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapterStringBuilder;
 
 public final class CWDArray {
 	/** array of concepts together with dep-sets */
-	private final List<ConceptWDep> Base = new ArrayList<ConceptWDep>();
+	private final List<ConceptWDep> base = new ArrayList<ConceptWDep>();
 	private BitSet cache;
 	private final ArrayIntMap indexes = new ArrayIntMap();
 	private boolean createCache = false;
-	private final static int cacheLimit = 8;
+	private final static int cacheLimit = 1;
 
-	//private FastSet containedConcepts =  new IntSet();
 	/** init/clear label */
-	protected void init() {
-		Base.clear();
+	public void init() {
+		base.clear();
 		cache = null;
 		indexes.clear();
 		createCache = false;
 	}
 
 	public List<ConceptWDep> getBase() {
-		return Base;
+		return base;
 	}
 
 	public ArrayIntMap getContainedConcepts() {
@@ -43,28 +42,28 @@ public final class CWDArray {
 
 	/** adds concept P to a label - to be called only from CGLabel */
 	protected void private_add(final ConceptWDep p) {
-		Base.add(p);
-		//cache = null;
+		base.add(p);
 		if (cache != null) {
 			cache.set(asPositive(p.getConcept()));
 		}
-		indexes.put(p.getConcept(), Base.size() - 1);
-		createCache = Base.size() > cacheLimit;
+		indexes.put(p.getConcept(), base.size() - 1);
+		createCache = base.size() > cacheLimit;
 	}
 
 	/** check whether label contains BP (ignoring dep-set) */
-	protected boolean contains(int bp) {
+	public boolean contains(int bp) {
 		if (cache == null && createCache) {
 			initCache();
 		}
 		if (cache != null) {
 			return cache.get(asPositive(bp));
 		} else {
+			//	System.out.println("CWDArray.contains() "+indexes.size());
 			return indexes.containsKey(bp);
 		}
 	}
 
-	void initCache() {
+	private void initCache() {
 		cache = new BitSet();
 		for (int i = 0; i < indexes.size(); i++) {
 			cache.set(asPositive(indexes.keySet(i)));
@@ -92,14 +91,14 @@ public final class CWDArray {
 		if (i < 0) {
 			return null;
 		}
-		return Base.get(i).getDep();
+		return base.get(i).getDep();
 	}
 
 	public int size() {
-		return Base.size();
+		return base.size();
 	}
 
-	protected boolean lesserequal(final CWDArray label) {
+	public boolean lesserequal(final CWDArray label) {
 		// checks the keys are in both maps
 		return label.indexes.containsAll(indexes);
 	}
@@ -125,54 +124,50 @@ public final class CWDArray {
 	}
 
 	/** save label using given SS */
-	protected int save() {
-		return Base.size();
+	public int save() {
+		return base.size();
 	}
 
-	protected TRestorer updateDepSet(int index, DepSet dep) {
+	public Restorer updateDepSet(int index, DepSet dep) {
 		if (dep.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
-		TRestorer ret = new UnMerge(this, Base.get(index), index);
-		Base.get(index).addDep(dep);
+		Restorer ret = new UnMerge(this, base.get(index), index);
+		base.get(index).addDep(dep);
 		return ret;
 	}
 
-	protected List<TRestorer> updateDepSet(DepSet dep) {
+	public List<Restorer> updateDepSet(DepSet dep) {
 		if (dep.isEmpty()) {
 			throw new IllegalArgumentException();
 		}
-		List<TRestorer> toReturn = new ArrayList<TRestorer>(Base.size());
-		for (int i = 0; i < Base.size(); i++) {
-			TRestorer ret = new UnMerge(this, Base.get(i), i);
-			Base.get(i).addDep(dep);
+		List<Restorer> toReturn = new ArrayList<Restorer>(base.size());
+		for (int i = 0; i < base.size(); i++) {
+			Restorer ret = new UnMerge(this, base.get(i), i);
+			base.get(i).addDep(dep);
 			toReturn.add(ret);
 		}
 		return toReturn;
 	}
 
-	protected void restore(int ss, int level) {
-		for (int i = ss; i < Base.size(); i++) {
-			int concept = Base.get(i).getConcept();
-			//containedConcepts.remove(concept);
+	public void restore(int ss, int level) {
+		for (int i = ss; i < base.size(); i++) {
+			int concept = base.get(i).getConcept();
 			indexes.remove(concept);
-			//cache = null;
 			if (cache != null) {
 				cache.clear(asPositive(concept));
 			}
 		}
-		//	cleanCacheMaster();
-		//		cache = null;
-		Helper.resize(Base, ss);
+		Helper.resize(base, ss);
 	}
 
-	protected void print(LeveLogger.LogAdapter o) {
+	public void print(LeveLogger.LogAdapter o) {
 		o.print(" [");
-		for (int i = 0; i < Base.size(); i++) {
+		for (int i = 0; i < base.size(); i++) {
 			if (i != 0) {
 				o.print(", ");
 			}
-			Base.get(i).print(o);
+			base.get(i).print(o);
 		}
 		o.print("]");
 	}
@@ -185,7 +180,7 @@ public final class CWDArray {
 	}
 }
 
-final class UnMerge extends TRestorer {
+final class UnMerge extends Restorer {
 	private final CWDArray label;
 	private final int offset;
 	private final FastSetSimple dep;

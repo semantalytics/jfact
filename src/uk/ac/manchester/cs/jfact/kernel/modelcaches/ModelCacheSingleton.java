@@ -5,20 +5,20 @@ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
+import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
 /**
  * Model caching implementation for singleton models. Such models contains only
  * one [negated] concept in completion tree. Reduced set of operations, but very
  * efficient.
  */
-public class ModelCacheSingleton extends ModelCacheInterface {
+public final class ModelCacheSingleton extends ModelCacheInterface {
 	/** the singleton itself */
-	private final int Singleton;
+	private final int singleton;
 
 	public ModelCacheSingleton(int bp) {
 		super(false);
-		Singleton = bp;
+		singleton = bp;
 	}
 
 	/** Check if the model contains clash */
@@ -29,7 +29,7 @@ public class ModelCacheSingleton extends ModelCacheInterface {
 
 	/** access to internal value */
 	public int getValue() {
-		return Singleton;
+		return singleton;
 	}
 
 	// mergable part
@@ -40,7 +40,7 @@ public class ModelCacheSingleton extends ModelCacheInterface {
 			case mctConst: // TOP/BOTTOM: the current node can't add anything to the result
 				return p.getState();
 			case mctSingleton: // it can be a clash
-				return ((ModelCacheSingleton) p).Singleton == -Singleton ? ModelCacheState.csInvalid : ModelCacheState.csValid;
+				return ((ModelCacheSingleton) p).singleton == -singleton ? ModelCacheState.csInvalid : ModelCacheState.csValid;
 			case mctIan: // ask more intellegent object
 				return p.canMerge(this);
 			case mctBadType: // error
@@ -58,7 +58,7 @@ public class ModelCacheSingleton extends ModelCacheInterface {
 	/** log this cache entry (with given level) */
 	@Override
 	public void logCacheEntry(int level) {
-		LL.print("\nSingleton cache: element ");
-		LL.print(Singleton);
+		logger.print("\nSingleton cache: element ");
+		logger.print(singleton);
 	}
 }

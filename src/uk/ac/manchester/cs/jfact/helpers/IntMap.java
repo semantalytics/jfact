@@ -47,23 +47,10 @@ public final class IntMap<V> {
 	public void clear() {
 		values.clear();
 		size = 0;
-		//cache.resetContained();
 	}
 
-	//private final IntCache cache = new IntCache();
 	public boolean containsKey(int key) {
-		//		if (cache.isContained(key)) {
-		//			return true;
-		//		}
-		//		if (cache.isNotContained(key)) {
-		//			return false;
-		//		}
 		boolean toReturn = insertionIndex(key) > -1;
-		//		if (toReturn) {
-		//			cache.hit(key);
-		//		} else {
-		//			cache.miss(key);
-		//		}
 		return toReturn;
 	}
 
@@ -162,16 +149,10 @@ public final class IntMap<V> {
 	}
 
 	public int index(int key) {
-		//		if (cache.isNotContained(key)) {
-		//			return -1;
-		//		}
 		return insertionIndex(key);
 	}
 
 	public V get(int key) {
-		//		if (cache.isNotContained(key)) {
-		//			return null;
-		//		}
 		int index = insertionIndex(key);
 		if (index < 0) {
 			return null;
@@ -184,8 +165,11 @@ public final class IntMap<V> {
 	}
 
 	public int[] keySet() {
-		// TODO Auto-generated method stub
-		return null;
+		int[] keys = new int[size];
+		for (int i = 0; i < size; i++) {
+			keys[i] = values.get(i).index;
+		}
+		return keys;
 	}
 
 	int size = 0;
@@ -196,7 +180,6 @@ public final class IntMap<V> {
 			values.get(index).value = value;
 			return;
 		}
-		//cache.add(key);
 		index = -index - 1;
 		Entry e = new Entry();
 		e.index = key;
@@ -208,7 +191,6 @@ public final class IntMap<V> {
 	public V remove(int key) {
 		int index = insertionIndex(key);
 		if (index > -1) {
-			//cache.delete(key);
 			size--;
 			return values.remove(index).value;
 		}

@@ -7,14 +7,14 @@ This library is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import java.util.List;
 
-import uk.ac.manchester.cs.jfact.kernel.TRole;
+import uk.ac.manchester.cs.jfact.kernel.Role;
 import uk.ac.manchester.cs.jfact.kernel.TaxonomyVertex;
 
-public class AddRoleActor implements Actor {
-	private final List<TRole> rset;
+public final class AddRoleActor implements Actor {
+	private final List<Role> rset;
 
 	//TODO check other actors
-	public AddRoleActor(List<TRole> v) {
+	public AddRoleActor(List<Role> v) {
 		rset = v;
 	}
 
@@ -22,7 +22,7 @@ public class AddRoleActor implements Actor {
 		if (v.getPrimer().getId() == 0) {
 			return false;
 		}
-		rset.add((TRole) v.getPrimer());
+		rset.add((Role) v.getPrimer());
 		return true;
 	}
 }

@@ -6,13 +6,13 @@ This library is free software; you can redistribute it and/or modify it under th
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry;
-import uk.ac.manchester.cs.jfact.kernel.TExpressionManager;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.TDLExpression;
+import uk.ac.manchester.cs.jfact.kernel.ExpressionManager;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Expression;
 
 public interface Policy {
 	boolean applicable(ClassifiableEntry p);
 
 	boolean needPlain();
 
-	TDLExpression buildTree(TExpressionManager EM, ClassifiableEntry p);
+	Expression buildTree(ExpressionManager EM, ClassifiableEntry p);
 }

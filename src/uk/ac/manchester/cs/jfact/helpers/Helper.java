@@ -32,34 +32,7 @@ public final class Helper {
 		}
 	}
 
-	// uncomment this to have a DAG usage statistics printed
-	////#define RKG_PRINT_DAG_USAGE
-	// uncomment this to have a DIG-passed information printed
-	//#define RKG_PRINT_DIG_MESSAGES
-	// uncomment this to have sorted ontology reasoning
-	//#define RKG_USE_SORTED_REASONING
-	// uncomment this to have absorption debug messages
-	////#define RKG_DEBUG_ABSORPTION
-	// uncomment this to allow dynamic backjumping
-	////#define RKG_USE_DYNAMIC_BACKJUMPING
-	//#ifdef RKG_USE_DYNAMIC_BACKJUMPING
-	// uncomment this to use improves S/R with better quality
-	//#	define RKG_IMPROVE_SAVE_RESTORE_DEPSET
-	//#endif
-	// uncomment this to update role's R&D from super-roles
-	////#define RKG_UPDATE_RND_FROM_SUPERROLES
-	// uncomment this to allow simple rules processing
-	////#define RKG_USE_SIMPLE_RULES
-	// uncomment this to support fairness constraints
-	////#define RKG_USE_FAIRNESS
-	// uncomment the following line if IR is defined as a list of elements in node label
-	//#define RKG_IR_IN_NODE_LABEL
 	public static final int InitBranchingLevelValue = 1;
-	//	public static void fpp_assert(boolean b) {
-	//		if (IfDefs.ENABLE_CHECKING && !b) {
-	//			throw new RuntimeException("Unsatisfied assertion!");
-	//		}
-	//	}
 	public static final int bpINVALID = 0;
 	public static final int bpTOP = 1;
 	public static final int bpBOTTOM = -1;
@@ -75,20 +48,4 @@ public final class Helper {
 	public static final boolean isValid(int p) {
 		return p != bpINVALID;
 	}
-	//	/** it is valid if it's either not a bpINVALID or is a basic datatype*/
-	//	public static boolean isValid(TDataEntry p) {
-	//		return p.getBP() != bpINVALID||p.isBasicDataType();
-	//	}
-	//	public static boolean isPositive(int p) {
-	//		return p > 0;
-	//	}
-	//	public static boolean isNegative(int p) {
-	//		return p < 0;
-	//	}
-	//	public static int getValue(int p) {
-	//		return p > 0 ? p : -p;
-	//	}
-	//	public static int inverse(int p) {
-	//		return -p;
-	//	}
 }

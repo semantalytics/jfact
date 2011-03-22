@@ -6,188 +6,187 @@ This library is free software; you can redistribute it and/or modify it under th
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.Helper.bpTOP;
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.LL;
+import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
+
+import java.util.BitSet;
+
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 
 public final class LogicFeatures {
 	/** all flags in one long */
-	private long flags;
+	private BitSet flags = new BitSet();
 
 	/** set any flag */
-	private void setX(LFEnum val) {
-		flags |= val.getValue();
+	private void setX(int val) {
+		flags.set(val);
 	}
 
 	/** get value of any flag */
-	private boolean getX(LFEnum val) {
-		return (flags & val.getValue()) > 0;
+	private boolean getX(int val) {
+		return flags.get(val);// (flags & val.getValue()) > 0;
 	}
 
 	/** default c'tor */
 	public LogicFeatures() {
-		flags = 0;
 	}
 
 	/** copy c'tor */
 	public LogicFeatures(final LogicFeatures lf) {
-		flags = lf.flags;
+		flags.or(lf.flags);
 	}
 
 	/** operator add */
-	public void binaryOrOperator(final LogicFeatures lf) {
-		flags |= lf.flags;
+	public void or(final LogicFeatures lf) {
+		flags.or(lf.flags);
 	}
 
 	public boolean hasInverseRole() {
-		return getX(LFEnum.lfBothRoles);
+		return getX(lfBothRoles);
 	}
 
 	private boolean hasRoleHierarchy() {
-		return getX(LFEnum.lfRolesSubsumption);
+		return getX(lfRolesSubsumption);
 	}
 
 	private boolean hasTransitiveRole() {
-		return getX(LFEnum.lfTransitiveRoles);
+		return getX(lfTransitiveRoles);
 	}
 
-	boolean hasSomeAll() {
-		return getX(LFEnum.lfSomeConstructor);
+	public boolean hasSomeAll() {
+		return getX(lfSomeConstructor);
 	}
 
-	boolean hasFunctionalRestriction() {
-		return getX(LFEnum.lfFConstructor) || getX(LFEnum.lfFunctionalRoles);
+	public boolean hasFunctionalRestriction() {
+		return getX(lfFConstructor) || getX(lfFunctionalRoles);
 	}
 
-	boolean hasNumberRestriction() {
-		return getX(LFEnum.lfNConstructor);
+	public boolean hasNumberRestriction() {
+		return getX(lfNConstructor);
 	}
 
-	boolean hasQNumberRestriction() {
-		return getX(LFEnum.lfQConstructor);
+	public boolean hasQNumberRestriction() {
+		return getX(lfQConstructor);
 	}
 
-	boolean hasSingletons() {
-		return getX(LFEnum.lfSingleton);
+	public boolean hasSingletons() {
+		return getX(lfSingleton);
 	}
 
-	boolean hasSelfRef() {
-		return getX(LFEnum.lfSelfRef);
+	public boolean hasSelfRef() {
+		return getX(lfSelfRef);
 	}
 
 	// overall state
 	/** check whether no flags are set */
-	boolean isEmpty() {
-		return flags == 0;
-	}
-
-	/** get all the flags at once */
-	long getAllFlags() {
-		return flags;
-	}
-
-	/** set all flags to a given value; @return old value of the flags */
-	long setAllFlags(int value) {
-		long old = flags;
-		flags = value;
-		return old;
+	public boolean isEmpty() {
+		return flags.isEmpty();
 	}
 
 	/** build bothRoles from single Roles flags */
-	void mergeRoles() {
-		if (getX(LFEnum.lfDirectRoles) && getX(LFEnum.lfInverseRoles)) {
-			setX(LFEnum.lfBothRoles);
+	public void mergeRoles() {
+		if (getX(lfDirectRoles) && getX(lfInverseRoles)) {
+			setX(lfBothRoles);
 		}
 	}
 
 	/** allow user to set presence of inverse roles */
-	void setInverseRoles() {
-		setX(LFEnum.lfBothRoles);
+	public void setInverseRoles() {
+		setX(lfBothRoles);
 	}
 
 	public static LogicFeatures plus(final LogicFeatures f1, final LogicFeatures f2) {
 		LogicFeatures f = new LogicFeatures(f1);
-		f.flags |= f2.flags;
+		f.flags.or(f2.flags);
 		return f;
 	}
 
-	void fillConceptData(final TConcept p) {
+	public void fillConceptData(final Concept p) {
 		if (p.isSingleton()) {
-			setX(LFEnum.lfSingleton);
+			setX(lfSingleton);
 		}
 	}
 
-	void fillRoleData(final TRole p, boolean both) {
+	public void fillRoleData(final Role p, boolean both) {
 		if (p.getId() > 0) {
-			setX(LFEnum.lfDirectRoles);
+			setX(lfDirectRoles);
 		} else {
-			setX(LFEnum.lfInverseRoles);
+			setX(lfInverseRoles);
 		}
 		if (both) {
-			setX(LFEnum.lfBothRoles);
+			setX(lfBothRoles);
 		}
 		if (p.isTransitive()) {
-			setX(LFEnum.lfTransitiveRoles);
+			setX(lfTransitiveRoles);
 		}
 		if (p.hasToldSubsumers()) {
-			setX(LFEnum.lfRolesSubsumption);
+			setX(lfRolesSubsumption);
 		}
 		if (p.isFunctional()) {
-			setX(LFEnum.lfFunctionalRoles);
+			setX(lfFunctionalRoles);
 		}
 		if (p.getBPDomain() != bpTOP || p.getBPRange() != bpTOP) {
-			setX(LFEnum.lfRangeAndDomain);
+			setX(lfRangeAndDomain);
 		}
 	}
 
-	void fillDAGData(final DLVertex v, boolean pos) {
-		switch (v.Type()) {
+	public void fillDAGData(final DLVertex v, boolean pos) {
+		switch (v.getType()) {
 			case dtForall:
-				setX(LFEnum.lfSomeConstructor);
+				setX(lfSomeConstructor);
 				break;
 			case dtLE:
-				setX(LFEnum.lfNConstructor);
-				if (v.getC() != bpTOP) {
-					setX(LFEnum.lfQConstructor);
+				setX(lfNConstructor);
+				if (v.getConceptIndex() != bpTOP) {
+					setX(lfQConstructor);
 				}
 				break;
 			case dtPSingleton:
 			case dtNSingleton:
-				setX(LFEnum.lfSingleton);
+				setX(lfSingleton);
 				break;
 			case dtIrr:
-				setX(LFEnum.lfSelfRef);
+				setX(lfSelfRef);
 				break;
 			default:
 				break;
 		}
 	}
 
-	void writeState() {
+	public void writeState() {
 		String NO = "NO ";
 		String Q = "qualified ";
-		LL.print(Templates.WRITE_STATE, (hasInverseRole() ? "" : NO), (hasRoleHierarchy() ? "" : NO), (hasTransitiveRole() ? "" : NO), (hasSomeAll() ? "" : NO), (hasFunctionalRestriction() ? "" : NO), (hasNumberRestriction() ? (hasQNumberRestriction() ? Q : "") : NO),
+		logger.print(Templates.WRITE_STATE, (hasInverseRole() ? "" : NO), (hasRoleHierarchy() ? "" : NO), (hasTransitiveRole() ? "" : NO), (hasSomeAll() ? "" : NO), (hasFunctionalRestriction() ? "" : NO), (hasNumberRestriction() ? (hasQNumberRestriction() ? Q : "") : NO),
 				(hasSingletons() ? "" : NO));
 	}
 
-	enum LFEnum {
-		lfInvalid(0),
-		// role description
-		lfTransitiveRoles(1 << 0), lfRolesSubsumption(1 << 1), lfDirectRoles(1 << 2), lfInverseRoles(1 << 3), lfRangeAndDomain(1 << 4), lfFunctionalRoles(1 << 5),
-		// concept description
-		lfSomeConstructor(1 << 6), lfFConstructor(1 << 7), lfNConstructor(1 << 8), lfQConstructor(1 << 9), lfSingleton(1 << 10),
-		// global description
-		lfGeneralAxioms(1 << 11), lfBothRoles(1 << 12),
-		// new constructions
-		lfSelfRef(1 << 13);
-		private final int value;
-
-		LFEnum(int v) {
-			value = v;
-		}
-
-		protected int getValue() {
-			return value;
-		}
-	}
+	//private static final int lfInvalid = 0;
+	// role description
+	private static final int lfTransitiveRoles = 1;
+	private static final int lfRolesSubsumption = 2;
+	private static final int lfDirectRoles = 3;
+	private static final int lfInverseRoles = 4;
+	private static final int lfRangeAndDomain = 5;
+	private static final int lfFunctionalRoles = 6;
+	// concept description
+	private static final int lfSomeConstructor = 7;
+	private static final int lfFConstructor = 8;
+	private static final int lfNConstructor = 9;
+	private static final int lfQConstructor = 10;
+	private static final int lfSingleton = 11;
+	// global description
+	private static final int lfGeneralAxioms = 12;
+	private static final int lfBothRoles = 13;
+	// new constructions
+	private static final int lfSelfRef = 14;
+	//		private final int value;
+	//
+	//		LFEnum(int v) {
+	//			value = v;
+	//		}
+	//
+	//		protected int getValue() {
+	//			return value;
+	//		}
+	//	}
 }

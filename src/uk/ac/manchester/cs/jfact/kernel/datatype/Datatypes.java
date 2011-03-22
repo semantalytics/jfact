@@ -16,7 +16,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
-import uk.ac.manchester.cs.jfact.kernel.dl.TDLDataTypeName;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 import uk.ac.manchester.cs.jfact.kernel.voc.Vocabulary;
 
 public enum Datatypes {
@@ -46,10 +46,6 @@ public enum Datatypes {
 		public Literal<Short> build(Object s) {
 			return new ShortRep((Short) s);
 		}
-		//		@Override
-		//		public boolean compatible(Datatypes d) {
-		//			return super.compatible(d) || d == BYTE;
-		//		}
 	},
 	BYTE {
 		@Override
@@ -238,16 +234,16 @@ public enum Datatypes {
 
 	public abstract Literal<?> build(Object s);
 
-	public TDataType getTDataType() {
+	public DataType getTDataType() {
 		return tdatatype;
 	}
 
-	public TDLDataTypeName getDataTypeName() {
+	public DataTypeName getDataTypeName() {
 		return datatypename;
 	}
 
-	private final TDLDataTypeName datatypename = new TDLDataTypeName(this);
-	private final TDataType tdatatype = new TDataType(datatypename);
+	private final DataTypeName datatypename = new DataTypeName(this);
+	private final DataType tdatatype = new DataType(datatypename);
 
 	public boolean compatible(Datatypes d) {
 		return d == this;// || d == LITERAL;
@@ -294,24 +290,6 @@ public enum Datatypes {
 	}
 }
 
-/// representation of a data value
-//public interface TDVRep extends Comparable<TDVRep> {
-//		/// equality
-//	bool operator == ( const TDVRep* val ) const { return compare(val) == 0; }
-//		/// inequality
-//	bool operator != ( const TDVRep* val ) const { return compare(val) != 0; }
-//		/// less than
-//	bool operator < ( const TDVRep* val ) const { return compare(val) < 0; }
-//		/// less than or equal
-//	bool operator <= ( const TDVRep* val ) const { return compare(val) <= 0; }
-//		/// greater than
-//	bool operator > ( const TDVRep* val ) const { return compare(val) > 0; }
-//		/// greater than or equal
-//	bool operator >= ( const TDVRep* val ) const { return compare(val) >= 0; }
-//}
-//-----------------------------------------------------------------------------------
-//	A few obvious implementations. All of them MUST have a c'tor that takes a string
-//-----------------------------------------------------------------------------------
 class IntRep implements Literal<Integer> {
 	protected Integer value;
 
@@ -366,19 +344,19 @@ class IntRep implements Literal<Integer> {
 		if (this == obj) {
 			return true;
 		}
-		if (obj instanceof IntRep) {
+		if (obj.getClass().equals(IntRep.class)) {
 			return value.equals(((IntRep) obj).getValue());
 		}
 		return false;
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		return value.hashCode();
 	}
 }
 
-class PosIntRep extends IntRep implements Literal<Integer> {
+class PosIntRep extends IntRep {
 	@Override
 	public Datatypes getDatatype() {
 		return Datatypes.POSINT;
@@ -399,14 +377,14 @@ class PosIntRep extends IntRep implements Literal<Integer> {
 		if (this == obj) {
 			return true;
 		}
-		if (obj instanceof PosIntRep) {
+		if (obj.getClass().equals(PosIntRep.class)) {
 			return value.equals(((PosIntRep) obj).getValue());
 		}
 		return false;
 	}
 }
 
-class NegIntRep extends IntRep implements Literal<Integer> {
+class NegIntRep extends IntRep {
 	@Override
 	public Datatypes getDatatype() {
 		return Datatypes.NEGINT;
@@ -427,14 +405,14 @@ class NegIntRep extends IntRep implements Literal<Integer> {
 		if (this == obj) {
 			return true;
 		}
-		if (obj instanceof NegIntRep) {
+		if (obj.getClass().equals(NegIntRep.class)) {
 			return value.equals(((NegIntRep) obj).getValue());
 		}
 		return false;
 	}
 }
 
-class NonPosIntRep extends IntRep implements Literal<Integer> {
+class NonPosIntRep extends IntRep {
 	@Override
 	public Datatypes getDatatype() {
 		return Datatypes.NONPOSINT;
@@ -455,14 +433,14 @@ class NonPosIntRep extends IntRep implements Literal<Integer> {
 		if (this == obj) {
 			return true;
 		}
-		if (obj instanceof NonPosIntRep) {
+		if (obj.getClass().equals(NonPosIntRep.class)) {
 			return value.equals(((NonPosIntRep) obj).getValue());
 		}
 		return false;
 	}
 }
 
-class NonNegIntRep extends IntRep implements Literal<Integer> {
+class NonNegIntRep extends IntRep {
 	@Override
 	public Datatypes getDatatype() {
 		return Datatypes.NONNEGINT;
@@ -483,7 +461,7 @@ class NonNegIntRep extends IntRep implements Literal<Integer> {
 		if (this == obj) {
 			return true;
 		}
-		if (obj instanceof NonNegIntRep) {
+		if (obj.getClass().equals(NonNegIntRep.class)) {
 			return value.equals(((NonNegIntRep) obj).getValue());
 		}
 		return false;

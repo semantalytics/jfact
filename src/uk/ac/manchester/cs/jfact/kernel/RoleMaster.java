@@ -19,79 +19,79 @@ import uk.ac.manchester.cs.jfact.helpers.Helper;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 
 public final class RoleMaster {
-	protected static final class RoleCreator implements TNameCreator<TRole> {
-		public TRole makeEntry(String name) {
-			return new TRole(name);
+	protected static final class RoleCreator implements NameCreator<Role> {
+		public Role makeEntry(String name) {
+			return new Role(name);
 		}
 	}
 
 	/** number of the last registered role */
 	private int newRoleId;
 	/** all registered roles */
-	private final List<TRole> Roles = new ArrayList<TRole>();
+	private final List<Role> roles = new ArrayList<Role>();
 	/** internal empty role (bottom in the taxonomy) */
-	private final TRole emptyRole;
+	private final Role emptyRole;
 	/** internal universal role (top in the taxonomy) */
-	private final TRole universalRole;
+	private final Role universalRole;
 	/** roles nameset */
-	private final TNameSet<TRole> roleNS;
+	private final NameSet<Role> roleNS;
 	/** Taxonomy of roles */
 	private final Taxonomy pTax;
 	/** two halves of disjoint roles axioms */
-	private final List<TRole> DJRolesA = new ArrayList<TRole>();
-	private final List<TRole> DJRolesB = new ArrayList<TRole>();
+	private final List<Role> disjointRolesA = new ArrayList<Role>();
+	private final List<Role> disjointRolesB = new ArrayList<Role>();
 	/** flag whether to create data roles or not */
-	private final boolean DataRoles;
+	private final boolean dataRoles;
 	/** flag if it is possible to introduce new names */
 	private boolean useUndefinedNames;
 	private static final int firstRoleIndex = 2;
 
 	/** TRole and it's inverse in RoleBox */
-	private void registerRole(TRole r) {
+	private void registerRole(Role r) {
 		assert r != null && r.getInverse() == null; // sanity check
 		assert r.getId() == 0; // only call it for the new roles
-		if (DataRoles) {
+		if (dataRoles) {
 			r.setDataRole();
 		}
-		Roles.add(r);
+		roles.add(r);
 		r.setId(newRoleId);
 		// create new role which would be inverse of R
 		String iname = "-";
 		iname += r.getName();
-		TRole ri = new TRole(iname);
+		Role ri = new Role(iname);
 		// set up inverse
 		r.setInverse(ri);
 		ri.setInverse(r);
-		Roles.add(ri);
+		roles.add(ri);
 		ri.setId(-newRoleId);
 		++newRoleId;
 	}
 
 	/** @return true if P is a role that is registered in the RM */
-	private boolean isRegisteredRole(final TNamedEntry p) {
-		if (!(p instanceof TRole)) {
+	private boolean isRegisteredRole(final NamedEntry p) {
+		if (!(p instanceof Role)) {
 			return false;
 		}
-		final TRole R = (TRole) p;
-		int ind = R.getIndex();
-		return ind >= firstRoleIndex && ind < Roles.size() && Roles.get(ind).equals(p);
+		final Role R = (Role) p;
+		int ind = R.getAbsoluteIndex();
+		return ind >= firstRoleIndex && ind < roles.size() && roles.get(ind).equals(p);
 	}
 
 	/** get number of roles */
 	public int size() {
-		return Roles.size() / 2 - 1;
+		return roles.size() / 2 - 1;
 	}
 
-	public RoleMaster(boolean dataRoles, final String TopRoleName, final String BotRoleName) {
+	public RoleMaster(boolean d, final String TopRoleName, final String BotRoleName) {
 		newRoleId = 1;
-		emptyRole = new TRole(BotRoleName.equals("") ? "emptyRole" : BotRoleName);
-		universalRole = new TRole(TopRoleName.equals("") ? "universalRole" : TopRoleName);
-		roleNS = new TNameSet<TRole>(new RoleCreator());
-		DataRoles = dataRoles;
+		emptyRole = new Role(BotRoleName.equals("") ? "emptyRole" : BotRoleName);
+		universalRole = new Role(TopRoleName.equals("") ? "universalRole" : TopRoleName);
+		roleNS = new NameSet<Role>(new RoleCreator());
+		dataRoles = d;
 		useUndefinedNames = true;
 		// no zero-named roles allowed
-		Roles.add(null);
-		Roles.add(null);
+		roles.add(null);
+		roles.add(null);
 		// setup empty role
 		emptyRole.setId(0);
 		emptyRole.setInverse(emptyRole);
@@ -107,7 +107,7 @@ public final class RoleMaster {
 	}
 
 	/** create role entry with given name */
-	public TNamedEntry ensureRoleName(final String name) {
+	public NamedEntry ensureRoleName(final String name) {
 		// check for the Top/Bottom names
 		if (name.equals(emptyRole.getName())) {
 			return emptyRole;
@@ -116,24 +116,24 @@ public final class RoleMaster {
 			return universalRole;
 		}
 		// new name from NS
-		TRole p = roleNS.insert(name);
+		Role p = roleNS.insert(name);
 		// check what happens
 		if (p == null) {
-			throw new OWLRuntimeException("Unable to register '" + name + "' as a " + (DataRoles ? "data role" : "role"));
+			throw new OWLRuntimeException("Unable to register '" + name + "' as a " + (dataRoles ? "data role" : "role"));
 		}
 		if (isRegisteredRole(p)) {
 			return p;
 		}
 		if (p.getId() != 0 || // not registered but has non-null ID
 				!useUndefinedNames) {
-			throw new OWLRuntimeException("Unable to register '" + name + "' as a " + (DataRoles ? "data role" : "role"));
+			throw new OWLRuntimeException("Unable to register '" + name + "' as a " + (dataRoles ? "data role" : "role"));
 		}
 		registerRole(p);
 		return p;
 	}
 
 	/** add parent for the input role */
-	public void addRoleParent(TRole role, TRole parent) {
+	public void addRoleParent(Role role, Role parent) {
 		if (role.isDataRole() != parent.isDataRole()) {
 			throw new ReasonerInternalException("Mixed object and data roles in role subsumption axiom");
 		}
@@ -142,7 +142,7 @@ public final class RoleMaster {
 	}
 
 	/** add synonym to existing role */
-	public void addRoleSynonym(TRole role, TRole syn) {
+	public void addRoleSynonym(Role role, Role syn) {
 		if (!role.equals(syn)) {
 			addRoleParent(role, syn);
 			addRoleParent(syn, role);
@@ -150,13 +150,13 @@ public final class RoleMaster {
 	}
 
 	/** a pair of disjoint roles */
-	public void addDisjointRoles(TRole R, TRole S) {
+	public void addDisjointRoles(Role R, Role S) {
 		// object- and data roles are always disjoint
 		if (R.isDataRole() != S.isDataRole()) {
 			return;
 		}
-		DJRolesA.add(R);
-		DJRolesB.add(S);
+		disjointRolesA.add(R);
+		disjointRolesB.add(S);
 	}
 
 	/** change the undefined names usage policy */
@@ -164,8 +164,8 @@ public final class RoleMaster {
 		useUndefinedNames = val;
 	}
 
-	public List<TRole> getRoles() {
-		return Roles.subList(firstRoleIndex, Roles.size());
+	public List<Role> getRoles() {
+		return roles.subList(firstRoleIndex, roles.size());
 	}
 
 	/** get access to the taxonomy */
@@ -173,20 +173,20 @@ public final class RoleMaster {
 		return pTax;
 	}
 
-	public void Print(LogAdapter o, final String type) {
+	public void print(LogAdapter o, final String type) {
 		if (size() == 0) {
 			return;
 		}
 		o.print(String.format("%s Roles (%s):\n", type, size()));
-		for (int i = firstRoleIndex; i < Roles.size(); i++) {
-			TRole p = Roles.get(i);
-			p.Print(o);
+		for (int i = firstRoleIndex; i < roles.size(); i++) {
+			Role p = roles.get(i);
+			p.print(o);
 		}
 	}
 
 	public boolean hasReflexiveRoles() {
-		for (int i = firstRoleIndex; i < Roles.size(); i++) {
-			TRole p = Roles.get(i);
+		for (int i = firstRoleIndex; i < roles.size(); i++) {
+			Role p = roles.get(i);
 			if (p.isReflexive()) {
 				return true;
 			}
@@ -194,17 +194,17 @@ public final class RoleMaster {
 		return false;
 	}
 
-	public void fillReflexiveRoles(List<TRole> RR) {
+	public void fillReflexiveRoles(List<Role> RR) {
 		RR.clear();
-		for (int i = firstRoleIndex; i < Roles.size(); i++) {
-			TRole p = Roles.get(i);
+		for (int i = firstRoleIndex; i < roles.size(); i++) {
+			Role p = roles.get(i);
 			if (!p.isSynonym() && p.isReflexive()) {
 				RR.add(p);
 			}
 		}
 	}
 
-	public void addRoleParent(DLTree tree, TRole parent) {
+	public void addRoleParent(DLTree tree, Role parent) {
 		if (tree == null) {
 			return;
 		}
@@ -212,107 +212,104 @@ public final class RoleMaster {
 			parent.addComposition(tree);
 			DLTree inv = DLTreeFactory.inverseComposition(tree);
 			parent.inverse().addComposition(inv);
-			//deleteTree(inv);
 		} else if (tree.token() == PROJINTO) {
-			TRole R = TRole.resolveRole(tree.Left());
+			Role R = Role.resolveRole(tree.getLeft());
 			if (R.isDataRole()) {
 				throw new ReasonerInternalException("Projection into not implemented for the data role");
 			}
-			DLTree C = tree.Right().copy();
-			DLTree InvP = DLTreeFactory.buildTree(new TLexeme(RNAME, parent.inverse()));
-			DLTree InvR = DLTreeFactory.buildTree(new TLexeme(RNAME, R.inverse()));
+			DLTree C = tree.getRight().copy();
+			DLTree InvP = DLTreeFactory.buildTree(new Lexeme(RNAME, parent.inverse()));
+			DLTree InvR = DLTreeFactory.buildTree(new Lexeme(RNAME, R.inverse()));
 			// C = PROJINTO(PARENT-,C)
-			C = DLTreeFactory.buildTree(new TLexeme(PROJINTO), InvP, C);
+			C = DLTreeFactory.buildTree(new Lexeme(PROJINTO), InvP, C);
 			// C = PROJFROM(R-,PROJINTO(PARENT-,C))
-			C = DLTreeFactory.buildTree(new TLexeme(PROJFROM), InvR, C);
+			C = DLTreeFactory.buildTree(new Lexeme(PROJFROM), InvR, C);
 			R.setRange(C);
-			//			R.setRange(new Reference<DLTree>(new DLTree(PROJFROM, InvR,
-			//					new DLTree(PROJINTO, InvP, C))));
 		} else if (tree.token() == PROJFROM) {
-			TRole R = TRole.resolveRole(tree.Left());
-			DLTree C = tree.Right().copy();
-			DLTree P = DLTreeFactory.buildTree(new TLexeme(RNAME, parent));
+			Role R = Role.resolveRole(tree.getLeft());
+			DLTree C = tree.getRight().copy();
+			DLTree P = DLTreeFactory.buildTree(new Lexeme(RNAME, parent));
 			// C = PROJINTO(PARENT,C)
-			C = DLTreeFactory.buildTree(new TLexeme(PROJINTO), P, C);
+			C = DLTreeFactory.buildTree(new Lexeme(PROJINTO), P, C);
 			// C = PROJFROM(R,PROJINTO(PARENT,C))
-			C = DLTreeFactory.buildTree(new TLexeme(PROJFROM), tree.Left().copy(), C);
+			C = DLTreeFactory.buildTree(new Lexeme(PROJFROM), tree.getLeft().copy(), C);
 			R.setDomain(C);
 		} else {
-			addRoleParent(TRole.resolveRole(tree), parent);
+			addRoleParent(Role.resolveRole(tree), parent);
 		}
 	}
 
 	public void initAncDesc() {
-		int nRoles = Roles.size();
-		for (int i = firstRoleIndex; i < Roles.size(); i++) {
-			TRole p = Roles.get(i);
+		int nRoles = roles.size();
+		for (int i = firstRoleIndex; i < roles.size(); i++) {
+			Role p = roles.get(i);
 			p.eliminateToldCycles();
 		}
-		for (int i = firstRoleIndex; i < Roles.size(); i++) {
-			TRole p = Roles.get(i);
+		for (int i = firstRoleIndex; i < roles.size(); i++) {
+			Role p = roles.get(i);
 			if (p.isSynonym()) {
 				p.canonicaliseSynonym();
 				p.addFeaturesToSynonym();
 			}
 		}
-		for (int i = firstRoleIndex; i < Roles.size(); i++) {
-			TRole p = Roles.get(i);
+		for (int i = firstRoleIndex; i < roles.size(); i++) {
+			Role p = roles.get(i);
 			if (!p.isSynonym()) {
 				p.removeSynonymsFromParents();
 			}
 		}
-		for (int i = firstRoleIndex; i < Roles.size(); i++) {
-			TRole p = Roles.get(i);
+		for (int i = firstRoleIndex; i < roles.size(); i++) {
+			Role p = roles.get(i);
 			if (!p.isSynonym() && !p.hasToldSubsumers()) {
 				p.addParent(universalRole);
 			}
 		}
 		pTax.setCompletelyDefined(true);
-		for (int i = firstRoleIndex; i < Roles.size(); i++) {
-			TRole p = Roles.get(i);
+		for (int i = firstRoleIndex; i < roles.size(); i++) {
+			Role p = roles.get(i);
 			if (!p.isClassified()) {
 				pTax.classifyEntry(p);
 			}
 		}
-		for (int i = firstRoleIndex; i < Roles.size(); i++) {
-			TRole p = Roles.get(i);
+		for (int i = firstRoleIndex; i < roles.size(); i++) {
+			Role p = roles.get(i);
 			if (!p.isSynonym()) {
 				p.initADbyTaxonomy(pTax, nRoles);
 			}
 		}
-		for (int i = firstRoleIndex; i < Roles.size(); i++) {
-			TRole p = Roles.get(i);
+		for (int i = firstRoleIndex; i < roles.size(); i++) {
+			Role p = roles.get(i);
 			if (!p.isSynonym()) {
 				p.completeAutomaton(nRoles);
 			}
 		}
 		pTax.finalise();
-		if (!DJRolesA.isEmpty()) {
-			for (int i = 0; i < DJRolesA.size(); i++) {
-				TRole q = DJRolesA.get(i);
-				TRole r = DJRolesB.get(i);
-				TRole R = ClassifiableEntry.resolveSynonym(q);
-				TRole S = ClassifiableEntry.resolveSynonym(r);
+		if (!disjointRolesA.isEmpty()) {
+			for (int i = 0; i < disjointRolesA.size(); i++) {
+				Role q = disjointRolesA.get(i);
+				Role r = disjointRolesB.get(i);
+				Role R = ClassifiableEntry.resolveSynonym(q);
+				Role S = ClassifiableEntry.resolveSynonym(r);
 				R.addDisjointRole(S);
 				S.addDisjointRole(R);
 				R.inverse().addDisjointRole(S.inverse());
 				S.inverse().addDisjointRole(R.inverse());
 			}
-			for (int i = firstRoleIndex; i < Roles.size(); i++) {
-				TRole p = Roles.get(i);
+			for (int i = firstRoleIndex; i < roles.size(); i++) {
+				Role p = roles.get(i);
 				if (!p.isSynonym() && p.isDisjoint()) {
 					p.checkHierarchicalDisjoint();
 				}
 			}
 		}
-		for (int i = firstRoleIndex; i < Roles.size(); i++) {
-			TRole p = Roles.get(i);
+		for (int i = firstRoleIndex; i < roles.size(); i++) {
+			Role p = roles.get(i);
 			if (!p.isSynonym()) {
 				p.postProcess();
 			}
 		}
-		for (int i = firstRoleIndex; i < Roles.size(); i++) {
-			TRole p = Roles.get(i);
+		for (int i = firstRoleIndex; i < roles.size(); i++) {
+			Role p = roles.get(i);
 			if (!p.isSynonym()) {
 				p.consistent();
 			}

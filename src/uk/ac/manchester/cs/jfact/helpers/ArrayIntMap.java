@@ -55,6 +55,7 @@ public final class ArrayIntMap {
 	}
 
 	public void put(int e, int v) {
+		//cache.resetNotContained();
 		int pos = -1;
 		if (values == null) {
 			init();
@@ -66,8 +67,6 @@ public final class ArrayIntMap {
 		if (pos > -1) {
 			return;
 		}
-		//i=-n-1
-		//n=-i-1
 		int i = -pos - 1;
 		// i is now the insertion point
 		if (i >= values[0].length || size >= values[0].length) {
@@ -78,7 +77,6 @@ public final class ArrayIntMap {
 				replacementvalues[1][j] = values[1][j];
 			}
 			values = replacementvalues;
-			//			pad(size);
 		}
 		// size ensured, shift and insert now
 		for (int j = size - 1; j >= i; j--) {
@@ -94,12 +92,26 @@ public final class ArrayIntMap {
 	public void clear() {
 		values = null;
 		size = 0;
+		//		cache.resetContained();
+		//		cache.resetNotContained();
 	}
 
+	//	IntCache cache = new IntCache();
 	public boolean containsKey(int o) {
 		if (values != null) {
-			int i = insertionIndex(o);
-			return i > -1;
+			//			if (cache.isContained(o)) {
+			//				return true;
+			//			}
+			//			if (cache.isNotContained(o)) {
+			//				return false;
+			//			}
+			boolean b = insertionIndex(o) > -1;
+			//			if (b) {
+			//				cache.hit(o);
+			//			} else {
+			//				cache.miss(o);
+			//			}
+			return b;
 		}
 		return false;
 	}
@@ -154,6 +166,7 @@ public final class ArrayIntMap {
 		if (values == null) {
 			return;
 		}
+		//cache.resetContained();
 		int i = insertionIndex(o);
 		removeAt(i);
 	}
@@ -176,7 +189,6 @@ public final class ArrayIntMap {
 				values[0][j] = values[0][j + 1];
 				values[1][j] = values[1][j + 1];
 			}
-			//		values[0][size - 1] = Integer.MAX_VALUE;
 			size--;
 		}
 		if (size == 0) {

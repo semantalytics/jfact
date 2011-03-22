@@ -9,28 +9,17 @@ import uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry;
 import uk.ac.manchester.cs.jfact.kernel.TaxonomyVertex;
 
 /** class for exploring concept taxonomy to find super classes */
-public class SupConceptActor implements Actor {
+public final class SupConceptActor implements Actor {
 	protected final ClassifiableEntry pe;
 
-	//	private void entry(ClassifiableEntry q) {
-	//		if (pe.equals(q)) {
-	//			throw new RuntimeException();
-	//		}
-	//	}
 	public SupConceptActor(ClassifiableEntry q) {
 		pe = q;
 	}
 
 	public boolean apply(TaxonomyVertex v) {
-		//entry(v.getPrimer());
-		//XXX this needs refining, it's using exceptions to close cycles early
 		if (pe.equals(v.getPrimer()) || v.begin_syn().contains(pe)) {
 			return false;
-			//throw new RuntimeException();
 		}
-		//		for (ClassifiableEntry p : v.begin_syn()) {
-		//			entry(p);
-		//		}
 		return true;
 	}
 }

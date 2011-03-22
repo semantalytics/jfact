@@ -14,7 +14,7 @@ import org.semanticweb.owlapi.reasoner.OWLReasonerConfiguration;
 import org.semanticweb.owlapi.reasoner.OWLReasonerFactory;
 import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 
-public class CachedJFactFactory implements OWLReasonerFactory {
+public final class CachedJFactFactory implements OWLReasonerFactory {
 	public String getReasonerName() {
 		return "CachedJFact";
 	}
