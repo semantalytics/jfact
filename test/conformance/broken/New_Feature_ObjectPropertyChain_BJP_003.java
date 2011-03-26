@@ -28,8 +28,14 @@ public class New_Feature_ObjectPropertyChain_BJP_003 extends TestCase {
 		//			
 		//		}
 		//XXX test modified because of ontology not compliant with OWL 2
-		String premise = "<?xml version=\"1.0\"?>\n" + "<rdf:RDF\n" + "    xml:base  = \"http://example.org/\"\n" + "    xmlns     = \"http://example.org/\"\n" + "    xmlns:owl = \"http://www.w3.org/2002/07/owl#\"\n"
-				+ "    xmlns:rdfs= \"http://www.w3.org/2000/01/rdf-schema#\"\n" + "    xmlns:rdf = \"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n" + "\n"
+		String premise = "<?xml version=\"1.0\"?>\n"
+				+ "<rdf:RDF\n"
+				+ "    xml:base  = \"http://example.org/\"\n"
+				+ "    xmlns     = \"http://example.org/\"\n"
+				+ "    xmlns:owl = \"http://www.w3.org/2002/07/owl#\"\n"
+				+ "    xmlns:rdfs= \"http://www.w3.org/2000/01/rdf-schema#\"\n"
+				+ "    xmlns:rdf = \"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n"
+				+ "\n"
 				+ "<owl:Ontology/>\n"
 				+ "\n"
 				//added
@@ -38,19 +44,45 @@ public class New_Feature_ObjectPropertyChain_BJP_003 extends TestCase {
 				+ "<owl:Thing rdf:about=\"http://www.example.org/a\"/>\n"
 				+ "<owl:Thing rdf:about=\"http://www.example.org/c\"/>\n"
 				//end added
-				+ "    <rdf:Description rdf:about=\"p\">\n" + "        <owl:propertyChainAxiom rdf:parseType=\"Collection\">\n" + "            <owl:ObjectProperty rdf:about=\"p\"/>\n" + "            <owl:ObjectProperty rdf:about=\"q\"/>\n" + "        </owl:propertyChainAxiom>\n"
-				+ "    </rdf:Description>\n" + "    \n" + "    <rdf:Description rdf:about=\"a\">\n" + "        <p rdf:resource=\"b\"/>\n" + "    </rdf:Description>\n" + "    \n" + "    <rdf:Description rdf:about=\"b\">\n" + "        <q rdf:resource=\"c\"/>\n"
+				+ "    <rdf:Description rdf:about=\"p\">\n"
+				+ "        <owl:propertyChainAxiom rdf:parseType=\"Collection\">\n"
+				+ "            <owl:ObjectProperty rdf:about=\"p\"/>\n"
+				+ "            <owl:ObjectProperty rdf:about=\"q\"/>\n"
+				+ "        </owl:propertyChainAxiom>\n"
+				+ "    </rdf:Description>\n" + "    \n"
+				+ "    <rdf:Description rdf:about=\"a\">\n"
+				+ "        <p rdf:resource=\"b\"/>\n"
+				+ "    </rdf:Description>\n" + "    \n"
+				+ "    <rdf:Description rdf:about=\"b\">\n"
+				+ "        <q rdf:resource=\"c\"/>\n"
 				+ "    </rdf:Description>\n" + "   \n" + "</rdf:RDF>";
 		//XXX this should parse equal to the second example but does not
-		String conclusion = "<?xml version=\"1.0\"?>\n" + "<rdf:RDF\n" + "    xml:base  = \"http://example.org/\"\n" + "    xmlns     = \"http://example.org/\"\n" + "    xmlns:owl = \"http://www.w3.org/2002/07/owl#\"\n"
-				+ "    xmlns:rdf = \"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n" + "\n" + "    <owl:Ontology/>\n"
+		String conclusion = "<?xml version=\"1.0\"?>\n"
+				+ "<rdf:RDF\n"
+				+ "    xml:base  = \"http://example.org/\"\n"
+				+ "    xmlns     = \"http://example.org/\"\n"
+				+ "    xmlns:owl = \"http://www.w3.org/2002/07/owl#\"\n"
+				+ "    xmlns:rdf = \"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n"
+				+ "\n"
+				+ "    <owl:Ontology/>\n"
 				//added
 				+ "<owl:ObjectProperty rdf:about=\"http://www.example.org/p\"/>\n"
 				//end added
-				+ "    <owl:NamedIndividual rdf:about=\"a\">\n" + "        <p rdf:resource=\"c\"/>\n" + "    </owl:NamedIndividual>\n" + "\n" + "</rdf:RDF>";
-		conclusion = "<?xml version=\"1.0\"?>\n" + "<rdf:RDF xmlns=\"http://www.w3.org/2002/07/owl#\"\n" + "xml:base=\"http://www.w3.org/2002/07/owl\"\n" + "xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n" + "xmlns:test=\"http://www.example.org/\"\n"
-				+ "xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n" + "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n" + "xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n" + "<ObjectProperty rdf:about=\"http://www.example.org/p\"/>\n"
-				+ "<NamedIndividual rdf:about=\"http://www.example.org/a\">\n" + "<test:p rdf:resource=\"http://www.example.org/c\"/>\n" + "</NamedIndividual>\n" + "</rdf:RDF>";
+				+ "    <owl:NamedIndividual rdf:about=\"a\">\n"
+				+ "        <p rdf:resource=\"c\"/>\n"
+				+ "    </owl:NamedIndividual>\n" + "\n" + "</rdf:RDF>";
+		conclusion = "<?xml version=\"1.0\"?>\n"
+				+ "<rdf:RDF xmlns=\"http://www.w3.org/2002/07/owl#\"\n"
+				+ "xml:base=\"http://www.w3.org/2002/07/owl\"\n"
+				+ "xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n"
+				+ "xmlns:test=\"http://www.example.org/\"\n"
+				+ "xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n"
+				+ "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n"
+				+ "xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n"
+				+ "<ObjectProperty rdf:about=\"http://www.example.org/p\"/>\n"
+				+ "<NamedIndividual rdf:about=\"http://www.example.org/a\">\n"
+				+ "<test:p rdf:resource=\"http://www.example.org/c\"/>\n"
+				+ "</NamedIndividual>\n" + "</rdf:RDF>";
 		String id = "New_Feature_ObjectPropertyChain_BJP_003";
 		TestClasses tc = TestClasses.valueOf("POSITIVE_IMPL");
 		String d = "A simple test of role chains and role hierarchy.";
