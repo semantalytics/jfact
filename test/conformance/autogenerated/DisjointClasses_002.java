@@ -7,9 +7,20 @@ import conformance.TestClasses;
 
 public class DisjointClasses_002 extends TestCase {
 	public void testDisjointClasses_002() {
-		String premise = "<?xml version=\"1.0\"?>\n" + "<rdf:RDF\n" + "  xml:base  = \"http://example.org/\"\n" + "  xmlns     = \"http://example.org/\"\n" + "  xmlns:owl = \"http://www.w3.org/2002/07/owl#\"\n" + "  xmlns:rdf = \"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n"
-				+ "\n" + "<owl:Ontology/>\n" + "\n" + "<owl:Class rdf:about=\"Boy\" />\n" + "<owl:Class rdf:about=\"Girl\" />\n" + "\n" + "<rdf:Description rdf:about=\"Boy\">\n" + "  <owl:disjointWith rdf:resource=\"Girl\" />\n" + "</rdf:Description>\n" + "\n"
-				+ "<Boy rdf:about=\"Stewie\" />\n" + "<Girl rdf:about=\"Stewie\" />\n" + "\n" + "</rdf:RDF>";
+		String premise = "<?xml version=\"1.0\"?>\n"
+				+ "<rdf:RDF\n"
+				+ "  xml:base  = \"http://example.org/\"\n"
+				+ "  xmlns     = \"http://example.org/\"\n"
+				+ "  xmlns:owl = \"http://www.w3.org/2002/07/owl#\"\n"
+				+ "  xmlns:rdf = \"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">\n"
+				+ "\n" + "<owl:Ontology/>\n" + "\n"
+				+ "<owl:Class rdf:about=\"Boy\" />\n"
+				+ "<owl:Class rdf:about=\"Girl\" />\n" + "\n"
+				+ "<rdf:Description rdf:about=\"Boy\">\n"
+				+ "  <owl:disjointWith rdf:resource=\"Girl\" />\n"
+				+ "</rdf:Description>\n" + "\n"
+				+ "<Boy rdf:about=\"Stewie\" />\n"
+				+ "<Girl rdf:about=\"Stewie\" />\n" + "\n" + "</rdf:RDF>";
 		String conclusion = "";
 		String id = "DisjointClasses_002";
 		TestClasses tc = TestClasses.valueOf("INCONSISTENCY");

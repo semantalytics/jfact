@@ -7,10 +7,29 @@ import conformance.TestClasses;
 
 public class New_Feature_AxiomAnnotations_001 extends TestCase {
 	public void testNew_Feature_AxiomAnnotations_001() {
-		String premise = "<?xml version=\"1.0\"?>\n" + "<rdf:RDF\n" + "  xml:base  = \"http://example.org/\"\n" + "  xmlns     = \"http://example.org/\"\n" + "  xmlns:owl = \"http://www.w3.org/2002/07/owl#\"\n" + "  xmlns:rdf = \"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
-				+ "  xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\">\n" + "\n" + "<owl:Ontology/>\n" + "\n" + "<owl:Class rdf:about=\"Child\" />\n" + "<owl:Class rdf:about=\"Person\" />\n" + "\n" + "<rdf:Description rdf:about=\"Child\">\n"
-				+ "  <rdfs:subClassOf rdf:resource=\"Person\" />\n" + "</rdf:Description>\n" + "\n" + "<owl:Axiom>\n" + "  <owl:annotatedSource rdf:resource=\"Child\" />\n" + "  <owl:annotatedProperty rdf:resource=\"http://www.w3.org/2000/01/rdf-schema#subClassOf\" />\n"
-				+ "  <owl:annotatedTarget rdf:resource=\"Person\" />\n" + "  <rdfs:comment>Children are people.</rdfs:comment>\n" + "</owl:Axiom>\n" + "\n" + "</rdf:RDF>";
+		String premise = "<?xml version=\"1.0\"?>\n"
+				+ "<rdf:RDF\n"
+				+ "  xml:base  = \"http://example.org/\"\n"
+				+ "  xmlns     = \"http://example.org/\"\n"
+				+ "  xmlns:owl = \"http://www.w3.org/2002/07/owl#\"\n"
+				+ "  xmlns:rdf = \"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
+				+ "  xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\">\n"
+				+ "\n"
+				+ "<owl:Ontology/>\n"
+				+ "\n"
+				+ "<owl:Class rdf:about=\"Child\" />\n"
+				+ "<owl:Class rdf:about=\"Person\" />\n"
+				+ "\n"
+				+ "<rdf:Description rdf:about=\"Child\">\n"
+				+ "  <rdfs:subClassOf rdf:resource=\"Person\" />\n"
+				+ "</rdf:Description>\n"
+				+ "\n"
+				+ "<owl:Axiom>\n"
+				+ "  <owl:annotatedSource rdf:resource=\"Child\" />\n"
+				+ "  <owl:annotatedProperty rdf:resource=\"http://www.w3.org/2000/01/rdf-schema#subClassOf\" />\n"
+				+ "  <owl:annotatedTarget rdf:resource=\"Person\" />\n"
+				+ "  <rdfs:comment>Children are people.</rdfs:comment>\n"
+				+ "</owl:Axiom>\n" + "\n" + "</rdf:RDF>";
 		String conclusion = "";
 		String id = "New_Feature_AxiomAnnotations_001";
 		TestClasses tc = TestClasses.valueOf("CONSISTENCY");

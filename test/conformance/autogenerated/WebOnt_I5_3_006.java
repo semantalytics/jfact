@@ -7,9 +7,15 @@ import conformance.TestClasses;
 
 public class WebOnt_I5_3_006 extends TestCase {
 	public void testWebOnt_I5_3_006() {
-		String premise = "<rdf:RDF\n" + "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" + "    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n" + "    xmlns:first=\"http://www.w3.org/2002/03owlt/I5.3/consistent006#\"\n"
-				+ "    xml:base=\"http://www.w3.org/2002/03owlt/I5.3/consistent006\" >\n" + "   <owl:Ontology/>\n" + "   <owl:Thing>\n" + "      <first:p>\n" + "         <owl:Thing/>\n" + "      </first:p>\n" + "   </owl:Thing>\n" + "   <owl:ObjectProperty rdf:ID=\"p\" />\n"
-				+ "</rdf:RDF>";
+		String premise = "<rdf:RDF\n"
+				+ "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
+				+ "    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n"
+				+ "    xmlns:first=\"http://www.w3.org/2002/03owlt/I5.3/consistent006#\"\n"
+				+ "    xml:base=\"http://www.w3.org/2002/03owlt/I5.3/consistent006\" >\n"
+				+ "   <owl:Ontology/>\n" + "   <owl:Thing>\n"
+				+ "      <first:p>\n" + "         <owl:Thing/>\n"
+				+ "      </first:p>\n" + "   </owl:Thing>\n"
+				+ "   <owl:ObjectProperty rdf:ID=\"p\" />\n" + "</rdf:RDF>";
 		String conclusion = "";
 		String id = "WebOnt_I5_3_006";
 		TestClasses tc = TestClasses.valueOf("CONSISTENCY");

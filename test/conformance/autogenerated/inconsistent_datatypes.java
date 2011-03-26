@@ -7,8 +7,14 @@ import conformance.TestClasses;
 
 public class inconsistent_datatypes extends TestCase {
 	public void testinconsistent_datatypes() {
-		String premise = "Prefix(:=<http://example.org/>)\n" + "Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n" + "Ontology(\n" + "  Declaration(NamedIndividual(:a))\n" + "  Declaration(DataProperty(:dp))\n" + "  Declaration(Class(:A))\n"
-				+ "  SubClassOf(:A DataAllValuesFrom(:dp xsd:string)) \n" + "  SubClassOf(:A DataSomeValuesFrom(:dp xsd:integer)) \n" + "  ClassAssertion(:A :a)\n" + ")";
+		String premise = "Prefix(:=<http://example.org/>)\n"
+				+ "Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n"
+				+ "Ontology(\n" + "  Declaration(NamedIndividual(:a))\n"
+				+ "  Declaration(DataProperty(:dp))\n"
+				+ "  Declaration(Class(:A))\n"
+				+ "  SubClassOf(:A DataAllValuesFrom(:dp xsd:string)) \n"
+				+ "  SubClassOf(:A DataSomeValuesFrom(:dp xsd:integer)) \n"
+				+ "  ClassAssertion(:A :a)\n" + ")";
 		String conclusion = "";
 		String id = "inconsistent_datatypes";
 		TestClasses tc = TestClasses.valueOf("INCONSISTENCY");

@@ -7,10 +7,28 @@ import conformance.TestClasses;
 
 public class New_Feature_AnnotationAnnotations_001 extends TestCase {
 	public void testNew_Feature_AnnotationAnnotations_001() {
-		String premise = "<?xml version=\"1.0\"?>\n" + "<rdf:RDF\n" + "  xml:base  = \"http://example.org/\"\n" + "  xmlns     = \"http://example.org/\"\n" + "  xmlns:owl = \"http://www.w3.org/2002/07/owl#\"\n" + "  xmlns:rdf = \"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
-				+ "  xmlns:rdfs= \"http://www.w3.org/2000/01/rdf-schema#\">\n" + "\n" + "<owl:Ontology rdf:about=\"http://example.org/\"/>\n" + "\n" + "<rdf:Description rdf:about=\"http://example.org/\">\n" + "  <rdfs:label>An example ontology</rdfs:label>\n"
-				+ "</rdf:Description>\n" + "\n" + "<owl:Annotation>\n" + "  <owl:annotatedSource rdf:resource=\"http://example.org/\" />\n" + "  <owl:annotatedProperty rdf:resource=\"http://www.w3.org/2000/01/rdf-schema#label\" />\n"
-				+ "  <owl:annotatedTarget>An example ontology</owl:annotatedTarget>\n" + "  <author>Mike Smith</author>\n" + "</owl:Annotation>\n" + "\n" + "<owl:AnnotationProperty rdf:about=\"author\" />\n" + "<owl:NamedIndividual rdf:about=\"i\" />\n" + "\n" + "</rdf:RDF>";
+		String premise = "<?xml version=\"1.0\"?>\n"
+				+ "<rdf:RDF\n"
+				+ "  xml:base  = \"http://example.org/\"\n"
+				+ "  xmlns     = \"http://example.org/\"\n"
+				+ "  xmlns:owl = \"http://www.w3.org/2002/07/owl#\"\n"
+				+ "  xmlns:rdf = \"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
+				+ "  xmlns:rdfs= \"http://www.w3.org/2000/01/rdf-schema#\">\n"
+				+ "\n"
+				+ "<owl:Ontology rdf:about=\"http://example.org/\"/>\n"
+				+ "\n"
+				+ "<rdf:Description rdf:about=\"http://example.org/\">\n"
+				+ "  <rdfs:label>An example ontology</rdfs:label>\n"
+				+ "</rdf:Description>\n"
+				+ "\n"
+				+ "<owl:Annotation>\n"
+				+ "  <owl:annotatedSource rdf:resource=\"http://example.org/\" />\n"
+				+ "  <owl:annotatedProperty rdf:resource=\"http://www.w3.org/2000/01/rdf-schema#label\" />\n"
+				+ "  <owl:annotatedTarget>An example ontology</owl:annotatedTarget>\n"
+				+ "  <author>Mike Smith</author>\n" + "</owl:Annotation>\n"
+				+ "\n" + "<owl:AnnotationProperty rdf:about=\"author\" />\n"
+				+ "<owl:NamedIndividual rdf:about=\"i\" />\n" + "\n"
+				+ "</rdf:RDF>";
 		String conclusion = "";
 		String id = "New_Feature_AnnotationAnnotations_001";
 		TestClasses tc = TestClasses.valueOf("CONSISTENCY");

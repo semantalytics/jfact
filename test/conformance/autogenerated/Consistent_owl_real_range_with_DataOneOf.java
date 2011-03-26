@@ -7,8 +7,17 @@ import conformance.TestClasses;
 
 public class Consistent_owl_real_range_with_DataOneOf extends TestCase {
 	public void testConsistent_owl_real_range_with_DataOneOf() {
-		String premise = "Prefix(:=<http://example.org/>)\n" + "Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n" + "Prefix(owl:=<http://www.w3.org/2002/07/owl#>)\n" + "Ontology(\n" + "  Declaration(NamedIndividual(:a))\n" + "  Declaration(DataProperty(:dp))\n"
-				+ "  Declaration(Class(:A))\n" + "  SubClassOf(:A DataAllValuesFrom(:dp owl:real)) \n" + "  SubClassOf(:A \n" + "    DataSomeValuesFrom(:dp DataOneOf(\"-INF\"^^xsd:float \"-0\"^^xsd:integer))\n" + "  )\n" + "  ClassAssertion(:A :a)\n" + ")";
+		String premise = "Prefix(:=<http://example.org/>)\n"
+				+ "Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n"
+				+ "Prefix(owl:=<http://www.w3.org/2002/07/owl#>)\n"
+				+ "Ontology(\n"
+				+ "  Declaration(NamedIndividual(:a))\n"
+				+ "  Declaration(DataProperty(:dp))\n"
+				+ "  Declaration(Class(:A))\n"
+				+ "  SubClassOf(:A DataAllValuesFrom(:dp owl:real)) \n"
+				+ "  SubClassOf(:A \n"
+				+ "    DataSomeValuesFrom(:dp DataOneOf(\"-INF\"^^xsd:float \"-0\"^^xsd:integer))\n"
+				+ "  )\n" + "  ClassAssertion(:A :a)\n" + ")";
 		String conclusion = "";
 		String id = "Consistent_owl_real_range_with_DataOneOf";
 		TestClasses tc = TestClasses.valueOf("CONSISTENCY");

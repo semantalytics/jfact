@@ -5,11 +5,21 @@ import conformance.Factory;
 import conformance.JUnitRunner;
 import conformance.TestClasses;
 
-public class Consistent_Datatype_restrictions_with_Different_Types extends TestCase {
+public class Consistent_Datatype_restrictions_with_Different_Types extends
+		TestCase {
 	public void testConsistent_Datatype_restrictions_with_Different_Types() {
-		String premise = "Prefix(:=<http://example.org/>)\n" + "Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n" + "Ontology(\n" + "  Declaration(NamedIndividual(:a))\n" + "  Declaration(DataProperty(:dp))\n" + "  Declaration(Class(:A))\n"
-				+ "  SubClassOf(:A DataAllValuesFrom(:dp \n" + "    DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:int))\n" + "  ) \n" + "  SubClassOf(:A DataAllValuesFrom(:dp \n" + "    DataOneOf(\"2\"^^xsd:short \"3\"^^xsd:int))\n" + "  )\n" + "  ClassAssertion(:A :a)\n"
-				+ "  ClassAssertion(DataSomeValuesFrom(:dp \n" + "    DataOneOf(\"3\"^^xsd:integer)) :a\n" + "  )\n" + ")";
+		String premise = "Prefix(:=<http://example.org/>)\n"
+				+ "Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n"
+				+ "Ontology(\n" + "  Declaration(NamedIndividual(:a))\n"
+				+ "  Declaration(DataProperty(:dp))\n"
+				+ "  Declaration(Class(:A))\n"
+				+ "  SubClassOf(:A DataAllValuesFrom(:dp \n"
+				+ "    DataOneOf(\"3\"^^xsd:integer \"4\"^^xsd:int))\n"
+				+ "  ) \n" + "  SubClassOf(:A DataAllValuesFrom(:dp \n"
+				+ "    DataOneOf(\"2\"^^xsd:short \"3\"^^xsd:int))\n" + "  )\n"
+				+ "  ClassAssertion(:A :a)\n"
+				+ "  ClassAssertion(DataSomeValuesFrom(:dp \n"
+				+ "    DataOneOf(\"3\"^^xsd:integer)) :a\n" + "  )\n" + ")";
 		String conclusion = "";
 		String id = "Consistent_Datatype_restrictions_with_Different_Types";
 		TestClasses tc = TestClasses.valueOf("CONSISTENCY");

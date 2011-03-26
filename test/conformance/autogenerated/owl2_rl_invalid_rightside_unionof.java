@@ -7,9 +7,20 @@ import conformance.TestClasses;
 
 public class owl2_rl_invalid_rightside_unionof extends TestCase {
 	public void testowl2_rl_invalid_rightside_unionof() {
-		String premise = "<rdf:RDF\n" + "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" + "    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n" + "    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\">\n" + "  <owl:Ontology />\n"
-				+ "  <owl:Class rdf:about=\"http://owl2.test/rules#C_Sub\">\n" + "    <rdfs:subClassOf>\n" + "      <owl:Class>\n" + "        <owl:unionOf rdf:parseType=\"Collection\">\n" + "          <owl:Class rdf:about=\"http://owl2.test/rules#C1\"/>\n"
-				+ "          <owl:Class rdf:about=\"http://owl2.test/rules#C2\"/>\n" + "        </owl:unionOf>\n" + "      </owl:Class>\n" + "    </rdfs:subClassOf>\n" + "  </owl:Class>\n" + "</rdf:RDF>";
+		String premise = "<rdf:RDF\n"
+				+ "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
+				+ "    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n"
+				+ "    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\">\n"
+				+ "  <owl:Ontology />\n"
+				+ "  <owl:Class rdf:about=\"http://owl2.test/rules#C_Sub\">\n"
+				+ "    <rdfs:subClassOf>\n"
+				+ "      <owl:Class>\n"
+				+ "        <owl:unionOf rdf:parseType=\"Collection\">\n"
+				+ "          <owl:Class rdf:about=\"http://owl2.test/rules#C1\"/>\n"
+				+ "          <owl:Class rdf:about=\"http://owl2.test/rules#C2\"/>\n"
+				+ "        </owl:unionOf>\n" + "      </owl:Class>\n"
+				+ "    </rdfs:subClassOf>\n" + "  </owl:Class>\n"
+				+ "</rdf:RDF>";
 		String conclusion = "";
 		String id = "owl2_rl_invalid_rightside_unionof";
 		TestClasses tc = TestClasses.valueOf("CONSISTENCY");

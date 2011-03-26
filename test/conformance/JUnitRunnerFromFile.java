@@ -9,7 +9,8 @@ public class JUnitRunnerFromFile extends JUnitRunner {
 	public static String readFile(File f) {
 		StringBuilder b = new StringBuilder();
 		try {
-			BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+			BufferedReader r = new BufferedReader(new InputStreamReader(
+					new FileInputStream(f)));
 			String l = r.readLine();
 			while (l != null) {
 				b.append(l);
@@ -23,7 +24,8 @@ public class JUnitRunnerFromFile extends JUnitRunner {
 		return b.toString();
 	}
 
-	public JUnitRunnerFromFile(File premise, File consequence, String testId, TestClasses t, String description) {
+	public JUnitRunnerFromFile(File premise, File consequence, String testId,
+			TestClasses t, String description) {
 		super(readFile(premise), readFile(consequence), testId, t, description);
 	}
 }

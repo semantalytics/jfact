@@ -7,8 +7,17 @@ import conformance.TestClasses;
 
 public class datatype_restriction_min_max_inconsistency extends TestCase {
 	public void testdatatype_restriction_min_max_inconsistency() {
-		String premise = "Prefix(:=<http://example.org/>)\n" + "Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n" + "Ontology(\n" + "  Declaration(NamedIndividual(:a))\n" + "  Declaration(DataProperty(:dp))\n" + "  Declaration(Class(:A))\n"
-				+ "  SubClassOf(:A DataSomeValuesFrom(:dp \n" + "    DatatypeRestriction(xsd:integer xsd:minInclusive \"18\"^^xsd:integer))\n" + "  ) \n" + "  SubClassOf(:A DataAllValuesFrom(:dp \n" + "    DatatypeRestriction(xsd:integer xsd:maxInclusive \"10\"^^xsd:integer))\n"
+		String premise = "Prefix(:=<http://example.org/>)\n"
+				+ "Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n"
+				+ "Ontology(\n"
+				+ "  Declaration(NamedIndividual(:a))\n"
+				+ "  Declaration(DataProperty(:dp))\n"
+				+ "  Declaration(Class(:A))\n"
+				+ "  SubClassOf(:A DataSomeValuesFrom(:dp \n"
+				+ "    DatatypeRestriction(xsd:integer xsd:minInclusive \"18\"^^xsd:integer))\n"
+				+ "  ) \n"
+				+ "  SubClassOf(:A DataAllValuesFrom(:dp \n"
+				+ "    DatatypeRestriction(xsd:integer xsd:maxInclusive \"10\"^^xsd:integer))\n"
 				+ "  )\n" + "  ClassAssertion(:A :a)\n" + ")";
 		String conclusion = "";
 		String id = "datatype_restriction_min_max_inconsistency";

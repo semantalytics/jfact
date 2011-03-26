@@ -7,8 +7,15 @@ import conformance.TestClasses;
 
 public class consistent_integer_filler extends TestCase {
 	public void testconsistent_integer_filler() {
-		String premise = "Prefix(:=<http://example.org/>)\n" + "Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n" + "Ontology(\n" + "  Declaration(NamedIndividual(:a))\n" + "  Declaration(DataProperty(:dp))\n" + "  Declaration(Class(:A))\n"
-				+ "  SubClassOf(:A DataHasValue(:dp \"18\"^^xsd:integer)) \n" + "  ClassAssertion(:A :a) \n" + "  ClassAssertion(DataAllValuesFrom(:dp xsd:integer) :a)\n" + ")";
+		String premise = "Prefix(:=<http://example.org/>)\n"
+				+ "Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n"
+				+ "Ontology(\n" + "  Declaration(NamedIndividual(:a))\n"
+				+ "  Declaration(DataProperty(:dp))\n"
+				+ "  Declaration(Class(:A))\n"
+				+ "  SubClassOf(:A DataHasValue(:dp \"18\"^^xsd:integer)) \n"
+				+ "  ClassAssertion(:A :a) \n"
+				+ "  ClassAssertion(DataAllValuesFrom(:dp xsd:integer) :a)\n"
+				+ ")";
 		String conclusion = "";
 		String id = "consistent_integer_filler";
 		TestClasses tc = TestClasses.valueOf("CONSISTENCY");

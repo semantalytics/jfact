@@ -7,8 +7,15 @@ import conformance.TestClasses;
 
 public class inconsistent_integer_filler extends TestCase {
 	public void testinconsistent_integer_filler() {
-		String premise = "Prefix(:=<http://example.org/>)\n" + "Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n" + "Ontology(\n" + "  Declaration(NamedIndividual(:a))\n" + "  Declaration(DataProperty(:hasAge))\n" + "  Declaration(Class(:Eighteen))\n"
-				+ "  SubClassOf(DataHasValue(:hasAge \"18\"^^xsd:integer) :Eighteen) \n" + "  ClassAssertion(DataHasValue(:hasAge \"18\"^^xsd:integer) :a) \n" + "  ClassAssertion(ObjectComplementOf(:Eighteen) :a)\n" + ")";
+		String premise = "Prefix(:=<http://example.org/>)\n"
+				+ "Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n"
+				+ "Ontology(\n"
+				+ "  Declaration(NamedIndividual(:a))\n"
+				+ "  Declaration(DataProperty(:hasAge))\n"
+				+ "  Declaration(Class(:Eighteen))\n"
+				+ "  SubClassOf(DataHasValue(:hasAge \"18\"^^xsd:integer) :Eighteen) \n"
+				+ "  ClassAssertion(DataHasValue(:hasAge \"18\"^^xsd:integer) :a) \n"
+				+ "  ClassAssertion(ObjectComplementOf(:Eighteen) :a)\n" + ")";
 		String conclusion = "";
 		String id = "inconsistent_integer_filler";
 		TestClasses tc = TestClasses.valueOf("INCONSISTENCY");

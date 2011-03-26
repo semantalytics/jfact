@@ -7,8 +7,15 @@ import conformance.TestClasses;
 
 public class functionality_clash extends TestCase {
 	public void testfunctionality_clash() {
-		String premise = "Prefix(:=<http://example.org/>)\n" + "Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n" + "Ontology(\n" + "  Declaration(NamedIndividual(:a))\n" + "  Declaration(DataProperty(:hasAge))\n" + "  FunctionalDataProperty(:hasAge) \n"
-				+ "  ClassAssertion(DataHasValue(:hasAge \"18\"^^xsd:integer) :a) \n" + "  ClassAssertion(DataHasValue(:hasAge \"19\"^^xsd:integer) :a)\n" + ")";
+		String premise = "Prefix(:=<http://example.org/>)\n"
+				+ "Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n"
+				+ "Ontology(\n"
+				+ "  Declaration(NamedIndividual(:a))\n"
+				+ "  Declaration(DataProperty(:hasAge))\n"
+				+ "  FunctionalDataProperty(:hasAge) \n"
+				+ "  ClassAssertion(DataHasValue(:hasAge \"18\"^^xsd:integer) :a) \n"
+				+ "  ClassAssertion(DataHasValue(:hasAge \"19\"^^xsd:integer) :a)\n"
+				+ ")";
 		String conclusion = "";
 		String id = "functionality_clash";
 		TestClasses tc = TestClasses.valueOf("INCONSISTENCY");

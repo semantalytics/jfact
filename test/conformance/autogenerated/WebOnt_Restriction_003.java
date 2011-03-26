@@ -7,11 +7,29 @@ import conformance.TestClasses;
 
 public class WebOnt_Restriction_003 extends TestCase {
 	public void testWebOnt_Restriction_003() {
-		String premise = "<rdf:RDF\n" + "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" + "    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n" + "    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n"
-				+ "    xmlns:first=\"http://www.w3.org/2002/03owlt/Restriction/consistent003#\"\n" + "    xml:base=\"http://www.w3.org/2002/03owlt/Restriction/consistent003\" >\n" + "   <owl:Ontology/>\n" + "   <owl:DatatypeProperty rdf:ID=\"dp\"/>\n"
-				+ "   <owl:Class rdf:ID=\"C\">\n" + "     <owl:intersectionOf rdf:parseType=\"Collection\">\n" + "        <owl:Class rdf:ID=\"superC\"/>\n" + "        <owl:Restriction rdf:nodeID=\"r\">\n" + "           <owl:onProperty rdf:resource=\"#dp\"/>\n"
-				+ "           <owl:someValuesFrom rdf:resource=\n" + "     \"http://www.w3.org/2001/XMLSchema#byte\" />\n" + "        </owl:Restriction>\n" + "     </owl:intersectionOf>\n" + "   </owl:Class>\n" + "   <owl:Class rdf:ID=\"D\">\n"
-				+ "     <owl:intersectionOf rdf:parseType=\"Collection\">\n" + "        <owl:Class rdf:ID=\"superD\"/>\n" + "        <rdf:Description rdf:nodeID=\"r\"/>\n" + "     </owl:intersectionOf>\n" + "   </owl:Class>\n" + "\n" + "</rdf:RDF>";
+		String premise = "<rdf:RDF\n"
+				+ "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
+				+ "    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n"
+				+ "    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n"
+				+ "    xmlns:first=\"http://www.w3.org/2002/03owlt/Restriction/consistent003#\"\n"
+				+ "    xml:base=\"http://www.w3.org/2002/03owlt/Restriction/consistent003\" >\n"
+				+ "   <owl:Ontology/>\n"
+				+ "   <owl:DatatypeProperty rdf:ID=\"dp\"/>\n"
+				+ "   <owl:Class rdf:ID=\"C\">\n"
+				+ "     <owl:intersectionOf rdf:parseType=\"Collection\">\n"
+				+ "        <owl:Class rdf:ID=\"superC\"/>\n"
+				+ "        <owl:Restriction rdf:nodeID=\"r\">\n"
+				+ "           <owl:onProperty rdf:resource=\"#dp\"/>\n"
+				+ "           <owl:someValuesFrom rdf:resource=\n"
+				+ "     \"http://www.w3.org/2001/XMLSchema#byte\" />\n"
+				+ "        </owl:Restriction>\n"
+				+ "     </owl:intersectionOf>\n" + "   </owl:Class>\n"
+				+ "   <owl:Class rdf:ID=\"D\">\n"
+				+ "     <owl:intersectionOf rdf:parseType=\"Collection\">\n"
+				+ "        <owl:Class rdf:ID=\"superD\"/>\n"
+				+ "        <rdf:Description rdf:nodeID=\"r\"/>\n"
+				+ "     </owl:intersectionOf>\n" + "   </owl:Class>\n" + "\n"
+				+ "</rdf:RDF>";
 		String conclusion = "";
 		String id = "WebOnt_Restriction_003";
 		TestClasses tc = TestClasses.valueOf("CONSISTENCY");

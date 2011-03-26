@@ -7,9 +7,19 @@ import conformance.TestClasses;
 
 public class owl2_rl_invalid_leftside_allvaluesfrom extends TestCase {
 	public void testowl2_rl_invalid_leftside_allvaluesfrom() {
-		String premise = "<rdf:RDF\n" + "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" + "    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n" + "    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\">\n" + "  <owl:Ontology />\n"
-				+ "  <owl:Class rdf:about=\"http://owl2.test/rules#C\"/>\n" + "  <owl:Class rdf:about=\"http://owl2.test/rules#C1\"/>\n" + "  <owl:ObjectProperty rdf:about=\"http://owl2.test/rules#op\"/>\n" + "  <owl:Restriction>\n"
-				+ "    <owl:allValuesFrom rdf:resource=\"http://owl2.test/rules#C1\"/>\n" + "    <owl:onProperty rdf:resource=\"http://owl2.test/rules#op\"/>\n" + "    <rdfs:subClassOf rdf:resource=\"http://owl2.test/rules#C\"/>\n" + "  </owl:Restriction>\n" + "</rdf:RDF>";
+		String premise = "<rdf:RDF\n"
+				+ "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
+				+ "    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n"
+				+ "    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\">\n"
+				+ "  <owl:Ontology />\n"
+				+ "  <owl:Class rdf:about=\"http://owl2.test/rules#C\"/>\n"
+				+ "  <owl:Class rdf:about=\"http://owl2.test/rules#C1\"/>\n"
+				+ "  <owl:ObjectProperty rdf:about=\"http://owl2.test/rules#op\"/>\n"
+				+ "  <owl:Restriction>\n"
+				+ "    <owl:allValuesFrom rdf:resource=\"http://owl2.test/rules#C1\"/>\n"
+				+ "    <owl:onProperty rdf:resource=\"http://owl2.test/rules#op\"/>\n"
+				+ "    <rdfs:subClassOf rdf:resource=\"http://owl2.test/rules#C\"/>\n"
+				+ "  </owl:Restriction>\n" + "</rdf:RDF>";
 		String conclusion = "";
 		String id = "owl2_rl_invalid_leftside_allvaluesfrom";
 		TestClasses tc = TestClasses.valueOf("CONSISTENCY");
