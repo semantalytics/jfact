@@ -1,12 +1,12 @@
-package conformance.newfeatures;
+package conformance.fixed;
 
 import junit.framework.TestCase;
 import conformance.Factory;
 import conformance.JUnitRunner;
 import conformance.TestClasses;
 
-public class rdfbased_sem_key_def extends TestCase {
-	public void testrdfbased_sem_key_def() {
+public class rdfbased_sem_bool_union_term extends TestCase {
+	public void testrdfbased_sem_bool_union_term() {
 		//XXX test modified because of ontology not compliant with OWL 2
 		String premise = "<rdf:RDF\n"
 				+ "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
@@ -16,35 +16,41 @@ public class rdfbased_sem_key_def extends TestCase {
 				+ "    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\">\n"
 				//added
 				+ "  <owl:Class rdf:about=\"http://www.example.org#c\"/>\n"
-				+ "  <owl:ObjectProperty rdf:about=\"http://www.example.org#p1\"/>\n"
-				+ "  <owl:DatatypeProperty rdf:about=\"http://www.example.org#p2\"/>\n"
+				+ "  <owl:Class rdf:about=\"http://www.example.org#x\"/>\n"
+				+ "  <owl:Class rdf:about=\"http://www.example.org#y\"/>\n"
 				//end added
-				+ "  <ex:c rdf:about=\"http://www.example.org#x\">\n"
-				+ "    <ex:p1 rdf:resource=\"http://www.example.org#z\"/>\n"
-				+ "    <ex:p2>data</ex:p2>\n"
-				+ "  </ex:c>\n"
-				+ "  <ex:c rdf:about=\"http://www.example.org#y\">\n"
-				+ "    <ex:p1 rdf:resource=\"http://www.example.org#z\"/>\n"
-				+ "    <ex:p2>data</ex:p2>\n"
-				+ "  </ex:c>\n"
 				+ "  <rdf:Description rdf:about=\"http://www.example.org#c\">\n"
-				+ "    <owl:hasKey rdf:parseType=\"Collection\">\n"
-				+ "      <rdf:Description rdf:about=\"http://www.example.org#p1\"/>\n"
-				+ "      <rdf:Description rdf:about=\"http://www.example.org#p2\"/>\n"
-				+ "    </owl:hasKey>\n" + "  </rdf:Description>\n"
-				+ "</rdf:RDF>";
+				//added
+				+ "<owl:equivalentClass><owl:Class>"
+				//end added
+				+ "    <owl:unionOf rdf:parseType=\"Collection\">\n"
+				+ "      <rdf:Description rdf:about=\"http://www.example.org#x\"/>\n"
+				+ "      <rdf:Description rdf:about=\"http://www.example.org#y\"/>\n"
+				+ "    </owl:unionOf>\n"
+				//added
+				+ "</owl:Class></owl:equivalentClass>"
+				//end added
+				+ "  </rdf:Description>\n" + "</rdf:RDF>";
 		String conclusion = "<rdf:RDF\n"
 				+ "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
 				+ "    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n"
 				+ "    xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\"\n"
 				+ "    xmlns:ex=\"http://www.example.org#\"\n"
 				+ "    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\">\n"
+				//added
+				+ "  <owl:Class rdf:about=\"http://www.example.org#c\"/>\n"
+				+ "  <owl:Class rdf:about=\"http://www.example.org#x\"/>\n"
+				+ "  <owl:Class rdf:about=\"http://www.example.org#y\"/>\n"
+				//end added
 				+ "  <rdf:Description rdf:about=\"http://www.example.org#x\">\n"
-				+ "    <owl:sameAs rdf:resource=\"http://www.example.org#y\"/>\n"
+				+ "    <rdfs:subClassOf rdf:resource=\"http://www.example.org#c\"/>\n"
+				+ "  </rdf:Description>\n"
+				+ "  <rdf:Description rdf:about=\"http://www.example.org#y\">\n"
+				+ "    <rdfs:subClassOf rdf:resource=\"http://www.example.org#c\"/>\n"
 				+ "  </rdf:Description>\n" + "</rdf:RDF>";
-		String id = "rdfbased_sem_key_def";
+		String id = "rdfbased_sem_bool_union_term";
 		TestClasses tc = TestClasses.valueOf("POSITIVE_IMPL");
-		String d = "For two triples matching the conditions of a key axiom the subjects are identified.";
+		String d = "If a class is a union of other classes, then each of the other classes are subclasses of the original class.";
 		JUnitRunner r = new JUnitRunner(premise, conclusion, id, tc, d);
 		r.setReasonerFactory(Factory.factory());
 		r.run();
