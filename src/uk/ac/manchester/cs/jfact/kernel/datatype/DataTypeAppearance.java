@@ -14,6 +14,7 @@ import java.util.List;
 import uk.ac.manchester.cs.jfact.dep.DepSet;
 import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
+import uk.ac.manchester.cs.jfact.helpers.FastSetSimple;
 import uk.ac.manchester.cs.jfact.helpers.Reference;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 
@@ -219,14 +220,14 @@ class DepInterval {
 	/** interval itself */
 	private DataInterval constraints = new DataInterval();
 	/** local dep-set */
-	private DepSet locDep;
+	private FastSetSimple locDep;
 
 	public DepInterval() {
 	}
 
 	public DepInterval(DepInterval d) {
 		constraints = new DataInterval(d.constraints);
-		locDep = DepSetFactory.create(d.locDep);
+		locDep = d.locDep;
 	}
 
 	/** update MIN border of an TYPE's interval with VALUE wrt EXCL */
@@ -234,7 +235,7 @@ class DepInterval {
 		if (!constraints.update(min, excl, value)) {
 			return false;
 		}
-		locDep = DepSetFactory.create(dep);
+		locDep = dep==null?null:dep.getDelegate();
 		return true;
 	}
 

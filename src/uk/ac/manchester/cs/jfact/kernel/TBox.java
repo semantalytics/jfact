@@ -787,6 +787,7 @@ public final class TBox {
 		DLTree GCI = axioms.getGCI();
 		// add special domains to the GCIs
 		List<DLTree> list = new ArrayList<DLTree>();
+		//TODO quick for Robert's ontology
 		for (Role p : objectRoleMaster.getRoles()) {
 			if (!p.isSynonym() && p.hasSpecialDomain()) {
 				list.add(p.getTSpecialDomain().copy());

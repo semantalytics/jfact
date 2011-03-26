@@ -2513,7 +2513,9 @@ public class DlSatTester {
 	private void findNeighbours(final Role Role, int c, DepSet Dep) {
 		edgesToMerge.clear();
 		DagTag tag = dlHeap.get(c).getType();
-		for (DlCompletionTreeArc p : curNode.getNeighbour()) {
+		List<DlCompletionTreeArc> neighbour = curNode.getNeighbour();
+		int size=neighbour.size();
+		for (int i=0;i<size;i++) { DlCompletionTreeArc p = neighbour.get(i);
 			if (p.isNeighbour(Role) && isNewEdge(p.getArcEnd(), edgesToMerge) && findChooseRuleConcept(p.getArcEnd().label().getLabel(tag), c, Dep)) {
 				edgesToMerge.add(p);
 			}
@@ -2522,7 +2524,9 @@ public class DlSatTester {
 	}
 
 	private boolean commonTacticBodyChoose(final Role R, int C) {
-		for (DlCompletionTreeArc p : curNode.getNeighbour()) {
+		List<DlCompletionTreeArc> neighbour = curNode.getNeighbour();
+		int size=neighbour.size();
+		for (int i=0;i<size;i++) { DlCompletionTreeArc p = neighbour.get(i);
 			if (p.isNeighbour(R)) {
 				if (applyChooseRule(p.getArcEnd(), C)) {
 					return true;

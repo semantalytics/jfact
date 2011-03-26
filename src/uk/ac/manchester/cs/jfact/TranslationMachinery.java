@@ -101,6 +101,7 @@ import org.semanticweb.owlapi.model.SWRLRule;
 import org.semanticweb.owlapi.reasoner.Node;
 import org.semanticweb.owlapi.reasoner.NodeSet;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
+import org.semanticweb.owlapi.reasoner.UnsupportedEntailmentTypeException;
 import org.semanticweb.owlapi.reasoner.impl.DefaultNode;
 import org.semanticweb.owlapi.reasoner.impl.DefaultNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLClassNode;
@@ -393,15 +394,12 @@ public final class TranslationMachinery {
 		}
 
 		public Boolean visit(OWLEquivalentDataPropertiesAxiom axiom) {
-			/*	this is not implemented in OWL API
 						for (OWLAxiom ax : axiom.asSubDataPropertyOfAxioms()) {
 			                if (!ax.accept(this)) {
 			                    return false;
 			                }
 			            }
 			            return true;
-			*/
-			return null;
 		}
 
 		public Boolean visit(OWLClassAssertionAxiom axiom) {
@@ -476,17 +474,20 @@ public final class TranslationMachinery {
 
 		public Boolean visit(OWLHasKeyAxiom axiom) {
 			// FIXME!! unsupported by FaCT++ ATM
-			return null;
+			//return null;
+			throw new UnsupportedEntailmentTypeException(axiom);
 		}
 
 		public Boolean visit(OWLDatatypeDefinitionAxiom axiom) {
 			// FIXME!! unsupported by FaCT++ ATM
-			return null;
+			//return null;
+			throw new UnsupportedEntailmentTypeException(axiom);
 		}
 
 		public Boolean visit(SWRLRule rule) {
 			// FIXME!! unsupported by FaCT++ ATM
-			return null;
+			//return null;
+			throw new UnsupportedEntailmentTypeException((OWLAxiom) rule);
 		}
 
 		public Boolean visit(OWLSubAnnotationPropertyOfAxiom axiom) {

@@ -139,25 +139,33 @@ public final class ToDoList {
 
 		/** add entry to a queue */
 		void add(DlCompletionTree Node, ConceptWDep offset) {
-			try {
+			//try {
+			ToDoEntry e = new ToDoEntry(Node, offset);
 				if (isEmpty() || // no problems with empty queue and if no priority clashes
-						_Wait.get(_Wait.size() - 1).getNode().getNominalLevel() <= Node.getNominalLevel()) {
-					_Wait.add(new ToDoEntry(Node, offset));
+						_Wait.get(size - 1).getNode().getNominalLevel() <= Node.getNominalLevel()) {
+					_Wait.add(e);
+					size++;
 					return;
 				}
 				// here we need to put e on the proper place
-				int n = _Wait.size();
-				ToDoEntry e = new ToDoEntry(Node, offset);
-				_Wait.add(e); // will be rewritten
+				
+//				int n = _Wait.size();
+				int n = size;
+							
+//				_Wait.add(sPointer, e);
+//				_Wait.add(e); // will be rewritten
 				while (n > sPointer && _Wait.get(n - 1).getNode().getNominalLevel() > Node.getNominalLevel()) {
-					_Wait.set(n, _Wait.get(n - 1));
+					//_Wait.set(n, _Wait.get(n - 1));
 					--n;
 				}
-				_Wait.set(n, e);
+				
+				_Wait.add(n, e);
 				queueBroken = true;
-			} finally {
-				size = _Wait.size();
-			}
+				size++;
+
+//			} finally {
+//				size = _Wait.size();
+//			}
 		}
 
 		/** clear queue */

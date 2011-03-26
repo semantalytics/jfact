@@ -132,4 +132,14 @@ public final class DepSet {
 			delegate = new FastSetSimple(delegate, toAdd.delegate);
 		}
 	}
+	public void add(FastSetSimple d) {
+		if (d == null || d.size() == 0) {
+			return;
+		}
+		if (delegate == null) {
+			delegate = d;
+		} else {
+			delegate = new FastSetSimple(delegate, d);
+		}
+	}
 }
