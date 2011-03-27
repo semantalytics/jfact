@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,7 +49,8 @@ import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheSingleton;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheState;
 
 public final class TBox {
-	protected static final class IndividualCreator implements NameCreator<Individual> {
+	protected static final class IndividualCreator implements
+			NameCreator<Individual> {
 		public Individual makeEntry(String name) {
 			return new Individual(name);
 		}
@@ -259,7 +261,8 @@ public final class TBox {
 	public int reflexive2dag(final Role R) {
 		// input check: only simple roles are allowed in the reflexivity construction
 		if (!R.isSimple()) {
-			throw new ReasonerInternalException("Non simple role used as simple: " + R.getName());
+			throw new ReasonerInternalException(
+					"Non simple role used as simple: " + R.getName());
 		}
 		return -dlHeap.add(new DLVertex(dtIrr, 0, R, bpINVALID, null));
 	}
@@ -465,17 +468,29 @@ public final class TBox {
 	}
 
 	/** mark all active GCIs relevant */
-	public void markGCIsRelevant() {
+	private void markGCIsRelevant() {
 		setRelevant(internalisedGeneralAxiom);
 	}
 
 	/** set all TBox content (namely, concepts and GCIs) relevant */
-	public void markAllRelevant() {
+	private void markAllRelevant() {
 		for (Concept pc : concepts.getList()) {
-			setRelevant(pc);
+			if (!pc.isRelevant(relevance)) {
+				++nRelevantCCalls;
+				pc.setRelevant(relevance);
+				collectLogicFeature(pc);
+				setRelevant(pc.getpBody());
+			}
+			//			setRelevant(pc);
 		}
 		for (Individual pi : individuals.getList()) {
-			setRelevant(pi);
+			if (!pi.isRelevant(relevance)) {
+				++nRelevantCCalls;
+				pi.setRelevant(relevance);
+				collectLogicFeature(pi);
+				setRelevant(pi.getpBody());
+			}
+			//setRelevant(pi);
 		}
 		markGCIsRelevant();
 	}
@@ -597,7 +612,8 @@ public final class TBox {
 		if (C.equals(pBottom)) {
 			return DLTreeFactory.createBottom();
 		}
-		return DLTreeFactory.buildTree(new Lexeme(isIndividual(C) ? INAME : CNAME, C));
+		return DLTreeFactory.buildTree(new Lexeme(isIndividual(C) ? INAME
+				: CNAME, C));
 	}
 
 	/**
@@ -612,12 +628,16 @@ public final class TBox {
 	}
 
 	/** individual relation <a,b>:R */
-	public void registerIndividualRelation(NamedEntry a, NamedEntry R, NamedEntry b) {
+	public void registerIndividualRelation(NamedEntry a, NamedEntry R,
+			NamedEntry b) {
 		if (!isIndividual(a) || !isIndividual(b)) {
-			throw new ReasonerInternalException("Individual expected in related()");
+			throw new ReasonerInternalException(
+					"Individual expected in related()");
 		}
-		relatedIndividuals.add(new Related((Individual) a, (Individual) b, (Role) R));
-		relatedIndividuals.add(new Related((Individual) b, (Individual) a, ((Role) R).inverse()));
+		relatedIndividuals.add(new Related((Individual) a, (Individual) b,
+				(Role) R));
+		relatedIndividuals.add(new Related((Individual) b, (Individual) a,
+				((Role) R).inverse()));
 	}
 
 	/** add axiom CN [= D for concept CN */
@@ -668,7 +688,8 @@ public final class TBox {
 	/** check if the relevant part of KB contains number restrictions. */
 	public boolean isNRinQuery() {
 		final LogicFeatures p = curFeature != null ? curFeature : KBFeatures;
-		return p.hasFunctionalRestriction() || p.hasNumberRestriction() || p.hasQNumberRestriction();
+		return p.hasFunctionalRestriction() || p.hasNumberRestriction()
+				|| p.hasQNumberRestriction();
 	}
 
 	/** check if the relevant part of KB contains singletons */
@@ -849,7 +870,8 @@ public final class TBox {
 		if (isValid(p.getBP())) {
 			return p.getBP();
 		}
-		DagTag dt = p.isBasicDataType() ? dtDataType : p.isDataValue() ? dtDataValue : dtDataExpr;
+		DagTag dt = p.isBasicDataType() ? dtDataType
+				: p.isDataValue() ? dtDataValue : dtDataExpr;
 		int hostBP = bpTOP;
 		//TODO this is broken: the next two lines are commented but should not be
 		//		if (p.getType() != null) {
@@ -873,7 +895,9 @@ public final class TBox {
 	}
 
 	public void addConceptToHeap(Concept pConcept) {
-		DagTag tag = pConcept.isPrimitive() ? (pConcept.isSingleton() ? dtPSingleton : dtPConcept) : pConcept.isSingleton() ? dtNSingleton : dtNConcept;
+		DagTag tag = pConcept.isPrimitive() ? (pConcept.isSingleton() ? dtPSingleton
+				: dtPConcept)
+				: pConcept.isSingleton() ? dtNSingleton : dtNConcept;
 		// NSingleton is a nominal
 		if (tag == dtNSingleton && !pConcept.isSynonym()) {
 			((Individual) pConcept).setNominal(true);
@@ -927,16 +951,22 @@ public final class TBox {
 				ret = and2dag(new DLVertex(dtAnd), t);
 				break;
 			case FORALL:
-				ret = forall2dag(Role.resolveRole(t.getLeft()), tree2dag(t.getRight()));
+				ret = forall2dag(Role.resolveRole(t.getLeft()),
+						tree2dag(t.getRight()));
 				break;
 			case REFLEXIVE:
 				ret = reflexive2dag(Role.resolveRole(t.getChild()));
 				break;
 			case LE:
-				ret = atmost2dag(cur.getData(), Role.resolveRole(t.getLeft()), tree2dag(t.getRight()));
+				ret = atmost2dag(cur.getData(), Role.resolveRole(t.getLeft()),
+						tree2dag(t.getRight()));
 				break;
 			case PROJFROM:
-				ret = dlHeap.directAdd(new DLVertex(DagTag.dtProj, 0, Role.resolveRole(t.getLeft()), tree2dag(t.getRight().getRight()), Role.resolveRole(t.getRight().getLeft())));
+				ret = dlHeap
+						.directAdd(new DLVertex(DagTag.dtProj, 0, Role
+								.resolveRole(t.getLeft()), tree2dag(t
+								.getRight().getRight()), Role.resolveRole(t
+								.getRight().getLeft())));
 				break;
 			default:
 				assert DLTreeFactory.isSNF(t);
@@ -977,7 +1007,8 @@ public final class TBox {
 
 	public int atmost2dag(int n, final Role R, int C) {
 		if (!R.isSimple()) {
-			throw new ReasonerInternalException("Non simple role used as simple: " + R.getName());
+			throw new ReasonerInternalException(
+					"Non simple role used as simple: " + R.getName());
 		}
 		if (R.isDataRole()) {
 			return dataAtMost2dag(n, R, C);
@@ -1011,7 +1042,9 @@ public final class TBox {
 		pTax = new DLConceptTaxonomy(pTop, pBottom, this, GCIs);
 	}
 
-	private List<Concept> arrayCD = new ArrayList<Concept>(), arrayNoCD = new ArrayList<Concept>(), arrayNP = new ArrayList<Concept>();
+	private List<Concept> arrayCD = new ArrayList<Concept>(),
+			arrayNoCD = new ArrayList<Concept>(),
+			arrayNP = new ArrayList<Concept>();
 
 	public <T extends Concept> int fillArrays(List<T> begin) {
 		int n = 0;
@@ -1098,7 +1131,8 @@ public final class TBox {
 		}
 	}
 
-	public void classifyConcepts(final List<Concept> collection, boolean curCompletelyDefined, final String type) {
+	public void classifyConcepts(final List<Concept> collection,
+			boolean curCompletelyDefined, final String type) {
 		pTax.setCompletelyDefined(curCompletelyDefined);
 		logger.print(Templates.CLASSIFY_CONCEPTS, type);
 		int n = 0;
@@ -1124,7 +1158,9 @@ public final class TBox {
 		}
 	}
 
-	public TBox(final IFOptionSet Options, final String TopORoleName, final String BotORoleName, final String TopDRoleName, final String BotDRoleName, AtomicBoolean interrupted) {
+	public TBox(final IFOptionSet Options, final String TopORoleName,
+			final String BotORoleName, final String TopDRoleName,
+			final String BotDRoleName, AtomicBoolean interrupted) {
 		this.interrupted = interrupted;
 		axioms = new AxiomSet(this);
 		GCIs = new KBFlags();
@@ -1137,8 +1173,10 @@ public final class TBox {
 		kbStatus = kbLoading;
 		curFeature = null;
 		defConcept = null;
-		concepts = new NamedEntryCollection<Concept>("concept", new ConceptCreator());
-		individuals = new NamedEntryCollection<Individual>("individual", new IndividualCreator());
+		concepts = new NamedEntryCollection<Concept>("concept",
+				new ConceptCreator());
+		individuals = new NamedEntryCollection<Individual>("individual",
+				new IndividualCreator());
 		objectRoleMaster = new RoleMaster(false, TopORoleName, BotORoleName);
 		dataRoleMaster = new RoleMaster(true, TopDRoleName, BotDRoleName);
 		axioms = new AxiomSet(this);
@@ -1240,7 +1278,9 @@ public final class TBox {
 		Timer pt = new Timer();
 		pt.start();
 		buildSimpleCache();
-		Concept test = nominalCloudFeatures.hasSingletons() && individuals.getList().size() > 0 ? individuals.getList().get(0) : null;
+		Concept test = nominalCloudFeatures.hasSingletons()
+				&& individuals.getList().size() > 0 ? individuals.getList()
+				.get(0) : null;
 		prepareFeatures(test, null);
 		boolean ret = false;
 		if (test != null) {
@@ -1252,7 +1292,8 @@ public final class TBox {
 			ret = isSatisfiable(pTop);
 			// setup cache for GCI
 			if (GCIs.isGCI()) {
-				dlHeap.setCache(-internalisedGeneralAxiom, new ModelCacheConst(false));
+				dlHeap.setCache(-internalisedGeneralAxiom, new ModelCacheConst(
+						false));
 			}
 		}
 		pt.stop();
@@ -1275,17 +1316,21 @@ public final class TBox {
 		cache = getReasoner().buildCacheByCGraph(result);
 		dlHeap.setCache(pConcept.getpName(), cache);
 		clearFeatures();
-		logger.print(Templates.IS_SATISFIABLE1, pConcept.getName(), (!result ? "un" : ""));
+		logger.print(Templates.IS_SATISFIABLE1, pConcept.getName(),
+				(!result ? "un" : ""));
 		return result;
 	}
 
 	public boolean isSubHolds(Concept pConcept, Concept qConcept) {
 		assert pConcept != null && qConcept != null;
-		logger.print(Templates.ISSUBHOLDS1, pConcept.getName(), qConcept.getName());
+		logger.print(Templates.ISSUBHOLDS1, pConcept.getName(),
+				qConcept.getName());
 		prepareFeatures(pConcept, qConcept);
-		boolean result = !getReasoner().runSat(pConcept.resolveId(), -qConcept.resolveId());
+		boolean result = !getReasoner().runSat(pConcept.resolveId(),
+				-qConcept.resolveId());
 		clearFeatures();
-		logger.print(Templates.ISSUBHOLDS2, pConcept.getName(), qConcept.getName(), (!result ? " NOT" : ""));
+		logger.print(Templates.ISSUBHOLDS2, pConcept.getName(),
+				qConcept.getName(), (!result ? " NOT" : ""));
 		return result;
 	}
 
@@ -1294,7 +1339,8 @@ public final class TBox {
 			return true;
 		}
 		if (!isIndividual(a) || !isIndividual(b)) {
-			throw new ReasonerInternalException("Individuals are expected in the isSameIndividuals() query");
+			throw new ReasonerInternalException(
+					"Individuals are expected in the isSameIndividuals() query");
 		}
 		if (a.getNode() == null || b.getNode() == null) {
 			if (a.isSynonym()) {
@@ -1303,9 +1349,11 @@ public final class TBox {
 			if (b.isSynonym()) {
 				return isSameIndividuals(a, (Individual) b.getSynonym());
 			}
-			throw new ReasonerInternalException("isSameIndividuals() query with non-realised ontology");
+			throw new ReasonerInternalException(
+					"isSameIndividuals() query with non-realised ontology");
 		}
-		return a.getNode().resolvePBlocker().equals(b.getNode().resolvePBlocker());
+		return a.getNode().resolvePBlocker()
+				.equals(b.getNode().resolvePBlocker());
 	}
 
 	public boolean isDisjointRoles(final Role R, final Role S) {
@@ -1327,9 +1375,12 @@ public final class TBox {
 		dumpQuery = Options.getBool("dumpQuery");
 		alwaysPreferEquals = Options.getBool("alwaysPreferEquals");
 		usePrecompletion = Options.getBool("usePrecompletion");
-		logger.println(Templates.READ_CONFIG, useCompletelyDefined, useRelevantOnly, dumpQuery, alwaysPreferEquals, usePrecompletion);
+		logger.println(Templates.READ_CONFIG, useCompletelyDefined,
+				useRelevantOnly, dumpQuery, alwaysPreferEquals,
+				usePrecompletion);
 		if (axioms.initAbsorptionFlags(Options.getText("absorptionFlags"))) {
-			throw new ReasonerInternalException("Incorrect absorption flags given");
+			throw new ReasonerInternalException(
+					"Incorrect absorption flags given");
 		}
 		verboseOutput = true;
 	}
@@ -1396,7 +1447,9 @@ public final class TBox {
 			o.print("KB is inconsistent. Query is NOT processed\nConsistency");
 		}
 		long sum = preprocTime + consistTime;
-		o.print(String.format(" check done in %s seconds\nof which:\nPreproc. takes %s seconds\nConsist. takes %s seconds", time, preprocTime, consistTime));
+		o.print(String
+				.format(" check done in %s seconds\nof which:\nPreproc. takes %s seconds\nConsist. takes %s seconds",
+						time, preprocTime, consistTime));
 		if (nomReasoner != null) {
 			o.print("\nReasoning NOM:");
 			sum += nomReasoner.printReasoningTime(o);
@@ -1448,7 +1501,8 @@ public final class TBox {
 				o.print(getDataEntryByBP(p).getFacet().toString());
 				return;
 			case dtIrr:
-				o.print(String.format(" (%s %s)", type.getName(), v.getRole().getName()));
+				o.print(String.format(" (%s %s)", type.getName(), v.getRole()
+						.getName()));
 				return;
 			case dtCollection:
 			case dtAnd:
@@ -1473,14 +1527,17 @@ public final class TBox {
 				o.print(")");
 				return;
 			case dtProj:
-				o.print(String.format(" (%s %s)", type.getName(), v.getRole().getName()));
+				o.print(String.format(" (%s %s)", type.getName(), v.getRole()
+						.getName()));
 				printDagEntry(o, v.getConceptIndex());
 				o.print(String.format(" => %s)", v.getProjRole().getName()));
 				return;
 			case dtNN:
 				throw new UnreachableSituationException();
 			default:
-				throw new ReasonerInternalException("Error printing vertex of type " + type.getName() + "(" + type + ")");
+				throw new ReasonerInternalException(
+						"Error printing vertex of type " + type.getName() + "("
+								+ type + ")");
 		}
 	}
 
@@ -1490,7 +1547,8 @@ public final class TBox {
 			if (p.isSingleton()) {
 				o.print((p.isNominal() ? 'o' : '!'));
 			}
-			o.print(String.format(".%s [%s] %s", p.getName(), p.getTsDepth(), (p.isNonPrimitive() ? "=" : "[=")));
+			o.print(String.format(".%s [%s] %s", p.getName(), p.getTsDepth(),
+					(p.isNonPrimitive() ? "=" : "[=")));
 			if (isValid(p.getpBody())) {
 				printDagEntry(o, p.getpBody());
 			}
@@ -1635,7 +1693,9 @@ public final class TBox {
 				dump.finishOp(DIOp.diLE);
 				return;
 			default:
-				throw new ReasonerInternalException("Error dumping vertex of type " + type.getName() + "(" + type + ")");
+				throw new ReasonerInternalException(
+						"Error dumping vertex of type " + type.getName() + "("
+								+ type + ")");
 		}
 	}
 
@@ -1684,7 +1744,8 @@ public final class TBox {
 			return DLTreeFactory.createBottom();
 		}
 		if (C.equals(pTop)) {
-		} else if (!(C.isSingleton() && D.isName()) && equalTrees(C.getDescription(), D)) {
+		} else if (!(C.isSingleton() && D.isName())
+				&& equalTrees(C.getDescription(), D)) {
 			makeNonPrimitive(C, D);
 		} else {
 			return CN;
@@ -1727,7 +1788,8 @@ public final class TBox {
 			Role.resolveRole(sup.getLeft()).setRange(sup.getRight().copy());
 			return true;
 		}
-		if (sub.token() == NOT && sub.getChild().token() == FORALL && sub.getChild().getRight().isBOTTOM()) {
+		if (sub.token() == NOT && sub.getChild().token() == FORALL
+				&& sub.getChild().getRight().isBOTTOM()) {
 			Role.resolveRole(sub.getChild().getLeft()).setDomain(sup);
 			return true;
 		}
@@ -1825,7 +1887,8 @@ public final class TBox {
 				acc.add((Individual) l.get(i).elem().getNE());
 				l.set(i, null);
 			} else {
-				throw new ReasonerInternalException("Only individuals allowed in processDifferent()");
+				throw new ReasonerInternalException(
+						"Only individuals allowed in processDifferent()");
 			}
 		}
 		if (acc.size() > 1) {
@@ -1838,11 +1901,13 @@ public final class TBox {
 			return;
 		}
 		if (!isIndividual(l.get(0))) {
-			throw new ReasonerInternalException("Only individuals allowed in processSame()");
+			throw new ReasonerInternalException(
+					"Only individuals allowed in processSame()");
 		}
 		for (int i = 0; i < l.size() - 1; i++) {
 			if (!isIndividual(l.get(i + 1))) {
-				throw new ReasonerInternalException("Only individuals allowed in processSame()");
+				throw new ReasonerInternalException(
+						"Only individuals allowed in processSame()");
 			}
 			//TODO check if this is checking all combinations
 			addEqualityAxiom(l.get(i), l.get(i + 1).copy());
@@ -1855,7 +1920,8 @@ public final class TBox {
 		}
 		for (DLTree p : l) {
 			if (DLTreeFactory.isUniversalRole(p)) {
-				throw new ReasonerInternalException("Universal role in the disjoint roles axiom");
+				throw new ReasonerInternalException(
+						"Universal role in the disjoint roles axiom");
 			}
 		}
 		RoleMaster RM = getRM(Role.resolveRole(l.get(0)));
@@ -1873,7 +1939,8 @@ public final class TBox {
 		if (l.size() > 0) {
 			RoleMaster RM = getRM(Role.resolveRole(l.get(0)));
 			for (int i = 0; i < l.size() - 1; i++) {
-				RM.addRoleSynonym(Role.resolveRole(l.get(i)), Role.resolveRole(l.get(i + 1)));
+				RM.addRoleSynonym(Role.resolveRole(l.get(i)),
+						Role.resolveRole(l.get(i + 1)));
 			}
 			l.clear();
 		}
@@ -1925,7 +1992,8 @@ public final class TBox {
 		gatherRelevanceInfo();
 		// here it is safe to print KB features (all are known; the last one was in Relevance)
 		printFeatures();
-		dlHeap.setOrderDefaults(isLikeGALEN ? "Fdn" : isLikeWINE ? "Sdp" : "Sap", isLikeGALEN ? "Ban" : isLikeWINE ? "Fdn" : "Dap");
+		dlHeap.setOrderDefaults(isLikeGALEN ? "Fdn" : isLikeWINE ? "Sdp"
+				: "Sap", isLikeGALEN ? "Ban" : isLikeWINE ? "Fdn" : "Dap");
 		dlHeap.gatherStatistic();
 		calculateStatistic();
 		removeExtraDescriptions();
@@ -2129,7 +2197,8 @@ public final class TBox {
 			// Related individuals does not appears in DLHeap,
 			// so their sorts shall be determined explicitely
 			for (Related p : relatedIndividuals) {
-				dlHeap.updateSorts(p.getA().getpName(), p.getRole(), p.getB().getpName());
+				dlHeap.updateSorts(p.getA().getpName(), p.getRole(), p.getB()
+						.getpName());
 			}
 			// simple rules needs the same treatement
 			for (SimpleRule q : simpleRules) {
@@ -2191,8 +2260,9 @@ public final class TBox {
 			}
 		}
 		if (IfDefs.USE_LOGGING) {
-			logger.print(String.format("There are %s primitive concepts used\n of which %s completely defined\n      and %s has no told subsumers\nThere are %s non-primitive concepts used\n of which %s synonyms\nThere are %s individuals or nominals used\n", nPC, npFull, nNoTold,
-					nNC, nsFull, nSing));
+			logger.print(String
+					.format("There are %s primitive concepts used\n of which %s completely defined\n      and %s has no told subsumers\nThere are %s non-primitive concepts used\n of which %s synonyms\nThere are %s individuals or nominals used\n",
+							nPC, npFull, nNoTold, nNC, nsFull, nSing));
 		}
 	}
 
@@ -2246,7 +2316,8 @@ public final class TBox {
 
 	/** init [singleton] cache for given concept and polarity */
 	private void initSingletonCache(Concept p, boolean pos) {
-		dlHeap.setCache(createBiPointer(p.getpName(), pos), new ModelCacheSingleton(createBiPointer(p.index(), pos)));
+		dlHeap.setCache(createBiPointer(p.getpName(), pos),
+				new ModelCacheSingleton(createBiPointer(p.index(), pos)));
 	}
 
 	public ModelCacheInterface initCache(final Concept pConcept, boolean sub) {
@@ -2265,7 +2336,8 @@ public final class TBox {
 	}
 
 	/** test if 2 concept non-subsumption can be determined by cache merging */
-	public ModelCacheState testCachedNonSubsumption(final Concept p, final Concept q) {
+	public ModelCacheState testCachedNonSubsumption(final Concept p,
+			final Concept q) {
 		final ModelCacheInterface pCache = initCache(p, /*sub=*/false);
 		final ModelCacheInterface nCache = initCache(q, /*sub=*/true);
 		return pCache.canMerge(nCache);
@@ -2287,15 +2359,12 @@ public final class TBox {
 	private long nRelevantBCalls;
 
 	/** set relevance for a DLVertex */
-	public final void setRelevant(int p) {
+	private final void setRelevant(int p) {
 		assert isValid(p);
 		if (p == bpTOP || p == bpBOTTOM) {
 			return;
 		}
-		final DLVertex v = dlHeap.get(p);
-		boolean pos = p > 0;
-		++nRelevantBCalls;
-		collectLogicFeature(v, pos);
+		final DLVertex v = realSetRelevant(p);
 		DagTag type = v.getType();
 		switch (type) {
 			case dtDataType:
@@ -2307,7 +2376,14 @@ public final class TBox {
 			case dtPSingleton:
 			case dtNConcept:
 			case dtNSingleton:
-				setRelevant((Concept) v.getConcept());
+				Concept concept = (Concept) v.getConcept();
+				if (!concept.isRelevant(relevance)) {
+					++nRelevantCCalls;
+					concept.setRelevant(relevance);
+					collectLogicFeature(concept);
+					setRelevant(concept.getpBody());
+				}
+				//setRelevant((Concept) v.getConcept());
 				break;
 			case dtForall:
 			case dtLE:
@@ -2327,36 +2403,50 @@ public final class TBox {
 				}
 				break;
 			default:
-				throw new ReasonerInternalException("Error setting relevant vertex of type " + type.getName() + "(" + type + ")");
+				throw new ReasonerInternalException(
+						"Error setting relevant vertex of type " + type);
 		}
+	}
+
+	private DLVertex realSetRelevant(int p) {
+		final DLVertex v = dlHeap.get(p);
+		boolean pos = p > 0;
+		++nRelevantBCalls;
+		collectLogicFeature(v, pos);
+		return v;
 	}
 
 	/** set given concept relevant wrt current TBox if not checked yet */
-	public final void setRelevant(Concept p) {
-		if (!p.isRelevant(relevance)) {
-			++nRelevantCCalls;
-			p.setRelevant(relevance);
-			collectLogicFeature(p);
-			setRelevant(p.getpBody());
-		}
-	}
-
+	//	private final void setRelevant(Concept p) {
+	//		if (!p.isRelevant(relevance)) {
+	//			++nRelevantCCalls;
+	//			p.setRelevant(relevance);
+	//			collectLogicFeature(p);
+	//			setRelevant(p.getpBody());
+	//		}
+	//	}
 	/** set given role relevant wrt current TBox if not checked yet */
-	public final void setRelevant(Role p) {
-		if (p.getId() != 0 && !p.isRelevant(relevance)) {
-			p.setRelevant(relevance);
-			collectLogicFeature(p);
-			setRelevant(p.getBPDomain());
-			setRelevant(p.getBPRange());
-			List<Role> list = p.getAncestor();
-			int size = list.size();
-			for (int i = 0; i < size; i++) {
-				setRelevant(list.get(i));
+	private final void setRelevant(Role _p) {
+		List<Role> rolesToExplore = new LinkedList<Role>();
+		rolesToExplore.add(_p);
+		while (rolesToExplore.size() > 0) {
+			Role p = rolesToExplore.remove(0);
+			if (p.getId() != 0 && !p.isRelevant(relevance)) {
+				p.setRelevant(relevance);
+				collectLogicFeature(p);
+				setRelevant(p.getBPDomain());
+				setRelevant(p.getBPRange());
+				rolesToExplore.addAll(p.getAncestor());
+				//				List<Role> list = p.getAncestor();
+				//				int size = list.size();
+				//				for (int i = 0; i < size; i++) {
+				//					setRelevant(list.get(i));
+				//				}
 			}
 		}
 	}
 
-	public void gatherRelevanceInfo() {
+	private void gatherRelevanceInfo() {
 		nRelevantCCalls = 0;
 		nRelevantBCalls = 0;
 		int bSize = 0;
@@ -2389,7 +2479,10 @@ public final class TBox {
 
 	public void printFeatures() {
 		KBFeatures.writeState();
-		logger.print("KB contains " + (GCIs.isGCI() ? "" : "NO ") + "GCIs\nKB contains " + (GCIs.isReflexive() ? "" : "NO ") + "reflexive roles\nKB contains " + (GCIs.isRnD() ? "" : "NO ") + "range and domain restrictions\n");
+		logger.print("KB contains " + (GCIs.isGCI() ? "" : "NO ")
+				+ "GCIs\nKB contains " + (GCIs.isReflexive() ? "" : "NO ")
+				+ "reflexive roles\nKB contains " + (GCIs.isRnD() ? "" : "NO ")
+				+ "range and domain restrictions\n");
 	}
 
 	public List<List<Individual>> getDifferent() {
@@ -2417,7 +2510,8 @@ public final class TBox {
 		Concept X = getAuxConcept(null);
 		DLTree C = DLTreeFactory.createSNFNot(RC.getRight().copy());
 		// create ax axiom C [= AR^-.X
-		addSubsumeAxiom(C, DLTreeFactory.createSNFForall(DLTreeFactory.createInverse(RC.getLeft().copy()), getTree(X)));
+		addSubsumeAxiom(C, DLTreeFactory.createSNFForall(
+				DLTreeFactory.createInverse(RC.getLeft().copy()), getTree(X)));
 		// save cache for R,C
 		forall_R_C_Cache.put(RC, X);
 		return X;
@@ -2439,7 +2533,8 @@ enum KBStatus {
 
 enum DIOp {
 	// concept expressions
-	diNot("not"), diAnd("and"), diOr("or"), diExists("some"), diForall("all"), diGE("atleast"), diLE("atmost"),
+	diNot("not"), diAnd("and"), diOr("or"), diExists("some"), diForall("all"), diGE(
+			"atleast"), diLE("atmost"),
 	// role expressions
 	diInv,
 	// individual expressions
@@ -2453,7 +2548,9 @@ enum DIOp {
 	// concept axioms
 	diDefineC("defprimconcept"), diImpliesC("implies_c"), diEqualsC("equal_c"), diDisjointC,
 	// role axioms
-	diDefineR("defprimrole"), diTransitiveR("transitive"), diFunctionalR("functional"), diImpliesR("implies_r"), diEqualsR("equal_r"), diDomainR("domain"), diRangeR("range"),
+	diDefineR("defprimrole"), diTransitiveR("transitive"), diFunctionalR(
+			"functional"), diImpliesR("implies_r"), diEqualsR("equal_r"), diDomainR(
+			"domain"), diRangeR("range"),
 	// individual axioms
 	diInstanceOf;
 	private String s;
