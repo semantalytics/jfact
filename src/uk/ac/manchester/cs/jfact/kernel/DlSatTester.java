@@ -751,7 +751,7 @@ public class DlSatTester {
 	}
 
 	private void setClashSet(final List<DepSet> d) {
-		DepSet dep = new DepSet();
+		DepSet dep = DepSetFactory.create();
 		for (int i = 0; i < d.size(); i++) {
 			dep.add(d.get(i));
 		}
@@ -1170,7 +1170,7 @@ public class DlSatTester {
 			boolean ret = commonTacticBodyAnd(v);
 			curNode = oldNode;
 			curConceptConcept = oldConceptConcept;
-			curConceptDepSet = new DepSet(oldConceptDepSetDelegate);
+			curConceptDepSet = DepSetFactory.create(oldConceptDepSetDelegate);
 			return ret;
 		}
 		switch (tryAddConcept(n.label().getLabel(tag), bp, dep)) {
@@ -1198,6 +1198,7 @@ public class DlSatTester {
 		}
 		TODO.addEntry(n, tag, p);
 		if (n.isDataNode()) {
+
 			return checkDataNode ? checkDataClash(n) : false;
 		}
 		if (IfDefs.USE_LOGGING) {
@@ -1314,10 +1315,11 @@ public class DlSatTester {
 		return status.usageByState();
 	}
 
-	private boolean hasDataClash(final DlCompletionTree Node) {
-		assert Node != null && Node.isDataNode();
+	private boolean hasDataClash(final DlCompletionTree node) {
+		assert node != null && node.isDataNode();
 		datatypeReasoner.clear();
-		for (ConceptWDep r : Node.beginl_sc()) {
+		for (ConceptWDep r : node.beginl_sc()) {
+			//tBox.writeReasoningResult(logger, 0);
 			if (datatypeReasoner.addDataEntry(r.getConcept(), r.getDep())) {
 				return true;
 			}
@@ -1377,7 +1379,7 @@ public class DlSatTester {
 				assert curTDE != null;
 				curNode = curTDE.getNode();
 				curConceptConcept = curTDE.getOffsetConcept();
-				curConceptDepSet = new DepSet(curTDE.getOffsetDepSet());
+				curConceptDepSet = DepSetFactory.create(curTDE.getOffsetDepSet());
 			}
 			if (++loop == 5000) {
 				loop = 0;
@@ -1402,7 +1404,7 @@ public class DlSatTester {
 		curNode = bContext.node;
 		if (bContext.concept == null) {
 			curConceptConcept = Helper.bpINVALID;
-			curConceptDepSet = new DepSet();
+			curConceptDepSet = DepSetFactory.create();
 		} else {
 			curConceptConcept = bContext.concept.getConcept();
 			curConceptDepSet = DepSetFactory.create(bContext.concept.getDep());
@@ -2020,6 +2022,8 @@ public class DlSatTester {
 			node.setNominalLevel(level);
 		}
 		if (R.isDataRole()) {
+//			System.out.println("DlSatTester.createOneNeighbour() "+R);
+//			System.out.println("DlSatTester.createOneNeighbour() "+node);
 			node.setDataNode();
 		}
 		if (IfDefs.USE_LOGGING) {

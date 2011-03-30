@@ -71,7 +71,8 @@ public final class ArrayIntMap {
 		// i is now the insertion point
 		if (i >= values[0].length || size >= values[0].length) {
 			// no space left, increase
-			int[][] replacementvalues = new int[2][values[0].length + defaultSize];
+			int[][] replacementvalues = new int[2][values[0].length
+					+ defaultSize];
 			for (int j = 0; j < values[0].length; j++) {
 				replacementvalues[0][j] = values[0][j];
 				replacementvalues[1][j] = values[1][j];
@@ -117,16 +118,26 @@ public final class ArrayIntMap {
 	}
 
 	public boolean containsAll(ArrayIntMap c) {
-		if (c.isEmpty()) {
+		//System.out.println("ArrayIntMap.containsAll() " + this + "\t" + c);
+		if (c.size == 0) {
 			return true;
 		}
-		if (isEmpty()) {
+		if (size == 0) {
 			return false;
 		}
-		if (c.size() > size) {
+		if (c.size > size) {
 			return false;
 		}
-		if (this.values[0][0] > c.values[0][0] || this.values[0][size - 1] < c.values[0][c.size() - 1]) {
+		if (size == c.size) {
+			for (int i = 0; i < size; i++) {
+				if (values[0][i] != c.values[0][i]) {
+					return false;
+				}
+			}
+			return true;
+		}
+		if (this.values[0][0] > c.values[0][0]
+				|| this.values[0][size - 1] < c.values[0][c.size() - 1]) {
 			// c boundaries are outside this set
 			return false;
 		}
@@ -264,7 +275,8 @@ public final class ArrayIntMap {
 	@Override
 	public String toString() {
 		if (values != null) {
-			return Arrays.toString(Arrays.copyOf(values[0], size)) + "\n" + Arrays.toString(Arrays.copyOf(values[1], size));
+			return Arrays.toString(Arrays.copyOf(values[0], size)) + "\n"
+					+ Arrays.toString(Arrays.copyOf(values[1], size));
 		}
 		return "[]";
 	}

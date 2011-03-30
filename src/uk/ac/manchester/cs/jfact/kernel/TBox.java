@@ -31,6 +31,7 @@ import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
+import uk.ac.manchester.cs.jfact.helpers.FastSet;
 import uk.ac.manchester.cs.jfact.helpers.FastSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.IfDefs;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
@@ -427,8 +428,10 @@ public final class TBox {
 			return;
 		}
 		o.print("Axioms:\nT [=");
+		depth=0;
 		printDagEntry(o, internalisedGeneralAxiom);
 	}
+	int depth;
 
 	/** check if the role R is irreflexive */
 	public boolean isIrreflexive(Role R) {
@@ -447,21 +450,21 @@ public final class TBox {
 	}
 
 	/** gather information about logical features of relevant concept */
-	public void collectLogicFeature(final Concept p) {
+	private void collectLogicFeature(final Concept p) {
 		if (curFeature != null) {
 			curFeature.fillConceptData(p);
 		}
 	}
 
 	/** gather information about logical features of relevant role */
-	public void collectLogicFeature(final Role p) {
+	private void collectLogicFeature(final Role p) {
 		if (curFeature != null) {
 			curFeature.fillRoleData(p, p.inverse().isRelevant(relevance));
 		}
 	}
 
 	/** gather information about logical features of relevant DAG entry */
-	public void collectLogicFeature(final DLVertex v, boolean pos) {
+	private void collectLogicFeature(final DLVertex v, boolean pos) {
 		if (curFeature != null) {
 			curFeature.fillDAGData(v, pos);
 		}
@@ -874,9 +877,9 @@ public final class TBox {
 				: p.isDataValue() ? dtDataValue : dtDataExpr;
 		int hostBP = bpTOP;
 		//TODO this is broken: the next two lines are commented but should not be
-		//		if (p.getType() != null) {
-		//			hostBP = addDataExprToHeap(p.getType());
-		//		}
+				if (p.getType() != null) {
+					hostBP = addDataExprToHeap(p.getType());
+				}
 		// sets it off 0 and 1 - although it's not necessarily correct
 		hostBP = p.getDatatype().ordinal() + 2;
 		DLVertex ver = new DLVertex(dt, 0, null, hostBP, null);
@@ -1467,6 +1470,11 @@ public final class TBox {
 	}
 
 	public void printDagEntry(LeveLogger.LogAdapter o, int p) {
+		depth++;
+		if(depth%200==0) {
+			System.out.println("TBox.printDagEntry()");
+			return;
+		}
 		assert isValid(p);
 		if (p == bpTOP) {
 			o.print(" *TOP*");
@@ -1550,6 +1558,7 @@ public final class TBox {
 			o.print(String.format(".%s [%s] %s", p.getName(), p.getTsDepth(),
 					(p.isNonPrimitive() ? "=" : "[=")));
 			if (isValid(p.getpBody())) {
+				depth=0;
 				printDagEntry(o, p.getpBody());
 			}
 			if (p.getDescription() != null) {
@@ -2359,52 +2368,104 @@ public final class TBox {
 	private long nRelevantBCalls;
 
 	/** set relevance for a DLVertex */
-	private final void setRelevant(int p) {
-		assert isValid(p);
-		if (p == bpTOP || p == bpBOTTOM) {
-			return;
-		}
-		final DLVertex v = realSetRelevant(p);
-		DagTag type = v.getType();
-		switch (type) {
-			case dtDataType:
-			case dtDataValue:
-			case dtDataExpr:
-			case dtNN:
-				break;
-			case dtPConcept:
-			case dtPSingleton:
-			case dtNConcept:
-			case dtNSingleton:
-				Concept concept = (Concept) v.getConcept();
-				if (!concept.isRelevant(relevance)) {
-					++nRelevantCCalls;
-					concept.setRelevant(relevance);
-					collectLogicFeature(concept);
-					setRelevant(concept.getpBody());
+	private final void setRelevant(int _p) {
+		FastSet done=FastSetFactory.create();
+		LinkedList<Integer> queue = new LinkedList<Integer>();
+		queue.add(_p);
+		while (queue.size() > 0) {
+			int p = queue.remove(0);
+			if(done.contains(p)) {
+				// skip cycles
+//				System.out.println("TBox.setRelevant() cycle: "+p);
+				continue;
+			}
+			done.add(p);
+			assert isValid(p);
+			if (p == bpTOP || p == bpBOTTOM) {
+				continue;
+			}
+			final DLVertex v = realSetRelevant(p);
+			DagTag type = v.getType();
+			switch (type) {
+				case dtDataType:
+				case dtDataValue:
+				case dtDataExpr:
+				case dtNN:
+					break;
+				case dtPConcept:
+				case dtPSingleton:
+				case dtNConcept:
+				case dtNSingleton:
+					Concept concept = (Concept) v.getConcept();
+					if (!concept.isRelevant(relevance)) {
+						++nRelevantCCalls;
+						concept.setRelevant(relevance);
+						collectLogicFeature(concept);
+						//setRelevant(concept.getpBody());
+						queue.add(concept.getpBody());
+					}
+					//setRelevant((Concept) v.getConcept());
+					break;
+				case dtForall:
+				case dtLE:
+					//setRelevant(v.getRole());
+				{
+					Role _role = v.getRole();
+					List<Role> rolesToExplore = new LinkedList<Role>();
+					rolesToExplore.add(_role);
+					while (rolesToExplore.size() > 0) {
+						Role roleToExplore = rolesToExplore.remove(0);
+						if (roleToExplore.getId() != 0
+								&& !roleToExplore.isRelevant(relevance)) {
+							roleToExplore.setRelevant(relevance);
+							collectLogicFeature(roleToExplore);
+							//setRelevant(roleToExplore.getBPDomain());
+							//setRelevant(roleToExplore.getBPRange());
+							queue.add(roleToExplore.getBPDomain());
+							queue.add(roleToExplore.getBPRange());
+							rolesToExplore.addAll(roleToExplore.getAncestor());
+						}
+					}
 				}
-				//setRelevant((Concept) v.getConcept());
-				break;
-			case dtForall:
-			case dtLE:
-				setRelevant(v.getRole());
-				setRelevant(v.getConceptIndex());
-				break;
-			case dtProj:
-				setRelevant(v.getConceptIndex());
-				break;
-			case dtIrr:
-				setRelevant(v.getRole());
-				break;
-			case dtAnd:
-			case dtCollection:
-				for (int q : v.begin()) {
-					setRelevant(q);
+					//setRelevant(v.getConceptIndex());
+					queue.add(v.getConceptIndex());
+					break;
+				case dtProj:
+					//setRelevant(v.getConceptIndex());
+					queue.add(v.getConceptIndex());
+					break;
+				case dtIrr:
+					//setRelevant(v.getRole());
+				{
+					Role _role = v.getRole();
+					List<Role> rolesToExplore = new LinkedList<Role>();
+					rolesToExplore.add(_role);
+					while (rolesToExplore.size() > 0) {
+						Role roleToExplore = rolesToExplore.remove(0);
+						if (roleToExplore.getId() != 0
+								&& !roleToExplore.isRelevant(relevance)) {
+							roleToExplore.setRelevant(relevance);
+							collectLogicFeature(roleToExplore);
+							//setRelevant(roleToExplore.getBPDomain());
+							//setRelevant(roleToExplore.getBPRange());
+							queue.add(roleToExplore.getBPDomain());
+							queue.add(roleToExplore.getBPRange());
+							rolesToExplore.addAll(roleToExplore.getAncestor());
+						}
+					}
 				}
-				break;
-			default:
-				throw new ReasonerInternalException(
-						"Error setting relevant vertex of type " + type);
+					break;
+				case dtAnd:
+				case dtCollection:
+					for (int q : v.begin()) {
+						//setRelevant(q);
+						queue.add(q);
+					}
+					break;
+				default:
+					throw new ReasonerInternalException(
+							"Error setting relevant vertex of type " + type);
+			}
 		}
 	}
 
@@ -2426,26 +2487,21 @@ public final class TBox {
 	//		}
 	//	}
 	/** set given role relevant wrt current TBox if not checked yet */
-	private final void setRelevant(Role _p) {
-		List<Role> rolesToExplore = new LinkedList<Role>();
-		rolesToExplore.add(_p);
-		while (rolesToExplore.size() > 0) {
-			Role p = rolesToExplore.remove(0);
-			if (p.getId() != 0 && !p.isRelevant(relevance)) {
-				p.setRelevant(relevance);
-				collectLogicFeature(p);
-				setRelevant(p.getBPDomain());
-				setRelevant(p.getBPRange());
-				rolesToExplore.addAll(p.getAncestor());
-				//				List<Role> list = p.getAncestor();
-				//				int size = list.size();
-				//				for (int i = 0; i < size; i++) {
-				//					setRelevant(list.get(i));
-				//				}
-			}
-		}
-	}
-
+	//	private final void setRelevant(Role _p) {
+	//		List<Role> rolesToExplore = new LinkedList<Role>();
+	//		rolesToExplore.add(_p);
+	//		while (rolesToExplore.size() > 0) {
+	//			Role roleToExplore = rolesToExplore.remove(0);
+	//			if (roleToExplore.getId() != 0
+	//					&& !roleToExplore.isRelevant(relevance)) {
+	//				roleToExplore.setRelevant(relevance);
+	//				collectLogicFeature(roleToExplore);
+	//				setRelevant(roleToExplore.getBPDomain());
+	//				setRelevant(roleToExplore.getBPRange());
+	//				rolesToExplore.addAll(roleToExplore.getAncestor());
+	//			}
+	//		}
+	//	}
 	private void gatherRelevanceInfo() {
 		nRelevantCCalls = 0;
 		nRelevantBCalls = 0;

@@ -112,7 +112,7 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 	// save state information
 	protected int curLevel; // current level
 	/** is given node a data node */
-	private boolean flagDataNode = true;
+	private boolean flagDataNode = false;
 	/** flag if node is Cached */
 	protected boolean cached = true;
 	/** flag whether node is permanently/temporarily blocked */

@@ -10,6 +10,7 @@ import java.util.BitSet;
 import java.util.List;
 
 import uk.ac.manchester.cs.jfact.dep.DepSet;
+import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.ArrayIntMap;
 import uk.ac.manchester.cs.jfact.helpers.FastSetSimple;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
@@ -47,8 +48,28 @@ public final class CWDArray {
 			cache.set(asPositive(p.getConcept()));
 		}
 		indexes.put(p.getConcept(), base.size() - 1);
-		createCache = base.size() > cacheLimit;
+		int min = indexes.keySet(0);
+		int max = indexes.keySet(indexes.size() - 1);
+		int span = max - min;
+		// create a cache only if the size is higher than a preset minimum and 
+		//there is at least an element in 20; caches with very dispersed 
+		//elements eat up too much memory
+		createCache = base.size() > cacheLimit && ((double)base.size())/(span+1) >0.025;
+//		System.out.println("CWDArray.private_add() "+min+"\t"+max+"\tspan:\t"+span+"\t"+base.size()+"\t"+createCache);
+//		if (!createCache) {
+//			cache = null;
+//		}
+//		calls++;
+//		if(calls%100000==0) {
+//			System.out.println("CWDArray.private_add()");
+//			try {
+//			System.in.read();
+//			}catch (Exception e) {
+//				// TODO: handle exception
+//			}
+//		}
 	}
+	static int calls=0;
 
 	/** check whether label contains BP (ignoring dep-set) */
 	public boolean contains(int bp) {
@@ -70,7 +91,7 @@ public final class CWDArray {
 		}
 	}
 
-	static final int asPositive(int p) {
+	final int asPositive(int p) {
 		return p >= 0 ? 2 * p : 1 - 2 * p;
 	}
 
@@ -101,6 +122,12 @@ public final class CWDArray {
 	public boolean lesserequal(final CWDArray label) {
 		// checks the keys are in both maps
 		return label.indexes.containsAll(indexes);
+//		for (int i = 0; i < label.size(); i++) {
+//			if (!this.contains(label.indexes.keySet(i))) {
+//				return false;
+//			}
+//		}
+//		return true;
 	}
 
 	@Override
@@ -193,6 +220,9 @@ final class UnMerge extends Restorer {
 
 	@Override
 	public void restore() {
-		label.getBase().set(offset, new ConceptWDep(label.getBase().get(offset).getConcept(), new DepSet(dep)));
+		label.getBase().set(
+				offset,
+				new ConceptWDep(label.getBase().get(offset).getConcept(),
+						DepSetFactory.create(dep)));
 	}
 }

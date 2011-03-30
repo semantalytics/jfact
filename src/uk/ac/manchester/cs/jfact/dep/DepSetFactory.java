@@ -1,5 +1,7 @@
 package uk.ac.manchester.cs.jfact.dep;
 
+import uk.ac.manchester.cs.jfact.helpers.FastSetSimple;
+
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
@@ -25,5 +27,8 @@ public final class DepSetFactory {
 		toReturn.add(ds1);
 		toReturn.add(ds2);
 		return toReturn;
+	}
+	public final static DepSet create(FastSetSimple delegate) {
+		return new DepSet(delegate);
 	}
 }

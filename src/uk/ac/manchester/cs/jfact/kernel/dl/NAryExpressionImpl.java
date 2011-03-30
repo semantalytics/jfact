@@ -45,4 +45,9 @@ public class NAryExpressionImpl<Argument extends Expression> implements NAryExpr
 	public Argument transform(final Expression arg) {
 		return (Argument) arg;
 	}
+	@Override
+	public String toString() {
+		
+		return "NAryExpression("+Base+")";
+	}
 }

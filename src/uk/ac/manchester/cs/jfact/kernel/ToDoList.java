@@ -15,6 +15,7 @@ import java.util.List;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
 import uk.ac.manchester.cs.jfact.dep.DepSet;
+import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.FastSetSimple;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
 import uk.ac.manchester.cs.jfact.helpers.IfDefs;
@@ -50,12 +51,12 @@ public final class ToDoList {
 
 		@Override
 		public String toString() {
-			return "Node(" + node.getId() + "), offset(" + new ConceptWDep(concept, new DepSet(delegate)) + ")";
+			return "Node(" + node.getId() + "), offset(" + new ConceptWDep(concept, DepSetFactory.create(delegate)) + ")";
 		}
 
 		public void print(LogAdapter l) {
 			l.print("Node(" + node.getId() + "), offset(");
-			new ConceptWDep(concept, new DepSet(delegate)).print(l);
+			new ConceptWDep(concept, DepSetFactory.create(delegate)).print(l);
 			l.print(")");
 		}
 	}
