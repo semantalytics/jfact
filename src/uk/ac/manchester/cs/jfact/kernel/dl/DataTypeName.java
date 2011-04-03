@@ -6,6 +6,7 @@ This library is free software; you can redistribute it and/or modify it under th
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import uk.ac.manchester.cs.jfact.kernel.NamedEntry;
+import uk.ac.manchester.cs.jfact.kernel.datatype.DataEntry;
 import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
 import uk.ac.manchester.cs.jfact.kernel.datatype.Datatypes;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataType;
@@ -30,6 +31,8 @@ public final class DataTypeName extends NamedEntry implements DataTypeExpression
 		return visitor.visit(this);
 	}
 
+
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null) {
@@ -52,7 +55,8 @@ public final class DataTypeName extends NamedEntry implements DataTypeExpression
 		return this;
 	}
 
-	@Override
+
+
 	public String getName() {
 		return datatype.name();
 	}
@@ -61,7 +65,7 @@ public final class DataTypeName extends NamedEntry implements DataTypeExpression
 		return new DataValue(name, datatype);
 	}
 
-	@Override
+
 	public int hashCode() {
 		return datatype.hashCode();
 	}

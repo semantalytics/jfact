@@ -234,16 +234,7 @@ public enum Datatypes {
 
 	public abstract Literal<?> build(Object s);
 
-	public DataType getTDataType() {
-		return tdatatype;
-	}
 
-	public DataTypeName getDataTypeName() {
-		return datatypename;
-	}
-
-	private final DataTypeName datatypename = new DataTypeName(this);
-	private final DataType tdatatype = new DataType(datatypename);
 
 	public boolean compatible(Datatypes d) {
 		return d == this;// || d == LITERAL;

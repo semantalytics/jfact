@@ -54,6 +54,17 @@ public final class DLDag {
 	/** flag whether cache should be used */
 	private boolean useDLVCache;
 
+	/**@return index of a vertex containing a concept*/
+	public int index(NamedEntry c) {
+		for(int i=0;i<heap.size();i++) {
+			NamedEntry concept = heap.get(i).getConcept();
+			if(concept!=null &&concept.equals(c)) {
+				return i;
+			}
+		}
+		return bpINVALID;
+	}
+	
 	/** check if given string is correct sort ordering representation */
 	private boolean isCorrectOption(final String str) {
 		if (str == null) {

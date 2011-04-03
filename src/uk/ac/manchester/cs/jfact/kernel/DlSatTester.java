@@ -620,12 +620,12 @@ public class DlSatTester {
 		}
 		if (findConceptClash(label, C, null)) {
 			if (d != null) {
-				d.add(getClashSet());
+				d.add(clashSet);
 			}
 			return true;
 		} else if (findConceptClash(label, -C, null)) {
 			if (d != null) {
-				d.add(getClashSet());
+				d.add(clashSet);
 			}
 			return false;
 		} else {
@@ -739,11 +739,7 @@ public class DlSatTester {
 		stack.pop(); // remove unnecessary context from the stack
 	}
 
-	// access to global clashset, which contains result of clash during label addition
-	/** get value of global dep-set */
-	private final DepSet getClashSet() {
-		return clashSet;
-	}
+
 
 	/** set value of global dep-set to D */
 	private void setClashSet(final DepSet d) {
@@ -775,7 +771,7 @@ public class DlSatTester {
 
 	/** update cumulative branch-dep with current clash-set */
 	private void updateBranchDep() {
-		getBranchDep().add(getClashSet());
+		getBranchDep().add(clashSet);
 	}
 
 	/** prepare cumulative dep-set to usage */
@@ -1011,11 +1007,11 @@ public class DlSatTester {
 	// restore implementation
 	private boolean backJumpedRestore() {
 		// if empty clash dep-set -- concept is unsatisfiable
-		if (getClashSet().isEmpty()) {
+		if (clashSet==null ||clashSet.isEmpty()) {
 			return true;
 		}
 		// some non-deterministic choices were done
-		restore(getClashSet().level());
+		restore(clashSet.level());
 		return false;
 	}
 
@@ -1198,6 +1194,7 @@ public class DlSatTester {
 		}
 		TODO.addEntry(n, tag, p);
 		if (n.isDataNode()) {
+
 
 			return checkDataNode ? checkDataClash(n) : false;
 		}
@@ -1473,7 +1470,7 @@ public class DlSatTester {
 	private void logFinishEntry(boolean res) {
 		logger.print("]");
 		if (res) {
-			logger.print(Templates.LOG_FINISH_ENTRY, getClashSet());
+			logger.print(Templates.LOG_FINISH_ENTRY, clashSet);
 		}
 	}
 
@@ -1583,7 +1580,7 @@ public class DlSatTester {
 		for (Concept p : rule.getBody()) {
 			if (p.getpName() != curConceptConcept) {
 				if (findConceptClash(lab, p.getpName(), loc)) {
-					loc.add(getClashSet());
+					loc.add(clashSet);
 				} else {
 					return false;
 				}
@@ -1601,7 +1598,7 @@ public class DlSatTester {
 			if (rule.applicable(this)) // apply the rule's head
 			{
 				stats.getnSRuleFire().inc();
-				if (addToDoEntry(curNode, rule.getBpHead(), getClashSet(), null)) {
+				if (addToDoEntry(curNode, rule.getBpHead(), clashSet, null)) {
 					return true;
 				}
 			}
@@ -1680,7 +1677,7 @@ public class DlSatTester {
 			int inverse = -q;
 			switch (tryAddConcept(lab.getLabel(dlHeap.get(inverse).getType()), inverse, null)) {
 				case acrClash: // clash found -- OK
-					dep.getReference().add(getClashSet());
+					dep.getReference().add(clashSet);
 					continue;
 				case acrExist: // already have such concept -- save it to the 1st position
 					orConceptsToTest.clear();
@@ -2216,7 +2213,7 @@ public class DlSatTester {
 							// here dep contains the clash-set
 							test = findConceptClash(from.getArcEnd().label().getLabel(tag), C, dep.getReference());
 							assert test;
-							dep.setReference(DepSetFactory.plus(dep.getReference(), getClashSet()));
+							dep.setReference(DepSetFactory.plus(dep.getReference(), clashSet));
 							// save new dep-set
 							test = findConceptClash(to.getArcEnd().label().getLabel(tag), C, dep.getReference());
 							assert test;
@@ -2290,7 +2287,7 @@ public class DlSatTester {
 									// here dep contains the clash-set
 									test = findConceptClash(from.getArcEnd().label().getLabel(tag), C, dep.getReference());
 									assert test;
-									dep.setReference(DepSetFactory.plus(dep.getReference(), getClashSet())); // save new dep-set
+									dep.setReference(DepSetFactory.plus(dep.getReference(), clashSet)); // save new dep-set
 									test = findConceptClash(to.getArcEnd().label().getLabel(tag), C, dep.getReference());
 									assert test;
 									// both clash-sets are now in common clash-set
@@ -2395,16 +2392,16 @@ public class DlSatTester {
 			int inverse = -p.getConcept();
 			if (used.contains(inverse) && findConceptClash(to.getLabel(dtPConcept), inverse, p.getDep())) {
 				clash = true;
-				clashDep.add(getClashSet());
-				logger.print(Templates.CHECK_MERGE_CLASH, nodeId, p.getConcept(), DepSetFactory.plus(getClashSet(), dep));
+				clashDep.add(clashSet);
+				logger.print(Templates.CHECK_MERGE_CLASH, nodeId, p.getConcept(), DepSetFactory.plus(clashSet, dep));
 			}
 		}
 		for (ConceptWDep p : from.get_cc()) {
 			int inverse = -p.getConcept();
 			if (used.contains(inverse) && findConceptClash(to.getLabel(dtForall), inverse, p.getDep())) {
 				clash = true;
-				clashDep.add(getClashSet());
-				logger.print(Templates.CHECK_MERGE_CLASH, nodeId, p.getConcept(), DepSetFactory.plus(getClashSet(), dep));
+				clashDep.add(clashSet);
+				logger.print(Templates.CHECK_MERGE_CLASH, nodeId, p.getConcept(), DepSetFactory.plus(clashSet, dep));
 			}
 		}
 		if (clash) {

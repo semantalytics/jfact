@@ -215,6 +215,7 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 
 	// data node methods
 	public boolean isDataNode() {
+		
 		return flagDataNode;
 	}
 

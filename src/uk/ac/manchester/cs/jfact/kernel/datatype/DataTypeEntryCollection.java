@@ -9,17 +9,17 @@ import uk.ac.manchester.cs.jfact.kernel.NameCreator;
 import uk.ac.manchester.cs.jfact.kernel.NamedEntryCollection;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 
-public final class DataType extends NamedEntryCollection<DataEntry> {
+public final class DataTypeEntryCollection extends NamedEntryCollection<DataEntry> {
 	/** data type */
-	private final DataTypeName type;
+	private final Datatypes type;
 
 	@Override
 	public void registerNew(DataEntry p) {
 		p.setHostType(type);
 	}
 
-	public DataType(DataTypeName t) {
-		super(t.getName(), new NameCreator<DataEntry>() {
+	public DataTypeEntryCollection(Datatypes t) {
+		super(t.name(), new NameCreator<DataEntry>() {
 			public DataEntry makeEntry(String n) {
 				DataEntry toReturn = new DataEntry(n);
 				toReturn.initComp();

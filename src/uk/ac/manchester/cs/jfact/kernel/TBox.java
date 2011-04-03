@@ -43,6 +43,7 @@ import uk.ac.manchester.cs.jfact.helpers.Timer;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 import uk.ac.manchester.cs.jfact.kernel.datatype.DataEntry;
 import uk.ac.manchester.cs.jfact.kernel.datatype.DataTypeCenter;
+import uk.ac.manchester.cs.jfact.kernel.datatype.Datatypes;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheConst;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheInterface;
@@ -881,20 +882,37 @@ public final class TBox {
 					hostBP = addDataExprToHeap(p.getType());
 				}
 		// sets it off 0 and 1 - although it's not necessarily correct
-		hostBP = p.getDatatype().ordinal() + 2;
+		//hostBP = p.getDatatype().ordinal() + 2;
 		DLVertex ver = new DLVertex(dt, 0, null, hostBP, null);
 		ver.setConcept(p);
+	//	System.out.println("TBox.addDataExprToHeap() "+p);
 		p.setBP(dlHeap.directAdd(ver));
+		//dlHeap.print(new LeveLogger.LogAdapterStream());
 		return p.getBP();
 	}
 
-	public int addDataExprToHeap(DataTypeName p) {
-		DagTag dt = dtDataType;
+	public int addDataExprToHeap(Datatypes p) {
+
 		//XXX possibly a bug here
-		int hostBP = p.getDatatype().ordinal() + 2;
-		DLVertex ver = new DLVertex(dt, 0, null, hostBP, null);
-		ver.setConcept(p);
-		return dlHeap.directAdd(ver);
+		//int hostBP = p.getDatatype().ordinal() + 2;
+		//
+		
+		// create a concept and check if it's already in the list
+		// TODO needs to be more efficient
+		DataTypeName concept=new DataTypeName(p);
+		int index=dlHeap.index(concept);
+		if(index!=bpINVALID) {
+			return index;
+		}
+//		System.out.println("TBox.addDataExprToHeap(datatypename) "+p);
+		// else, create a new vertex and add it
+		DLVertex ver = new DLVertex(dtDataType, 0, null, bpTOP, null);
+		ver.setConcept(concept);
+		
+		
+		int directAdd = dlHeap.directAdd(ver);
+
+		return directAdd;
 	}
 
 	public void addConceptToHeap(Concept pConcept) {
@@ -935,7 +953,7 @@ public final class TBox {
 				if (cur.getNE() instanceof DataEntry) {
 					ret = addDataExprToHeap((DataEntry) cur.getNE());
 				} else {
-					ret = addDataExprToHeap((DataTypeName) cur.getNE());
+					ret = addDataExprToHeap(((DataTypeName) cur.getNE()).getDatatype());
 				}
 				break;
 			case CNAME:

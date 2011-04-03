@@ -15,9 +15,9 @@ import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 import uk.ac.manchester.cs.jfact.kernel.NamedEntry;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 
-public final class DataEntry extends NamedEntry {
+public  class DataEntry extends NamedEntry {
 	/** corresponding type (Type has null in the field) */
-	private DataTypeName type;
+	private Datatypes type;
 	/** DAG index of the entry */
 	private int pName;
 	/** ComparableDT, used only for values */
@@ -43,14 +43,14 @@ public final class DataEntry extends NamedEntry {
 	}
 
 	/** set host data type for the data value */
-	public void setHostType(DataTypeName t) {
+	public void setHostType(Datatypes t) {
 		type = t;
 		//XXX crappy implementation still here
-		if (getName().equals("expr") && type.getDatatype() != Datatypes.STRING) {
-			if (type.getDatatype() == Datatypes.DATETIME) {
+		if (getName().equals("expr") && type != Datatypes.STRING) {
+			if (type == Datatypes.DATETIME) {
 				// then a neutral date of some sort
 				try {
-					comp = type.getDatatype().build(DatatypeFactory.newInstance().newXMLGregorianCalendar());
+					comp = type.build(DatatypeFactory.newInstance().newXMLGregorianCalendar());
 				} catch (DatatypeConfigurationException e) {
 					throw new ReasonerInternalException(e);
 				}
@@ -65,13 +65,13 @@ public final class DataEntry extends NamedEntry {
 
 	public void initComp() {
 		if (type != null) {
-			comp = type.getDatatype().parse(getName());
+			comp = type.parse(getName());
 		}
 	}
 
 	public void initComp(String s) {
 		if (type != null) {
-			comp = type.getDatatype().parse(s);
+			comp = type.parse(s);
 		}
 	}
 
@@ -80,12 +80,12 @@ public final class DataEntry extends NamedEntry {
 	}
 
 	/** get host type */
-	public DataTypeName getType() {
+	public Datatypes getType() {
 		return type;
 	}
 
-	public final Datatypes getDatatype() {
-		return type.getDatatype();
+	public  Datatypes getDatatype() {
+		return type;
 	}
 
 	// facet part

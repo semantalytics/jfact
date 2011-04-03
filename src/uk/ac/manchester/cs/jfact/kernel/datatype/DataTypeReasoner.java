@@ -109,7 +109,11 @@ public final class DataTypeReasoner {
 			case dtAnd:
 				return false;
 			default:
-				throw new UnreachableSituationException(v.toString());
+				//TODO this case needs investigation; is it a mistake? whenever something is supposed to be a data node and is actually a primitive concept?
+				// or is it just a regular clash?
+				System.out.println("DataTypeReasoner.addDataEntry() warning: this case might indicate errors in the datatype reasoning");
+				return true;
+				//throw new UnreachableSituationException(v.toString());
 		}
 	}
 

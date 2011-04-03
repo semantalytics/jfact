@@ -17,13 +17,13 @@ public final class DataTypeCenter {
 	 * vector of registered data types; initially contains unrestricted NUMBER
 	 * and STRING
 	 */
-	private final Map<Datatypes, DataType> Types = new HashMap<Datatypes, DataType>();
+	private final Map<Datatypes, DataTypeEntryCollection> Types = new HashMap<Datatypes, DataTypeEntryCollection>();
 
 	public DataTypeCenter() {
 		// primitive DataTypes
 		//XXX all this is not really needed
 		for (Datatypes d : Datatypes.values()) {
-			Types.put(d, new DataType(new DataTypeName(d)));
+			Types.put(d, new DataTypeEntryCollection(d));
 		}
 	}
 
