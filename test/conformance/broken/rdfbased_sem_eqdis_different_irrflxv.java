@@ -15,7 +15,7 @@ public class rdfbased_sem_eqdis_different_irrflxv extends TestCase {
 				+ "    xmlns:ex=\"http://www.example.org#\"\n"
 				+ "    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\">\n"
 				//added
-				+ "<owl:Class rdf:about=\"http://www.example.org#x\"/>\n"
+				+ "<owl:Thing rdf:about=\"http://www.example.org#x\"/>\n"
 				//end added
 				+ "  <rdf:Description rdf:about=\"http://www.example.org#x\">\n"
 				+ "    <owl:differentFrom rdf:resource=\"http://www.example.org#x\"/>\n"

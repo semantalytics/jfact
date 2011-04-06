@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -16,14 +18,13 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 import uk.ac.manchester.cs.jfact.kernel.voc.Vocabulary;
 
 public enum Datatypes {
 	INT {
 		@Override
 		public Literal<Integer> parse(String s) {
-			return new IntRep(Integer.parseInt(s));
+			return new IntRep(Integer.valueOf(s));
 		}
 
 		@Override
@@ -33,13 +34,33 @@ public enum Datatypes {
 
 		@Override
 		public boolean compatible(Datatypes d) {
-			return super.compatible(d) || EnumSet.of(NEGINT, POSINT, NONNEGINT, NONPOSINT).contains(d);
+			return super.compatible(d)
+					|| EnumSet.of(NEGINT, POSINT, NONNEGINT, NONPOSINT)
+							.contains(d);
+		}
+	},
+	DECIMAL {
+		@Override
+		public Literal<BigDecimal> parse(String s) {
+			return new DecimalRep(new BigDecimal(s));
+		}
+
+		@Override
+		public Literal<BigDecimal> build(Object s) {
+			return new DecimalRep((BigDecimal) s);
+		}
+
+		@Override
+		public boolean compatible(Datatypes d) {
+			return super.compatible(d)
+					|| EnumSet.of(INT, NEGINT, POSINT, NONNEGINT, NONPOSINT)
+							.contains(d);
 		}
 	},
 	SHORT {
 		@Override
 		public Literal<Short> parse(String s) {
-			return new ShortRep(Short.parseShort(s));
+			return new ShortRep(Short.valueOf(s));
 		}
 
 		@Override
@@ -50,7 +71,7 @@ public enum Datatypes {
 	BYTE {
 		@Override
 		public Literal<Byte> parse(String s) {
-			return new ByteRep(Byte.parseByte(s));
+			return new ByteRep(Byte.valueOf(s));
 		}
 
 		@Override
@@ -66,7 +87,7 @@ public enum Datatypes {
 	BOOLEAN {
 		@Override
 		public Literal<Boolean> parse(String s) {
-			return new BoolRep(Boolean.parseBoolean(s));
+			return new BoolRep(Boolean.valueOf(s));
 		}
 
 		@Override
@@ -77,7 +98,7 @@ public enum Datatypes {
 	DOUBLE {
 		@Override
 		public Literal<Double> parse(String s) {
-			return new DoubleRep(Double.parseDouble(s.replace("inf", "Infinity").replace("INF", "Infinity")));
+			return new DoubleRep(parseDouble(s));
 		}
 
 		@Override
@@ -88,7 +109,8 @@ public enum Datatypes {
 	FLOAT {
 		@Override
 		public Literal<Float> parse(String s) {
-			return new FloatRep(Float.parseFloat(s.replace("inf", "Infinity").replace("INF", "Infinity")));
+			return new FloatRep(Float.valueOf(s.replace("inf", "Infinity")
+					.replace("INF", "Infinity")));
 		}
 
 		@Override
@@ -147,7 +169,7 @@ public enum Datatypes {
 	POSINT {
 		@Override
 		public Literal<Integer> parse(String s) {
-			return new PosIntRep(Integer.parseInt(s));
+			return new PosIntRep(Integer.valueOf(s));
 		}
 
 		@Override
@@ -158,7 +180,7 @@ public enum Datatypes {
 	NEGINT {
 		@Override
 		public Literal<Integer> parse(String s) {
-			return new NegIntRep(Integer.parseInt(s));
+			return new NegIntRep(Integer.valueOf(s));
 		}
 
 		@Override
@@ -169,7 +191,7 @@ public enum Datatypes {
 	NONPOSINT {
 		@Override
 		public Literal<Integer> parse(String s) {
-			return new NonPosIntRep(Integer.parseInt(s));
+			return new NonPosIntRep(Integer.valueOf(s));
 		}
 
 		@Override
@@ -185,7 +207,7 @@ public enum Datatypes {
 	NONNEGINT {
 		@Override
 		public Literal<Integer> parse(String s) {
-			return new NonNegIntRep(Integer.parseInt(s));
+			return new NonNegIntRep(Integer.valueOf(s));
 		}
 
 		@Override
@@ -211,13 +233,17 @@ public enum Datatypes {
 
 		@Override
 		public boolean compatible(Datatypes d) {
-			return super.compatible(d) || EnumSet.complementOf(EnumSet.of(STRING, LITERAL, DATETIME, DOUBLE, FLOAT)).contains(d);
+			return super.compatible(d)
+					|| EnumSet
+							.complementOf(
+									EnumSet.of(STRING, LITERAL, DATETIME,
+											DOUBLE, FLOAT)).contains(d);
 		}
 	},
 	RATIONAL {
 		@Override
 		public Literal<BigDecimal> parse(String s) {
-			return new RationalRep(new BigDecimal(s));
+			return new RationalRep(new BigDecimal(parseDouble(s)));
 		}
 
 		@Override
@@ -234,10 +260,53 @@ public enum Datatypes {
 
 	public abstract Literal<?> build(Object s);
 
-
-
 	public boolean compatible(Datatypes d) {
 		return d == this;// || d == LITERAL;
+	}
+
+	static final String pattern = "\\-?[0-9]+(\\.[0-9]+)?([eE]\\-?[0-9]+)?";
+	static final String fractionPattern = "(\\-?)([0-9]+)/([0-9]+)";
+	static final Pattern regularFloat = Pattern.compile(pattern);
+	static final Pattern fraction = Pattern.compile(fractionPattern);
+
+	public final static Float parseFloat(String s) {
+		Matcher m = regularFloat.matcher(s);
+		if (m.matches()) {
+			return Float.valueOf(s);
+		} else {
+			if (s.contains("inf") || s.contains("INF") || s.contains("Inf")) {
+				return Float.valueOf(s.replace("inf", "Infinity").replace(
+						"INF", "Infinity"));
+			}
+			Pattern p = Pattern.compile(fractionPattern);
+			m = p.matcher(s);
+			if (m.matches()) {
+				return (m.group(1).length() == 0 ? +1 : -1)
+						* Float.parseFloat(m.group(2))
+						/ Float.parseFloat(m.group(3));
+			}
+			throw new NumberFormatException("Unparsable float: " + s);
+		}
+	}
+
+	public final static Double parseDouble(String s) {
+		Matcher m = regularFloat.matcher(s);
+		if (m.matches()) {
+			return Double.valueOf(s);
+		} else {
+			if (s.contains("inf") || s.contains("INF") || s.contains("Inf")) {
+				return Double.valueOf(s.replace("inf", "Infinity").replace(
+						"INF", "Infinity"));
+			}
+			Pattern p = Pattern.compile(fractionPattern);
+			m = p.matcher(s);
+			if (m.matches()) {
+				return (m.group(1).length() == 0 ? +1 : -1)
+						* Double.parseDouble(m.group(2))
+						/ Double.parseDouble(m.group(3));
+			}
+			throw new NumberFormatException("Unparsable double: " + s);
+		}
 	}
 
 	private final static Map<String, Datatypes> datatypeMap = buildDatatypeMap();
@@ -272,8 +341,8 @@ public enum Datatypes {
 		toReturn.put(Vocabulary.FLOAT, FLOAT);
 		toReturn.put(Vocabulary.DOUBLE, DOUBLE);
 		toReturn.put(Vocabulary.REAL, REAL);
-		toReturn.put(Vocabulary.RATIONAL, FLOAT);
-		toReturn.put(Vocabulary.DECIMAL, FLOAT);
+		toReturn.put(Vocabulary.RATIONAL, RATIONAL);
+		toReturn.put(Vocabulary.DECIMAL, DECIMAL);
 		toReturn.put(Vocabulary.BOOLEAN, BOOLEAN);
 		toReturn.put(Vocabulary.DATETIME, DATETIME);
 		toReturn.put(Vocabulary.DATE, DATETIME);
@@ -337,6 +406,72 @@ class IntRep implements Literal<Integer> {
 		}
 		if (obj.getClass().equals(IntRep.class)) {
 			return value.equals(((IntRep) obj).getValue());
+		}
+		return false;
+	}
+
+	@Override
+	public final int hashCode() {
+		return value.hashCode();
+	}
+}
+
+class DecimalRep implements Literal<BigDecimal> {
+	protected BigDecimal value;
+
+	public Datatypes getDatatype() {
+		return Datatypes.DECIMAL;
+	}
+
+	public DecimalRep(BigDecimal v) {
+		value = v;
+	}
+
+	public int compareTo(Literal<BigDecimal> o) {
+		return value.compareTo(o.getValue());
+	}
+
+	public BigDecimal getValue() {
+		return value;
+	}
+
+	public boolean correctMin(boolean excl) {
+		if (excl) {
+			// transform (n,} into [n+1,}
+			value = value.add(BigDecimal.ONE);
+			return false;
+		}
+		return excl;
+	}
+
+	public boolean correctMax(boolean excl) {
+		if (excl) {
+			// transform (n,} into [n+1,}
+			value = value.subtract(BigDecimal.ONE);
+			return false;
+		}
+		return excl;
+	}
+
+	public boolean lesser(Literal<BigDecimal> other) {
+		return this.compareTo(other) < 0;
+	}
+
+	@Override
+	public String toString() {
+		return " " + value.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (this == obj) {
+			return true;
+		}
+		if (obj.getClass().equals(DecimalRep.class)) {
+			return value.equals(((DecimalRep) obj).getValue());
 		}
 		return false;
 	}
@@ -960,7 +1095,9 @@ class RationalRep implements Literal<BigDecimal> {
 	private static BigDecimal parse(String s) {
 		int i = s.indexOf('/');
 		if (i == -1) {
-			throw new IllegalArgumentException("invalid string used: no '/' character separating longs: " + s);
+			throw new IllegalArgumentException(
+					"invalid string used: no '/' character separating longs: "
+							+ s);
 		}
 		double n = Long.parseLong(s.substring(0, i));
 		double d = Long.parseLong(s.substring(i + 1));

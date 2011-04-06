@@ -3,7 +3,9 @@ package conformance;
 import junit.framework.Assert;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.OWLFunctionalSyntaxOntologyFormat;
 import org.semanticweb.owlapi.io.StringDocumentSource;
+import org.semanticweb.owlapi.io.SystemOutDocumentTarget;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChangeListener;
@@ -75,10 +77,6 @@ public class JUnitRunner {
 					System.out
 							.println("JUnitRunner.run() premise violations:\n"
 									+ report.toString());
-					//					t=new StringDocumentTarget();
-					//					premiseOntology.getOWLOntologyManager().saveOntology(premiseOntology, new TurtleOntologyFormat(), t);
-					//					System.out.println(t);
-					//System.out.println("\n" + premise + "\n");
 					throw new RuntimeException("errors!");
 				}
 			}
@@ -99,28 +97,14 @@ public class JUnitRunner {
 				if (report.getViolations().size() > 0) {
 					System.out.println("JUnitRunner.run() " + testId
 							+ report.getViolations().size());
-					//					List<OWLProfileViolation> list=report.getViolations();
-					//					Set<String> classes=new HashSet<String>();
-					//					for(OWLProfileViolation v:list) {
-					//						String s=v.toString();
-					//						s=s.substring(s.indexOf('<')+1, s.indexOf('>'));
-					//						classes.add(s);
-					//					}
-					//					for(String s:classes) {
-					//						System.out.println("<Declaration><Class IRI=\""+s+"\"/></Declaration>");
-					//					}
 					System.out
 							.println("JUnitRunner.run() conclusion violations:\n"
 									+ report.toString());
-					//					StringDocumentTarget t=new StringDocumentTarget();
-					//					premiseOntology.getOWLOntologyManager().saveOntology(conclusionOntology, new TurtleOntologyFormat(), t);
-					//					System.out.println(t);
 					throw new RuntimeException("errors!");
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace(System.out);
-			//System.out.println("JUnitRunner.run() conclusion:\n" + consequence);
 			throw new RuntimeException(e);
 		}
 		run(premiseOntology, conclusionOntology);
@@ -218,6 +202,11 @@ public class JUnitRunner {
 		b.append(" ======================================\n");
 		b.append(description);
 		b.append("\nPremise:\n");
+		try {
+		o.getOWLOntologyManager().saveOntology(o, new OWLFunctionalSyntaxOntologyFormat(), new SystemOutDocumentTarget());
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
 		for (OWLAxiom x : o.getAxioms()) {
 			b.append(x);
 			b.append("\n");

@@ -119,7 +119,21 @@ public final class CWDArray {
 		return base.size();
 	}
 
+//	static int cacheused=0;
 	public boolean lesserequal(final CWDArray label) {
+		// use the cache on the label if there is one
+		if(label.cache!=null) {
+//			cacheused++;
+//			if(cacheused%1000==0) {
+//				System.out.println("CWDArray.lesserequal() "+cacheused);
+//			}
+			for(int i=0;i<indexes.size();i++) {
+				if(!label.cache.get(asPositive(indexes.keySet(i)))) {
+					return false;
+				}
+			}
+			return true;
+		}
 		// checks the keys are in both maps
 		return label.indexes.containsAll(indexes);
 //		for (int i = 0; i < label.size(); i++) {

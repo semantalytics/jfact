@@ -16,6 +16,7 @@ public class rdfbased_sem_eqdis_disclass_irrflxv extends TestCase {
 				+ "    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\">\n"
 				//added
 				+ "  <owl:Class rdf:about=\"http://www.example.org#c\"/>\n"
+				+ "  <owl:Thing rdf:about=\"http://www.example.org#x\"/>\n"
 				//end added
 				+ "  <ex:c rdf:about=\"http://www.example.org#x\"/>\n"
 				+ "  <rdf:Description rdf:about=\"http://www.example.org#c\">\n"

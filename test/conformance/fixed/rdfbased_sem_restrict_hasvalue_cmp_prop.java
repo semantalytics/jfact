@@ -1,4 +1,4 @@
-package conformance.broken;
+package conformance.fixed;
 
 import junit.framework.TestCase;
 import conformance.Factory;
@@ -35,8 +35,14 @@ public class rdfbased_sem_restrict_hasvalue_cmp_prop extends TestCase {
 				//end added
 				+ "  </rdf:Description>\n"
 				+ "  <rdf:Description rdf:about=\"http://www.example.org#x2\">\n"
+				//added
+				+ "<owl:equivalentClass><owl:Restriction>"
+				//end added
 				+ "    <owl:hasValue rdf:resource=\"http://www.example.org#v\"/>\n"
 				+ "    <owl:onProperty rdf:resource=\"http://www.example.org#p2\"/>\n"
+				//added
+				+ "</owl:Restriction></owl:equivalentClass>"
+				//end added
 				+ "  </rdf:Description>\n" + "</rdf:RDF>";
 		String conclusion = "<rdf:RDF\n"
 				+ "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"

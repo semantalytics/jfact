@@ -1,4 +1,4 @@
-package conformance.broken;
+package conformance.fixed;
 
 import java.util.Set;
 
@@ -17,10 +17,11 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import org.semanticweb.owlapi.reasoner.TimedConsoleProgressMonitor;
 
 import conformance.Factory;
+import conformance.JUnitRunner;
 import conformance.TestClasses;
 
 public class WebOnt_description_logic_661 extends TestCase {
-	public void _testWebOnt_description_logic_661() throws Exception {
+	public void testWebOnt_description_logic_661() throws Exception {
 		String premise = "<rdf:RDF\n"
 				+ "    xmlns:oiled=\"http://oiled.man.example.net/test#\"\n"
 				+ "    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n"
@@ -83,16 +84,28 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C140\">\n"
+				//TODO added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C74\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C138.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C78\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C10\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.25\"/>\n"
@@ -102,10 +115,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C76\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C2.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty>\n"
@@ -117,16 +136,28 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C74\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C54\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C72.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C72\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C68.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C70\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty>\n"
@@ -138,16 +169,28 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C70\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C2\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C28\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C26\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C16.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty>\n"
@@ -171,16 +214,28 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C24\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C16\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C2\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C22\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C20\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C16\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty>\n"
@@ -287,16 +342,28 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C126\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C124\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C34.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C124\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C10.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C102.comp\">\n"
 				+ "  <owl:equivalentClass>\n"
@@ -331,40 +398,76 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C120\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C118\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C34\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C58\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C56\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C34\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C56\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C10.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C54\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C14\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C52\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C52\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C32.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C50.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C50\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C48.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty>\n"
@@ -387,10 +490,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C88\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C16\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C2\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.64\"/>\n"
@@ -411,10 +520,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C86\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C84\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C16\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty>\n"
@@ -454,10 +569,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C82\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C16.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C2\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.65\"/>\n"
@@ -467,10 +588,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C80\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C76.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C78.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C86.comp\">\n"
 				+ "  <owl:equivalentClass>\n"
@@ -535,10 +662,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C108\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C106\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C34.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty>\n"
@@ -571,10 +704,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C104\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C34\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C100.comp\">\n"
 				+ "  <owl:equivalentClass>\n"
@@ -599,10 +738,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C102\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C100\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C34\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.35\"/>\n"
@@ -659,10 +804,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C36\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C34.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C34\">\n"
 				+ "  <owl:equivalentClass>\n"
@@ -674,10 +825,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C32\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C30.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C2\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty>\n"
@@ -689,10 +846,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C30\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C22.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C28.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.8\"/>\n"
@@ -717,10 +880,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C136\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C116\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C134.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.46\"/>\n"
@@ -741,10 +910,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C134\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C130.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C132\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty>\n"
@@ -756,10 +931,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C132\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C2\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.48\"/>\n"
@@ -769,10 +950,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C130\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C122\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C128\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.44\"/>\n"
@@ -782,10 +969,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C68\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C60\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C66\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty>\n"
@@ -807,16 +1000,28 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C64\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C62\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C34.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C62\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C10.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C72.comp\">\n"
 				+ "  <owl:equivalentClass>\n"
@@ -874,10 +1079,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C8\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C2.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty>\n"
@@ -909,16 +1120,28 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C6\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C2\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#TEST\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C6\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C140\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C110.comp\">\n"
 				+ "  <owl:equivalentClass>\n"
@@ -959,10 +1182,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C18\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C16.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C2\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.56\"/>\n"
@@ -981,16 +1210,28 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C14\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C8.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C12.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C12\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C10\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.3\"/>\n"
@@ -1000,10 +1241,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C98\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C34.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.63\"/>\n"
@@ -1022,10 +1269,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C96\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C94.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C2\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.38\"/>\n"
@@ -1035,10 +1288,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C94\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C86.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C92.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.30\"/>\n"
@@ -1048,10 +1307,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C92\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C90\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C16.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.29\"/>\n"
@@ -1076,28 +1341,52 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C118\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C10.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C116\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C80\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C114\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C114\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C96.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C112.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C112\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C110.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.39\"/>\n"
@@ -1107,10 +1396,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C110\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C102.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C108.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.37\"/>\n"
@@ -1129,10 +1424,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C48\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C40.comp\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C46.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.13\"/>\n"
@@ -1142,10 +1443,16 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C46\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C44\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C34.comp\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.12\"/>\n"
@@ -1165,16 +1472,28 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "  </owl:equivalentClass>\n"
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C42\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C34\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C4\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ " </owl:Class>\n"
 				+ " <owl:Class rdf:about=\"http://oiled.man.example.net/test#C40\">\n"
+				// added
+				+ "  <owl:equivalentClass><owl:Class>\n"
+				// end added
 				+ "  <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C38\"/>\n"
 				+ "   <owl:Class rdf:about=\"http://oiled.man.example.net/test#C34\"/>\n"
 				+ "  </owl:intersectionOf>\n"
+				// added
+				+ "  </owl:Class></owl:equivalentClass>\n"
+				// end added
 				+ "  <owl:equivalentClass>\n"
 				+ "   <owl:Restriction>\n"
 				+ "    <owl:onProperty rdf:resource=\"#P.11\"/>\n"
@@ -1270,11 +1589,11 @@ public class WebOnt_description_logic_661 extends TestCase {
 		TestClasses tc = TestClasses.valueOf("POSITIVE_IMPL");
 		String d = "DL Test: k_branch\n"
 				+ "ABox test from DL98 systems comparison.";
-		//		JUnitRunner r = new JUnitRunner(premise, conclusion, id, tc, d);
-		//		r.setReasonerFactory(Factory.factory());
-		//		//XXX slow
-		//		r.run();
-		verify(premise, conclusion);
+				JUnitRunner r = new JUnitRunner(premise, conclusion, id, tc, d);
+				r.setReasonerFactory(Factory.factory());
+				
+				r.run();
+		//verify(premise, conclusion);
 	}
 
 	public static void verify(String premise, String consequence)

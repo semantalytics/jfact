@@ -17,6 +17,8 @@ public class rdfbased_sem_restrict_maxqcr_inst_obj_one extends TestCase {
 				//added
 				+ "  <owl:Class rdf:about=\"http://www.example.org#c\"/>\n"
 				+ "  <owl:Class rdf:about=\"http://www.example.org#z\"/>\n"
+				+ "  <owl:Thing rdf:about=\"http://www.example.org#x1\"/>\n"
+				+ "  <owl:Thing rdf:about=\"http://www.example.org#x2\"/>\n"
 				+ "  <owl:ObjectProperty rdf:about=\"http://www.example.org#p\"/>\n"
 				//end added
 				+ "  <ex:z rdf:about=\"http://www.example.org#w\">\n"

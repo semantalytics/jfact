@@ -92,16 +92,24 @@ public final class CGLabel {
 		notLesserEquals.remove(changed);
 	}
 
+	//static int cachedlesser=0;
+	//static int missedcachedlesser=0;
 	public boolean lesserequal(final CGLabel label) {
+//		if(cachedlesser%1000==0||missedcachedlesser%1000==0) {
+//			System.out.println("CGLabel.lesserequal() cached "+cachedlesser+"\t"+missedcachedlesser);
+//		}
 		if (this == label) {
 			return true;
 		}
 		if (lesserEquals.contains(label)) {
+		//	cachedlesser++;
 			return true;
 		}
 		if (notLesserEquals.contains(label)) {
+//			cachedlesser++;
 			return false;
 		}
+//		missedcachedlesser++;
 		boolean toReturn = scLabel.lesserequal(label.scLabel) && ccLabel.lesserequal(label.ccLabel);
 		if (toReturn) {
 			lesserEquals.add(label);

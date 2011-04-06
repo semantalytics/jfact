@@ -1821,7 +1821,8 @@ public class DlSatTester {
 		Role R = arcSample.getRole();
 		DepSet dep = DepSetFactory.plus(dep_, arcSample.getDep());
 		List<ConceptWDep> base = Node.beginl_cc();
-		for (int i = 0; i < base.size(); i++) {
+		int size = base.size();
+		for (int i = 0; i < size; i++) {
 			ConceptWDep p = base.get(i);
 			// need only AR.C concepts where ARC is labelled with R
 			if (p.getConcept() < 0) {
@@ -2094,8 +2095,10 @@ public class DlSatTester {
 	private boolean initHeadOfNewEdge(DlCompletionTree node, final Role R, final DepSet dep, final String reason) {
 		// if R is functional, then add FR with given DEP-set to NODE
 		if (R.isFunctional()) {
-			for (Role r : R.begin_topfunc()) {
-				if (addToDoEntry(node, r.getFunctional(), dep, "fr")) {
+			List<Role> begin_topfunc = R.begin_topfunc();
+			int size=begin_topfunc.size();
+			for (int i=0;i<size;i++) {
+				if (addToDoEntry(node, begin_topfunc.get(i).getFunctional(), dep, "fr")) {
 					return true;
 				}
 			}
@@ -2388,7 +2391,9 @@ public class DlSatTester {
 	private boolean checkMergeClash(final CGLabel from, final CGLabel to, final DepSet dep, int nodeId) {
 		DepSet clashDep = DepSetFactory.create(dep);
 		boolean clash = false;
-		for (ConceptWDep p : from.get_sc()) {
+		List<ConceptWDep> list = from.get_sc();
+		int size=list.size();
+		for (int i=0;i<size; i++) { ConceptWDep p = list.get(i);
 			int inverse = -p.getConcept();
 			if (used.contains(inverse) && findConceptClash(to.getLabel(dtPConcept), inverse, p.getDep())) {
 				clash = true;
@@ -2396,8 +2401,11 @@ public class DlSatTester {
 				logger.print(Templates.CHECK_MERGE_CLASH, nodeId, p.getConcept(), DepSetFactory.plus(clashSet, dep));
 			}
 		}
-		for (ConceptWDep p : from.get_cc()) {
-			int inverse = -p.getConcept();
+		list = from.get_cc();
+		size=list.size();
+		for (int i=0;i<size; i++) { ConceptWDep p = list.get(i);
+		
+	int inverse = -p.getConcept();
 			if (used.contains(inverse) && findConceptClash(to.getLabel(dtForall), inverse, p.getDep())) {
 				clash = true;
 				clashDep.add(clashSet);
