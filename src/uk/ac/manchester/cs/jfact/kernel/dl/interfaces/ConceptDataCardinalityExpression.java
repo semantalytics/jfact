@@ -8,7 +8,8 @@ You should have received a copy of the GNU Lesser General Public License along w
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 
 /** general data role cardinality expression */
-public interface ConceptDataCardinalityExpression extends ConceptDataRVExpression, NumberArg {
+public interface ConceptDataCardinalityExpression extends
+		ConceptDataRVExpression, NumberArg {
 	/** accept method for the visitor pattern */
 	void accept(DLExpressionVisitor visitor);
 }

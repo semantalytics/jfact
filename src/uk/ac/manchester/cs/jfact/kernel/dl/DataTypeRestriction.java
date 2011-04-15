@@ -12,7 +12,10 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NAryExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
-public final class DataTypeRestriction extends NAryExpressionImpl<FacetExpression> implements NAryExpression<FacetExpression>, DataTypeExpression, DataExpressionArg<DataTypeName> {
+public final class DataTypeRestriction extends
+		NAryExpressionImpl<FacetExpression> implements
+		NAryExpression<FacetExpression>, DataTypeExpression,
+		DataExpressionArg<DataTypeName> {
 	private final DataTypeName delegate;
 
 	public DataTypeRestriction(final DataTypeName T) {

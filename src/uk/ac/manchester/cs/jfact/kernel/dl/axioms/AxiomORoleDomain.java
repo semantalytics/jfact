@@ -13,7 +13,8 @@ import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitorEx;
 public final class AxiomORoleDomain extends AxiomSingleORole {
 	private final ConceptExpression domain;
 
-	public AxiomORoleDomain(final ObjectRoleExpression role, final ConceptExpression domain) {
+	public AxiomORoleDomain(final ObjectRoleExpression role,
+			final ConceptExpression domain) {
 		super(role);
 		this.domain = domain;
 	}

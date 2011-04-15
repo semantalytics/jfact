@@ -73,7 +73,8 @@ public final class InAx {
 
 	/// @return true iff P is an object FORALL expression
 	static boolean isOForall(DLTree p) {
-		return isForall(p) && !Role.resolveRole(p.getChild().getLeft()).isDataRole();
+		return isForall(p)
+				&& !Role.resolveRole(p.getChild().getLeft()).isDataRole();
 	}
 
 	/// @return true iff P is a FORALL expression suitable for absorption

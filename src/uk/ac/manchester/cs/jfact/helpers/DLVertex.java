@@ -160,7 +160,10 @@ public final class DLVertex extends DLVertexTagDFS {
 		}
 		if (obj instanceof DLVertex) {
 			DLVertex v = (DLVertex) obj;
-			return op == v.op && compare(role, v.role) && compare(projRole, v.projRole) && conceptIndex == v.conceptIndex && n == v.n && child.equals(v.child);
+			return op == v.op && compare(role, v.role)
+					&& compare(projRole, v.projRole)
+					&& conceptIndex == v.conceptIndex && n == v.n
+					&& child.equals(v.child);
 		}
 		return false;
 	}
@@ -174,7 +177,10 @@ public final class DLVertex extends DLVertexTagDFS {
 
 	@Override
 	public int hashCode() {
-		return (op == null ? 0 : op.hashCode()) + (role == null ? 0 : role.hashCode()) + (projRole == null ? 0 : projRole.hashCode()) + conceptIndex + n + (child == null ? 0 : child.hashCode());
+		return (op == null ? 0 : op.hashCode())
+				+ (role == null ? 0 : role.hashCode())
+				+ (projRole == null ? 0 : projRole.hashCode()) + conceptIndex
+				+ n + (child == null ? 0 : child.hashCode());
 	}
 
 	/** return C for concepts/quantifiers/NR verteces */
@@ -267,7 +273,9 @@ public final class DLVertex extends DLVertexTagDFS {
 	}
 
 	public void print(LeveLogger.LogAdapter o) {
-		o.print(Templates.DLVERTEXPrint, stat[0], stat[1], stat[2], stat[3], stat[4], stat[5], stat[6], stat[7], stat[8], stat[9], op.getName());
+		o.print(Templates.DLVERTEXPrint, stat[0], stat[1], stat[2], stat[3],
+				stat[4], stat[5], stat[6], stat[7], stat[8], stat[9],
+				op.getName());
 		switch (op) {
 			case dtAnd:
 			case dtCollection:
@@ -285,7 +293,8 @@ public final class DLVertex extends DLVertexTagDFS {
 			case dtNConcept:
 			case dtPSingleton:
 			case dtNSingleton:
-				o.print(Templates.DLVERTEXPrint2, concept.getName(), (op.isNNameTag() ? "=" : "[="), conceptIndex);
+				o.print(Templates.DLVERTEXPrint2, concept.getName(),
+						(op.isNNameTag() ? "=" : "[="), conceptIndex);
 				return;
 			case dtLE:
 				o.print(Templates.SPACE, n);
@@ -293,16 +302,20 @@ public final class DLVertex extends DLVertexTagDFS {
 				o.print(Templates.SPACE, conceptIndex);
 				return;
 			case dtForall:
-				o.print(Templates.DLVERTEXPrint3, role.getName(), n, conceptIndex);
+				o.print(Templates.DLVERTEXPrint3, role.getName(), n,
+						conceptIndex);
 				return;
 			case dtIrr:
 				o.print(Templates.SPACE, role.getName());
 				return;
 			case dtProj:
-				o.print(Templates.DLVERTEXPrint4, role.getName(), conceptIndex, projRole.getName());
+				o.print(Templates.DLVERTEXPrint4, role.getName(), conceptIndex,
+						projRole.getName());
 				return;
 			default:
-				throw new ReasonerInternalException(String.format("Error printing vertex of type %s(%s)", op.getName(), op));
+				throw new ReasonerInternalException(String.format(
+						"Error printing vertex of type %s(%s)", op.getName(),
+						op));
 		}
 		for (int q : child.sorted()) {
 			o.print(Templates.SPACE, q);

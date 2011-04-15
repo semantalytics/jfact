@@ -138,7 +138,8 @@ public final class TaxonomyVertex {
 	/** add link in given direction to vertex */
 	public void addNeighbour(boolean upDirection, TaxonomyVertex p) {
 		if (p == null) {
-			System.out.println("TaxonomyVertex.addNeighbour() passed in a null");
+			System.out
+					.println("TaxonomyVertex.addNeighbour() passed in a null");
 		}
 		neigh(upDirection).add(p);
 	}
@@ -198,8 +199,10 @@ public final class TaxonomyVertex {
 		setSample(entry);
 		// setup links
 		//TODO doublecheck
-		List<TaxonomyVertex> falselist = new ArrayList<TaxonomyVertex>(neigh(false));
-		List<TaxonomyVertex> truelist = new ArrayList<TaxonomyVertex>(neigh(true));
+		List<TaxonomyVertex> falselist = new ArrayList<TaxonomyVertex>(
+				neigh(false));
+		List<TaxonomyVertex> truelist = new ArrayList<TaxonomyVertex>(
+				neigh(true));
 		for (TaxonomyVertex d : falselist) {
 			for (TaxonomyVertex u : truelist) {
 				if (d.removeLink(true, u)) {

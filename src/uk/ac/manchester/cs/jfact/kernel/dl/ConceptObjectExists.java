@@ -16,7 +16,8 @@ public final class ConceptObjectExists implements ConceptObjectRCExpression {
 	private final ConceptExpression conceptExpression;
 	private final ObjectRoleExpression delegate;
 
-	public ConceptObjectExists(final ObjectRoleExpression R, final ConceptExpression C) {
+	public ConceptObjectExists(final ObjectRoleExpression R,
+			final ConceptExpression C) {
 		conceptExpression = C;
 		delegate = R;
 	}

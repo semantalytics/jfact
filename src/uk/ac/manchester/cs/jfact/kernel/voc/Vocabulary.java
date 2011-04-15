@@ -7,10 +7,14 @@ This library is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 public final class Vocabulary {
 	public final static String OWL_NAMESPACE = "http://www.w3.org/2002/07/owl#";
-	public final static String TOP_OBJECT_PROPERTY = OWL_NAMESPACE + "topObjectProperty";
-	public final static String BOTTOM_OBJECT_PROPERTY = OWL_NAMESPACE + "bottomObjectProperty";
-	public final static String TOP_DATA_PROPERTY = OWL_NAMESPACE + "topDataProperty";
-	public final static String BOTTOM_DATA_PROPERTY = OWL_NAMESPACE + "bottomDataProperty";
+	public final static String TOP_OBJECT_PROPERTY = OWL_NAMESPACE
+			+ "topObjectProperty";
+	public final static String BOTTOM_OBJECT_PROPERTY = OWL_NAMESPACE
+			+ "bottomObjectProperty";
+	public final static String TOP_DATA_PROPERTY = OWL_NAMESPACE
+			+ "topDataProperty";
+	public final static String BOTTOM_DATA_PROPERTY = OWL_NAMESPACE
+			+ "bottomDataProperty";
 	public final static String LITERAL = "http://www.w3.org/2000/01/rdf-schema#Literal";
 	public final static String PLAIN_LITERAL = "http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral";
 	public final static String XMLLITERAL = "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral";

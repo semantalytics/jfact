@@ -13,11 +13,13 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
-public final class ObjectRoleProjectionFrom implements ObjectRoleComplexExpression, ObjectRoleArg, ConceptArg {
+public final class ObjectRoleProjectionFrom implements
+		ObjectRoleComplexExpression, ObjectRoleArg, ConceptArg {
 	private final ConceptExpression delegate;
 	private final ObjectRoleExpression roleDelegate;
 
-	public ObjectRoleProjectionFrom(final ObjectRoleExpression R, final ConceptExpression C) {
+	public ObjectRoleProjectionFrom(final ObjectRoleExpression R,
+			final ConceptExpression C) {
 		roleDelegate = R;
 		delegate = C;
 	}

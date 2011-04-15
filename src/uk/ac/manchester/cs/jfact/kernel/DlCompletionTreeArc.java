@@ -12,7 +12,7 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 
 public final class DlCompletionTreeArc {
 	/** pointer to "to" node */
-	private DlCompletionTree node;
+	private final DlCompletionTree node;
 	/** role, labelling given arc */
 	protected Role role;
 	/** dep-set of the arc */
@@ -20,19 +20,12 @@ public final class DlCompletionTreeArc {
 	/** pointer to reverse arc */
 	protected DlCompletionTreeArc reverse;
 	/** true if the edge going from a predecessor to a successor */
-	private boolean succEdge;
+	private boolean succEdge = true;
 
 	/**
 	 * init an arc with R as a label and NODE on given LEVEL; use it inside
 	 * MAKEARCS only
 	 */
-	public void init(final Role r, final DepSet dep, DlCompletionTree n) {
-		role = r;
-		depSet = DepSetFactory.create(dep);
-		node = n;
-		reverse = null;
-	}
-
 	/** class for restoring edge */
 	final static class EdgeRestorer extends Restorer {
 		private DlCompletionTreeArc p;
@@ -72,8 +65,12 @@ public final class DlCompletionTreeArc {
 		v.reverse = this;
 	}
 
-	public DlCompletionTreeArc() {
-		succEdge = true;
+	public DlCompletionTreeArc(final Role r, final DepSet dep,
+			DlCompletionTree n) {
+		role = r;
+		depSet = DepSetFactory.create(dep);
+		node = n;
+		reverse = null;
 	}
 
 	/** get label of the edge */
@@ -159,6 +156,7 @@ public final class DlCompletionTreeArc {
 
 	/** print current arc */
 	public void print(LogAdapter o) {
-		o.print(Templates.DLCOMPLETIONTREEARC, (isIBlocked() ? "-" : role.getName()), depSet);
+		o.print(Templates.DLCOMPLETIONTREEARC,
+				(isIBlocked() ? "-" : role.getName()), depSet);
 	}
 }

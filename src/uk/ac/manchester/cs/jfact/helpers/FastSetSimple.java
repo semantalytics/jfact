@@ -51,7 +51,8 @@ public final class FastSetSimple extends AbstractFastSet {
 	}
 
 	public FastSetSimple(FastSetSimple c1, FastSetSimple c2) {
-		values = new int[((c1.size + c2.size) / defaultSize) * defaultSize + defaultSize];
+		values = new int[((c1.size + c2.size) / defaultSize) * defaultSize
+				+ defaultSize];
 		int i = 0;
 		int j = 0;
 		int index = 0;
@@ -90,7 +91,8 @@ public final class FastSetSimple extends AbstractFastSet {
 		if (values != null) {
 			return values[i];
 		}
-		throw new IllegalArgumentException("Illegal argument " + i + ": no such element");
+		throw new IllegalArgumentException("Illegal argument " + i
+				+ ": no such element");
 	}
 
 	protected final void init() {
@@ -336,7 +338,8 @@ public final class FastSetSimple extends AbstractFastSet {
 			return;
 		}
 		if (end < -1 || end < i || end > size || i < -1 || i > size) {
-			throw new IllegalArgumentException("illegal arguments: " + i + " " + end + " size: " + size);
+			throw new IllegalArgumentException("illegal arguments: " + i + " "
+					+ end + " size: " + size);
 		}
 		if (size == 1 || (i == 0 && end == size)) {
 			values = null;

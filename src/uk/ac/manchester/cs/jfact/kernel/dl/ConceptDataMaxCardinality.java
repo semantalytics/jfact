@@ -12,13 +12,15 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataRoleExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
-public final class ConceptDataMaxCardinality implements ConceptDataCardinalityExpression, DataRoleArg {
+public final class ConceptDataMaxCardinality implements
+		ConceptDataCardinalityExpression, DataRoleArg {
 	/** data role argument */
 	private final DataRoleExpression dataRoleExpression;
 	private final int delegate;
 	private final DataExpression delegateExpression;
 
-	public ConceptDataMaxCardinality(int n, final DataRoleExpression R, final DataExpression E) {
+	public ConceptDataMaxCardinality(int n, final DataRoleExpression R,
+			final DataExpression E) {
 		dataRoleExpression = R;
 		delegateExpression = E;
 		delegate = n;

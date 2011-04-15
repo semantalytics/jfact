@@ -12,7 +12,8 @@ import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitorEx;
 public final class AxiomRoleInverse extends AxiomSingleORole {
 	private final ObjectRoleExpression inverseRole;
 
-	public AxiomRoleInverse(final ObjectRoleExpression dirRole, final ObjectRoleExpression invRole) {
+	public AxiomRoleInverse(final ObjectRoleExpression dirRole,
+			final ObjectRoleExpression invRole) {
 		super(dirRole);
 		inverseRole = invRole;
 	}

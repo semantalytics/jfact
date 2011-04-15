@@ -28,7 +28,7 @@ public final class CGLabel {
 	private final CWDArray scLabel;
 	/** all complex concepts (ie, FORALL, GE), labelled a node */
 	private final CWDArray ccLabel;
-	final int id;
+	private final int id;
 
 	public CGLabel() {
 		scLabel = new CWDArray();
@@ -59,24 +59,34 @@ public final class CGLabel {
 
 	public void add(DagTag tag, ConceptWDep p) {
 		getLabel(tag).private_add(p);
-		clearCache();
+		clearMyCache();
 	}
 
-	private void clearCache() {
-		for (CGLabel c : lesserEquals) {
-			c.clearReferences(this);
-		}
-		for (CGLabel c : notLesserEquals) {
-			c.clearReferences(this);
-		}
+	//	protected final void _clearCache() {
+	//		for (CGLabel c : lesserEquals) {
+	//			c.lesserEquals.remove(this);
+	//		//	c.notLesserEquals.remove(this);
+	//		}
+	//		//for (CGLabel c : notLesserEquals) {
+	//		//	c.lesserEquals.remove(this);
+	//		//	c.notLesserEquals.remove(this);
+	//		//}
+	//		lesserEquals.clear();
+	//		//notLesserEquals.clear();
+	//	}
+	protected final void clearMyCache() {
 		lesserEquals.clear();
-		notLesserEquals.clear();
+	}
+
+	protected final void clearOthersCache() {
+		for (CGLabel c : lesserEquals) {
+			c.lesserEquals.remove(this);
+		}
 	}
 
 	/** check whether node is labelled by complex concept P */
 	public boolean containsCC(int p) {
-		boolean b = ccLabel.contains(p);
-		return b;
+		return ccLabel.contains(p);
 	}
 
 	@Override
@@ -84,37 +94,37 @@ public final class CGLabel {
 		return id;
 	}
 
-	private final Set<CGLabel> lesserEquals = Collections.newSetFromMap(new IdentityHashMap<CGLabel, Boolean>());
-	private final Set<CGLabel> notLesserEquals = Collections.newSetFromMap(new IdentityHashMap<CGLabel, Boolean>());
+	private final Set<CGLabel> lesserEquals = Collections
+			.newSetFromMap(new IdentityHashMap<CGLabel, Boolean>());
 
-	private void clearReferences(CGLabel changed) {
-		lesserEquals.remove(changed);
-		notLesserEquals.remove(changed);
-	}
-
-	//static int cachedlesser=0;
-	//static int missedcachedlesser=0;
+	//	private final Set<CGLabel> notLesserEquals = Collections
+	//			.newSetFromMap(new IdentityHashMap<CGLabel, Boolean>());
+	//	static int hit=0;
+	//	static int miss=0;
 	public boolean lesserequal(final CGLabel label) {
-//		if(cachedlesser%1000==0||missedcachedlesser%1000==0) {
-//			System.out.println("CGLabel.lesserequal() cached "+cachedlesser+"\t"+missedcachedlesser);
-//		}
 		if (this == label) {
 			return true;
 		}
 		if (lesserEquals.contains(label)) {
-		//	cachedlesser++;
+			//			hit++;
+			//			if(hit%1000==0||miss%1000==0) {
+			//				System.out.println("CGLabel.lesserequal() "+hit+"\t"+miss);
+			//			}
 			return true;
 		}
-		if (notLesserEquals.contains(label)) {
-//			cachedlesser++;
-			return false;
-		}
-//		missedcachedlesser++;
-		boolean toReturn = scLabel.lesserequal(label.scLabel) && ccLabel.lesserequal(label.ccLabel);
+		//		if (notLesserEquals.contains(label)) {
+		//			miss++;
+		//			if(hit%1000==0||miss%1000==0) {
+		//				System.out.println("CGLabel.lesserequal() "+hit+"\t"+miss);
+		//			}
+		//			return false;
+		//		}
+		boolean toReturn = scLabel.lesserequal(label.scLabel)
+				&& ccLabel.lesserequal(label.ccLabel);
 		if (toReturn) {
 			lesserEquals.add(label);
-		} else {
-			notLesserEquals.add(label);
+			//		} else {
+			//			notLesserEquals.add(label);
 		}
 		return toReturn;
 	}
@@ -129,7 +139,8 @@ public final class CGLabel {
 		}
 		if (obj instanceof CGLabel) {
 			CGLabel obj2 = (CGLabel) obj;
-			boolean toReturn = scLabel.equals(obj2.scLabel) && ccLabel.equals(obj2.ccLabel);
+			boolean toReturn = scLabel.equals(obj2.scLabel)
+					&& ccLabel.equals(obj2.ccLabel);
 			return toReturn;
 		}
 		return false;
@@ -142,10 +153,11 @@ public final class CGLabel {
 	}
 
 	/** restore label to given LEVEL using given SS */
-	public void restore(final SaveState ss, int level) {
+	public final void restore(final SaveState ss, int level) {
 		scLabel.restore(ss.getSc(), level);
 		ccLabel.restore(ss.getCc(), level);
-		clearCache();
+		//_clearCache();
+		clearOthersCache();
 	}
 
 	/** print the whole label */
@@ -161,8 +173,10 @@ public final class CGLabel {
 		return l.toString();
 	}
 
-	public void init() {
-		clearCache();
+	public final void init() {
+		//_clearCache();
+		clearOthersCache();
+		clearMyCache();
 		scLabel.init();
 		ccLabel.init();
 	}
@@ -183,7 +197,7 @@ public final class CGLabel {
 		return ccLabel.size() + scLabel.size();
 	}
 
-	public Integer getId() {
+	public int getId() {
 		return id;
 	}
 }

@@ -21,7 +21,9 @@ import uk.ac.manchester.cs.jfact.kernel.Role;
 import uk.ac.manchester.cs.jfact.kernel.Token;
 
 public final class DLTreeFactory {
-	private static EnumSet<Token> snfCalls = EnumSet.of(TOP, BOTTOM, CNAME, INAME, RNAME, DNAME, DATAEXPR, NOT, INV, AND, FORALL, LE, REFLEXIVE, RCOMPOSITION, PROJFROM, PROJINTO);
+	private static final EnumSet<Token> snfCalls = EnumSet.of(TOP, BOTTOM,
+			CNAME, INAME, RNAME, DNAME, DATAEXPR, NOT, INV, AND, FORALL, LE,
+			REFLEXIVE, RCOMPOSITION, PROJFROM, PROJINTO);
 
 	/** create BOTTOM element */
 	public static DLTree createBottom() {
@@ -95,7 +97,8 @@ public final class DLTreeFactory {
 		return new NDLTree(new Lexeme(AND), l);
 	}
 
-	public static DLTree createSNFAnd(Collection<DLTree> collection, DLTree ancestor) {
+	public static DLTree createSNFAnd(Collection<DLTree> collection,
+			DLTree ancestor) {
 		boolean hasTop = false;
 		List<DLTree> l = new ArrayList<DLTree>();
 		for (DLTree d : collection) {
@@ -215,7 +218,8 @@ public final class DLTreeFactory {
 		if (tree.token() == RCOMPOSITION) {
 			return tree.accept(new ReverseCloningVisitor());
 		} else {
-			return new LEAFDLTree(new Lexeme(RNAME, Role.resolveRole(tree).inverse()));
+			return new LEAFDLTree(new Lexeme(RNAME, Role.resolveRole(tree)
+					.inverse()));
 		}
 	}
 
@@ -254,7 +258,9 @@ public final class DLTreeFactory {
 
 	/** check whether T is an expression in the form (atmost 1 RNAME) */
 	public static boolean isFunctionalExpr(final DLTree t, final NamedEntry R) {
-		return t != null && t.token() == LE && R.equals(t.getLeft().elem().getNE()) && t.elem().getData() == 1 && t.getRight().isTOP();
+		return t != null && t.token() == LE
+				&& R.equals(t.getLeft().elem().getNE())
+				&& t.elem().getData() == 1 && t.getRight().isTOP();
 	}
 
 	public static boolean isSNF(final DLTree t) {
@@ -307,9 +313,12 @@ public final class DLTreeFactory {
 			if (entry.isSynonym()) {
 				entry = resolveSynonym(entry);
 				if (entry.getId() == -1) {
-					desc.elem = new Lexeme(entry.getName().equals("TOP") ? TOP : BOTTOM);
+					desc.elem = new Lexeme(entry.getName().equals("TOP") ? TOP
+							: BOTTOM);
 				} else {
-					desc.elem = new Lexeme(((Concept) entry).isSingleton() ? INAME : CNAME, entry);
+					desc.elem = new Lexeme(
+							((Concept) entry).isSingleton() ? INAME : CNAME,
+							entry);
 				}
 				return true;
 			} else {

@@ -82,7 +82,9 @@ public final class DepSet {
 		}
 		if (obj instanceof DepSet) {
 			DepSet obj2 = (DepSet) obj;
-			return (delegate == null && obj2.delegate == null) || (delegate != null ? delegate.equals(obj2.delegate) : false); //obj2.delegate.equals(delegate);
+			return (delegate == null && obj2.delegate == null)
+					|| (delegate != null ? delegate.equals(obj2.delegate)
+							: false); //obj2.delegate.equals(delegate);
 		}
 		return false;
 	}
@@ -132,6 +134,7 @@ public final class DepSet {
 			delegate = new FastSetSimple(delegate, toAdd.delegate);
 		}
 	}
+
 	public void add(FastSetSimple d) {
 		if (d == null || d.size() == 0) {
 			return;

@@ -13,7 +13,8 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NAryExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
-public final class DataOr extends NAryExpressionImpl<DataExpression> implements NAryExpression<DataExpression>, DataExpression {
+public final class DataOr extends NAryExpressionImpl<DataExpression> implements
+		NAryExpression<DataExpression>, DataExpression {
 	/** create OR of expressions from the given array */
 	public DataOr(final List<Expression> v) {
 		add(v);

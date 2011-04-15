@@ -34,7 +34,8 @@ public final class SortedIntList {
 		if (values != null) {
 			return values[i];
 		}
-		throw new IllegalArgumentException("Illegal argument " + i + ": no such element");
+		throw new IllegalArgumentException("Illegal argument " + i
+				+ ": no such element");
 	}
 
 	protected final void init() {

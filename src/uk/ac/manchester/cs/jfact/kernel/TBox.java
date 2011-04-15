@@ -125,11 +125,6 @@ public final class TBox {
 	private LogicFeatures auxFeatures = new LogicFeatures();
 	/** pointer to current feature (in case of local ones) */
 	private LogicFeatures curFeature = new LogicFeatures();
-	// auxiliary concepts for Taxonomy
-	/** concept representing Top */
-	private Concept pTop;
-	/** concept representing Bottom */
-	private Concept pBottom;
 	/**
 	 * concept representing temporary one that can not be used anywhere in the
 	 * ontology
@@ -323,7 +318,6 @@ public final class TBox {
 
 	/** set told TOP concept whether necessary */
 	public void setToldTop() {
-		Concept top = pTop;
 		for (Concept pc : concepts.getList()) {
 			pc.setToldTop(top);
 		}
@@ -429,9 +423,10 @@ public final class TBox {
 			return;
 		}
 		o.print("Axioms:\nT [=");
-		depth=0;
+		depth = 0;
 		printDagEntry(o, internalisedGeneralAxiom);
 	}
+
 	int depth;
 
 	/** check if the role R is irreflexive */
@@ -577,23 +572,20 @@ public final class TBox {
 		return individuals.isRegistered(name);
 	}
 
-	/** @return true iff given ENTRY is a registered individual */
-	public boolean isIndividual(final NamedEntry entry) {
-		return isIndividual(entry.getName());
-	}
-
 	/** @return true iff given TREE represents a registered individual */
 	public boolean isIndividual(final DLTree tree) {
-		return tree.token() == INAME && isIndividual(tree.elem().getNE());
+		return tree.token() == INAME
+				&& isIndividual(tree.elem().getNE().getName());
 	}
 
+	//TODO move
 	/** get TOP/BOTTOM/CN/IN by the DLTree entry */
 	public Concept getCI(final DLTree name) {
 		if (name.isTOP()) {
-			return pTop;
+			return top;
 		}
 		if (name.isBOTTOM()) {
-			return pBottom;
+			return bottom;
 		}
 		if (!name.isName()) {
 			return null;
@@ -610,14 +602,14 @@ public final class TBox {
 		if (C == null) {
 			return null;
 		}
-		if (C.equals(pTop)) {
+		if (C.isTop()) {
 			return DLTreeFactory.createTop();
 		}
-		if (C.equals(pBottom)) {
+		if (C.isBottom()) {
 			return DLTreeFactory.createBottom();
 		}
-		return DLTreeFactory.buildTree(new Lexeme(isIndividual(C) ? INAME
-				: CNAME, C));
+		return DLTreeFactory.buildTree(new Lexeme(
+				isIndividual(C.getName()) ? INAME : CNAME, C));
 	}
 
 	/**
@@ -634,7 +626,7 @@ public final class TBox {
 	/** individual relation <a,b>:R */
 	public void registerIndividualRelation(NamedEntry a, NamedEntry R,
 			NamedEntry b) {
-		if (!isIndividual(a) || !isIndividual(b)) {
+		if (!isIndividual(a.getName()) || !isIndividual(b.getName())) {
 			throw new ReasonerInternalException(
 					"Individual expected in related()");
 		}
@@ -878,40 +870,35 @@ public final class TBox {
 				: p.isDataValue() ? dtDataValue : dtDataExpr;
 		int hostBP = bpTOP;
 		//TODO this is broken: the next two lines are commented but should not be
-				if (p.getType() != null) {
-					hostBP = addDataExprToHeap(p.getType());
-				}
+		if (p.getType() != null) {
+			hostBP = addDataExprToHeap(p.getType());
+		}
 		// sets it off 0 and 1 - although it's not necessarily correct
 		//hostBP = p.getDatatype().ordinal() + 2;
 		DLVertex ver = new DLVertex(dt, 0, null, hostBP, null);
 		ver.setConcept(p);
-	//	System.out.println("TBox.addDataExprToHeap() "+p);
+		//	System.out.println("TBox.addDataExprToHeap() "+p);
 		p.setBP(dlHeap.directAdd(ver));
 		//dlHeap.print(new LeveLogger.LogAdapterStream());
 		return p.getBP();
 	}
 
 	public int addDataExprToHeap(Datatypes p) {
-
 		//XXX possibly a bug here
 		//int hostBP = p.getDatatype().ordinal() + 2;
 		//
-		
 		// create a concept and check if it's already in the list
 		// TODO needs to be more efficient
-		DataTypeName concept=new DataTypeName(p);
-		int index=dlHeap.index(concept);
-		if(index!=bpINVALID) {
+		DataTypeName concept = new DataTypeName(p);
+		int index = dlHeap.index(concept);
+		if (index != bpINVALID) {
 			return index;
 		}
-//		System.out.println("TBox.addDataExprToHeap(datatypename) "+p);
+		//		System.out.println("TBox.addDataExprToHeap(datatypename) "+p);
 		// else, create a new vertex and add it
 		DLVertex ver = new DLVertex(dtDataType, 0, null, bpTOP, null);
 		ver.setConcept(concept);
-		
-		
 		int directAdd = dlHeap.directAdd(ver);
-
 		return directAdd;
 	}
 
@@ -953,7 +940,8 @@ public final class TBox {
 				if (cur.getNE() instanceof DataEntry) {
 					ret = addDataExprToHeap((DataEntry) cur.getNE());
 				} else {
-					ret = addDataExprToHeap(((DataTypeName) cur.getNE()).getDatatype());
+					ret = addDataExprToHeap(((DataTypeName) cur.getNE())
+							.getDatatype());
 				}
 				break;
 			case CNAME:
@@ -1049,7 +1037,7 @@ public final class TBox {
 		if (t.isAND()) {
 			boolean ret = false;
 			List<DLTree> children = t.getChildren();
-			int size = children.size();
+			final int size = children.size();
 			for (int i = 0; i < size; i++) {
 				ret |= fillANDVertex(v, children.get(i));
 			}
@@ -1060,7 +1048,7 @@ public final class TBox {
 	}
 
 	public void initTaxonomy() {
-		pTax = new DLConceptTaxonomy(pTop, pBottom, this, GCIs);
+		pTax = new DLConceptTaxonomy(top, bottom, this, GCIs);
 	}
 
 	private List<Concept> arrayCD = new ArrayList<Concept>(),
@@ -1225,9 +1213,12 @@ public final class TBox {
 		return C;
 	}
 
+	private Concept top;
+	private Concept bottom;
+
 	private void initTopBottom() {
-		pBottom = Concept.BOTTOM;
-		pTop = Concept.TOP;
+		top = Concept.getTOP();
+		bottom = Concept.getBOTTOM();
 		pTemp = Concept.getTEMP();
 	}
 
@@ -1310,7 +1301,7 @@ public final class TBox {
 			}
 			ret = nomReasoner.consistentNominalCloud();
 		} else {
-			ret = isSatisfiable(pTop);
+			ret = isSatisfiable(top);
 			// setup cache for GCI
 			if (GCIs.isGCI()) {
 				dlHeap.setCache(-internalisedGeneralAxiom, new ModelCacheConst(
@@ -1359,7 +1350,7 @@ public final class TBox {
 		if (a.equals(b)) {
 			return true;
 		}
-		if (!isIndividual(a) || !isIndividual(b)) {
+		if (!isIndividual(a.getName()) || !isIndividual(b.getName())) {
 			throw new ReasonerInternalException(
 					"Individuals are expected in the isSameIndividuals() query");
 		}
@@ -1489,7 +1480,7 @@ public final class TBox {
 
 	public void printDagEntry(LeveLogger.LogAdapter o, int p) {
 		depth++;
-		if(depth%200==0) {
+		if (depth % 200 == 0) {
 			System.out.println("TBox.printDagEntry()");
 			return;
 		}
@@ -1576,7 +1567,7 @@ public final class TBox {
 			o.print(String.format(".%s [%s] %s", p.getName(), p.getTsDepth(),
 					(p.isNonPrimitive() ? "=" : "[=")));
 			if (isValid(p.getpBody())) {
-				depth=0;
+				depth = 0;
 				printDagEntry(o, p.getpBody());
 			}
 			if (p.getDescription() != null) {
@@ -1767,10 +1758,10 @@ public final class TBox {
 		Concept C = resolveSynonym(getCI(CN));
 		assert C != null;
 		// lie: this will never be reached
-		if (C.equals(pBottom)) {
+		if (C.isBottom()) {
 			return DLTreeFactory.createBottom();
 		}
-		if (C.equals(pTop)) {
+		if (C.isTop()) {
 		} else if (!(C.isSingleton() && D.isName())
 				&& equalTrees(C.getDescription(), D)) {
 			makeNonPrimitive(C, D);
@@ -1783,10 +1774,10 @@ public final class TBox {
 	public DLTree applyAxiomCNToC(DLTree CN, DLTree D) {
 		Concept C = resolveSynonym(getCI(CN));
 		assert C != null;
-		if (C.equals(pTop)) {
+		if (C.isTop()) {
 			return DLTreeFactory.createTop();
 		}
-		if (C.equals(pBottom)) {
+		if (C.isBottom()) {
 		} else if (C.isPrimitive()) {
 			C.addDesc(D);
 		} else {
@@ -1842,7 +1833,7 @@ public final class TBox {
 
 	public boolean addNonprimitiveDefinition(DLTree left, DLTree right) {
 		Concept C = resolveSynonym(getCI(left));
-		if (C == null || C.equals(pTop) || C.equals(pBottom)) {
+		if (C == null || C.isTop() || C.isBottom()) {
 			return false;
 		}
 		Concept D = getCI(right);
@@ -1862,7 +1853,7 @@ public final class TBox {
 
 	public boolean switchToNonprimitive(DLTree left, DLTree right) {
 		Concept C = resolveSynonym(getCI(left));
-		if (C == null || C.equals(pTop) || C.equals(pBottom)) {
+		if (C == null || C.isTop() || C.isBottom()) {
 			return false;
 		}
 		Concept D = resolveSynonym(getCI(right));
@@ -1924,18 +1915,14 @@ public final class TBox {
 	}
 
 	public void processSame(List<DLTree> l) {
-		if (l.size() == 0) {
-			return;
-		}
-		if (!isIndividual(l.get(0))) {
-			throw new ReasonerInternalException(
-					"Only individuals allowed in processSame()");
-		}
-		for (int i = 0; i < l.size() - 1; i++) {
-			if (!isIndividual(l.get(i + 1))) {
+		final int size = l.size();
+		for (int i = 0; i < size; i++) {
+			if (!isIndividual(l.get(i))) {
 				throw new ReasonerInternalException(
 						"Only individuals allowed in processSame()");
 			}
+		}
+		for (int i = 0; i < size - 1; i++) {
 			//TODO check if this is checking all combinations
 			addEqualityAxiom(l.get(i), l.get(i + 1).copy());
 		}
@@ -1945,20 +1932,22 @@ public final class TBox {
 		if (l.isEmpty()) {
 			throw new ReasonerInternalException("Empty disjoint role axiom");
 		}
-		for (DLTree p : l) {
-			if (DLTreeFactory.isUniversalRole(p)) {
+		final int size = l.size();
+		for (int i = 0; i < size; i++) {
+			if (DLTreeFactory.isUniversalRole(l.get(i))) {
 				throw new ReasonerInternalException(
 						"Universal role in the disjoint roles axiom");
 			}
 		}
-		RoleMaster RM = getRM(Role.resolveRole(l.get(0)));
-		for (int i = 0; i < l.size(); i++) {
-			DLTree p = l.get(i);
-			Role r = Role.resolveRole(p);
-			for (int j = i + 1; j < l.size(); j++) {
-				RM.addDisjointRoles(r, Role.resolveRole(l.get(j)));
+		List<Role> roles = new ArrayList<Role>(size);
+		for (int i = 0; i < size; i++) {
+			roles.add(Role.resolveRole(l.get(i)));
+		}
+		RoleMaster RM = getRM(roles.get(0));
+		for (int i = 0; i < size - 1; i++) {
+			for (int j = i + 1; j < size; j++) {
+				RM.addDisjointRoles(roles.get(i), roles.get(j));
 			}
-			l.set(i, null);
 		}
 	}
 
@@ -2111,7 +2100,7 @@ public final class TBox {
 	public Concept checkToldCycle(Concept _p) {
 		assert _p != null;
 		Concept p = resolveSynonym(_p);
-		if (p.equals(pTop)) {
+		if (p.isTop()) {
 			return null;
 		}
 		if (conceptInProcess.contains(p)) {
@@ -2387,14 +2376,14 @@ public final class TBox {
 
 	/** set relevance for a DLVertex */
 	private final void setRelevant(int _p) {
-		FastSet done=FastSetFactory.create();
+		FastSet done = FastSetFactory.create();
 		LinkedList<Integer> queue = new LinkedList<Integer>();
 		queue.add(_p);
 		while (queue.size() > 0) {
 			int p = queue.remove(0);
-			if(done.contains(p)) {
+			if (done.contains(p)) {
 				// skip cycles
-//				System.out.println("TBox.setRelevant() cycle: "+p);
+				//				System.out.println("TBox.setRelevant() cycle: "+p);
 				continue;
 			}
 			done.add(p);

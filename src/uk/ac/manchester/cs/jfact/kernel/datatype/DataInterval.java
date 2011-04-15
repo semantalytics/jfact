@@ -5,22 +5,24 @@ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-public final class DataInterval {
+public class DataInterval {
 	/** left border of the interval */
-	public Literal min;
+	protected Literal min;
 	/** right border of the interval */
-	public Literal max;
+	protected Literal max;
 	/** type of the left border */
-	public boolean minExcl;
+	protected boolean minExcl;
 	/** type of the right border */
-	public boolean maxExcl;
+	protected boolean maxExcl;
 
 	public DataInterval() {
 	}
 
 	public DataInterval(DataInterval copy) {
-		min = copy.min == null ? null : copy.min.getDatatype().build(copy.min.getValue());
-		max = copy.max == null ? null : copy.max.getDatatype().build(copy.max.getValue());
+		min = copy.min == null ? null : copy.min.getDatatype().build(
+				copy.min.getValue());
+		max = copy.max == null ? null : copy.max.getDatatype().build(
+				copy.max.getValue());
 		minExcl = copy.minExcl;
 		maxExcl = copy.maxExcl;
 	}

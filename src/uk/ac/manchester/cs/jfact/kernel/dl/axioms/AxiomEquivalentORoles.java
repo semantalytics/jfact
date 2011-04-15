@@ -17,7 +17,8 @@ import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitorEx;
 
 /** Object Role equivalence axiom */
-public final class AxiomEquivalentORoles extends AxiomImpl implements Axiom, NAryExpression<ObjectRoleExpression> {
+public final class AxiomEquivalentORoles extends AxiomImpl implements Axiom,
+		NAryExpression<ObjectRoleExpression> {
 	private final NAryExpressionImpl<ObjectRoleExpression> delegate;
 
 	public AxiomEquivalentORoles(final List<Expression> v) {

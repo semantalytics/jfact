@@ -17,7 +17,8 @@ import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitorEx;
 
 /** Same individuals axiom */
-public final class AxiomSameIndividuals extends AxiomImpl implements Axiom, NAryExpression<IndividualExpression> {
+public final class AxiomSameIndividuals extends AxiomImpl implements Axiom,
+		NAryExpression<IndividualExpression> {
 	private final NAryExpressionImpl<IndividualExpression> delegate;
 
 	public AxiomSameIndividuals(final List<Expression> v) {

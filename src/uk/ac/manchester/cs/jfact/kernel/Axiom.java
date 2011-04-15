@@ -27,7 +27,10 @@ public final class Axiom {
 		DLTree bestConcept = null;
 		// finds all primitive negated concept names without description
 		for (DLTree p : disjuncts) {
-			if (p.token() == NOT && p.getChild().isName() && (Concept = getConcept(p.getChild())).isPrimitive() && !Concept.isSingleton() && Concept.getDescription() == null) {
+			if (p.token() == NOT && p.getChild().isName()
+					&& (Concept = getConcept(p.getChild())).isPrimitive()
+					&& !Concept.isSingleton()
+					&& Concept.getDescription() == null) {
 				SAbsNAttempt();
 				Cons.add(p);
 			}
@@ -44,11 +47,15 @@ public final class Axiom {
 		// normal concept absorption
 		Concept = InAx.getConcept(bestConcept.getChild());
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.print(" N-Absorb GCI to concept " + Concept.getName());
+			LeveLogger.logger_absorption.print(" N-Absorb GCI to concept "
+					+ Concept.getName());
 			if (Cons.size() > 1) {
 				LeveLogger.logger_absorption.print(" (other options are");
 				for (int j = 1; j < Cons.size(); ++j) {
-					LeveLogger.logger_absorption.print(" " + InAx.getConcept(Cons.get(j).getChild()).getName());
+					LeveLogger.logger_absorption
+							.print(" "
+									+ InAx.getConcept(Cons.get(j).getChild())
+											.getName());
 				}
 				LeveLogger.logger_absorption.print(")");
 			}
@@ -79,9 +86,11 @@ public final class Axiom {
 	private Axiom simplifyPosNP(DLTree pos) {
 		SAbsRepCN();
 		Axiom ret = copy(pos);
-		ret.add(DLTreeFactory.createSNFNot(InAx.getConcept(pos.getChild()).getDescription().copy()));
+		ret.add(DLTreeFactory.createSNFNot(InAx.getConcept(pos.getChild())
+				.getDescription().copy()));
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.print(" simplify CN expression for " + pos.getChild());
+			LeveLogger.logger_absorption.print(" simplify CN expression for "
+					+ pos.getChild());
 		}
 		return ret;
 	}
@@ -92,7 +101,8 @@ public final class Axiom {
 		Axiom ret = copy(pos);
 		ret.add(InAx.getConcept(pos).getDescription().copy());
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.print(" simplify ~CN expression for " + pos);
+			LeveLogger.logger_absorption.print(" simplify ~CN expression for "
+					+ pos);
 		}
 		return ret;
 	}
@@ -121,7 +131,8 @@ public final class Axiom {
 			if (InAx.isAnd(p)) {
 				SAbsSplit();
 				if (LeveLogger.isAbsorptionActive()) {
-					LeveLogger.logger_absorption.print(" split AND espression " + p.getChild());
+					LeveLogger.logger_absorption.print(" split AND espression "
+							+ p.getChild());
 				}
 				acc = split(acc, p, p.getChildren().iterator().next());
 				// no need to split more than once:
@@ -196,7 +207,8 @@ public final class Axiom {
 		SAbsRepForall();
 		DLTree pAll = pos.getChild(); // (all R ~C)
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.print(" simplify ALL expression" + pAll);
+			LeveLogger.logger_absorption.print(" simplify ALL expression"
+					+ pAll);
 		}
 		Axiom ret = copy(pos);
 		ret.add(KB.getTree(KB.replaceForall(pAll.copy())));
@@ -224,7 +236,8 @@ public final class Axiom {
 				case BOTTOM: // axiom in the form T [= T or ...; nothing to do
 					SAbsBApply();
 					if (IfDefs.RKG_DEBUG_ABSORPTION) {
-						LeveLogger.logger_absorption.print(" Absorb into BOTTOM");
+						LeveLogger.logger_absorption
+								.print(" Absorb into BOTTOM");
 					}
 					return true;
 				case TOP: // skip it here
@@ -242,7 +255,9 @@ public final class Axiom {
 				if (q.equals(s)) {
 					SAbsBApply();
 					if (IfDefs.RKG_DEBUG_ABSORPTION) {
-						LeveLogger.logger_absorption.print(" Absorb into BOTTOM due to (not" + q + ") and" + s);
+						LeveLogger.logger_absorption
+								.print(" Absorb into BOTTOM due to (not" + q
+										+ ") and" + s);
 					}
 					return true;
 				}
@@ -271,11 +286,13 @@ public final class Axiom {
 		// normal concept absorption
 		Concept Concept = InAx.getConcept(bestConcept);
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.print(" C-Absorb GCI to concept " + Concept.getName());
+			LeveLogger.logger_absorption.print(" C-Absorb GCI to concept "
+					+ Concept.getName());
 			if (Cons.size() > 1) {
 				LeveLogger.logger_absorption.print(" (other options are");
 				for (int j = 1; j < Cons.size(); ++j) {
-					LeveLogger.logger_absorption.print(" " + InAx.getConcept(Cons.get(j)).getName());
+					LeveLogger.logger_absorption.print(" "
+							+ InAx.getConcept(Cons.get(j)).getName());
 				}
 				LeveLogger.logger_absorption.print(")");
 			}
@@ -292,7 +309,8 @@ public final class Axiom {
 		List<DLTree> Cons = new ArrayList<DLTree>();
 		DLTree bestSome = null;
 		for (DLTree p : disjuncts) {
-			if (p.token() == NOT && (p.getChild().token() == FORALL || p.getChild().token() == LE)) {
+			if (p.token() == NOT
+					&& (p.getChild().token() == FORALL || p.getChild().token() == LE)) {
 				SAbsRAttempt();
 				Cons.add(p);
 				if (p.getChild().getRight().isBOTTOM()) {
@@ -312,11 +330,17 @@ public final class Axiom {
 			role = Role.resolveRole(Cons.get(0).getChild().getLeft());
 		}
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.print(" R-Absorb GCI to the domain of role " + role.getName());
+			LeveLogger.logger_absorption
+					.print(" R-Absorb GCI to the domain of role "
+							+ role.getName());
 			if (Cons.size() > 1) {
 				LeveLogger.logger_absorption.print(" (other options are");
 				for (int j = 1; j < Cons.size(); ++j) {
-					LeveLogger.logger_absorption.print(" " + Role.resolveRole(Cons.get(j).getChild().getLeft()).getName());
+					LeveLogger.logger_absorption
+							.print(" "
+									+ Role.resolveRole(
+											Cons.get(j).getChild().getLeft())
+											.getName());
 				}
 				LeveLogger.logger_absorption.print(")");
 			}
@@ -352,9 +376,11 @@ public final class Axiom {
 		// make an absorption
 		DLTree desc = KB.makeNonPrimitive(C, DLTreeFactory.createTop());
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.println("TAxiom.absorbIntoTop() T-Absorb GCI to axiom");
+			LeveLogger.logger_absorption
+					.println("TAxiom.absorbIntoTop() T-Absorb GCI to axiom");
 			if (desc != null) {
-				LeveLogger.logger_absorption.println("s *TOP* [=" + desc + " and");
+				LeveLogger.logger_absorption.println("s *TOP* [=" + desc
+						+ " and");
 			}
 			LeveLogger.logger.println(" " + C.getName() + " = *TOP*");
 		}

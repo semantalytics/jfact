@@ -97,7 +97,8 @@ public final class DLConceptTaxonomy extends Taxonomy {
 	public void preClassificationActions() {
 		++nConcepts;
 		if (pTaxProgress != null) {
-			pTaxProgress.reasonerTaskProgressChanged((int) nConcepts, tBox.getNItems());
+			pTaxProgress.reasonerTaskProgressChanged((int) nConcepts,
+					tBox.getNItems());
 		}
 	}
 
@@ -108,7 +109,8 @@ public final class DLConceptTaxonomy extends Taxonomy {
 	}
 
 	/** the only c'tor */
-	public DLConceptTaxonomy(final Concept pTop, final Concept pBottom, TBox kb, final KBFlags GCIs) {
+	public DLConceptTaxonomy(final Concept pTop, final Concept pBottom,
+			TBox kb, final KBFlags GCIs) {
 		super(pTop, pBottom);
 		tBox = kb;
 		nConcepts = 0;
@@ -163,7 +165,8 @@ public final class DLConceptTaxonomy extends Taxonomy {
 		// we DON'T need bottom-up phase for primitive concepts during CD-like reasoning
 		// if no GCIs are in the TBox (C [= T, T [= X or Y, X [= D, Y [= D)
 		// or no reflexive roles w/RnD precent (Refl(R), Range(R)=D)
-		return flagNeedBottomUp || !useCompletelyDefined || curConcept().isNonPrimitive();
+		return flagNeedBottomUp || !useCompletelyDefined
+				|| curConcept().isNonPrimitive();
 	}
 
 	private boolean testSub(final Concept p, final Concept q) {
@@ -211,8 +214,17 @@ public final class DLConceptTaxonomy extends Taxonomy {
 
 	@Override
 	public void print(LogAdapter o) {
-		o.print(Templates.DLCONCEPTTAXONOMY, nTries, nPositives, nPositives * 100 / Math.max(1, nTries), nCachedPositive, nCachedNegative, (nSortedNegative > 0 ? String.format("Sorted reasoning deals with %s non-subsumptions\n", nSortedNegative) : ""), nSearchCalls, nSubCalls,
-				nNonTrivialSubCalls, nEntries * (nEntries - 1) / Math.max(1, nTries));
+		o.print(Templates.DLCONCEPTTAXONOMY,
+				nTries,
+				nPositives,
+				nPositives * 100 / Math.max(1, nTries),
+				nCachedPositive,
+				nCachedNegative,
+				(nSortedNegative > 0 ? String.format(
+						"Sorted reasoning deals with %s non-subsumptions\n",
+						nSortedNegative) : ""), nSearchCalls, nSubCalls,
+				nNonTrivialSubCalls,
+				nEntries * (nEntries - 1) / Math.max(1, nTries));
 		super.print(o);
 	}
 
@@ -221,7 +233,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 		++nSearchCalls;
 		boolean noPosSucc = true;
 		List<TaxonomyVertex> neigh = cur.neigh(upDirection);
-		int size = neigh.size();
+		final int size = neigh.size();
 		for (int i = 0; i < size; i++) {
 			TaxonomyVertex p = neigh.get(i);
 			if (enhancedSubs(upDirection, p)) {
@@ -243,7 +255,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 	private boolean enhancedSubs1(boolean upDirection, TaxonomyVertex cur) {
 		++nNonTrivialSubCalls;
 		List<TaxonomyVertex> neigh = cur.neigh(!upDirection);
-		int size = neigh.size();
+		final int size = neigh.size();
 		for (int i = 0; i < size; i++) {
 			if (!enhancedSubs(upDirection, neigh.get(i))) {
 				return false;
@@ -292,7 +304,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 		final boolean upDirection = true;
 		nCommon = 1;
 		List<TaxonomyVertex> list = current.neigh(upDirection);
-		int size = list.size();
+		final int size = list.size();
 		assert size > 0; // there is at least one parent (TOP)
 		TaxonomyVertex p = list.get(0);
 		// define possible successors of the node
@@ -320,7 +332,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 	}
 
 	private void clearCommon() {
-		int size = common.size();
+		final int size = common.size();
 		for (int i = 0; i < size; i++) {
 			common.get(i).clearCommon();
 		}
@@ -354,7 +366,8 @@ public final class DLConceptTaxonomy extends Taxonomy {
 					return true;
 				} else // non-det merge: check whether it is the same
 				{
-					logger.print("\nTAX: trying '" + curI.getName() + "' = '" + syn.getName() + "'... ");
+					logger.print("\nTAX: trying '" + curI.getName() + "' = '"
+							+ syn.getName() + "'... ");
 					if (testSubTBox(curI, syn)) // they are actually the same
 					{
 						insertCurrent(syn.getTaxVertex());

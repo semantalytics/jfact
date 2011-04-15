@@ -14,7 +14,8 @@ public final class AxiomRelatedToNot extends AxiomIndividual {
 	private final IndividualExpression individualExpression;
 	private final ObjectRoleExpression objectRoleExpression;
 
-	public AxiomRelatedToNot(final IndividualExpression i, final ObjectRoleExpression r, final IndividualExpression j) {
+	public AxiomRelatedToNot(final IndividualExpression i,
+			final ObjectRoleExpression r, final IndividualExpression j) {
 		super(i);
 		objectRoleExpression = r;
 		individualExpression = j;

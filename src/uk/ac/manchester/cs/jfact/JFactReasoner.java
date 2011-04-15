@@ -58,8 +58,8 @@ import uk.ac.manchester.cs.jfact.kernel.ReasoningKernel;
 import uk.ac.manchester.cs.jfact.kernel.actors.ClassPolicy;
 import uk.ac.manchester.cs.jfact.kernel.actors.DataPropertyPolicy;
 import uk.ac.manchester.cs.jfact.kernel.actors.IndividualPolicy;
-import uk.ac.manchester.cs.jfact.kernel.actors.TaxonomyActor;
 import uk.ac.manchester.cs.jfact.kernel.actors.ObjectPropertyPolicy;
+import uk.ac.manchester.cs.jfact.kernel.actors.TaxonomyActor;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ConceptExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataRoleExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.IndividualExpression;
@@ -342,7 +342,9 @@ public final class JFactReasoner implements OWLReasoner,
 			InconsistentOntologyException {
 		for (InferenceType it : inferenceTypes) {
 			if (supportedInferenceTypes.contains(it)) {
-				kernel.realiseKB();
+				if (!kernel.isKBRealised()) {
+					kernel.realiseKB();
+				}
 				return;
 			}
 		}
@@ -405,7 +407,6 @@ public final class JFactReasoner implements OWLReasoner,
 		//TODO have the exception thrown from the entailment checker
 		boolean entailed = axiom.accept(translationMachinery
 				.getEntailmentChecker());
-		
 		return entailed;
 	}
 

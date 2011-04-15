@@ -8,7 +8,8 @@ You should have received a copy of the GNU Lesser General Public License along w
 import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 
-public interface FacetExpression extends DataExpression, DataExpressionArg<DataValue> {
+public interface FacetExpression extends DataExpression,
+		DataExpressionArg<DataValue> {
 	/** accept method for the visitor pattern */
 	public void accept(DLExpressionVisitor visitor);
 }

@@ -94,7 +94,8 @@ public final class RAStateTransitions {
 		if (R == null) {
 			return false;
 		}
-		return R.isDataRole() == dataRole && applicableRoles.get(R.getAbsoluteIndex());
+		return R.isDataRole() == dataRole
+				&& applicableRoles.get(R.getAbsoluteIndex());
 	}
 
 	/** @return true iff there is only one transition */

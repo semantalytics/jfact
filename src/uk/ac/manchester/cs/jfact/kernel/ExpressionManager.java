@@ -99,38 +99,46 @@ public final class ExpressionManager {
 		}
 	}
 
-	protected static final class DataroleNameCreator implements NameCreator<DataRoleName> {
+	protected static final class DataroleNameCreator implements
+			NameCreator<DataRoleName> {
 		public DataRoleName makeEntry(String name) {
 			return new DataRoleName(name);
 		}
 	}
 
-	protected static final class ObjectroleNameCreator implements NameCreator<ObjectRoleName> {
+	protected static final class ObjectroleNameCreator implements
+			NameCreator<ObjectRoleName> {
 		public ObjectRoleName makeEntry(String name) {
 			return new ObjectRoleName(name);
 		}
 	}
 
-	protected static final class IndividualNameCreator implements NameCreator<IndividualName> {
+	protected static final class IndividualNameCreator implements
+			NameCreator<IndividualName> {
 		public IndividualName makeEntry(String name) {
 			return new IndividualName(name);
 		}
 	}
 
-	protected static final class ConceptNameCreator implements NameCreator<ConceptName> {
+	protected static final class ConceptNameCreator implements
+			NameCreator<ConceptName> {
 		public ConceptName makeEntry(String name) {
 			return new ConceptName(name);
 		}
 	}
 
 	/** nameset for concepts */
-	private final NameSet<ConceptName> conceptNameset = new NameSet<ConceptName>(new ConceptNameCreator());
+	private final NameSet<ConceptName> conceptNameset = new NameSet<ConceptName>(
+			new ConceptNameCreator());
 	/** nameset for individuals */
-	private final NameSet<IndividualName> individualNameset = new NameSet<IndividualName>(new IndividualNameCreator());
+	private final NameSet<IndividualName> individualNameset = new NameSet<IndividualName>(
+			new IndividualNameCreator());
 	/** nameset for object roles */
-	private final NameSet<ObjectRoleName> objectRoleNameset = new NameSet<ObjectRoleName>(new ObjectroleNameCreator());
+	private final NameSet<ObjectRoleName> objectRoleNameset = new NameSet<ObjectRoleName>(
+			new ObjectroleNameCreator());
 	/** nameset for data roles */
-	private final NameSet<DataRoleName> dataRoleNameset = new NameSet<DataRoleName>(new DataroleNameCreator());
+	private final NameSet<DataRoleName> dataRoleNameset = new NameSet<DataRoleName>(
+			new DataroleNameCreator());
 	/** TOP concept */
 	private final ConceptTop top = new ConceptTop();
 	/** BOTTOM concept */
@@ -247,17 +255,20 @@ public final class ExpressionManager {
 	}
 
 	/** get value restriction wrt an object role R and an individual I */
-	public ConceptExpression value(final ObjectRoleExpression R, final IndividualExpression I) {
+	public ConceptExpression value(final ObjectRoleExpression R,
+			final IndividualExpression I) {
 		return record(new ConceptObjectValue(R, I));
 	}
 
 	/** get existential restriction wrt an object role R and a concept C */
-	public ConceptExpression exists(final ObjectRoleExpression R, final ConceptExpression C) {
+	public ConceptExpression exists(final ObjectRoleExpression R,
+			final ConceptExpression C) {
 		return record(new ConceptObjectExists(R, C));
 	}
 
 	/** get universal restriction wrt an object role R and a concept C */
-	public ConceptExpression forall(final ObjectRoleExpression R, final ConceptExpression C) {
+	public ConceptExpression forall(final ObjectRoleExpression R,
+			final ConceptExpression C) {
 		return record(new ConceptObjectForall(R, C));
 	}
 
@@ -265,7 +276,8 @@ public final class ExpressionManager {
 	 * get min cardinality restriction wrt number N, an object role R and a
 	 * concept C
 	 */
-	public ConceptExpression minCardinality(int n, final ObjectRoleExpression R, final ConceptExpression C) {
+	public ConceptExpression minCardinality(int n,
+			final ObjectRoleExpression R, final ConceptExpression C) {
 		return record(new ConceptObjectMinCardinality(n, R, C));
 	}
 
@@ -273,7 +285,8 @@ public final class ExpressionManager {
 	 * get max cardinality restriction wrt number N, an object role R and a
 	 * concept C
 	 */
-	public ConceptExpression maxCardinality(int n, final ObjectRoleExpression R, final ConceptExpression C) {
+	public ConceptExpression maxCardinality(int n,
+			final ObjectRoleExpression R, final ConceptExpression C) {
 		return record(new ConceptObjectMaxCardinality(n, R, C));
 	}
 
@@ -281,7 +294,8 @@ public final class ExpressionManager {
 	 * get exact cardinality restriction wrt number N, an object role R and a
 	 * concept C
 	 */
-	public ConceptExpression cardinality(int n, final ObjectRoleExpression R, final ConceptExpression C) {
+	public ConceptExpression cardinality(int n, final ObjectRoleExpression R,
+			final ConceptExpression C) {
 		return record(new ConceptObjectExactCardinality(n, R, C));
 	}
 
@@ -291,12 +305,14 @@ public final class ExpressionManager {
 	}
 
 	/** get existential restriction wrt a data role R and a data expression E */
-	public ConceptExpression exists(final DataRoleExpression R, final DataExpression E) {
+	public ConceptExpression exists(final DataRoleExpression R,
+			final DataExpression E) {
 		return record(new ConceptDataExists(R, E));
 	}
 
 	/** get universal restriction wrt a data role R and a data expression E */
-	public ConceptExpression forall(final DataRoleExpression R, final DataExpression E) {
+	public ConceptExpression forall(final DataRoleExpression R,
+			final DataExpression E) {
 		return record(new ConceptDataForall(R, E));
 	}
 
@@ -304,7 +320,8 @@ public final class ExpressionManager {
 	 * get min cardinality restriction wrt number N, a data role R and a data
 	 * expression E
 	 */
-	public ConceptExpression minCardinality(int n, final DataRoleExpression R, final DataExpression E) {
+	public ConceptExpression minCardinality(int n, final DataRoleExpression R,
+			final DataExpression E) {
 		return record(new ConceptDataMinCardinality(n, R, E));
 	}
 
@@ -312,7 +329,8 @@ public final class ExpressionManager {
 	 * get max cardinality restriction wrt number N, a data role R and a data
 	 * expression E
 	 */
-	public ConceptExpression maxCardinality(int n, final DataRoleExpression R, final DataExpression E) {
+	public ConceptExpression maxCardinality(int n, final DataRoleExpression R,
+			final DataExpression E) {
 		return record(new ConceptDataMaxCardinality(n, R, E));
 	}
 
@@ -320,7 +338,8 @@ public final class ExpressionManager {
 	 * get exact cardinality restriction wrt number N, a data role R and a data
 	 * expression E
 	 */
-	public ConceptExpression cardinality(int n, final DataRoleExpression R, final DataExpression E) {
+	public ConceptExpression cardinality(int n, final DataRoleExpression R,
+			final DataExpression E) {
 		return record(new ConceptDataExactCardinality(n, R, E));
 	}
 
@@ -355,12 +374,14 @@ public final class ExpressionManager {
 	}
 
 	/** get a expression corresponding to R projected from C */
-	public ObjectRoleComplexExpression projectFrom(final ObjectRoleExpression R, final ConceptExpression C) {
+	public ObjectRoleComplexExpression projectFrom(
+			final ObjectRoleExpression R, final ConceptExpression C) {
 		return record(new ObjectRoleProjectionFrom(R, C));
 	}
 
 	/** get a expression corresponding to R projected into C */
-	public ObjectRoleComplexExpression projectInto(final ObjectRoleExpression R, final ConceptExpression C) {
+	public ObjectRoleComplexExpression projectInto(
+			final ObjectRoleExpression R, final ConceptExpression C) {
 		return record(new ObjectRoleProjectionInto(R, C));
 	}
 
@@ -398,7 +419,8 @@ public final class ExpressionManager {
 	}
 
 	/** get basic boolean data type */
-	public DataTypeRestriction restrictedType(DataTypeExpression type, final FacetExpression facet) {
+	public DataTypeRestriction restrictedType(DataTypeExpression type,
+			final FacetExpression facet) {
 		DataTypeRestriction ret = null;
 		if (type instanceof DataTypeRestriction) {
 			ret = (DataTypeRestriction) type;

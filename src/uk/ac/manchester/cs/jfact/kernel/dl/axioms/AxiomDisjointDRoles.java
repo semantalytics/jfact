@@ -17,7 +17,8 @@ import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitorEx;
 
 /** Data Role disjointness axiom */
-public final class AxiomDisjointDRoles extends AxiomImpl implements Axiom, NAryExpression<DataRoleExpression> {
+public final class AxiomDisjointDRoles extends AxiomImpl implements Axiom,
+		NAryExpression<DataRoleExpression> {
 	private final NAryExpressionImpl<DataRoleExpression> delegate;
 
 	public AxiomDisjointDRoles(final List<Expression> v) {

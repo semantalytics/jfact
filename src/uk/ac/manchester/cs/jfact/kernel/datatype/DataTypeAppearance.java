@@ -8,13 +8,12 @@ You should have received a copy of the GNU Lesser General Public License along w
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import uk.ac.manchester.cs.jfact.dep.DepSet;
 import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.helpers.FastSetSimple;
+import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.helpers.Reference;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 
@@ -61,7 +60,8 @@ public final class DataTypeAppearance {
 	}
 
 	/** set the local parameters for updating */
-	private void setLocal(boolean min, boolean excl, final Literal value, final DepSet dep) {
+	private void setLocal(boolean min, boolean excl, final Literal value,
+			final DepSet dep) {
 		localMin = min;
 		localExcl = excl;
 		localValue = value.getDatatype().build(value.getValue());
@@ -93,9 +93,10 @@ public final class DataTypeAppearance {
 	 * update and add all the intervals from the given range. @return true iff
 	 * clash occurs
 	 */
-	private boolean addIntervals(Collection<DepInterval> c) {
-		for (DepInterval d : c) {
-			if (addUpdatedInterval(new DepInterval(d))) {
+	private boolean addIntervals(List<DepInterval> c) {
+		final int size = c.size();
+		for (int i = 0; i < size; i++) {
+			if (addUpdatedInterval(new DepInterval(c.get(i)))) {
 				return true;
 			}
 		}
@@ -146,7 +147,8 @@ public final class DataTypeAppearance {
 	}
 
 	/** add restrictions [POS]INT to intervals */
-	protected boolean addInterval(boolean pos, final DataInterval Int, final DepSet dep) {
+	protected boolean addInterval(boolean pos, final DataInterval Int,
+			final DepSet dep) {
 		logger.print(Templates.INTERVAL, (pos ? "+" : "-"), Int);
 		return pos ? addPosInterval(Int, dep) : addNegInterval(Int, dep);
 	}
@@ -154,7 +156,8 @@ public final class DataTypeAppearance {
 	/** @return true iff PType and NType leads to clash */
 	protected boolean checkPNTypeClash() {
 		if (hasNType()) {
-			return reportClash(DepSetFactory.plus(pType.second, nType.second), "TNT");
+			return reportClash(DepSetFactory.plus(pType.second, nType.second),
+					"TNT");
 		}
 		return false;
 	}
@@ -216,9 +219,7 @@ public final class DataTypeAppearance {
 }
 
 /** data interval with dep-sets */
-class DepInterval {
-	/** interval itself */
-	private DataInterval constraints = new DataInterval();
+final class DepInterval extends DataInterval {
 	/** local dep-set */
 	private FastSetSimple locDep;
 
@@ -226,22 +227,23 @@ class DepInterval {
 	}
 
 	public DepInterval(DepInterval d) {
-		constraints = new DataInterval(d.constraints);
+		super(d);
 		locDep = d.locDep;
 	}
 
 	/** update MIN border of an TYPE's interval with VALUE wrt EXCL */
-	public boolean update(boolean min, boolean excl, final Literal value, final DepSet dep) {
-		if (!constraints.update(min, excl, value)) {
+	public boolean update(boolean min, boolean excl, final Literal value,
+			final DepSet dep) {
+		if (!super.update(min, excl, value)) {
 			return false;
 		}
-		locDep = dep==null?null:dep.getDelegate();
+		locDep = dep == null ? null : dep.getDelegate();
 		return true;
 	}
 
 	/** check if the interval is consistent wrt given type */
 	public boolean consistent(final Literal type, Reference<DepSet> dep) {
-		if (constraints.consistent(type)) {
+		if (super.consistent(type)) {
 			return true;
 		}
 		dep.getReference().add(locDep);
@@ -249,23 +251,16 @@ class DepInterval {
 	}
 
 	public boolean checkMinMaxClash(Reference<DepSet> dep) {
-		if (!constraints.closed()) {
+		if (!closed()) {
 			return false;
 		}
-		final Literal Min = constraints.min;
-		final Literal Max = constraints.max;
-		if (Min.lesser(Max)) {
+		if (min.lesser(max)) {
 			return false;
 		}
-		if (Max.lesser(Min) || constraints.minExcl || constraints.maxExcl) {
+		if (max.lesser(min) || minExcl || maxExcl) {
 			dep.getReference().add(locDep);
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	public String toString() {
-		return constraints.toString();
 	}
 }

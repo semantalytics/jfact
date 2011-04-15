@@ -75,7 +75,8 @@ public final class IFOption {
 		return tValue;
 	}
 
-	public IFOption(final String name, final String desc, IOType t, final String defVal) {
+	public IFOption(final String name, final String desc, IOType t,
+			final String defVal) {
 		optionName = name;
 		optionDescription = desc;
 		defaultValue = defVal;
@@ -85,9 +86,11 @@ public final class IFOption {
 
 	private boolean setAValue(final String s) {
 		if (type == IOType.iotBool) {
-			if (s.equals("0") || s.equals("off") || s.equals("no") || s.equals("false")) {
+			if (s.equals("0") || s.equals("off") || s.equals("no")
+					|| s.equals("false")) {
 				bValue = false;
-			} else if (s.equals("1") || s.equals("on") || s.equals("yes") || s.equals("true")) {
+			} else if (s.equals("1") || s.equals("on") || s.equals("yes")
+					|| s.equals("true")) {
 				bValue = true;
 			} else {
 				return true;
@@ -105,6 +108,9 @@ public final class IFOption {
 	}
 
 	public void printConfString(LogAdapter o) {
-		o.print(String.format("\n;---\n;--- Option '%s': %s ---\n;---\n;* %s\n;* Default value: '%s'\n\n; %s = %s\n", optionName, type, optionDescription, defaultValue, optionName, type.get(this)));
+		o.print(String
+				.format("\n;---\n;--- Option '%s': %s ---\n;---\n;* %s\n;* Default value: '%s'\n\n; %s = %s\n",
+						optionName, type, optionDescription, defaultValue,
+						optionName, type.get(this)));
 	}
 }

@@ -12,7 +12,8 @@ import java.util.List;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Expression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NAryExpression;
 
-public class NAryExpressionImpl<Argument extends Expression> implements NAryExpression<Argument> {
+public class NAryExpressionImpl<Argument extends Expression> implements
+		NAryExpression<Argument> {
 	/** set of equivalent concept descriptions */
 	private final List<Argument> Base = new ArrayList<Argument>();
 
@@ -45,9 +46,9 @@ public class NAryExpressionImpl<Argument extends Expression> implements NAryExpr
 	public Argument transform(final Expression arg) {
 		return (Argument) arg;
 	}
+
 	@Override
 	public String toString() {
-		
-		return "NAryExpression("+Base+")";
+		return "NAryExpression(" + Base + ")";
 	}
 }

@@ -50,7 +50,8 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	public ModelCacheState curState;
 
 	/** process CT label in given interval; set Deterministic accordingly */
-	private void processLabelInterval(final DLDag DLHeap, List<ConceptWDep> start) {
+	private void processLabelInterval(final DLDag DLHeap,
+			List<ConceptWDep> start) {
 		for (int i = 0; i < start.size(); i++) {
 			ConceptWDep p = start.get(i);
 			int bp = p.getConcept();
@@ -65,7 +66,8 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	}
 
 	/** Create cache model of given CompletionTree using given HEAP */
-	public ModelCacheIan(final DLDag heap, final DlCompletionTree p, boolean flagNominals, int nC, int nR) {
+	public ModelCacheIan(final DLDag heap, final DlCompletionTree p,
+			boolean flagNominals, int nC, int nR) {
 		super(flagNominals);
 		initCacheByLabel(heap, p);
 		initRolesFromArcs(p);
@@ -170,7 +172,8 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	}
 
 	public void processAutomaton(final DLVertex cur) {
-		RAStateTransitions RST = cur.getRole().getAutomaton().getBase().get(cur.getState());
+		RAStateTransitions RST = cur.getRole().getAutomaton().getBase()
+				.get(cur.getState());
 		// for every transition starting from a given state,
 		// add the role that is accepted by a transition
 		List<RATransition> begin = RST.begin();
@@ -193,7 +196,7 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	private void addExistsRole(Role R) {
 		addRoleToCache(R);
 		List<Role> list = R.getAncestor();
-		int size = list.size();
+		final int size = list.size();
 		for (int i = 0; i < size; i++) {
 			addRoleToCache(list.get(i));
 		}
@@ -233,11 +236,24 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	}
 
 	public ModelCacheState isMergableIan(final ModelCacheIan q) {
-		if (posDConcepts.intersects(q.negDConcepts) || q.posDConcepts.intersects(negDConcepts) || IfDefs.RKG_USE_SIMPLE_RULES && getExtra(true).intersect(q.getExtra(true))) {
+		if (posDConcepts.intersects(q.negDConcepts)
+				|| q.posDConcepts.intersects(negDConcepts)
+				|| IfDefs.RKG_USE_SIMPLE_RULES
+				&& getExtra(true).intersect(q.getExtra(true))) {
 			return csInvalid;
-		} else if (existsRoles.intersect(q.forallRoles) || q.existsRoles.intersect(forallRoles) || funcRoles.intersect(q.funcRoles) || posDConcepts.intersects(q.negNConcepts) || posNConcepts.intersects(q.negDConcepts) || posNConcepts.intersects(q.negNConcepts)
-				|| q.posDConcepts.intersects(negNConcepts) || q.posNConcepts.intersects(negDConcepts) || q.posNConcepts.intersects(negNConcepts) || IfDefs.RKG_USE_SIMPLE_RULES
-				&& (getExtra(true).intersect(q.getExtra(false)) || getExtra(false).intersect(q.getExtra(true)) || getExtra(false).intersect(q.getExtra(false)))) {
+		} else if (existsRoles.intersect(q.forallRoles)
+				|| q.existsRoles.intersect(forallRoles)
+				|| funcRoles.intersect(q.funcRoles)
+				|| posDConcepts.intersects(q.negNConcepts)
+				|| posNConcepts.intersects(q.negDConcepts)
+				|| posNConcepts.intersects(q.negNConcepts)
+				|| q.posDConcepts.intersects(negNConcepts)
+				|| q.posNConcepts.intersects(negDConcepts)
+				|| q.posNConcepts.intersects(negNConcepts)
+				|| IfDefs.RKG_USE_SIMPLE_RULES
+				&& (getExtra(true).intersect(q.getExtra(false))
+						|| getExtra(false).intersect(q.getExtra(true)) || getExtra(
+						false).intersect(q.getExtra(false)))) {
 			return csFailed;
 		} else {
 			return csValid;

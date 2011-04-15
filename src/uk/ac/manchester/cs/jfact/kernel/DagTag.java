@@ -12,16 +12,20 @@ public enum DagTag {
 	// illegal entry
 	dtBad("bad-tag"),
 	// operations
-	dtTop("*TOP*"), dtAnd("and"), dtCollection("collection"), dtForall("all"), dtLE("at-most"), dtUAll("all U"), // \dall U.C
+	dtTop("*TOP*"), dtAnd("and"), dtCollection("collection"), dtForall("all"), dtLE(
+			"at-most"), dtUAll("all U"), // \dall U.C
 	dtIrr("irreflexive"), // \neg\exists R.Self
 	dtProj("projection"), // aux vertex with Projection FROM the current node
 	dtNN("NN-stopper"), // NN-rule was applied
 	// ID's
 	dtPConcept("primconcept"), // primitive concept
 	dtNConcept("concept"), // non-primitive concept
-	dtPSingleton("prim-singleton"), dtNSingleton("singleton"), dtDataType("data-type"), dtDataValue("data-value"), dtDataExpr("data-expr");
-	private static final EnumSet<DagTag> TRUE = EnumSet.of(dtDataType, dtDataValue, dtDataExpr, dtNN, dtBad, dtTop);
-	private static final EnumSet<DagTag> NotPos = EnumSet.of(dtPConcept, dtPSingleton, dtCollection, dtProj);
+	dtPSingleton("prim-singleton"), dtNSingleton("singleton"), dtDataType(
+			"data-type"), dtDataValue("data-value"), dtDataExpr("data-expr");
+	private static final EnumSet<DagTag> TRUE = EnumSet.of(dtDataType,
+			dtDataValue, dtDataExpr, dtNN, dtBad, dtTop);
+	private static final EnumSet<DagTag> NotPos = EnumSet.of(dtPConcept,
+			dtPSingleton, dtCollection, dtProj);
 
 	/**
 	 * whether statistic's gathering should be omitted due to the type of a
@@ -63,7 +67,9 @@ public enum DagTag {
 		return isPNameTag() || isNNameTag();
 	}
 
-	private static final EnumSet<DagTag> complexConceptsEnumSet = EnumSet.of(DagTag.dtForall, DagTag.dtLE, DagTag.dtIrr, DagTag.dtUAll, DagTag.dtNN);
+	private static final EnumSet<DagTag> complexConceptsEnumSet = EnumSet.of(
+			DagTag.dtForall, DagTag.dtLE, DagTag.dtIrr, DagTag.dtUAll,
+			DagTag.dtNN);
 
 	/** @return true iff TAG represents complex concept */
 	public boolean isComplexConcept() {

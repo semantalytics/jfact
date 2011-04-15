@@ -12,14 +12,7 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 import uk.ac.manchester.cs.jfact.kernel.DlCompletionGraph;
 
 public final class Stats {
-	/** accumulate all registered statistic elements */
-	public static void accumulateAll(List<AccumulatedStatistic> root) {
-		for (AccumulatedStatistic cur : root) {
-			cur.accumulate();
-		}
-	}
-
-	public static AccumulatedStatistic build(List<AccumulatedStatistic> root) {
+	public AccumulatedStatistic build(List<AccumulatedStatistic> root) {
 		AccumulatedStatistic toReturn = new AccumulatedStatistic();
 		root.add(toReturn);
 		return toReturn;
@@ -95,16 +88,22 @@ public final class Stats {
 	private final AccumulatedStatistic nCachedUnsat = build(root);
 
 	public void accumulate() {
-		accumulateAll(root);
+		for (AccumulatedStatistic cur : root) {
+			cur.accumulate();
+		}
 	}
 
-	public void logStatisticData(LogAdapter o, boolean needLocal, DlCompletionGraph CGraph) {
+	public void logStatisticData(LogAdapter o, boolean needLocal,
+			DlCompletionGraph CGraph) {
 		if (IfDefs.USE_REASONING_STATISTICS) {
-			nTacticCalls.print(o, needLocal, "\nThere were made ", " tactic operations, of which:");
+			nTacticCalls.print(o, needLocal, "\nThere were made ",
+					" tactic operations, of which:");
 			nIdCalls.print(o, needLocal, "\n    CN   operations: ", "");
-			nSingletonCalls.print(o, needLocal, "\n           including ", " singleton ones");
+			nSingletonCalls.print(o, needLocal, "\n           including ",
+					" singleton ones");
 			nOrCalls.print(o, needLocal, "\n    OR   operations: ", "");
-			nOrBrCalls.print(o, needLocal, "\n           ", " of which are branching");
+			nOrBrCalls.print(o, needLocal, "\n           ",
+					" of which are branching");
 			nAndCalls.print(o, needLocal, "\n    AND  operations: ", "");
 			nSomeCalls.print(o, needLocal, "\n    SOME operations: ", "");
 			nAllCalls.print(o, needLocal, "\n    ALL  operations: ", "");
@@ -112,29 +111,48 @@ public final class Stats {
 			nLeCalls.print(o, needLocal, "\n    LE   operations: ", "");
 			nGeCalls.print(o, needLocal, "\n    GE   operations: ", "");
 			nUseless.print(o, needLocal, "\n    N/A  operations: ", "");
-			nNNCalls.print(o, needLocal, "\nThere were made ", " NN rule application");
-			nMergeCalls.print(o, needLocal, "\nThere were made ", " merging operations");
-			nAutoEmptyLookups.print(o, needLocal, "\nThere were made ", " RA empty transition lookups");
-			nAutoTransLookups.print(o, needLocal, "\nThere were made ", " RA applicable transition lookups");
-			nSRuleAdd.print(o, needLocal, "\nThere were made ", " simple rule additions");
-			nSRuleFire.print(o, needLocal, "\n       of which ", " simple rules fired");
-			nStateSaves.print(o, needLocal, "\nThere were made ", " save(s) of global state");
-			nStateRestores.print(o, needLocal, "\nThere were made ", " restore(s) of global state");
-			nNodeSaves.print(o, needLocal, "\nThere were made ", " save(s) of tree state");
-			nNodeRestores.print(o, needLocal, "\nThere were made ", " restore(s) of tree state");
-			nLookups.print(o, needLocal, "\nThere were made ", " concept lookups");
+			nNNCalls.print(o, needLocal, "\nThere were made ",
+					" NN rule application");
+			nMergeCalls.print(o, needLocal, "\nThere were made ",
+					" merging operations");
+			nAutoEmptyLookups.print(o, needLocal, "\nThere were made ",
+					" RA empty transition lookups");
+			nAutoTransLookups.print(o, needLocal, "\nThere were made ",
+					" RA applicable transition lookups");
+			nSRuleAdd.print(o, needLocal, "\nThere were made ",
+					" simple rule additions");
+			nSRuleFire.print(o, needLocal, "\n       of which ",
+					" simple rules fired");
+			nStateSaves.print(o, needLocal, "\nThere were made ",
+					" save(s) of global state");
+			nStateRestores.print(o, needLocal, "\nThere were made ",
+					" restore(s) of global state");
+			nNodeSaves.print(o, needLocal, "\nThere were made ",
+					" save(s) of tree state");
+			nNodeRestores.print(o, needLocal, "\nThere were made ",
+					" restore(s) of tree state");
+			nLookups.print(o, needLocal, "\nThere were made ",
+					" concept lookups");
 			if (IfDefs.RKG_USE_FAIRNESS) {
-				nFairnessViolations.print(o, needLocal, "\nThere were ", " fairness constraints violation");
+				nFairnessViolations.print(o, needLocal, "\nThere were ",
+						" fairness constraints violation");
 			}
-			nCacheTry.print(o, needLocal, "\nThere were made ", " tries to cache completion tree node, of which:");
-			nCacheFailedNoCache.print(o, needLocal, "\n                ", " fails due to cache absence");
-			nCacheFailedShallow.print(o, needLocal, "\n                ", " fails due to shallow node");
-			nCacheFailed.print(o, needLocal, "\n                ", " fails due to cache merge failure");
-			nCachedSat.print(o, needLocal, "\n                ", " cached satisfiable nodes");
-			nCachedUnsat.print(o, needLocal, "\n                ", " cached unsatisfiable nodes");
+			nCacheTry.print(o, needLocal, "\nThere were made ",
+					" tries to cache completion tree node, of which:");
+			nCacheFailedNoCache.print(o, needLocal, "\n                ",
+					" fails due to cache absence");
+			nCacheFailedShallow.print(o, needLocal, "\n                ",
+					" fails due to shallow node");
+			nCacheFailed.print(o, needLocal, "\n                ",
+					" fails due to cache merge failure");
+			nCachedSat.print(o, needLocal, "\n                ",
+					" cached satisfiable nodes");
+			nCachedUnsat.print(o, needLocal, "\n                ",
+					" cached unsatisfiable nodes");
 		}
 		if (!needLocal) {
-			o.print(String.format("\nThe maximal graph size is %s nodes", CGraph.maxSize()));
+			o.print(String.format("\nThe maximal graph size is %s nodes",
+					CGraph.maxSize()));
 		}
 	}
 

@@ -74,7 +74,8 @@ public final class RoleMaster {
 		}
 		final Role R = (Role) p;
 		int ind = R.getAbsoluteIndex();
-		return ind >= firstRoleIndex && ind < roles.size() && roles.get(ind).equals(p);
+		return ind >= firstRoleIndex && ind < roles.size()
+				&& roles.get(ind).equals(p);
 	}
 
 	/** get number of roles */
@@ -82,10 +83,12 @@ public final class RoleMaster {
 		return roles.size() / 2 - 1;
 	}
 
-	public RoleMaster(boolean d, final String TopRoleName, final String BotRoleName) {
+	public RoleMaster(boolean d, final String TopRoleName,
+			final String BotRoleName) {
 		newRoleId = 1;
 		emptyRole = new Role(BotRoleName.equals("") ? "emptyRole" : BotRoleName);
-		universalRole = new Role(TopRoleName.equals("") ? "universalRole" : TopRoleName);
+		universalRole = new Role(TopRoleName.equals("") ? "universalRole"
+				: TopRoleName);
 		roleNS = new NameSet<Role>(new RoleCreator());
 		dataRoles = d;
 		useUndefinedNames = true;
@@ -119,14 +122,16 @@ public final class RoleMaster {
 		Role p = roleNS.insert(name);
 		// check what happens
 		if (p == null) {
-			throw new OWLRuntimeException("Unable to register '" + name + "' as a " + (dataRoles ? "data role" : "role"));
+			throw new OWLRuntimeException("Unable to register '" + name
+					+ "' as a " + (dataRoles ? "data role" : "role"));
 		}
 		if (isRegisteredRole(p)) {
 			return p;
 		}
 		if (p.getId() != 0 || // not registered but has non-null ID
 				!useUndefinedNames) {
-			throw new OWLRuntimeException("Unable to register '" + name + "' as a " + (dataRoles ? "data role" : "role"));
+			throw new OWLRuntimeException("Unable to register '" + name
+					+ "' as a " + (dataRoles ? "data role" : "role"));
 		}
 		registerRole(p);
 		return p;
@@ -135,7 +140,8 @@ public final class RoleMaster {
 	/** add parent for the input role */
 	public void addRoleParent(Role role, Role parent) {
 		if (role.isDataRole() != parent.isDataRole()) {
-			throw new ReasonerInternalException("Mixed object and data roles in role subsumption axiom");
+			throw new ReasonerInternalException(
+					"Mixed object and data roles in role subsumption axiom");
 		}
 		role.addParent(parent);
 		role.getInverse().addParent(parent.getInverse());
@@ -215,11 +221,14 @@ public final class RoleMaster {
 		} else if (tree.token() == PROJINTO) {
 			Role R = Role.resolveRole(tree.getLeft());
 			if (R.isDataRole()) {
-				throw new ReasonerInternalException("Projection into not implemented for the data role");
+				throw new ReasonerInternalException(
+						"Projection into not implemented for the data role");
 			}
 			DLTree C = tree.getRight().copy();
-			DLTree InvP = DLTreeFactory.buildTree(new Lexeme(RNAME, parent.inverse()));
-			DLTree InvR = DLTreeFactory.buildTree(new Lexeme(RNAME, R.inverse()));
+			DLTree InvP = DLTreeFactory.buildTree(new Lexeme(RNAME, parent
+					.inverse()));
+			DLTree InvR = DLTreeFactory
+					.buildTree(new Lexeme(RNAME, R.inverse()));
 			// C = PROJINTO(PARENT-,C)
 			C = DLTreeFactory.buildTree(new Lexeme(PROJINTO), InvP, C);
 			// C = PROJFROM(R-,PROJINTO(PARENT-,C))
@@ -232,7 +241,8 @@ public final class RoleMaster {
 			// C = PROJINTO(PARENT,C)
 			C = DLTreeFactory.buildTree(new Lexeme(PROJINTO), P, C);
 			// C = PROJFROM(R,PROJINTO(PARENT,C))
-			C = DLTreeFactory.buildTree(new Lexeme(PROJFROM), tree.getLeft().copy(), C);
+			C = DLTreeFactory.buildTree(new Lexeme(PROJFROM), tree.getLeft()
+					.copy(), C);
 			R.setDomain(C);
 		} else {
 			addRoleParent(Role.resolveRole(tree), parent);

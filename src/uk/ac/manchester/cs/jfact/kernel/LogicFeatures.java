@@ -95,7 +95,8 @@ public final class LogicFeatures {
 		setX(lfBothRoles);
 	}
 
-	public static LogicFeatures plus(final LogicFeatures f1, final LogicFeatures f2) {
+	public static LogicFeatures plus(final LogicFeatures f1,
+			final LogicFeatures f2) {
 		LogicFeatures f = new LogicFeatures(f1);
 		f.flags.or(f2.flags);
 		return f;
@@ -156,8 +157,12 @@ public final class LogicFeatures {
 	public void writeState() {
 		String NO = "NO ";
 		String Q = "qualified ";
-		logger.print(Templates.WRITE_STATE, (hasInverseRole() ? "" : NO), (hasRoleHierarchy() ? "" : NO), (hasTransitiveRole() ? "" : NO), (hasSomeAll() ? "" : NO), (hasFunctionalRestriction() ? "" : NO), (hasNumberRestriction() ? (hasQNumberRestriction() ? Q : "") : NO),
-				(hasSingletons() ? "" : NO));
+		logger.print(Templates.WRITE_STATE, (hasInverseRole() ? "" : NO),
+				(hasRoleHierarchy() ? "" : NO),
+				(hasTransitiveRole() ? "" : NO), (hasSomeAll() ? "" : NO),
+				(hasFunctionalRestriction() ? "" : NO),
+				(hasNumberRestriction() ? (hasQNumberRestriction() ? Q : "")
+						: NO), (hasSingletons() ? "" : NO));
 	}
 
 	//private static final int lfInvalid = 0;

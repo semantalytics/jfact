@@ -15,7 +15,8 @@ public final class ConceptObjectValue implements ConceptObjectRoleExpression {
 	private final ObjectRoleExpression delegate;
 	private final IndividualExpression individualExpression;
 
-	public ConceptObjectValue(final ObjectRoleExpression R, final IndividualExpression I) {
+	public ConceptObjectValue(final ObjectRoleExpression R,
+			final IndividualExpression I) {
 		individualExpression = I;
 		delegate = R;
 	}

@@ -11,7 +11,11 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NamedEntity;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
-public final class DataValue implements DataExpression, DataExpressionArg<Datatypes>, NamedEntity {
+public final class DataValue implements DataExpression,
+		DataExpressionArg<Datatypes>, NamedEntity {
+	/** name of the entity */
+	protected final String name;
+	private Literal<?> literal;
 	private final Datatypes delegate;
 
 	public DataValue(String value, Datatypes T) {
@@ -19,10 +23,6 @@ public final class DataValue implements DataExpression, DataExpressionArg<Dataty
 		delegate = T;
 		literal = delegate.parse(name);
 	}
-
-	/** name of the entity */
-	protected final String name;
-	private Literal<?> literal;
 
 	public String getName() {
 		return name;

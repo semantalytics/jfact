@@ -31,7 +31,8 @@ public final class AxiomSet {
 	/** add already built GCI p */
 	private void insertGCI(Axiom p) {
 		if (LeveLogger.isAbsorptionActive()) {
-			logger_absorption.print("\n new axiom (" + accumulator.size() + "):");
+			logger_absorption.print("\n new axiom (" + accumulator.size()
+					+ "):");
 			p.dump(logger_absorption);
 		}
 		accumulator.add(p);
@@ -126,7 +127,8 @@ public final class AxiomSet {
 		// clear absorbed and remove them from Accum
 		accumulator = GCIs;
 		if (LeveLogger.isAbsorptionActive()) {
-			logger_absorption.print("\nAbsorption done with " + accumulator.size() + " GCIs left\n");
+			logger_absorption.print("\nAbsorption done with "
+					+ accumulator.size() + " GCIs left\n");
 		}
 		printStatistics();
 		return size();
@@ -218,12 +220,16 @@ public final class AxiomSet {
 		if (!created.containsKey("SAbsAction")) {
 			return;
 		}
-		logger.print("\nAbsorption dealt with " + get("SAbsInput") + " input axioms\nThere were made " + get("SAbsAction") + " absorption actions, of which:");
+		logger.print("\nAbsorption dealt with " + get("SAbsInput")
+				+ " input axioms\nThere were made " + get("SAbsAction")
+				+ " absorption actions, of which:");
 		if (get("SAbsRepCN") > 0) {
-			logger.print("\n\t" + get("SAbsRepCN") + " concept name replacements");
+			logger.print("\n\t" + get("SAbsRepCN")
+					+ " concept name replacements");
 		}
 		if (get("SAbsRepForall") > 0) {
-			logger.print("\n\t" + get("SAbsRepForall") + " universals replacements");
+			logger.print("\n\t" + get("SAbsRepForall")
+					+ " universals replacements");
 		}
 		if (get("SAbsSplit") > 0) {
 			logger.print("\n\t" + get("SAbsSplit") + " conjunction splits");
@@ -235,13 +241,19 @@ public final class AxiomSet {
 			logger.print("\n\t" + get("SAbsTApply") + " TOP absorptions");
 		}
 		if (get("SAbsCApply") > 0) {
-			logger.print("\n\t" + get("SAbsCApply") + " concept absorption with " + get("SAbsCAttempt") + " possibilities");
+			logger.print("\n\t" + get("SAbsCApply")
+					+ " concept absorption with " + get("SAbsCAttempt")
+					+ " possibilities");
 		}
 		if (get("SAbsNApply") > 0) {
-			logger.print("\n\t" + get("SAbsNApply") + " negated concept absorption with " + get("SAbsNAttempt") + " possibilities");
+			logger.print("\n\t" + get("SAbsNApply")
+					+ " negated concept absorption with " + get("SAbsNAttempt")
+					+ " possibilities");
 		}
 		if (get("SAbsRApply") > 0) {
-			logger.print("\n\t" + get("SAbsRApply") + " role domain absorption with " + get("SAbsRAttempt") + " possibilities");
+			logger.print("\n\t" + get("SAbsRApply")
+					+ " role domain absorption with " + get("SAbsRAttempt")
+					+ " possibilities");
 		}
 		if (!accumulator.isEmpty()) {
 			logger.print("\nThere are " + accumulator.size() + " GCIs left");

@@ -33,7 +33,8 @@ public final class DLDag {
 	private final List<DLVertex> heap = new ArrayList<DLVertex>();
 	/** all the AND nodes (needs to recompute) */
 	private final FastSet listAnds = FastSetFactory.create();
-	private final EnumMap<DagTag, DLVTable> indexes = new EnumMap<DagTag, DLVTable>(DagTag.class);
+	private final EnumMap<DagTag, DLVTable> indexes = new EnumMap<DagTag, DLVTable>(
+			DagTag.class);
 	/** cache efficiency -- statistic purposes */
 	private int nCacheHits;
 	/** size of sort array */
@@ -54,17 +55,17 @@ public final class DLDag {
 	/** flag whether cache should be used */
 	private boolean useDLVCache;
 
-	/**@return index of a vertex containing a concept*/
+	/** @return index of a vertex containing a concept */
 	public int index(NamedEntry c) {
-		for(int i=0;i<heap.size();i++) {
+		for (int i = 0; i < heap.size(); i++) {
 			NamedEntry concept = heap.get(i).getConcept();
-			if(concept!=null &&concept.equals(c)) {
+			if (concept != null && concept.equals(c)) {
 				return i;
 			}
 		}
 		return bpINVALID;
 	}
-	
+
 	/** check if given string is correct sort ordering representation */
 	private boolean isCorrectOption(final String str) {
 		if (str == null) {
@@ -74,8 +75,12 @@ public final class DLDag {
 		if (n < 1 || n > 3) {
 			return false;
 		}
-		char Method = str.charAt(0), Order = n >= 2 ? str.charAt(1) : 'a', NGPref = n == 3 ? str.charAt(2) : 'p';
-		return (Method == 'S' || Method == 'D' || Method == 'F' || Method == 'B' || Method == 'G' || Method == '0') && (Order == 'a' || Order == 'd') && (NGPref == 'p' || NGPref == 'n');
+		char Method = str.charAt(0), Order = n >= 2 ? str.charAt(1) : 'a', NGPref = n == 3 ? str
+				.charAt(2) : 'p';
+		return (Method == 'S' || Method == 'D' || Method == 'F'
+				|| Method == 'B' || Method == 'G' || Method == '0')
+				&& (Order == 'a' || Order == 'd')
+				&& (NGPref == 'p' || NGPref == 'n');
 	}
 
 	/** change order of ADD elements wrt statistic */
@@ -274,7 +279,8 @@ public final class DLDag {
 		if (orSortSat.charAt(0) == '0') {
 			orSortSat = defSat;
 		}
-		logger.print(Templates.SET_ORDER_DEFAULTS2, orSortSat, orSortSub, defSub);
+		logger.print(Templates.SET_ORDER_DEFAULTS2, orSortSat, orSortSub,
+				defSub);
 		if (orSortSub.charAt(0) == '0') {
 			orSortSub = defSub;
 		}
@@ -557,7 +563,8 @@ public final class DLDag {
 				v.merge(v.getRole().getDomainLabel());
 				v.merge(v.getProjRole().getDomainLabel());
 				merge(v.getRole().getDomainLabel(), v.getConceptIndex());
-				v.getRole().getRangeLabel().merge(v.getProjRole().getRangeLabel());
+				v.getRole().getRangeLabel()
+						.merge(v.getProjRole().getRangeLabel());
 				break;
 			case dtIrr: // equate R&D for role
 				v.merge(v.getRole().getDomainLabel());

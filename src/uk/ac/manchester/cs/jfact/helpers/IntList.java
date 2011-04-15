@@ -19,7 +19,8 @@ public final class IntList extends AbstractFastSet {
 		if (values != null) {
 			return values[i];
 		}
-		throw new IllegalArgumentException("Illegal argument " + i + ": no such element");
+		throw new IllegalArgumentException("Illegal argument " + i
+				+ ": no such element");
 	}
 
 	protected final void init() {
@@ -185,7 +186,8 @@ public final class IntList extends AbstractFastSet {
 			return;
 		}
 		if (end < -1 || end < i || end > size || i < -1 || i > size) {
-			throw new IllegalArgumentException("illegal arguments: " + i + " " + end + " size: " + size);
+			throw new IllegalArgumentException("illegal arguments: " + i + " "
+					+ end + " size: " + size);
 		}
 		if (size == 1 || (i == 0 && end == size)) {
 			values = null;

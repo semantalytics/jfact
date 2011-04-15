@@ -104,24 +104,30 @@ public final class Precompletor {
 				case BOTTOM:
 					return true;
 				case CNAME:
-					addToDoEntry(cur.first, ((Concept) cur.second.elem().getNE()).getDescription());
+					addToDoEntry(cur.first, ((Concept) cur.second.elem()
+							.getNE()).getDescription());
 					break;
 				case AND:
 					processTree(cur.first, cur.second);
 					break;
 				case FORALL:
-					processForall(cur.first, (Role) cur.second.getLeft().elem().getNE(), cur.second.getRight());
+					processForall(cur.first, (Role) cur.second.getLeft().elem()
+							.getNE(), cur.second.getRight());
 					break;
 				case NOT:
 					switch (cur.second.getChild().token()) {
 						case FORALL:
 							break;
 						default:
-							throw new ReasonerInternalException("Unsupported concept expression: " + cur.second.getChild() + "\n");
+							throw new ReasonerInternalException(
+									"Unsupported concept expression: "
+											+ cur.second.getChild() + "\n");
 					}
 					break;
 				default:
-					throw new ReasonerInternalException("Unsupported concept expression: " + cur.second + "\n");
+					throw new ReasonerInternalException(
+							"Unsupported concept expression: " + cur.second
+									+ "\n");
 			}
 		}
 		return false;

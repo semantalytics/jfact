@@ -87,7 +87,8 @@ public final class TaxonomyActor implements Actor {
 	}
 
 	public Collection<IndividualExpression> getPlainIndividualElements() {
-		Collection<IndividualExpression> toReturn = new ArrayList<IndividualExpression>(plain.size());
+		Collection<IndividualExpression> toReturn = new ArrayList<IndividualExpression>(
+				plain.size());
 		for (Expression e : plain) {
 			toReturn.add((IndividualExpression) e);
 		}
@@ -95,7 +96,8 @@ public final class TaxonomyActor implements Actor {
 	}
 
 	public Collection<ConceptExpression> getPlainClassElements() {
-		Collection<ConceptExpression> toReturn = new ArrayList<ConceptExpression>(plain.size());
+		Collection<ConceptExpression> toReturn = new ArrayList<ConceptExpression>(
+				plain.size());
 		for (Expression e : plain) {
 			toReturn.add((ConceptExpression) e);
 		}

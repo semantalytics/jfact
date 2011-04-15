@@ -13,7 +13,8 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NAryExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
-public final class ConceptOr extends NAryExpressionImpl<ConceptExpression> implements NAryExpression<ConceptExpression>, ConceptExpression {
+public final class ConceptOr extends NAryExpressionImpl<ConceptExpression>
+		implements NAryExpression<ConceptExpression>, ConceptExpression {
 	/** create OR of expressions from the given array */
 	public ConceptOr(final List<Expression> v) {
 		add(v);

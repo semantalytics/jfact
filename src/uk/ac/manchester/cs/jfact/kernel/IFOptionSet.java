@@ -20,7 +20,8 @@ public final class IFOptionSet {
 	 * an option with given name, description, type and default. @return true
 	 * iff such option exists
 	 */
-	public boolean registerOption(final String name, final String desc, IFOption.IOType t, final String defVal) {
+	public boolean registerOption(final String name, final String desc,
+			IFOption.IOType t, final String defVal) {
 		if (locateOption(name) != null) {
 			return true;
 		}

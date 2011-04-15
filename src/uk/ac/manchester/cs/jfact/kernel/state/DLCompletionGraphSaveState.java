@@ -46,6 +46,7 @@ public final class DLCompletionGraphSaveState {
 
 	@Override
 	public String toString() {
-		return "CGSaveState (" + this.nNodes + "," + this.nEdges + "," + this.sNodes + ")";
+		return "CGSaveState (" + this.nNodes + "," + this.nEdges + ","
+				+ this.sNodes + ")";
 	}
 }

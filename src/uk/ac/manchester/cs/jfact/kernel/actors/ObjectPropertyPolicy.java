@@ -21,6 +21,7 @@ public final class ObjectPropertyPolicy implements Policy {
 	}
 
 	public Expression buildTree(ExpressionManager EM, ClassifiableEntry p) {
-		return p.getId() >= 0 ? EM.objectRole(p.getName()) : EM.inverse(EM.objectRole(((Role) p).realInverse().getName()));
+		return p.getId() >= 0 ? EM.objectRole(p.getName()) : EM.inverse(EM
+				.objectRole(((Role) p).realInverse().getName()));
 	}
 }

@@ -150,7 +150,13 @@ public class ClassifiableEntry extends NamedEntry {
 		}
 		if (set.contains(runner.pSynonym)) {
 			// then adding this synonym would cause a loop
-			System.out.println("ClassifiableEntry.setSynonym(): warning: assigning this synonym would create a loop; ignored\nignored synonym: " + this + " -> " + syn + "\nPrevious synonyms: " + set);
+			System.out
+					.println("ClassifiableEntry.setSynonym(): warning: assigning this synonym would create a loop; ignored\nignored synonym: "
+							+ this
+							+ " -> "
+							+ syn
+							+ "\nPrevious synonyms: "
+							+ set);
 		} else {
 			pSynonym = syn;
 			canonicaliseSynonym();
@@ -169,7 +175,8 @@ public class ClassifiableEntry extends NamedEntry {
 	}
 
 	public final static <T extends ClassifiableEntry> T resolveSynonym(T p) {
-		return p == null ? null : p.isSynonym() ? resolveSynonym((T) p.pSynonym) : p;
+		return p == null ? null
+				: p.isSynonym() ? resolveSynonym((T) p.pSynonym) : p;
 	}
 
 	public final void addParentIfNew(ClassifiableEntry parent) {

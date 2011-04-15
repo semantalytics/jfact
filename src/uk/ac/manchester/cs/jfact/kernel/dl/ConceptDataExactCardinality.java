@@ -12,13 +12,15 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataRoleExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
-public final class ConceptDataExactCardinality implements ConceptDataCardinalityExpression, DataRoleArg {
+public final class ConceptDataExactCardinality implements
+		ConceptDataCardinalityExpression, DataRoleArg {
 	private final int cardinality;
 	/** data role argument */
 	private final DataRoleExpression dataRoleExpression;
 	private final DataExpression expression;
 
-	public ConceptDataExactCardinality(int n, final DataRoleExpression R, final DataExpression E) {
+	public ConceptDataExactCardinality(int n, final DataRoleExpression R,
+			final DataExpression E) {
 		dataRoleExpression = R;
 		expression = E;
 		cardinality = n;

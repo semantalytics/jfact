@@ -13,7 +13,8 @@ import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitorEx;
 public final class AxiomDRoleRange extends AxiomSingleDRole {
 	private final DataExpression range;
 
-	public AxiomDRoleRange(final DataRoleExpression role, final DataExpression range) {
+	public AxiomDRoleRange(final DataRoleExpression role,
+			final DataExpression range) {
 		super(role);
 		this.range = range;
 	}

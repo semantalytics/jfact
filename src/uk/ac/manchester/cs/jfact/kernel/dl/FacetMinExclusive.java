@@ -11,7 +11,8 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.FacetExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
-public final class FacetMinExclusive implements FacetExpression, DataExpressionArg<DataValue> {
+public final class FacetMinExclusive implements FacetExpression,
+		DataExpressionArg<DataValue> {
 	/** data expression argument */
 	protected final DataValue Expr;
 

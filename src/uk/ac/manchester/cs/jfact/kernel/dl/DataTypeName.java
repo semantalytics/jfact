@@ -6,7 +6,6 @@ This library is free software; you can redistribute it and/or modify it under th
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import uk.ac.manchester.cs.jfact.kernel.NamedEntry;
-import uk.ac.manchester.cs.jfact.kernel.datatype.DataEntry;
 import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
 import uk.ac.manchester.cs.jfact.kernel.datatype.Datatypes;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataType;
@@ -15,7 +14,8 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NamedEntity;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
-public final class DataTypeName extends NamedEntry implements DataTypeExpression, NamedEntity, DataType {
+public final class DataTypeName extends NamedEntry implements
+		DataTypeExpression, NamedEntity, DataType {
 	private final Datatypes datatype;
 
 	public DataTypeName(Datatypes d) {
@@ -30,8 +30,6 @@ public final class DataTypeName extends NamedEntry implements DataTypeExpression
 	public <O> O accept(DLExpressionVisitorEx<O> visitor) {
 		return visitor.visit(this);
 	}
-
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -55,8 +53,6 @@ public final class DataTypeName extends NamedEntry implements DataTypeExpression
 		return this;
 	}
 
-
-
 	public String getName() {
 		return datatype.name();
 	}
@@ -64,7 +60,6 @@ public final class DataTypeName extends NamedEntry implements DataTypeExpression
 	public DataValue getValue(String name) {
 		return new DataValue(name, datatype);
 	}
-
 
 	public int hashCode() {
 		return datatype.hashCode();

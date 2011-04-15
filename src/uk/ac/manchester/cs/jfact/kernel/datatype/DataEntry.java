@@ -13,9 +13,8 @@ import javax.xml.datatype.DatatypeFactory;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
 import uk.ac.manchester.cs.jfact.kernel.NamedEntry;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 
-public  class DataEntry extends NamedEntry {
+public class DataEntry extends NamedEntry {
 	/** corresponding type (Type has null in the field) */
 	private Datatypes type;
 	/** DAG index of the entry */
@@ -50,7 +49,8 @@ public  class DataEntry extends NamedEntry {
 			if (type == Datatypes.DATETIME) {
 				// then a neutral date of some sort
 				try {
-					comp = type.build(DatatypeFactory.newInstance().newXMLGregorianCalendar());
+					comp = type.build(DatatypeFactory.newInstance()
+							.newXMLGregorianCalendar());
 				} catch (DatatypeConfigurationException e) {
 					throw new ReasonerInternalException(e);
 				}
@@ -84,7 +84,7 @@ public  class DataEntry extends NamedEntry {
 		return type;
 	}
 
-	public  Datatypes getDatatype() {
+	public Datatypes getDatatype() {
 		return type;
 	}
 

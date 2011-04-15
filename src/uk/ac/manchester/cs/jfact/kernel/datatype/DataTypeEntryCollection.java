@@ -7,9 +7,9 @@ This library is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import uk.ac.manchester.cs.jfact.kernel.NameCreator;
 import uk.ac.manchester.cs.jfact.kernel.NamedEntryCollection;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 
-public final class DataTypeEntryCollection extends NamedEntryCollection<DataEntry> {
+public final class DataTypeEntryCollection extends
+		NamedEntryCollection<DataEntry> {
 	/** data type */
 	private final Datatypes type;
 

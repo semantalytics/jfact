@@ -18,10 +18,10 @@ import uk.ac.manchester.cs.jfact.helpers.FastSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
 import uk.ac.manchester.cs.jfact.helpers.IfDefs;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
-import uk.ac.manchester.cs.jfact.helpers.SaveStack;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.helpers.Reference;
+import uk.ac.manchester.cs.jfact.helpers.SaveStack;
 import uk.ac.manchester.cs.jfact.kernel.state.DLCompletionGraphSaveState;
 
 public final class DlCompletionGraph {
@@ -78,8 +78,8 @@ public final class DlCompletionGraph {
 
 	/** increase heap size */
 	private void grow() {
-		int size = nodeBase.size();
-		Helper.resize(nodeBase, nodeBase.size() * 2);
+		final int size = nodeBase.size();
+		Helper.resize(nodeBase, size * 2);
 		initNodeArray(nodeBase, size, nodeBase.size());
 	}
 
@@ -116,7 +116,7 @@ public final class DlCompletionGraph {
 	/** unblock all the children of the node */
 	private void unblockNodeChildren(DlCompletionTree node) {
 		List<DlCompletionTreeArc> neighbour = node.getNeighbour();
-		int size = neighbour.size();
+		final int size = neighbour.size();
 		for (int i = 0; i < size; i++) {
 			DlCompletionTreeArc q = neighbour.get(i);
 			if (q.isSuccEdge() && !q.isIBlocked() && !q.isReflexiveEdge()) {
@@ -126,13 +126,15 @@ public final class DlCompletionGraph {
 	}
 
 	/** mark NODE as a d-blocked by a BLOCKER */
-	private void setNodeDBlocked(DlCompletionTree node, final DlCompletionTree blocker) {
+	private void setNodeDBlocked(DlCompletionTree node,
+			final DlCompletionTree blocker) {
 		saveRareCond(node.setDBlocked(blocker));
 		propagateIBlockedStatus(node, node);
 	}
 
 	/** mark NODE as an i-blocked by a BLOCKER */
-	private void setNodeIBlocked(DlCompletionTree node, final DlCompletionTree blocker) {
+	private void setNodeIBlocked(DlCompletionTree node,
+			final DlCompletionTree blocker) {
 		// nominal nodes can't be blocked
 		if (node.isPBlocked() || node.isNominalNode()) {
 			return;
@@ -151,9 +153,10 @@ public final class DlCompletionGraph {
 	}
 
 	/** propagate i-blocked status to all children of NODE */
-	private void propagateIBlockedStatus(DlCompletionTree node, final DlCompletionTree blocker) {
+	private void propagateIBlockedStatus(DlCompletionTree node,
+			final DlCompletionTree blocker) {
 		List<DlCompletionTreeArc> neighbour = node.getNeighbour();
-		int size = neighbour.size();
+		final int size = neighbour.size();
 		for (int i = 0; i < size; i++) {
 			DlCompletionTreeArc q = neighbour.get(i);
 			if (q.isSuccEdge() && !q.isIBlocked()) {
@@ -211,7 +214,8 @@ public final class DlCompletionGraph {
 	}
 
 	/** add concept C of a type TAG to NODE; call blocking check if appropriate */
-	public void addConceptToNode(DlCompletionTree node, ConceptWDep c, DagTag tag) {
+	public void addConceptToNode(DlCompletionTree node, ConceptWDep c,
+			DagTag tag) {
 		node.addConcept(c, tag);
 		if (useLazyBlocking) {
 			node.setAffected();
@@ -313,7 +317,8 @@ public final class DlCompletionGraph {
 
 	// role/node
 	/** add role R with dep-set DEP to the label of the TO arc */
-	public DlCompletionTreeArc addRoleLabel(DlCompletionTree from, DlCompletionTree to, boolean isPredEdge, final Role R, // name of role (arc label)
+	public DlCompletionTreeArc addRoleLabel(DlCompletionTree from,
+			DlCompletionTree to, boolean isPredEdge, final Role R, // name of role (arc label)
 			final DepSet dep) // dep-set of the arc label
 	{
 		// check if GCraph already has FROM.TO edge labelled with RNAME
@@ -329,7 +334,8 @@ public final class DlCompletionGraph {
 	}
 
 	/** Create an empty R-neighbour of FROM; @return an edge to created node */
-	public DlCompletionTreeArc createNeighbour(DlCompletionTree from, boolean isPredEdge, final Role r, // name of role (arc label)
+	public DlCompletionTreeArc createNeighbour(DlCompletionTree from,
+			boolean isPredEdge, final Role r, // name of role (arc label)
 			final DepSet dep) // dep-set of the arc label
 	{
 		if (IfDefs.RKG_IMPROVE_SAVE_RESTORE_DEPSET) {
@@ -339,7 +345,8 @@ public final class DlCompletionGraph {
 	}
 
 	/** Create an R-loop of NODE wrt dep-set DEP; @return a loop edge */
-	public DlCompletionTreeArc createLoop(DlCompletionTree node, final Role r, final DepSet dep) {
+	public DlCompletionTreeArc createLoop(DlCompletionTree node, final Role r,
+			final DepSet dep) {
 		return addRoleLabel(node, node, /*isPredEdge=*/false, r, dep);
 	}
 
@@ -360,7 +367,8 @@ public final class DlCompletionGraph {
 		}
 	}
 
-	private boolean isBlockedBy(final DlCompletionTree node, final DlCompletionTree blocker) {
+	private boolean isBlockedBy(final DlCompletionTree node,
+			final DlCompletionTree blocker) {
 		assert !node.isNominalNode();
 		assert !blocker.isNominalNode();
 		if (blocker.isBlocked()) {
@@ -381,7 +389,8 @@ public final class DlCompletionGraph {
 			ret = node.isBlockedBy_SH(blocker);
 		}
 		if (IfDefs.USE_BLOCKING_STATISTICS && !ret && IfDefs.USE_LOGGING) {
-			logger.print(Templates.IS_BLOCKED_FAILURE_BY, node.getId(), blocker.getId());
+			logger.print(Templates.IS_BLOCKED_FAILURE_BY, node.getId(),
+					blocker.getId());
 		}
 		return ret;
 	}
@@ -446,11 +455,13 @@ public final class DlCompletionGraph {
 	 * Class for maintaining graph of CT nodes. Behaves like deleteless
 	 * allocator for nodes, plus some obvious features
 	 */
-	public boolean nonMergable(final DlCompletionTree p, final DlCompletionTree q, Reference<DepSet> dep) {
+	public boolean nonMergable(final DlCompletionTree p,
+			final DlCompletionTree q, Reference<DepSet> dep) {
 		return p.nonMergable(q, dep);
 	}
 
-	private void updateIR(DlCompletionTree p, final DlCompletionTree q, final DepSet toAdd) {
+	private void updateIR(DlCompletionTree p, final DlCompletionTree q,
+			final DepSet toAdd) {
 		if (!q.inequalityRelation.isEmpty()) {
 			saveRareCond(p.updateIR(q, toAdd));
 		}
@@ -467,14 +478,16 @@ public final class DlCompletionGraph {
 	public void finiIR() {
 	}
 
-	private DlCompletionTreeArc createEdge(DlCompletionTree from, DlCompletionTree to, boolean isPredEdge, final Role roleName, final DepSet dep) {
-		DlCompletionTreeArc forward = new DlCompletionTreeArc();
+	private DlCompletionTreeArc createEdge(DlCompletionTree from,
+			DlCompletionTree to, boolean isPredEdge, final Role roleName,
+			final DepSet dep) {
+		DlCompletionTreeArc forward = new DlCompletionTreeArc(roleName, dep, to);
 		ctEdgeHeap.add(forward);
-		forward.init(roleName, dep, to);
 		forward.setSuccEdge(!isPredEdge);
-		DlCompletionTreeArc backward = new DlCompletionTreeArc();
+		DlCompletionTreeArc backward = new DlCompletionTreeArc(
+				roleName.inverse(), dep, from);
+		;
 		ctEdgeHeap.add(backward);
-		backward.init(roleName.inverse(), dep, from);
 		backward.setSuccEdge(isPredEdge);
 		forward.setReverse(backward);
 		saveNode(from, branchingLevel);
@@ -482,12 +495,17 @@ public final class DlCompletionGraph {
 		from.addNeighbour(forward);
 		to.addNeighbour(backward);
 		if (IfDefs.USE_LOGGING) {
-			logger.print(Templates.CREATE_EDGE, (isPredEdge ? to.getId() : from.getId()), (isPredEdge ? "<-" : "->"), (isPredEdge ? from.getId() : to.getId()), roleName.getName());
+			logger.print(Templates.CREATE_EDGE,
+					(isPredEdge ? to.getId() : from.getId()),
+					(isPredEdge ? "<-" : "->"),
+					(isPredEdge ? from.getId() : to.getId()), roleName
+							.getName());
 		}
 		return forward;
 	}
 
-	private DlCompletionTreeArc moveEdge(DlCompletionTree node, DlCompletionTreeArc edge, boolean isPredEdge, final DepSet dep) {
+	private DlCompletionTreeArc moveEdge(DlCompletionTree node,
+			DlCompletionTreeArc edge, boolean isPredEdge, final DepSet dep) {
 		if (edge.isIBlocked()) {
 			return null;
 		}
@@ -510,9 +528,13 @@ public final class DlCompletionGraph {
 		return addRoleLabel(node, to, isPredEdge, R, dep);
 	}
 
-	public void merge(DlCompletionTree from, DlCompletionTree to, final DepSet dep, List<DlCompletionTreeArc> edges) {
+	public void merge(DlCompletionTree from, DlCompletionTree to,
+			final DepSet dep, List<DlCompletionTreeArc> edges) {
 		edges.clear();
-		for (DlCompletionTreeArc p : from.getNeighbour()) {
+		List<DlCompletionTreeArc> neighbour = from.getNeighbour();
+		final int size = neighbour.size();
+		for (int i = 0; i < size; i++) {
+			DlCompletionTreeArc p = neighbour.get(i);
 			if (p.isPredEdge() || p.getArcEnd().isNominalNode()) {
 				DlCompletionTreeArc temp = moveEdge(to, p, p.isPredEdge(), dep);
 				if (temp != null) {
@@ -527,7 +549,8 @@ public final class DlCompletionGraph {
 		purgeNode(from, to, dep);
 	}
 
-	private void purgeNode(DlCompletionTree p, final DlCompletionTree root, final DepSet dep) {
+	private void purgeNode(DlCompletionTree p, final DlCompletionTree root,
+			final DepSet dep) {
 		if (p.isPBlocked()) {
 			return;
 		}
@@ -539,7 +562,8 @@ public final class DlCompletionGraph {
 		}
 	}
 
-	private void purgeEdge(DlCompletionTreeArc e, final DlCompletionTree root, final DepSet dep) {
+	private void purgeEdge(DlCompletionTreeArc e, final DlCompletionTree root,
+			final DepSet dep) {
 		if (e.getRole() != null) {
 			invalidateEdge(e);
 		}
@@ -596,7 +620,9 @@ public final class DlCompletionGraph {
 		o.print("\n");
 	}
 
-	private void printEdge(List<DlCompletionTreeArc> l, int pos, DlCompletionTreeArc _edge, final DlCompletionTree parent, LogAdapter o) {
+	private void printEdge(List<DlCompletionTreeArc> l, int pos,
+			DlCompletionTreeArc _edge, final DlCompletionTree parent,
+			LogAdapter o) {
 		DlCompletionTreeArc edge = _edge;
 		final DlCompletionTree node = edge.getArcEnd();
 		boolean succEdge = edge.isSuccEdge();
@@ -638,7 +664,8 @@ public final class DlCompletionGraph {
 		++cgpIndent;
 		List<DlCompletionTreeArc> l = node.getNeighbour();
 		for (int i = 0; i < l.size(); i++) {
-			if (l.get(i).isSuccEdge() || wantPred && l.get(i).getArcEnd().isNominalNode()) {
+			if (l.get(i).isSuccEdge() || wantPred
+					&& l.get(i).getArcEnd().isNominalNode()) {
 				printEdge(l, i + 1, l.get(i), node, o);
 			}
 		}
@@ -675,7 +702,8 @@ final class SaveStackRare {
 	/** get all object from the top of the stack with levels >= LEVEL */
 	public void restore(int level) {
 		curLevel = level;
-		while (base.size() > 0 && base.getLast().getRaresavestackLevel() > level) {
+		while (base.size() > 0
+				&& base.getLast().getRaresavestackLevel() > level) {
 			// need to restore: restore last element, remove it from stack
 			base.getLast().restore();
 			base.removeLast();

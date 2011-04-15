@@ -67,12 +67,14 @@ public final class OntologyLoader implements DLAxiomVisitor {
 		try {
 			return resolveRole(r.accept(expressionTranslator));
 		} catch (OWLRuntimeException e) {
-			throw new ReasonerInternalException(reason + "\t" + e.getMessage(), e);
+			throw new ReasonerInternalException(reason + "\t" + e.getMessage(),
+					e);
 		}
 	}
 
 	/** get an individual be the DLTree; throw exception if unable */
-	public Individual getIndividual(final IndividualExpression I, final String reason) {
+	public Individual getIndividual(final IndividualExpression I,
+			final String reason) {
 		DLTree i = I.accept(expressionTranslator);
 		if (i == null) {
 			throw new ReasonerInternalException(reason);
@@ -159,8 +161,10 @@ public final class OntologyLoader implements DLAxiomVisitor {
 	public void visit(AxiomRoleInverse axiom) {
 		ensureNames(axiom.getRole());
 		ensureNames(axiom.getInvRole());
-		Role R = getRole(axiom.getRole(), "Role expression expected in Role Inverse axiom");
-		Role iR = getRole(axiom.getInvRole(), "Role expression expected in Role Inverse axiom");
+		Role R = getRole(axiom.getRole(),
+				"Role expression expected in Role Inverse axiom");
+		Role iR = getRole(axiom.getInvRole(),
+				"Role expression expected in Role Inverse axiom");
 		tbox.getRM(R).addRoleSynonym(iR.inverse(), R);
 	}
 
@@ -168,53 +172,68 @@ public final class OntologyLoader implements DLAxiomVisitor {
 		ensureNames(axiom.getRole());
 		ensureNames(axiom.getSubRole());
 		DLTree Sub = axiom.getSubRole().accept(expressionTranslator);
-		Role R = getRole(axiom.getRole(), "Role expression expected in Object Roles Subsumption axiom");
+		Role R = getRole(axiom.getRole(),
+				"Role expression expected in Object Roles Subsumption axiom");
 		tbox.getRM(R).addRoleParent(Sub, R);
 	}
 
 	public void visit(AxiomDRoleSubsumption axiom) {
 		ensureNames(axiom.getRole());
 		ensureNames(axiom.getSubRole());
-		Role R = getRole(axiom.getRole(), "Role expression expected in Data Roles Subsumption axiom");
-		Role S = getRole(axiom.getSubRole(), "Role expression expected in Data Roles Subsumption axiom");
+		Role R = getRole(axiom.getRole(),
+				"Role expression expected in Data Roles Subsumption axiom");
+		Role S = getRole(axiom.getSubRole(),
+				"Role expression expected in Data Roles Subsumption axiom");
 		tbox.getDRM().addRoleParent(S, R);
 	}
 
 	public void visit(AxiomORoleDomain axiom) {
 		ensureNames(axiom.getRole());
 		ensureNames(axiom.getDomain());
-		getRole(axiom.getRole(), "Role expression expected in Object Role Domain axiom").setDomain(axiom.getDomain().accept(expressionTranslator));
+		getRole(axiom.getRole(),
+				"Role expression expected in Object Role Domain axiom")
+				.setDomain(axiom.getDomain().accept(expressionTranslator));
 	}
 
 	public void visit(AxiomDRoleDomain axiom) {
 		ensureNames(axiom.getRole());
 		ensureNames(axiom.getDomain());
-		getRole(axiom.getRole(), "Role expression expected in Data Role Domain axiom").setDomain(axiom.getDomain().accept(expressionTranslator));
+		getRole(axiom.getRole(),
+				"Role expression expected in Data Role Domain axiom")
+				.setDomain(axiom.getDomain().accept(expressionTranslator));
 	}
 
 	public void visit(AxiomORoleRange axiom) {
 		ensureNames(axiom.getRole());
 		ensureNames(axiom.getRange());
-		getRole(axiom.getRole(), "Role expression expected in Object Role Range axiom").setRange(axiom.getRange().accept(expressionTranslator));
+		getRole(axiom.getRole(),
+				"Role expression expected in Object Role Range axiom")
+				.setRange(axiom.getRange().accept(expressionTranslator));
 	}
 
 	public void visit(AxiomDRoleRange axiom) {
 		ensureNames(axiom.getRole());
 		ensureNames(axiom.getRange());
-		getRole(axiom.getRole(), "Role expression expected in Data Role Range axiom").setRange(axiom.getRange().accept(expressionTranslator));
+		getRole(axiom.getRole(),
+				"Role expression expected in Data Role Range axiom").setRange(
+				axiom.getRange().accept(expressionTranslator));
 	}
 
 	public void visit(AxiomRoleTransitive axiom) {
 		ensureNames(axiom.getRole());
 		if (!isUniversalRole(axiom.getRole())) {
-			getRole(axiom.getRole(), "Role expression expected in Role Transitivity axiom").setTransitive();
+			getRole(axiom.getRole(),
+					"Role expression expected in Role Transitivity axiom")
+					.setTransitive();
 		}
 	}
 
 	public void visit(AxiomRoleReflexive axiom) {
 		ensureNames(axiom.getRole());
 		if (!isUniversalRole(axiom.getRole())) {
-			getRole(axiom.getRole(), "Role expression expected in Role Reflexivity axiom").setReflexive();
+			getRole(axiom.getRole(),
+					"Role expression expected in Role Reflexivity axiom")
+					.setReflexive();
 		}
 	}
 
@@ -223,15 +242,19 @@ public final class OntologyLoader implements DLAxiomVisitor {
 		if (isUniversalRole(axiom.getRole())) {
 			throw new InconsistentOntologyException();
 		}
-		Role R = getRole(axiom.getRole(), "Role expression expected in Role Irreflexivity axiom");
-		R.setDomain(DLTreeFactory.createSNFNot(DLTreeFactory.buildTree(new Lexeme(Token.REFLEXIVE), axiom.getRole().accept(expressionTranslator))));
+		Role R = getRole(axiom.getRole(),
+				"Role expression expected in Role Irreflexivity axiom");
+		R.setDomain(DLTreeFactory.createSNFNot(DLTreeFactory.buildTree(
+				new Lexeme(Token.REFLEXIVE),
+				axiom.getRole().accept(expressionTranslator))));
 		R.setIrreflexive(true);
 	}
 
 	public void visit(AxiomRoleSymmetric axiom) {
 		ensureNames(axiom.getRole());
 		if (!isUniversalRole(axiom.getRole())) {
-			Role R = getRole(axiom.getRole(), "Role expression expected in Role Symmetry axiom");
+			Role R = getRole(axiom.getRole(),
+					"Role expression expected in Role Symmetry axiom");
 			R.setSymmetric(true);
 			tbox.getORM().addRoleParent(R, R.inverse());
 		}
@@ -242,7 +265,8 @@ public final class OntologyLoader implements DLAxiomVisitor {
 		if (isUniversalRole(axiom.getRole())) {
 			throw new InconsistentOntologyException();
 		}
-		Role R = getRole(axiom.getRole(), "Role expression expected in Role Asymmetry axiom");
+		Role R = getRole(axiom.getRole(),
+				"Role expression expected in Role Asymmetry axiom");
 		R.setAsymmetric(true);
 		tbox.getORM().addDisjointRoles(R, R.inverse());
 	}
@@ -252,7 +276,9 @@ public final class OntologyLoader implements DLAxiomVisitor {
 		if (isUniversalRole(axiom.getRole())) {
 			throw new InconsistentOntologyException();
 		}
-		getRole(axiom.getRole(), "Role expression expected in Object Role Functionality axiom").setFunctional();
+		getRole(axiom.getRole(),
+				"Role expression expected in Object Role Functionality axiom")
+				.setFunctional();
 	}
 
 	public void visit(AxiomDRoleFunctional axiom) {
@@ -260,7 +286,9 @@ public final class OntologyLoader implements DLAxiomVisitor {
 		if (isUniversalRole(axiom.getRole())) {
 			throw new InconsistentOntologyException();
 		}
-		getRole(axiom.getRole(), "Role expression expected in Data Role Functionality axiom").setFunctional();
+		getRole(axiom.getRole(),
+				"Role expression expected in Data Role Functionality axiom")
+				.setFunctional();
 	}
 
 	public void visit(AxiomRoleInverseFunctional axiom) {
@@ -268,7 +296,9 @@ public final class OntologyLoader implements DLAxiomVisitor {
 		if (isUniversalRole(axiom.getRole())) {
 			throw new InconsistentOntologyException();
 		}
-		getRole(axiom.getRole(), "Role expression expected in Role Inverse Functionality axiom").inverse().setFunctional();
+		getRole(axiom.getRole(),
+				"Role expression expected in Role Inverse Functionality axiom")
+				.inverse().setFunctional();
 	}
 
 	// concept/individual axioms
@@ -283,7 +313,8 @@ public final class OntologyLoader implements DLAxiomVisitor {
 	public void visit(AxiomInstanceOf axiom) {
 		ensureNames(axiom.getIndividual());
 		ensureNames(axiom.getC());
-		getIndividual(axiom.getIndividual(), "Individual expected in Instance axiom");
+		getIndividual(axiom.getIndividual(),
+				"Individual expected in Instance axiom");
 		DLTree I = axiom.getIndividual().accept(expressionTranslator);
 		DLTree C = axiom.getC().accept(expressionTranslator);
 		tbox.addSubsumeAxiom(I, C);
@@ -295,9 +326,12 @@ public final class OntologyLoader implements DLAxiomVisitor {
 		ensureNames(axiom.getRelatedIndividual());
 		if (!isUniversalRole(axiom.getRelation())) // nothing to do for universal role
 		{
-			Individual I = getIndividual(axiom.getIndividual(), "Individual expected in Related To axiom");
-			Role R = getRole(axiom.getRelation(), "Role expression expected in Related To axiom");
-			Individual J = getIndividual(axiom.getRelatedIndividual(), "Individual expected in Related To axiom");
+			Individual I = getIndividual(axiom.getIndividual(),
+					"Individual expected in Related To axiom");
+			Role R = getRole(axiom.getRelation(),
+					"Role expression expected in Related To axiom");
+			Individual J = getIndividual(axiom.getRelatedIndividual(),
+					"Individual expected in Related To axiom");
 			tbox.registerIndividualRelation(I, R, J);
 		}
 	}
@@ -310,31 +344,49 @@ public final class OntologyLoader implements DLAxiomVisitor {
 			throw new InconsistentOntologyException();
 		}
 		// make sure everything is consistent
-		getIndividual(axiom.getIndividual(), "Individual expected in Related To Not axiom");
-		getIndividual(axiom.getRelatedIndividual(), "Individual expected in Related To Not axiom");
+		getIndividual(axiom.getIndividual(),
+				"Individual expected in Related To Not axiom");
+		getIndividual(axiom.getRelatedIndividual(),
+				"Individual expected in Related To Not axiom");
 		// make an axiom i:AR.\neg{j}
-		tbox.addSubsumeAxiom(axiom.getIndividual().accept(expressionTranslator), DLTreeFactory.createSNFForall(axiom.getRelation().accept(expressionTranslator), DLTreeFactory.createSNFNot(axiom.getRelatedIndividual().accept(expressionTranslator))));
+		tbox.addSubsumeAxiom(
+				axiom.getIndividual().accept(expressionTranslator),
+				DLTreeFactory.createSNFForall(
+						axiom.getRelation().accept(expressionTranslator),
+						DLTreeFactory.createSNFNot(axiom.getRelatedIndividual()
+								.accept(expressionTranslator))));
 	}
 
 	public void visit(AxiomValueOf axiom) {
 		ensureNames(axiom.getIndividual());
 		ensureNames(axiom.getAttribute());
-		getIndividual(axiom.getIndividual(), "Individual expected in Value Of axiom");
+		getIndividual(axiom.getIndividual(),
+				"Individual expected in Value Of axiom");
 		// FIXME!! think about ensuring the value
 		// make an axiom i:EA.V
-		tbox.addSubsumeAxiom(axiom.getIndividual().accept(expressionTranslator), DLTreeFactory.createSNFExists(axiom.getAttribute().accept(expressionTranslator), axiom.getValue().accept(expressionTranslator)));
+		tbox.addSubsumeAxiom(
+				axiom.getIndividual().accept(expressionTranslator),
+				DLTreeFactory.createSNFExists(
+						axiom.getAttribute().accept(expressionTranslator),
+						axiom.getValue().accept(expressionTranslator)));
 	}
 
 	public void visit(AxiomValueOfNot axiom) {
 		ensureNames(axiom.getIndividual());
 		ensureNames(axiom.getAttribute());
-		getIndividual(axiom.getIndividual(), "Individual expected in Value Of Not axiom");
+		getIndividual(axiom.getIndividual(),
+				"Individual expected in Value Of Not axiom");
 		// FIXME!! think about ensuring the value
 		if (isUniversalRole(axiom.getAttribute())) {
 			throw new InconsistentOntologyException();
 		}
 		// make an axiom i:AA.\neg V
-		tbox.addSubsumeAxiom(axiom.getIndividual().accept(expressionTranslator), DLTreeFactory.createSNFForall(axiom.getAttribute().accept(expressionTranslator), DLTreeFactory.createSNFNot(axiom.getValue().accept(expressionTranslator))));
+		tbox.addSubsumeAxiom(
+				axiom.getIndividual().accept(expressionTranslator),
+				DLTreeFactory.createSNFForall(
+						axiom.getAttribute().accept(expressionTranslator),
+						DLTreeFactory.createSNFNot(axiom.getValue().accept(
+								expressionTranslator))));
 	}
 
 	public OntologyLoader(TBox KB) {

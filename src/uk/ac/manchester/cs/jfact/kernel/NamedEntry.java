@@ -18,6 +18,12 @@ public class NamedEntry {
 		assert name != null;
 		extName = name;
 		extId = 0; // sets local id
+		if (extName.equals("TOP")) {
+			top = true;
+		}
+		if (extName.equals("BOTTOM")) {
+			bottom = true;
+		}
 	}
 
 	/** gets name of given entry */

@@ -24,8 +24,23 @@ import uk.ac.manchester.cs.jfact.helpers.IfDefs;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 
 public class Concept extends ClassifiableEntry {
-	public static final Concept BOTTOM = new Concept("BOTTOM");
-	public static final Concept TOP = new Concept("TOP");
+	public static final Concept getBOTTOM() {
+		Concept toReturn = new Concept("BOTTOM");
+		toReturn.setId(-1);
+		toReturn.setpName(bpBOTTOM);
+		toReturn.setpBody(bpBOTTOM);
+		return toReturn;
+	}
+
+	public static final Concept getTOP() {
+		Concept toReturn = new Concept("TOP");
+		toReturn.setId(-1);
+		toReturn.setpName(bpTOP);
+		toReturn.setpBody(bpTOP);
+		toReturn.setTsDepth(1);
+		toReturn.setClassTag(CTTag.cttTrueCompletelyDefined);
+		return toReturn;
+	}
 
 	public static Concept getTEMP() {
 		Concept TEMP = new Concept(" ");
@@ -33,17 +48,6 @@ public class Concept extends ClassifiableEntry {
 		TEMP.setTsDepth(1);
 		TEMP.setClassTag(CTTag.cttTrueCompletelyDefined);
 		return TEMP;
-	}
-
-	static {
-		BOTTOM.setId(-1);
-		BOTTOM.setpName(bpBOTTOM);
-		BOTTOM.setpBody(bpBOTTOM);
-		TOP.setId(-1);
-		TOP.setpName(bpTOP);
-		TOP.setpBody(bpTOP);
-		TOP.setTsDepth(1);
-		TOP.setClassTag(CTTag.cttTrueCompletelyDefined);
 	}
 
 	/** type of concept wrt classifiability */
@@ -321,7 +325,8 @@ public class Concept extends ClassifiableEntry {
 		return CTTag.cttTrueCompletelyDefined;
 	}
 
-	private static final EnumSet<Token> replacements = EnumSet.of(CNAME, INAME, RNAME, DNAME);
+	private static final EnumSet<Token> replacements = EnumSet.of(CNAME, INAME,
+			RNAME, DNAME);
 
 	public void push(LinkedList<DLTree> stack, DLTree current) {
 		// push subtrees: stack size increases by one or two, or current is a leaf
@@ -338,7 +343,9 @@ public class Concept extends ClassifiableEntry {
 		}
 		Token token = t.token();
 		// the three ifs are actually exclusive
-		if (replacements.contains(token) && resolveSynonym((ClassifiableEntry) t.elem().getNE()).equals(this)) {
+		if (replacements.contains(token)
+				&& resolveSynonym((ClassifiableEntry) t.elem().getNE()).equals(
+						this)) {
 			return DLTreeFactory.createTop();
 		}
 		if (token == AND) {
@@ -349,8 +356,10 @@ public class Concept extends ClassifiableEntry {
 			return DLTreeFactory.createSNFAnd(l, t);
 		}
 		if (token == NOT) {
-			if (t.getChild().isAND() || replacements.contains(t.getChild().token())) {
-				return DLTreeFactory.createSNFNot(replaceWithConstOld(t.getChild()));
+			if (t.getChild().isAND()
+					|| replacements.contains(t.getChild().token())) {
+				return DLTreeFactory.createSNFNot(replaceWithConstOld(t
+						.getChild()));
 			}
 		}
 		return t;
@@ -360,7 +369,8 @@ public class Concept extends ClassifiableEntry {
 	 * init told subsumers of the concept by given DESCription; @return TRUE iff
 	 * concept is CD
 	 */
-	public boolean initToldSubsumers(final DLTree _desc, Set<Role> RolesProcessed) {
+	public boolean initToldSubsumers(final DLTree _desc,
+			Set<Role> RolesProcessed) {
 		if (_desc == null || _desc.isTOP()) {
 			return true;
 		}
@@ -370,8 +380,11 @@ public class Concept extends ClassifiableEntry {
 			return addToldSubsumer((Concept) desc.elem().getNE());
 		}
 		if (token == NOT) {
-			if (desc.getChild().token() == FORALL || desc.getChild().token() == LE) {
-				searchTSbyRoleAndSupers(Role.resolveRole(desc.getChild().getLeft()), RolesProcessed);
+			if (desc.getChild().token() == FORALL
+					|| desc.getChild().token() == LE) {
+				searchTSbyRoleAndSupers(
+						Role.resolveRole(desc.getChild().getLeft()),
+						RolesProcessed);
 			}
 			return false;
 		}

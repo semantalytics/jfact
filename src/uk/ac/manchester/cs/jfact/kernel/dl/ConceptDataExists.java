@@ -12,7 +12,8 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataRoleExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
-public final class ConceptDataExists implements ConceptDataRVExpression, DataRoleArg {
+public final class ConceptDataExists implements ConceptDataRVExpression,
+		DataRoleArg {
 	/** data role argument */
 	private final DataRoleExpression dataRoleExpression;
 	private final DataExpression delegate;

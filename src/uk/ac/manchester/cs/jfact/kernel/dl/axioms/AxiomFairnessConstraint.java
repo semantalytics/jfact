@@ -17,7 +17,8 @@ import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitorEx;
 
 /** Fairness constraint axiom */
-public final class AxiomFairnessConstraint extends AxiomImpl implements Axiom, NAryExpression<ConceptExpression> {
+public final class AxiomFairnessConstraint extends AxiomImpl implements Axiom,
+		NAryExpression<ConceptExpression> {
 	private final NAryExpressionImpl<ConceptExpression> delegate;
 
 	public AxiomFairnessConstraint(final List<Expression> v) {

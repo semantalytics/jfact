@@ -13,7 +13,8 @@ import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitorEx;
 public final class AxiomORoleRange extends AxiomSingleORole {
 	private final ConceptExpression range;
 
-	public AxiomORoleRange(final ObjectRoleExpression role, final ConceptExpression range) {
+	public AxiomORoleRange(final ObjectRoleExpression role,
+			final ConceptExpression range) {
 		super(role);
 		this.range = range;
 	}

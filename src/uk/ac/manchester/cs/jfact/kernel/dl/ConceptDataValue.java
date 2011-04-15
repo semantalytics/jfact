@@ -12,7 +12,8 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataRoleExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
-public final class ConceptDataValue implements ConceptDataRoleExpression, DataExpressionArg<DataValue> {
+public final class ConceptDataValue implements ConceptDataRoleExpression,
+		DataExpressionArg<DataValue> {
 	/** data expression argument */
 	protected final DataValue dataValue;
 	private final DataRoleExpression delegate;

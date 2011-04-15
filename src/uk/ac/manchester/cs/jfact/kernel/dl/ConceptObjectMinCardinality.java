@@ -12,12 +12,14 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
-public final class ConceptObjectMinCardinality implements ConceptObjectCardinalityExpression, NumberArg {
+public final class ConceptObjectMinCardinality implements
+		ConceptObjectCardinalityExpression, NumberArg {
 	private final ConceptExpression delegate;
 	private final int N;
 	private final ObjectRoleExpression roleDelegate;
 
-	public ConceptObjectMinCardinality(int n, final ObjectRoleExpression R, final ConceptExpression C) {
+	public ConceptObjectMinCardinality(int n, final ObjectRoleExpression R,
+			final ConceptExpression C) {
 		N = n;
 		delegate = C;
 		roleDelegate = R;

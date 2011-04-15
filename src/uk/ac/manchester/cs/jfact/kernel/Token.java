@@ -12,10 +12,12 @@ public enum Token {
 	UNUSED(""), // never used one
 	LEXEOF(""),
 	// symbols
-	LBRACK(""), RBRACK(""), AND("and"), OR("or"), NOT("not"), INV("inv"), RCOMPOSITION("compose"), // role composition
+	LBRACK(""), RBRACK(""), AND("and"), OR("or"), NOT("not"), INV("inv"), RCOMPOSITION(
+			"compose"), // role composition
 	PROJINTO("project_into"), // role projection into
 	PROJFROM("project_from"), // role projection from
-	TOP("*TOP*"), BOTTOM("*BOTTOM*"), EXISTS("some"), FORALL("all"), GE("at-least"),
+	TOP("*TOP*"), BOTTOM("*BOTTOM*"), EXISTS("some"), FORALL("all"), GE(
+			"at-least"),
 	//	ATLEAST = GE,
 	LE("at-most"),
 	//	ATMOST = LE,
@@ -29,7 +31,8 @@ public enum Token {
 	DNAME("dname"), // name of a data role
 	// FaCT commands
 	// definitions
-	PCONCEPT("primconcept"), PROLE(""), PATTR(""), CONCEPT("concept"), DATAROLE(""),
+	PCONCEPT("primconcept"), PROLE(""), PATTR(""), CONCEPT("concept"), DATAROLE(
+			""),
 	// FaCT++ commands for internal DataTypes
 	NUMBER(""), STRING(""), REAL(""), BOOL(""),
 	// datatype operations command names -- used only as an external commands
@@ -37,9 +40,12 @@ public enum Token {
 	// general commands
 	SUBSUMES(""), DISJOINT(""), EQUAL_C(""),
 	// new for roles
-	INVERSE(""), EQUAL_R(""), IMPLIES_R(""), DISJOINT_R(""), FUNCTIONAL(""), TRANSITIVE(""), REFLEXIVE("self-ref"), IRREFLEXIVE(""), SYMMETRIC(""), ANTISYMMETRIC(""), ROLERANGE(""), ROLEDOMAIN(""),
+	INVERSE(""), EQUAL_R(""), IMPLIES_R(""), DISJOINT_R(""), FUNCTIONAL(""), TRANSITIVE(
+			""), REFLEXIVE("self-ref"), IRREFLEXIVE(""), SYMMETRIC(""), ANTISYMMETRIC(
+			""), ROLERANGE(""), ROLEDOMAIN(""),
 	// new for individuals
-	DEFINDIVIDUAL(""), INSTANCE(""), RELATED(""), ONEOF(""), SAME(""), DIFFERENT(""),
+	DEFINDIVIDUAL(""), INSTANCE(""), RELATED(""), ONEOF(""), SAME(""), DIFFERENT(
+			""),
 	// fairness constraints
 	FAIRNESS("");
 	private final String s;
@@ -52,6 +58,7 @@ public enum Token {
 		if (s.length() > 0) {
 			return s;
 		}
-		throw new ReasonerInternalException("token " + toString() + "has no name");
+		throw new ReasonerInternalException("token " + toString()
+				+ "has no name");
 	}
 }

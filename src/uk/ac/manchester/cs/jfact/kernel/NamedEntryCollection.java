@@ -74,7 +74,8 @@ public class NamedEntryCollection<T extends NamedEntry> {
 		}
 		// check if it is possible to insert name
 		if (isLocked()) {
-			throw new OWLRuntimeException("Unable to register '" + name + "' as a " + typeName);
+			throw new OWLRuntimeException("Unable to register '" + name
+					+ "' as a " + typeName);
 		}
 		// name in name set, and it
 		return registerElem(nameset.add(name));

@@ -20,12 +20,14 @@ public final class JFactFactory implements OWLReasonerFactory {
 	}
 
 	public OWLReasoner createReasoner(OWLOntology ontology) {
-		JFactReasoner toReturn = new JFactReasoner(ontology, new SimpleConfiguration(), BufferingMode.BUFFERING);
+		JFactReasoner toReturn = new JFactReasoner(ontology,
+				new SimpleConfiguration(), BufferingMode.BUFFERING);
 		return verify(toReturn);
 	}
 
 	private OWLReasoner verify(JFactReasoner toReturn) {
-		OWLOntologyManager m = toReturn.getRootOntology().getOWLOntologyManager();
+		OWLOntologyManager m = toReturn.getRootOntology()
+				.getOWLOntologyManager();
 		m.addOntologyChangeListener(toReturn);
 		//		toReturn.isConsistent();//precomputeInferences(InferenceType.values());
 		//	toReturn.kernel.writeReasoningResult(new LeveLogger.LogAdapterStream(), 0);
@@ -33,17 +35,24 @@ public final class JFactFactory implements OWLReasonerFactory {
 	}
 
 	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology) {
-		JFactReasoner toReturn = new JFactReasoner(ontology, new SimpleConfiguration(), BufferingMode.NON_BUFFERING);
+		JFactReasoner toReturn = new JFactReasoner(ontology,
+				new SimpleConfiguration(), BufferingMode.NON_BUFFERING);
 		return verify(toReturn);
 	}
 
-	public OWLReasoner createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
-		JFactReasoner toReturn = new JFactReasoner(ontology, config, BufferingMode.BUFFERING);
+	public OWLReasoner createReasoner(OWLOntology ontology,
+			OWLReasonerConfiguration config)
+			throws IllegalConfigurationException {
+		JFactReasoner toReturn = new JFactReasoner(ontology, config,
+				BufferingMode.BUFFERING);
 		return verify(toReturn);
 	}
 
-	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
-		JFactReasoner toReturn = new JFactReasoner(ontology, config, BufferingMode.NON_BUFFERING);
+	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology,
+			OWLReasonerConfiguration config)
+			throws IllegalConfigurationException {
+		JFactReasoner toReturn = new JFactReasoner(ontology, config,
+				BufferingMode.NON_BUFFERING);
 		return verify(toReturn);
 	}
 }

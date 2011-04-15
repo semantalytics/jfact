@@ -13,7 +13,8 @@ import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitorEx;
 public final class AxiomORoleSubsumption extends AxiomSingleORole {
 	private final ObjectRoleComplexExpression complexRole;
 
-	public AxiomORoleSubsumption(final ObjectRoleComplexExpression subRole, final ObjectRoleExpression supRole) {
+	public AxiomORoleSubsumption(final ObjectRoleComplexExpression subRole,
+			final ObjectRoleExpression supRole) {
 		super(supRole);
 		complexRole = subRole;
 	}

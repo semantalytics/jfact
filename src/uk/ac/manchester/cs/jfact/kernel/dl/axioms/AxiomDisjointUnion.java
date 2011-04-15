@@ -17,7 +17,8 @@ import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitorEx;
 
 /** Disjoint Union axiom */
-public final class AxiomDisjointUnion extends AxiomImpl implements Axiom, NAryExpression<ConceptExpression> {
+public final class AxiomDisjointUnion extends AxiomImpl implements Axiom,
+		NAryExpression<ConceptExpression> {
 	private final ConceptExpression conceptExpression;
 	private final NAryExpressionImpl<ConceptExpression> delegate;
 

@@ -16,7 +16,8 @@ public final class ConceptObjectForall implements ConceptObjectRCExpression {
 	private final ConceptExpression conceptExpression;
 	private final ObjectRoleExpression delegate;
 
-	public ConceptObjectForall(final ObjectRoleExpression R, final ConceptExpression C) {
+	public ConceptObjectForall(final ObjectRoleExpression R,
+			final ConceptExpression C) {
 		conceptExpression = C;
 		delegate = R;
 	}

@@ -15,7 +15,6 @@ import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.helpers.Reference;
-import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 import uk.ac.manchester.cs.jfact.kernel.DLDag;
 import uk.ac.manchester.cs.jfact.kernel.NamedEntry;
 import uk.ac.manchester.cs.jfact.kernel.datatype.DataTypeAppearance.DepDTE;
@@ -43,7 +42,8 @@ public final class DataTypeReasoner {
 	}
 
 	/** process data expr */
-	private boolean processDataExpr(boolean pos, final DataEntry c, final DepSet dep) {
+	private boolean processDataExpr(boolean pos, final DataEntry c,
+			final DepSet dep) {
 		final DataInterval constraints = c.getFacet();
 		if (constraints.isEmpty()) {
 			return false;
@@ -93,8 +93,12 @@ public final class DataTypeReasoner {
 		NamedEntry dataEntry = getDataEntry(p);
 		switch (v.getType()) {
 			case dtDataType: {
-				DataTypeAppearance type = map.get(dataEntry instanceof DataEntry ? ((DataEntry) dataEntry).getDatatype() : ((DataTypeName) dataEntry).getDatatype());
-				logger.print(Templates.INTERVAL, (p > 0 ? "+" : "-"), dataEntry.getName());
+				DataTypeAppearance type = map
+						.get(dataEntry instanceof DataEntry ? ((DataEntry) dataEntry)
+								.getDatatype() : ((DataTypeName) dataEntry)
+								.getDatatype());
+				logger.print(Templates.INTERVAL, (p > 0 ? "+" : "-"),
+						dataEntry.getName());
 				if (p > 0) {
 					type.setPType(getDTE(p, dep));
 				} else {
@@ -111,7 +115,8 @@ public final class DataTypeReasoner {
 			default:
 				//TODO this case needs investigation; is it a mistake? whenever something is supposed to be a data node and is actually a primitive concept?
 				// or is it just a regular clash?
-				System.out.println("DataTypeReasoner.addDataEntry() warning: this case might indicate errors in the datatype reasoning");
+				System.out
+						.println("DataTypeReasoner.addDataEntry() warning: this case might indicate errors in the datatype reasoning");
 				return true;
 				//throw new UnreachableSituationException(v.toString());
 		}
@@ -126,14 +131,17 @@ public final class DataTypeReasoner {
 				} else {
 					Datatypes type_datatype = type.getPDatatype();
 					Datatypes p_datatype = p.getPDatatype();
-					if (!p_datatype.compatible(type_datatype) && !type_datatype.compatible(p_datatype)) {
+					if (!p_datatype.compatible(type_datatype)
+							&& !type_datatype.compatible(p_datatype)) {
 						logger.print(Templates.CHECKCLASH);
-						clashDep.setReference(DepSetFactory.plus(type.getPType().second, p.getPType().second));
+						clashDep.setReference(DepSetFactory.plus(
+								type.getPType().second, p.getPType().second));
 						return true;
 					}
 					// if one of them is compatible with the other but not the other way around, then replace type with the most restrictive one
 					// XXX this is still dubious
-					if (type_datatype.compatible(p_datatype) && !p_datatype.compatible(type_datatype)) {
+					if (type_datatype.compatible(p_datatype)
+							&& !p_datatype.compatible(type_datatype)) {
 						type = p;
 					}
 					// else irrelevant: type is already the most restrictive

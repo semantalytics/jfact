@@ -54,7 +54,8 @@ public class Taxonomy {
 	 * version is intended to work only with SupConceptActor, which requires the
 	 * method to return as soon as the apply() method returns false
 	 */
-	public boolean getRelativesInfo(TaxonomyVertex node, SupConceptActor actor, boolean needCurrent, boolean onlyDirect, boolean upDirection) {
+	public boolean getRelativesInfo(TaxonomyVertex node, SupConceptActor actor,
+			boolean needCurrent, boolean onlyDirect, boolean upDirection) {
 		// if current node processed OK and there is no need to continue -- exit
 		// this is the helper to the case like getDomain():
 		//   if there is a named concept that represent's a domain -- that's what we need
@@ -70,7 +71,7 @@ public class Taxonomy {
 		queue.add(node.neigh(upDirection));
 		while (queue.size() > 0) {
 			List<TaxonomyVertex> neigh = queue.remove();
-			int size = neigh.size();
+			final int size = neigh.size();
 			for (int i = 0; i < size; i++) {
 				TaxonomyVertex _node = neigh.get(i);
 				// recursive applicability checking
@@ -95,7 +96,8 @@ public class Taxonomy {
 	}
 
 	/** apply ACTOR to subgraph starting from NODE as defined by flags; */
-	public void getRelativesInfo(TaxonomyVertex node, Actor actor, boolean needCurrent, boolean onlyDirect, boolean upDirection) {
+	public void getRelativesInfo(TaxonomyVertex node, Actor actor,
+			boolean needCurrent, boolean onlyDirect, boolean upDirection) {
 		// if current node processed OK and there is no need to continue -- exit
 		// this is the helper to the case like getDomain():
 		//   if there is a named concept that represent's a domain -- that's what we need
@@ -106,7 +108,7 @@ public class Taxonomy {
 		queue.add(node.neigh(upDirection));
 		while (queue.size() > 0) {
 			List<TaxonomyVertex> neigh = queue.remove();// node.neigh(upDirection);
-			int size = neigh.size();
+			final int size = neigh.size();
 			for (int i = 0; i < size; i++) {
 				TaxonomyVertex _node = neigh.get(i);
 				// recursive applicability checking
@@ -187,7 +189,8 @@ public class Taxonomy {
 		return true;
 	}
 
-	public Taxonomy(final ClassifiableEntry pTop, final ClassifiableEntry pBottom) {
+	public Taxonomy(final ClassifiableEntry pTop,
+			final ClassifiableEntry pBottom) {
 		current = new TaxonomyVertex();
 		curEntry = null;
 		nEntries = 0;
@@ -239,7 +242,9 @@ public class Taxonomy {
 	}
 
 	public void print(LogAdapter o) {
-		o.print(String.format("Taxonomy consists of %s entries\n            of which %s are completely defined\n\nAll entries are in format:\n\"entry\" {n: parent_1 ... parent_n} {m: child_1 child_m}\n\n", nEntries, nCDEntries));
+		o.print(String
+				.format("Taxonomy consists of %s entries\n            of which %s are completely defined\n\nAll entries are in format:\n\"entry\" {n: parent_1 ... parent_n} {m: child_1 child_m}\n\n",
+						nEntries, nCDEntries));
 		for (int i = 1; i < graph.size(); i++) {
 			TaxonomyVertex p = graph.get(i);
 			p.print(o);
@@ -260,7 +265,8 @@ public class Taxonomy {
 			if (syn != null) {
 				syn.addSynonym(curEntry);
 				if (IfDefs.USE_LOGGING) {
-					logger.print("\nTAX:set " + curEntry.getName() + " equal " + syn.getPrimer().getName());
+					logger.print("\nTAX:set " + curEntry.getName() + " equal "
+							+ syn.getPrimer().getName());
 				}
 			} else {
 				// just incorporate it as a special entry and save into Graph
@@ -405,7 +411,9 @@ public class Taxonomy {
 		// load last concept
 		setCurrentEntry(waitStack.peek());
 		if (IfDefs.TMP_PRINT_TAXONOMY_INFO) {
-			logger.print("\nTrying classify" + (curEntry.isCompletelyDefined() ? " CD " : " ") + curEntry.getName() + "... ");
+			logger.print("\nTrying classify"
+					+ (curEntry.isCompletelyDefined() ? " CD " : " ")
+					+ curEntry.getName() + "... ");
 		}
 		performClassification();
 		if (IfDefs.TMP_PRINT_TAXONOMY_INFO) {
@@ -418,7 +426,8 @@ public class Taxonomy {
 		assert !waitStack.isEmpty();
 		ClassifiableEntry p = waitStack.peek();
 		classifyTop();
-		StringBuilder b = new StringBuilder("\n* Concept definitions cycle found: ");
+		StringBuilder b = new StringBuilder(
+				"\n* Concept definitions cycle found: ");
 		b.append(p.getName());
 		b.append('\n');
 		while (!waitStack.isEmpty()) {

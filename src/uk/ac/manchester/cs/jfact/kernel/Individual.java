@@ -64,7 +64,8 @@ public class Individual extends Concept {
 
 	// related things
 	/** update told subsumers from the RELATED axioms in a given range */
-	private <T extends Related> void updateTold(List<T> begin, Set<Role> RolesProcessed) {
+	private <T extends Related> void updateTold(List<T> begin,
+			Set<Role> RolesProcessed) {
 		for (int i = 0; i < begin.size(); i++) {
 			searchTSbyRoleAndSupers(begin.get(i).getRole(), RolesProcessed);
 		}

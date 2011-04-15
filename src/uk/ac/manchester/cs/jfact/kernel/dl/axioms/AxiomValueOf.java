@@ -15,7 +15,8 @@ public final class AxiomValueOf extends AxiomIndividual {
 	private final DataRoleExpression dataRoleExpression;
 	private final DataValue value;
 
-	public AxiomValueOf(final IndividualExpression i, final DataRoleExpression a, final DataValue v) {
+	public AxiomValueOf(final IndividualExpression i,
+			final DataRoleExpression a, final DataValue v) {
 		super(i);
 		dataRoleExpression = a;
 		value = v;

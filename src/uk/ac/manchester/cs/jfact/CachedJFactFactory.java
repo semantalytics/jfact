@@ -20,28 +20,37 @@ public final class CachedJFactFactory implements OWLReasonerFactory {
 	}
 
 	public OWLReasoner createReasoner(OWLOntology ontology) {
-		JFactReasoner toReturn = new JFactReasoner(ontology, new SimpleConfiguration(), BufferingMode.BUFFERING);
+		JFactReasoner toReturn = new JFactReasoner(ontology,
+				new SimpleConfiguration(), BufferingMode.BUFFERING);
 		return verify(toReturn);
 	}
 
 	private OWLReasoner verify(JFactReasoner toReturn) {
-		OWLOntologyManager m = toReturn.getRootOntology().getOWLOntologyManager();
+		OWLOntologyManager m = toReturn.getRootOntology()
+				.getOWLOntologyManager();
 		m.addOntologyChangeListener(toReturn);
 		return new CachedOWLReasoner(toReturn, m);
 	}
 
 	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology) {
-		JFactReasoner toReturn = new JFactReasoner(ontology, new SimpleConfiguration(), BufferingMode.NON_BUFFERING);
+		JFactReasoner toReturn = new JFactReasoner(ontology,
+				new SimpleConfiguration(), BufferingMode.NON_BUFFERING);
 		return verify(toReturn);
 	}
 
-	public OWLReasoner createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
-		JFactReasoner toReturn = new JFactReasoner(ontology, config, BufferingMode.BUFFERING);
+	public OWLReasoner createReasoner(OWLOntology ontology,
+			OWLReasonerConfiguration config)
+			throws IllegalConfigurationException {
+		JFactReasoner toReturn = new JFactReasoner(ontology, config,
+				BufferingMode.BUFFERING);
 		return verify(toReturn);
 	}
 
-	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology, OWLReasonerConfiguration config) throws IllegalConfigurationException {
-		JFactReasoner toReturn = new JFactReasoner(ontology, config, BufferingMode.NON_BUFFERING);
+	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology,
+			OWLReasonerConfiguration config)
+			throws IllegalConfigurationException {
+		JFactReasoner toReturn = new JFactReasoner(ontology, config,
+				BufferingMode.NON_BUFFERING);
 		return verify(toReturn);
 	}
 }

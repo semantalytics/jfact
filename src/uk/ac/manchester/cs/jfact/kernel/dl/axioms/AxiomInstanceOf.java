@@ -13,7 +13,8 @@ import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitorEx;
 public final class AxiomInstanceOf extends AxiomIndividual {
 	private final ConceptExpression conceptExpression;
 
-	public AxiomInstanceOf(final IndividualExpression i, final ConceptExpression c) {
+	public AxiomInstanceOf(final IndividualExpression i,
+			final ConceptExpression c) {
 		super(i);
 		conceptExpression = c;
 	}

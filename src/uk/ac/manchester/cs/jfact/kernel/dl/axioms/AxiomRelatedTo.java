@@ -14,7 +14,8 @@ public final class AxiomRelatedTo extends AxiomIndividual {
 	private final IndividualExpression individualExpression;
 	private final ObjectRoleExpression objectRoleExpression;
 
-	public AxiomRelatedTo(final IndividualExpression i, final ObjectRoleExpression r, final IndividualExpression j) {
+	public AxiomRelatedTo(final IndividualExpression i,
+			final ObjectRoleExpression r, final IndividualExpression j) {
 		super(i);
 		objectRoleExpression = r;
 		individualExpression = j;

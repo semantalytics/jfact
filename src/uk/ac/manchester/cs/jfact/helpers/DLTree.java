@@ -155,7 +155,8 @@ public abstract class DLTree {
 			}
 			Collection<DLTree> c1 = t1.getChildren();
 			Collection<DLTree> c2 = t2.getChildren();
-			return c1.size() == c2.size() && c1.containsAll(c2) && c2.containsAll(c1);
+			return c1.size() == c2.size() && c1.containsAll(c2)
+					&& c2.containsAll(c1);
 		}
 		return false;
 	}
@@ -213,7 +214,8 @@ class CloningVisitor implements DLTreeVisitorEx<DLTree> {
 	}
 
 	public DLTree visit(TWODLTree t) {
-		return new TWODLTree(new Lexeme(t.elem), t.getLeft().accept(this), t.getRight().accept(this));
+		return new TWODLTree(new Lexeme(t.elem), t.getLeft().accept(this), t
+				.getRight().accept(this));
 	}
 
 	public DLTree visit(NDLTree t) {
@@ -235,7 +237,8 @@ class ReverseCloningVisitor implements DLTreeVisitorEx<DLTree> {
 	}
 
 	public DLTree visit(TWODLTree t) {
-		return new TWODLTree(new Lexeme(t.elem), t.getRight().accept(this), t.getLeft().accept(this));
+		return new TWODLTree(new Lexeme(t.elem), t.getRight().accept(this), t
+				.getLeft().accept(this));
 	}
 
 	public DLTree visit(NDLTree t) {
@@ -395,7 +398,8 @@ class NDLTree extends DLTree {
 		super(l);
 		children = new ArrayList<DLTree>();
 		if (trees.size() < 2) {
-			throw new RuntimeException("not enough elements in the n-ary element");
+			throw new RuntimeException(
+					"not enough elements in the n-ary element");
 		}
 		for (DLTree d : trees) {
 			addChild(d);
@@ -406,7 +410,8 @@ class NDLTree extends DLTree {
 		super(l);
 		children = new ArrayList<DLTree>();
 		if (C == null || D == null) {
-			throw new RuntimeException("not enough elements in the n-ary element");
+			throw new RuntimeException(
+					"not enough elements in the n-ary element");
 		}
 		addChild(C);
 		addChild(D);

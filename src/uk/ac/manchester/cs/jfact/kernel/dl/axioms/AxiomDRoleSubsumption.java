@@ -12,7 +12,8 @@ import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitorEx;
 public final class AxiomDRoleSubsumption extends AxiomSingleDRole {
 	private final DataRoleExpression subRole;
 
-	public AxiomDRoleSubsumption(final DataRoleExpression subRole, final DataRoleExpression supRole) {
+	public AxiomDRoleSubsumption(final DataRoleExpression subRole,
+			final DataRoleExpression supRole) {
 		super(supRole);
 		this.subRole = subRole;
 	}

@@ -67,7 +67,8 @@ public final class RoleAutomaton {
 	// add single RA
 	/** add RA from simple subrole to given one */
 	public void addSimpleRA(RoleAutomaton RA) {
-		boolean ok = base.get(initial).addToExisting(RA.base.get(initial).begin().get(0));
+		boolean ok = base.get(initial).addToExisting(
+				RA.base.get(initial).begin().get(0));
 		assert ok;
 	}
 

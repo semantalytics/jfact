@@ -49,7 +49,8 @@ public final class Reference<E> {
 			return true;
 		}
 		if (arg0 instanceof Reference) {
-			return e != null ? e.equals(((Reference<?>) arg0).getReference()) : false;
+			return e != null ? e.equals(((Reference<?>) arg0).getReference())
+					: false;
 		}
 		return false;
 	}

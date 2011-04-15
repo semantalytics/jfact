@@ -28,6 +28,7 @@ public final class DepSetFactory {
 		toReturn.add(ds2);
 		return toReturn;
 	}
+
 	public final static DepSet create(FastSetSimple delegate) {
 		return new DepSet(delegate);
 	}

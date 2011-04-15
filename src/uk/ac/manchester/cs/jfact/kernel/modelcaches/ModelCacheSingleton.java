@@ -40,7 +40,8 @@ public final class ModelCacheSingleton extends ModelCacheInterface {
 			case mctConst: // TOP/BOTTOM: the current node can't add anything to the result
 				return p.getState();
 			case mctSingleton: // it can be a clash
-				return ((ModelCacheSingleton) p).singleton == -singleton ? ModelCacheState.csInvalid : ModelCacheState.csValid;
+				return ((ModelCacheSingleton) p).singleton == -singleton ? ModelCacheState.csInvalid
+						: ModelCacheState.csValid;
 			case mctIan: // ask more intellegent object
 				return p.canMerge(this);
 			case mctBadType: // error

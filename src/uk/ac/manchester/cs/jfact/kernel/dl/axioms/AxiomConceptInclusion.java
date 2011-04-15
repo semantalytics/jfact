@@ -13,7 +13,8 @@ public final class AxiomConceptInclusion extends AxiomImpl {
 	private final ConceptExpression subConcept;
 	private final ConceptExpression superConcept;
 
-	public AxiomConceptInclusion(final ConceptExpression sub, final ConceptExpression sup) {
+	public AxiomConceptInclusion(final ConceptExpression sub,
+			final ConceptExpression sup) {
 		subConcept = sub;
 		superConcept = sup;
 	}

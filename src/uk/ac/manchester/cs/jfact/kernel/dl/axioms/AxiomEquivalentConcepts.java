@@ -16,7 +16,8 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NAryExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitorEx;
 
-public final class AxiomEquivalentConcepts extends AxiomImpl implements Axiom, NAryExpression<ConceptExpression> {
+public final class AxiomEquivalentConcepts extends AxiomImpl implements Axiom,
+		NAryExpression<ConceptExpression> {
 	private final NAryExpressionImpl<ConceptExpression> delegate;
 
 	public AxiomEquivalentConcepts(final List<Expression> v) {

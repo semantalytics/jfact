@@ -14,7 +14,8 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NAryExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
-public final class DataOneOf extends NAryExpressionImpl<DataValue> implements NAryExpression<DataValue>, DataExpression {
+public final class DataOneOf extends NAryExpressionImpl<DataValue> implements
+		NAryExpression<DataValue>, DataExpression {
 	/** create one-of from individuals in the given array */
 	public DataOneOf(final List<Expression> v) {
 		add(v);

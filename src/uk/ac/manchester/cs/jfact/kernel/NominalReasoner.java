@@ -30,7 +30,8 @@ public final class NominalReasoner extends DlSatTester {
 	///		internal nominal reasoning interface
 	/** create cache entry for given singleton */
 	protected void registerNominalCache(Individual p) {
-		dlHeap.setCache(p.getpName(), createModelCache(p.getNode().resolvePBlocker()));
+		dlHeap.setCache(p.getpName(), createModelCache(p.getNode()
+				.resolvePBlocker()));
 	}
 
 	/** init single nominal node */
@@ -46,10 +47,12 @@ public final class NominalReasoner extends DlSatTester {
 		registerNominalCache(p);
 		if (p.getNode().isPBlocked()) {
 			// BP of the individual P is merged to
-			int bp = p.getNode().getBlocker().label().get_sc().get(0).getConcept();
+			int bp = p.getNode().getBlocker().label().get_sc().get(0)
+					.getConcept();
 			Individual blocker = (Individual) dlHeap.get(bp).getConcept();
 			assert blocker.getNode().equals(p.getNode().getBlocker());
-			tBox.sameIndividuals.put(p, new Pair<Individual, Boolean>(blocker, p.getNode().getPurgeDep().isEmpty()));
+			tBox.sameIndividuals.put(p, new Pair<Individual, Boolean>(blocker,
+					p.getNode().getPurgeDep().isEmpty()));
 		}
 	}
 
@@ -82,7 +85,8 @@ public final class NominalReasoner extends DlSatTester {
 	public boolean consistentNominalCloud() {
 		logger.print("\n\nChecking consistency of an ontology with individuals:\n");
 		boolean result = false;
-		if (initNewNode(cGraph.getRoot(), DepSetFactory.create(), Helper.bpTOP) || initNominalCloud()) {
+		if (initNewNode(cGraph.getRoot(), DepSetFactory.create(), Helper.bpTOP)
+				|| initNominalCloud()) {
 			logger.print("\ninit done\n");
 			result = false;
 		} else {
@@ -100,7 +104,8 @@ public final class NominalReasoner extends DlSatTester {
 			nonDetShift = 1;
 			logger.print("]");
 		}
-		logger.print(Templates.CONSISTENT_NOMINAL, (result ? "consistent" : "INCONSISTENT"));
+		logger.print(Templates.CONSISTENT_NOMINAL, (result ? "consistent"
+				: "INCONSISTENT"));
 		if (!result) {
 			return false;
 		}
@@ -151,7 +156,8 @@ public final class NominalReasoner extends DlSatTester {
 		for (int i = 0; i < neighbour.size(); i++) {
 			DlCompletionTreeArc p = neighbour.get(i);
 			DlCompletionTree suspect = p.getArcEnd();
-			if (p.isPredEdge() && suspect.isBlockableNode() && p.isNeighbour(r) && suspect.isLabelledBy(C)) {
+			if (p.isPredEdge() && suspect.isBlockableNode() && p.isNeighbour(r)
+					&& suspect.isLabelledBy(C)) {
 				logger.print(Templates.NN, suspect.getId());
 				return true;
 			}

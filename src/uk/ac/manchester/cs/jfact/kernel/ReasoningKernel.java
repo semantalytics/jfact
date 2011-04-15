@@ -218,7 +218,8 @@ public final class ReasoningKernel {
 		if (C.isCN() && D.isCN()) {
 			return checkSub(getTBox().getCI(C), getTBox().getCI(D));
 		}
-		return !checkSat(DLTreeFactory.createSNFAnd(C, DLTreeFactory.createSNFNot(D)));
+		return !checkSat(DLTreeFactory.createSNFAnd(C,
+				DLTreeFactory.createSNFNot(D)));
 	}
 
 	// get access to internal structures
@@ -255,7 +256,8 @@ public final class ReasoningKernel {
 	/** get access to the concept hierarchy */
 	private Taxonomy getCTaxonomy() {
 		if (!isKBClassified()) {
-			throw new ReasonerInternalException("No access to concept taxonomy: ontology not classified");
+			throw new ReasonerInternalException(
+					"No access to concept taxonomy: ontology not classified");
 		}
 		return getTBox().getTaxonomy();
 	}
@@ -263,7 +265,8 @@ public final class ReasoningKernel {
 	/** get access to the object role hierarchy */
 	private Taxonomy getORTaxonomy() {
 		if (!isKBPreprocessed()) {
-			throw new ReasonerInternalException("No access to the object role taxonomy: ontology not preprocessed");
+			throw new ReasonerInternalException(
+					"No access to the object role taxonomy: ontology not preprocessed");
 		}
 		return getORM().getTaxonomy();
 	}
@@ -271,14 +274,16 @@ public final class ReasoningKernel {
 	/** get access to the data role hierarchy */
 	private Taxonomy getDRTaxonomy() {
 		if (!isKBPreprocessed()) {
-			throw new ReasonerInternalException("No access to the data role taxonomy: ontology not preprocessed");
+			throw new ReasonerInternalException(
+					"No access to the data role taxonomy: ontology not preprocessed");
 		}
 		return getDRM().getTaxonomy();
 	}
 
 	// transformation methods
 	/** get individual by the TIndividualExpr */
-	private Individual getIndividual(final IndividualExpression i, final String reason) {
+	private Individual getIndividual(final IndividualExpression i,
+			final String reason) {
 		DLTree I = e(i);
 		if (I == null) {
 			throw new ReasonerInternalException(reason);
@@ -337,7 +342,8 @@ public final class ReasoningKernel {
 	}
 
 	/** set top/bottom role names to use them in the related output */
-	public void setTopBottomRoleNames(final String topO, final String botO, final String topD, final String botD) {
+	public void setTopBottomRoleNames(final String topO, final String botO,
+			final String topD, final String botD) {
 		topORoleName = topO;
 		botORoleName = botO;
 		topDRoleName = topD;
@@ -364,15 +370,19 @@ public final class ReasoningKernel {
 	/** @return true if R is functional wrt ontology */
 	private boolean checkFunctionality(DLTree R) {
 		// R is transitive iff \ER.C and \ER.\not C is unsatisfiable
-		DLTree tmp = DLTreeFactory.createSNFExists(R.copy(), DLTreeFactory.createSNFNot(getTBox().getFreshConcept()));
-		tmp = DLTreeFactory.createSNFAnd(tmp, DLTreeFactory.createSNFExists(R, getTBox().getFreshConcept()));
+		DLTree tmp = DLTreeFactory.createSNFExists(R.copy(),
+				DLTreeFactory.createSNFNot(getTBox().getFreshConcept()));
+		tmp = DLTreeFactory.createSNFAnd(tmp,
+				DLTreeFactory.createSNFExists(R, getTBox().getFreshConcept()));
 		return !checkSat(tmp);
 	}
 
 	/** @return true if R is functional; set the value for R if necessary */
 	private boolean getFunctionality(Role R) {
 		if (!R.isFunctionalityKnown()) {
-			R.setFunctional(checkFunctionality(DLTreeFactory.buildTree(new Lexeme(R.isDataRole() ? Token.DNAME : Token.RNAME, R))));
+			R.setFunctional(checkFunctionality(DLTreeFactory
+					.buildTree(new Lexeme(R.isDataRole() ? Token.DNAME
+							: Token.RNAME, R))));
 		}
 		return R.isFunctional();
 	}
@@ -380,24 +390,29 @@ public final class ReasoningKernel {
 	/** @return true if R is transitive wrt ontology */
 	private boolean checkTransitivity(DLTree R) {
 		// R is transitive iff \ER.\ER.C and \AR.\not C is unsatisfiable
-		DLTree tmp = DLTreeFactory.createSNFExists(R.copy(), DLTreeFactory.createSNFNot(getTBox().getFreshConcept()));
+		DLTree tmp = DLTreeFactory.createSNFExists(R.copy(),
+				DLTreeFactory.createSNFNot(getTBox().getFreshConcept()));
 		tmp = DLTreeFactory.createSNFExists(R.copy(), tmp);
-		tmp = DLTreeFactory.createSNFAnd(tmp, DLTreeFactory.createSNFForall(R, getTBox().getFreshConcept()));
+		tmp = DLTreeFactory.createSNFAnd(tmp,
+				DLTreeFactory.createSNFForall(R, getTBox().getFreshConcept()));
 		return !checkSat(tmp);
 	}
 
 	/** @return true if R is symmetric wrt ontology */
 	private boolean checkSymmetry(DLTree R) {
 		// R is symmetric iff C and \ER.\AR.(not C) is unsatisfiable
-		DLTree tmp = DLTreeFactory.createSNFForall(R.copy(), DLTreeFactory.createSNFNot(getTBox().getFreshConcept()));
-		tmp = DLTreeFactory.createSNFAnd(getTBox().getFreshConcept(), DLTreeFactory.createSNFExists(R, tmp));
+		DLTree tmp = DLTreeFactory.createSNFForall(R.copy(),
+				DLTreeFactory.createSNFNot(getTBox().getFreshConcept()));
+		tmp = DLTreeFactory.createSNFAnd(getTBox().getFreshConcept(),
+				DLTreeFactory.createSNFExists(R, tmp));
 		return !checkSat(tmp);
 	}
 
 	/** @return true if R is reflexive wrt ontology */
 	private boolean checkReflexivity(DLTree R) {
 		// R is reflexive iff C and \AR.(not C) is unsatisfiable
-		DLTree tmp = DLTreeFactory.createSNFForall(R, DLTreeFactory.createSNFNot(getTBox().getFreshConcept()));
+		DLTree tmp = DLTreeFactory.createSNFForall(R,
+				DLTreeFactory.createSNFNot(getTBox().getFreshConcept()));
 		tmp = DLTreeFactory.createSNFAnd(getTBox().getFreshConcept(), tmp);
 		return !checkSat(tmp);
 	}
@@ -405,8 +420,11 @@ public final class ReasoningKernel {
 	/** @return true if R [= S wrt ontology */
 	private boolean checkRoleSubsumption(DLTree R, DLTree S) {
 		// R [= S iff \ER.C and \AS.(not C) is unsatisfiable
-		DLTree tmp = DLTreeFactory.createSNFForall(S, DLTreeFactory.createSNFNot(getTBox().getFreshConcept()));
-		tmp = DLTreeFactory.createSNFAnd(DLTreeFactory.createSNFExists(R, getTBox().getFreshConcept()), tmp);
+		DLTree tmp = DLTreeFactory.createSNFForall(S,
+				DLTreeFactory.createSNFNot(getTBox().getFreshConcept()));
+		tmp = DLTreeFactory.createSNFAnd(
+				DLTreeFactory.createSNFExists(R, getTBox().getFreshConcept()),
+				tmp);
 		return !checkSat(tmp);
 	}
 
@@ -420,7 +438,8 @@ public final class ReasoningKernel {
 		if (pTBox != null) {
 			return true;
 		}
-		pTBox = new TBox(getOptions(), topORoleName, botORoleName, topDRoleName, botDRoleName, interrupted);
+		pTBox = new TBox(getOptions(), topORoleName, botORoleName,
+				topDRoleName, botDRoleName, interrupted);
 		pTBox.setTestTimeout(opTimeout);
 		pTBox.setProgressMonitor(pMonitor);
 		pTBox.setVerboseOutput(verboseOutput);
@@ -474,7 +493,8 @@ public final class ReasoningKernel {
 	}
 
 	/** axiom (R [= S) */
-	public Axiom impliesORoles(ObjectRoleComplexExpression R, ObjectRoleExpression S) {
+	public Axiom impliesORoles(ObjectRoleComplexExpression R,
+			ObjectRoleExpression S) {
 		return ontology.add(new AxiomORoleSubsumption(R, S));
 	}
 
@@ -570,22 +590,26 @@ public final class ReasoningKernel {
 	}
 
 	/** axiom <I,J>:R */
-	public Axiom relatedTo(IndividualExpression I, ObjectRoleExpression R, IndividualExpression J) {
+	public Axiom relatedTo(IndividualExpression I, ObjectRoleExpression R,
+			IndividualExpression J) {
 		return ontology.add(new AxiomRelatedTo(I, R, J));
 	}
 
 	/** axiom <I,J>:\neg R */
-	public Axiom relatedToNot(IndividualExpression I, ObjectRoleExpression R, IndividualExpression J) {
+	public Axiom relatedToNot(IndividualExpression I, ObjectRoleExpression R,
+			IndividualExpression J) {
 		return ontology.add(new AxiomRelatedToNot(I, R, J));
 	}
 
 	/** axiom (value I A V) */
-	public Axiom valueOf(IndividualExpression I, DataRoleExpression A, DataValue V) {
+	public Axiom valueOf(IndividualExpression I, DataRoleExpression A,
+			DataValue V) {
 		return ontology.add(new AxiomValueOf(I, A, V));
 	}
 
 	/** axiom <I,V>:\neg A */
-	public Axiom valueOfNot(IndividualExpression I, DataRoleExpression A, DataValue V) {
+	public Axiom valueOfNot(IndividualExpression I, DataRoleExpression A,
+			DataValue V) {
 		return ontology.add(new AxiomValueOfNot(I, A, V));
 	}
 
@@ -660,7 +684,8 @@ public final class ReasoningKernel {
 		if (isEmptyRole(R)) {
 			return true; // empty role is functional
 		}
-		return getFunctionality(getRole(R, "Role expression expected in isFunctional()"));
+		return getFunctionality(getRole(R,
+				"Role expression expected in isFunctional()"));
 	}
 
 	/** @return true iff data role is functional */
@@ -672,7 +697,8 @@ public final class ReasoningKernel {
 		if (isEmptyRole(R)) {
 			return true; // empty role is functional
 		}
-		return getFunctionality(getRole(R, "Role expression expected in isFunctional()"));
+		return getFunctionality(getRole(R,
+				"Role expression expected in isFunctional()"));
 	}
 
 	/** @return true iff role is inverse-functional */
@@ -684,7 +710,8 @@ public final class ReasoningKernel {
 		if (isEmptyRole(R)) {
 			return true; // empty role is functional
 		}
-		return getFunctionality(getRole(R, "Role expression expected in isInverseFunctional()").inverse());
+		return getFunctionality(getRole(R,
+				"Role expression expected in isInverseFunctional()").inverse());
 	}
 
 	/** @return true iff role is transitive */
@@ -768,7 +795,8 @@ public final class ReasoningKernel {
 	}
 
 	/** @return true iff two roles are disjoint */
-	public boolean isDisjointRoles(final ObjectRoleExpression R, final ObjectRoleExpression S) {
+	public boolean isDisjointRoles(final ObjectRoleExpression R,
+			final ObjectRoleExpression S) {
 		preprocessKB(); // ensure KB is ready to answer the query
 		if (isUniversalRole(R) || isUniversalRole(S)) {
 			return false; // universal role is not disjoint with anything
@@ -776,11 +804,14 @@ public final class ReasoningKernel {
 		if (isEmptyRole(R) || isEmptyRole(S)) {
 			return true; // empty role is disjoint with everything
 		}
-		return getTBox().isDisjointRoles(getRole(R, "Role expression expected in isDisjointRoles()"), getRole(S, "Role expression expected in isDisjointRoles()"));
+		return getTBox().isDisjointRoles(
+				getRole(R, "Role expression expected in isDisjointRoles()"),
+				getRole(S, "Role expression expected in isDisjointRoles()"));
 	}
 
 	/** @return true iff two roles are disjoint */
-	public boolean isDisjointRoles(final DataRoleExpression R, final DataRoleExpression S) {
+	public boolean isDisjointRoles(final DataRoleExpression R,
+			final DataRoleExpression S) {
 		preprocessKB(); // ensure KB is ready to answer the query
 		if (isUniversalRole(R) || isUniversalRole(S)) {
 			return false; // universal role is not disjoint with anything
@@ -788,7 +819,9 @@ public final class ReasoningKernel {
 		if (isEmptyRole(R) || isEmptyRole(S)) {
 			return true; // empty role is disjoint with everything
 		}
-		return getTBox().isDisjointRoles(getRole(R, "Role expression expected in isDisjointRoles()"), getRole(S, "Role expression expected in isDisjointRoles()"));
+		return getTBox().isDisjointRoles(
+				getRole(R, "Role expression expected in isDisjointRoles()"),
+				getRole(S, "Role expression expected in isDisjointRoles()"));
 	}
 
 	/** @return true if R is a sub-role of S */
@@ -801,7 +834,8 @@ public final class ReasoningKernel {
 			return false; // as \top [= \bot leads to inconsistent ontology
 		}
 		// told case first
-		if (getRole(R, "Role expression expected in isSubRoles()").lesserequal(getRole(S, "Role expression expected in isSubRoles()"))) {
+		if (getRole(R, "Role expression expected in isSubRoles()").lesserequal(
+				getRole(S, "Role expression expected in isSubRoles()"))) {
 			return true;
 		}
 		// check the general case
@@ -827,32 +861,38 @@ public final class ReasoningKernel {
 	}
 
 	/** @return true iff C [= D holds */
-	public boolean isSubsumedBy(final ConceptExpression C, final ConceptExpression D) {
+	public boolean isSubsumedBy(final ConceptExpression C,
+			final ConceptExpression D) {
 		preprocessKB();
 		try {
 			return checkSub(e(C), e(D));
 		} catch (OWLRuntimeException e) {
 			//XXX this needs a better approach
-			System.out.println("ReasoningKernel.isSameIndividuals() WARNING: an exception was thrown: returning false as default\n" + e.getMessage());
+			System.out
+					.println("ReasoningKernel.isSameIndividuals() WARNING: an exception was thrown: returning false as default\n"
+							+ e.getMessage());
 			return false;
 		}
 	}
 
 	/** @return true iff C is disjoint with D; that is, C [= \not D holds */
-	public boolean isDisjoint(final ConceptExpression C, final ConceptExpression D) {
+	public boolean isDisjoint(final ConceptExpression C,
+			final ConceptExpression D) {
 		preprocessKB();
 		return checkSub(e(C), DLTreeFactory.createSNFNot(e(D)));
 	}
 
 	/** @return true iff C is equivalent to D */
-	public boolean isEquivalent(final ConceptExpression C, final ConceptExpression D) {
+	public boolean isEquivalent(final ConceptExpression C,
+			final ConceptExpression D) {
 		preprocessKB();
 		return isSubsumedBy(C, D) && isSubsumedBy(D, C);
 	}
 
 	// concept hierarchy
 	/** apply actor__apply() to all DIRECT super-concepts of [complex] C */
-	public void getSupConcepts(final ConceptExpression C, boolean direct, Actor actor) {
+	public void getSupConcepts(final ConceptExpression C, boolean direct,
+			Actor actor) {
 		classifyKB(); // ensure KB is ready to answer the query
 		setUpCache(e(C), csClassified);
 		Taxonomy tax = getCTaxonomy();
@@ -864,7 +904,8 @@ public final class ReasoningKernel {
 	}
 
 	/** apply actor__apply() to all DIRECT sub-concepts of [complex] C */
-	public void getSubConcepts(final ConceptExpression C, boolean direct, Actor actor) {
+	public void getSubConcepts(final ConceptExpression C, boolean direct,
+			Actor actor) {
 		classifyKB(); // ensure KB is ready to answer the query
 		setUpCache(e(C), csClassified);
 		Taxonomy tax = getCTaxonomy();
@@ -919,9 +960,12 @@ public final class ReasoningKernel {
 	 * apply actor__apply() to all DIRECT NC that are in the domain of [complex]
 	 * R
 	 */
-	public void getRoleDomain(final RoleExpression r, boolean direct, Actor actor) {
+	public void getRoleDomain(final RoleExpression r, boolean direct,
+			Actor actor) {
 		classifyKB(); // ensure KB is ready to answer the query
-		setUpCache(DLTreeFactory.createSNFExists(e(r), DLTreeFactory.createTop()), csClassified);
+		setUpCache(
+				DLTreeFactory.createSNFExists(e(r), DLTreeFactory.createTop()),
+				csClassified);
 		Taxonomy tax = getCTaxonomy();
 		if (direct) {
 			tax.getRelativesInfo(cachedVertex, actor, true, true, true);
@@ -935,7 +979,8 @@ public final class ReasoningKernel {
 	 * apply actor__apply() to all DIRECT NC that are in the range of [complex]
 	 * R
 	 */
-	public void getRoleRange(final ObjectRoleExpression r, boolean direct, Actor actor) {
+	public void getRoleRange(final ObjectRoleExpression r, boolean direct,
+			Actor actor) {
 		getRoleDomain(getExpressionManager().inverse(r), direct, actor);
 	}
 
@@ -968,7 +1013,8 @@ public final class ReasoningKernel {
 	 * apply actor__apply() to all DIRECT concepts that are types of an
 	 * individual I
 	 */
-	public void getTypes(final IndividualExpression I, boolean direct, Actor actor) {
+	public void getTypes(final IndividualExpression I, boolean direct,
+			Actor actor) {
 		realiseKB(); // ensure KB is ready to answer the query
 		setUpCache(e(I), csClassified);
 		Taxonomy tax = getCTaxonomy();
@@ -986,15 +1032,20 @@ public final class ReasoningKernel {
 	}
 
 	/** @return true iff I and J refer to the same individual */
-	public boolean isSameIndividuals(final IndividualExpression I, final IndividualExpression J) {
+	public boolean isSameIndividuals(final IndividualExpression I,
+			final IndividualExpression J) {
 		realiseKB();
 		try {
-			Individual i = getIndividual(I, "Only known individuals are allowed in the isSameAs()");
-			Individual j = getIndividual(J, "Only known individuals are allowed in the isSameAs()");
+			Individual i = getIndividual(I,
+					"Only known individuals are allowed in the isSameAs()");
+			Individual j = getIndividual(J,
+					"Only known individuals are allowed in the isSameAs()");
 			return getTBox().isSameIndividuals(i, j);
 		} catch (OWLRuntimeException e) {
 			//XXX this needs a better approach
-			System.out.println("ReasoningKernel.isSameIndividuals() WARNING: an exception was thrown: returning false as default\n" + e.getMessage());
+			System.out
+					.println("ReasoningKernel.isSameIndividuals() WARNING: an exception was thrown: returning false as default\n"
+							+ e.getMessage());
 			//			StringWriter w = new StringWriter();
 			//			PrintWriter p = new PrintWriter(w);
 			//			e.printStackTrace(p);
@@ -1004,14 +1055,17 @@ public final class ReasoningKernel {
 	}
 
 	/** @return true iff individual I is instance of given [complex] C */
-	public boolean isInstance(final IndividualExpression I, final ConceptExpression C) {
+	public boolean isInstance(final IndividualExpression I,
+			final ConceptExpression C) {
 		realiseKB(); // ensure KB is ready to answer the query
 		try {
 			getIndividual(I, "individual name expected in the isInstance()");
 			return isSubsumedBy(getExpressionManager().oneOf(I), C);
 		} catch (OWLRuntimeException e) {
 			//XXX this needs a better approach
-			System.out.println("ReasoningKernel.isSameIndividuals() WARNING: an exception was thrown: returning false as default\n" + e.getMessage());
+			System.out
+					.println("ReasoningKernel.isSameIndividuals() WARNING: an exception was thrown: returning false as default\n"
+							+ e.getMessage());
 			//			StringWriter w = new StringWriter();
 			//			PrintWriter p = new PrintWriter(w);
 			//			e.printStackTrace(p);
@@ -1029,7 +1083,8 @@ public final class ReasoningKernel {
 		cachedQuery = null;
 		initCacheAndFlags();
 		if (initOptions()) {
-			throw new ReasonerInternalException("FaCT++ kernel: Cannot init options");
+			throw new ReasonerInternalException(
+					"FaCT++ kernel: Cannot init options");
 		}
 	}
 
@@ -1056,7 +1111,8 @@ public final class ReasoningKernel {
 		assert status.ordinal() >= kbCChecked.ordinal();
 		// check whether reasoning was failed
 		if (reasoningFailed) {
-			throw new ReasonerInternalException("Can't classify KB because of previous errors");
+			throw new ReasonerInternalException(
+					"Can't classify KB because of previous errors");
 		}
 		// check if something have to be done
 		if (getStatus().ordinal() >= status.ordinal()) { // nothing to do; but make sure that we are consistent
@@ -1173,7 +1229,8 @@ public final class ReasoningKernel {
 				// invalidate cache
 				cacheLevel = csEmpty;
 				// FIXME!! reclassification
-				throw new ReasonerInternalException("FaCT++ Kernel: incremental classification not supported");
+				throw new ReasonerInternalException(
+						"FaCT++ Kernel: incremental classification not supported");
 			}
 			cacheLevel = level;
 			if (level == csClassified) // need to set the pointers
@@ -1202,12 +1259,15 @@ public final class ReasoningKernel {
 		for (int i = l.size() - 1; i > -1; i--) {
 			Expression p = l.get(i);
 			if (!(p instanceof ObjectRoleExpression)) {
-				throw new ReasonerInternalException("Role expression expected in the role chain construct");
+				throw new ReasonerInternalException(
+						"Role expression expected in the role chain construct");
 			}
 			ObjectRoleExpression Ri = (ObjectRoleExpression) p;
 			tmp = DLTreeFactory.createSNFExists(e(Ri), tmp);
 		}
-		tmp = DLTreeFactory.createSNFAnd(tmp, DLTreeFactory.createSNFForall(DLTreeFactory.buildTree(new Lexeme(Token.RNAME, R)), getTBox().getFreshConcept()));
+		tmp = DLTreeFactory.createSNFAnd(tmp, DLTreeFactory.createSNFForall(
+				DLTreeFactory.buildTree(new Lexeme(Token.RNAME, R)), getTBox()
+						.getFreshConcept()));
 		return !checkSat(tmp);
 	}
 
@@ -1220,7 +1280,8 @@ public final class ReasoningKernel {
 		if (isEmptyRole(R)) {
 			return false; // empty role is not a super of any chain
 		}
-		return checkSubChain(getRole(R, "Role expression expected in isSubChain()"), l);
+		return checkSubChain(
+				getRole(R, "Role expression expected in isSubChain()"), l);
 	}
 
 	/** @return true if R is a sub-role of S */
@@ -1233,7 +1294,8 @@ public final class ReasoningKernel {
 			return false; // as \top [= \bot leads to inconsistent ontology
 		}
 		// told case first
-		if (getRole(R, "Role expression expected in isSubRoles()").lesserequal(getRole(S, "Role expression expected in isSubRoles()"))) {
+		if (getRole(R, "Role expression expected in isSubRoles()").lesserequal(
+				getRole(S, "Role expression expected in isSubRoles()"))) {
 			return true;
 		}
 		// FIXME!! we can hardly do better, but need to think more here
@@ -1254,10 +1316,12 @@ public final class ReasoningKernel {
 				if (isEmptyRole(ORole)) {
 					continue; // empty role is disjoint with everything
 				}
-				Roles.add(getRole(ORole, "Role expression expected in isDisjointRoles()"));
+				Roles.add(getRole(ORole,
+						"Role expression expected in isDisjointRoles()"));
 			} else {
 				if (!(p instanceof DataRoleExpression)) {
-					throw new ReasonerInternalException("Role expression expected in isDisjointRoles()");
+					throw new ReasonerInternalException(
+							"Role expression expected in isDisjointRoles()");
 				}
 				DataRoleExpression DRole = (DataRoleExpression) p;
 				if (isUniversalRole(DRole)) {
@@ -1266,7 +1330,8 @@ public final class ReasoningKernel {
 				if (isEmptyRole(DRole)) {
 					continue; // empty role is disjoint with everything
 				}
-				Roles.add(getRole(DRole, "Role expression expected in isDisjointRoles()"));
+				Roles.add(getRole(DRole,
+						"Role expression expected in isDisjointRoles()"));
 			}
 		}
 		// test pair-wise disjointness
@@ -1288,21 +1353,26 @@ public final class ReasoningKernel {
 			return new ArrayList<Individual>();
 		}
 		RIActor actor = new RIActor();
-		ObjectRoleExpression InvR = R.getId() > 0 ? getExpressionManager().inverse(getExpressionManager().objectRole(R.getName())) : getExpressionManager().objectRole(R.inverse().getName());
+		ObjectRoleExpression InvR = R.getId() > 0 ? getExpressionManager()
+				.inverse(getExpressionManager().objectRole(R.getName()))
+				: getExpressionManager().objectRole(R.inverse().getName());
 		ConceptExpression query;
 		if (R.isTop()) {
 			query = getExpressionManager().top();
 		} else {
-			query = getExpressionManager().value(InvR, getExpressionManager().individual(I.getName()));
+			query = getExpressionManager().value(InvR,
+					getExpressionManager().individual(I.getName()));
 		}
 		getInstances(query, actor);
 		return actor.getAcc();
 	}
 
-	public void getRelatedRoles(final IndividualExpression I, List<NamedEntry> Rs, boolean data, boolean needI) {
+	public void getRelatedRoles(final IndividualExpression I,
+			List<NamedEntry> Rs, boolean data, boolean needI) {
 		realiseKB();
 		Rs.clear();
-		Individual i = getIndividual(I, "individual name expected in the getRelatedRoles()");
+		Individual i = getIndividual(I,
+				"individual name expected in the getRelatedRoles()");
 		RoleMaster RM = data ? getDRM() : getORM();
 		for (Role R : RM.getRoles()) {
 			if ((R.getId() > 0 || needI) && !getRelated(i, R).isEmpty()) {
@@ -1311,22 +1381,29 @@ public final class ReasoningKernel {
 		}
 	}
 
-	public void getRoleFillers(final IndividualExpression I, final ObjectRoleExpression R, List<NamedEntry> Result) {
+	public void getRoleFillers(final IndividualExpression I,
+			final ObjectRoleExpression R, List<NamedEntry> Result) {
 		realiseKB();
-		List<Individual> vec = getRelated(getIndividual(I, "Individual name expected in the getRoleFillers()"), getRole(R, "Role expression expected in the getRoleFillers()"));
+		List<Individual> vec = getRelated(
+				getIndividual(I,
+						"Individual name expected in the getRoleFillers()"),
+				getRole(R, "Role expression expected in the getRoleFillers()"));
 		for (Individual p : vec) {
 			Result.add(p);
 		}
 	}
 
-	public boolean isRelated(final IndividualExpression I, final ObjectRoleExpression R, final IndividualExpression J) {
+	public boolean isRelated(final IndividualExpression I,
+			final ObjectRoleExpression R, final IndividualExpression J) {
 		realiseKB();
-		Individual i = getIndividual(I, "Individual name expected in the isRelated()");
+		Individual i = getIndividual(I,
+				"Individual name expected in the isRelated()");
 		Role r = getRole(R, "Role expression expected in the isRelated()");
 		if (r.isDataRole()) {
 			return false;
 		}
-		Individual j = getIndividual(J, "Individual name expected in the isRelated()");
+		Individual j = getIndividual(J,
+				"Individual name expected in the isRelated()");
 		List<Individual> vec = getRelated(i, r);
 		for (Individual p : vec) {
 			if (j.equals(p)) {
@@ -1337,52 +1414,119 @@ public final class ReasoningKernel {
 	}
 
 	private boolean initOptions() {
-		if (kernelOptions.registerOption("useRelevantOnly", "Option 'useRelevantOnly' is used when creating internal DAG representation for externally given TBox. " + "If true, DAG contains only concepts, relevant to query. It is safe to leave this option false.",
-				IFOption.IOType.iotBool, "false")) {
-			return true;
-		}
-		if (kernelOptions.registerOption("dumpQuery", "Option 'dumpQuery' dumps sub-TBox relevant to given satisfiability/subsumption query.", IFOption.IOType.iotBool, "false")) {
-			return true;
-		}
-		if (kernelOptions.registerOption("absorptionFlags", "Option 'absorptionFlags' sets up absorption process for general axioms. " + "It text field of arbitrary length; every symbol means the absorption action: "
-				+ "(B)ottom Absorption), (T)op absorption, (E)quivalent concepts replacement, (C)oncept absorption, " + "(N)egated concept absorption, (F)orall expression replacement, (R)ole absorption, (S)plit", IFOption.IOType.iotText, "BTECFSR")) {
-			return true;
-		}
-		if (kernelOptions.registerOption("alwaysPreferEquals", "Option 'alwaysPreferEquals' allows user to enforce usage of C=D definition instead of C[=D " + "during absorption, even if implication appeares earlier in stream of axioms.", IFOption.IOType.iotBool, "true")) {
-			return true;
-		}
-		if (kernelOptions.registerOption("usePrecompletion", "Option 'usePrecompletion' switchs on and off precompletion process for ABox.", IFOption.IOType.iotBool, "false")) {
-			return true;
-		}
-		if (kernelOptions.registerOption("orSortSub", "Option 'orSortSub' define the sorting order of OR vertices in the DAG used in subsumption tests. " + "Option has form of string 'Mop', where 'M' is a sort field (could be 'D' for depth, 'S' for size, 'F' "
-				+ "for frequency, and '0' for no sorting), 'o' is a order field (could be 'a' for ascending and 'd' " + "for descending mode), and 'p' is a preference field (could be 'p' for preferencing non-generating " + "rules and 'n' for not doing so).",
-				IFOption.IOType.iotText, "0")) {
-			return true;
-		}
-		if (kernelOptions.registerOption("orSortSat", "Option 'orSortSat' define the sorting order of OR vertices in the DAG used in satisfiability tests " + "(used mostly in caching). Option has form of string 'Mop', see orSortSub for details.", IFOption.IOType.iotText, "0")) {
-			return true;
-		}
-		if (kernelOptions.registerOption("IAOEFLG", "Option 'IAOEFLG' define the priorities of different operations in TODO list. Possible values are " + "7-digit strings with ony possible digit are 0-6. The digits on the places 1, 2, ..., 7 are for "
-				+ "priority of Id, And, Or, Exists, Forall, LE and GE operations respectively. The smaller number means " + "the higher priority. All other constructions (TOP, BOTTOM, etc) has priority 0.", IFOption.IOType.iotText, "1263005")) {
+		if (kernelOptions
+				.registerOption(
+						"useRelevantOnly",
+						"Option 'useRelevantOnly' is used when creating internal DAG representation for externally given TBox. "
+								+ "If true, DAG contains only concepts, relevant to query. It is safe to leave this option false.",
+						IFOption.IOType.iotBool, "false")) {
 			return true;
 		}
 		if (kernelOptions
-				.registerOption("useSemanticBranching", "Option 'useSemanticBranching' switch semantic branching on and off. The usage of semantic branching " + "usually leads to faster reasoning, but sometime could give small overhead.", IFOption.IOType.iotBool, "true")) {
+				.registerOption(
+						"dumpQuery",
+						"Option 'dumpQuery' dumps sub-TBox relevant to given satisfiability/subsumption query.",
+						IFOption.IOType.iotBool, "false")) {
 			return true;
 		}
-		if (kernelOptions.registerOption("useBackjumping", "Option 'useBackjumping' switch backjumping on and off. The usage of backjumping " + "usually leads to much faster reasoning.", IFOption.IOType.iotBool, "true")) {
+		if (kernelOptions
+				.registerOption(
+						"absorptionFlags",
+						"Option 'absorptionFlags' sets up absorption process for general axioms. "
+								+ "It text field of arbitrary length; every symbol means the absorption action: "
+								+ "(B)ottom Absorption), (T)op absorption, (E)quivalent concepts replacement, (C)oncept absorption, "
+								+ "(N)egated concept absorption, (F)orall expression replacement, (R)ole absorption, (S)plit",
+						IFOption.IOType.iotText, "BTECFSR")) {
 			return true;
 		}
-		if (kernelOptions.registerOption("testTimeout", "Option 'testTimeout' sets timeout for a single reasoning test in milliseconds.", IFOption.IOType.iotInt, "0")) {
+		if (kernelOptions
+				.registerOption(
+						"alwaysPreferEquals",
+						"Option 'alwaysPreferEquals' allows user to enforce usage of C=D definition instead of C[=D "
+								+ "during absorption, even if implication appeares earlier in stream of axioms.",
+						IFOption.IOType.iotBool, "true")) {
 			return true;
 		}
-		if (kernelOptions.registerOption("useLazyBlocking", "Option 'useLazyBlocking' makes checking of blocking status as small as possible. This greatly " + "increase speed of reasoning.", IFOption.IOType.iotBool, "true")) {
+		if (kernelOptions
+				.registerOption(
+						"usePrecompletion",
+						"Option 'usePrecompletion' switchs on and off precompletion process for ABox.",
+						IFOption.IOType.iotBool, "false")) {
 			return true;
 		}
-		if (kernelOptions.registerOption("useAnywhereBlocking", "Option 'useAnywhereBlocking' allow user to choose between Anywhere and Ancestor blocking.", IFOption.IOType.iotBool, "true")) {
+		if (kernelOptions
+				.registerOption(
+						"orSortSub",
+						"Option 'orSortSub' define the sorting order of OR vertices in the DAG used in subsumption tests. "
+								+ "Option has form of string 'Mop', where 'M' is a sort field (could be 'D' for depth, 'S' for size, 'F' "
+								+ "for frequency, and '0' for no sorting), 'o' is a order field (could be 'a' for ascending and 'd' "
+								+ "for descending mode), and 'p' is a preference field (could be 'p' for preferencing non-generating "
+								+ "rules and 'n' for not doing so).",
+						IFOption.IOType.iotText, "0")) {
 			return true;
 		}
-		if (kernelOptions.registerOption("useCompletelyDefined", "Option 'useCompletelyDefined' leads to simpler Taxonomy creation if TBox contains no non-primitive " + "concepts. Unfortunately, it is quite rare case.", IFOption.IOType.iotBool, "true")) {
+		if (kernelOptions
+				.registerOption(
+						"orSortSat",
+						"Option 'orSortSat' define the sorting order of OR vertices in the DAG used in satisfiability tests "
+								+ "(used mostly in caching). Option has form of string 'Mop', see orSortSub for details.",
+						IFOption.IOType.iotText, "0")) {
+			return true;
+		}
+		if (kernelOptions
+				.registerOption(
+						"IAOEFLG",
+						"Option 'IAOEFLG' define the priorities of different operations in TODO list. Possible values are "
+								+ "7-digit strings with ony possible digit are 0-6. The digits on the places 1, 2, ..., 7 are for "
+								+ "priority of Id, And, Or, Exists, Forall, LE and GE operations respectively. The smaller number means "
+								+ "the higher priority. All other constructions (TOP, BOTTOM, etc) has priority 0.",
+						IFOption.IOType.iotText, "1263005")) {
+			return true;
+		}
+		if (kernelOptions
+				.registerOption(
+						"useSemanticBranching",
+						"Option 'useSemanticBranching' switch semantic branching on and off. The usage of semantic branching "
+								+ "usually leads to faster reasoning, but sometime could give small overhead.",
+						IFOption.IOType.iotBool, "true")) {
+			return true;
+		}
+		if (kernelOptions
+				.registerOption(
+						"useBackjumping",
+						"Option 'useBackjumping' switch backjumping on and off. The usage of backjumping "
+								+ "usually leads to much faster reasoning.",
+						IFOption.IOType.iotBool, "true")) {
+			return true;
+		}
+		if (kernelOptions
+				.registerOption(
+						"testTimeout",
+						"Option 'testTimeout' sets timeout for a single reasoning test in milliseconds.",
+						IFOption.IOType.iotInt, "0")) {
+			return true;
+		}
+		if (kernelOptions
+				.registerOption(
+						"useLazyBlocking",
+						"Option 'useLazyBlocking' makes checking of blocking status as small as possible. This greatly "
+								+ "increase speed of reasoning.",
+						IFOption.IOType.iotBool, "true")) {
+			return true;
+		}
+		if (kernelOptions
+				.registerOption(
+						"useAnywhereBlocking",
+						"Option 'useAnywhereBlocking' allow user to choose between Anywhere and Ancestor blocking.",
+						IFOption.IOType.iotBool, "true")) {
+			return true;
+		}
+		if (kernelOptions
+				.registerOption(
+						"useCompletelyDefined",
+						"Option 'useCompletelyDefined' leads to simpler Taxonomy creation if TBox contains no non-primitive "
+								+ "concepts. Unfortunately, it is quite rare case.",
+						IFOption.IOType.iotBool, "true")) {
 			return true;
 		}
 		return false;
