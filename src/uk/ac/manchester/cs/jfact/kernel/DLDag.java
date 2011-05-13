@@ -26,6 +26,7 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.helpers.StatIndex;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
+import uk.ac.manchester.cs.jfact.kernel.datatype.DataEntry;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheInterface;
 
 public final class DLDag {
@@ -261,6 +262,13 @@ public final class DLDag {
 
 	public void removeAfter(int n) {
 		assert n < size();
+		for(int i=n;i<heap.size();i++) {
+			DLVertex v=heap.get(i);
+			if(v.getConcept()!=null && v.getConcept() instanceof DataEntry) {
+				((DataEntry)v.getConcept()).setBP(bpINVALID);
+			}
+
+		}
 		Helper.resize(heap, n);
 	}
 

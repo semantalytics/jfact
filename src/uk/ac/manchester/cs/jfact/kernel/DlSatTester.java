@@ -1367,8 +1367,9 @@ public class DlSatTester {
 		boolean result = checkSatisfiability();
 		testTimer.stop();
 		if (IfDefs.USE_LOGGING) {
-			logger.print("\nChecking time in seconds:");
-			logger.print(testTimer.toString());
+			logger.print("\nChecking time was ");
+			logger.print(testTimer.getResultTime());
+			logger.print(" milliseconds");
 		}
 		testTimer.reset();
 		finaliseStatistic();

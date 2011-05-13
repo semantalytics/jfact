@@ -863,13 +863,13 @@ public final class TBox {
 	}
 
 	public int addDataExprToHeap(DataEntry p) {
+		int toReturn=0;
 		if (isValid(p.getBP())) {
-			return p.getBP();
-		}
+			toReturn= p.getBP();
+		}else {
 		DagTag dt = p.isBasicDataType() ? dtDataType
 				: p.isDataValue() ? dtDataValue : dtDataExpr;
 		int hostBP = bpTOP;
-		//TODO this is broken: the next two lines are commented but should not be
 		if (p.getType() != null) {
 			hostBP = addDataExprToHeap(p.getType());
 		}
@@ -880,7 +880,10 @@ public final class TBox {
 		//	System.out.println("TBox.addDataExprToHeap() "+p);
 		p.setBP(dlHeap.directAdd(ver));
 		//dlHeap.print(new LeveLogger.LogAdapterStream());
-		return p.getBP();
+		toReturn= p.getBP();
+		}
+	//	System.out.println("TBox.addDataExprToHeap(DataEntry) "+p+" hashcode "+p.hashCode()+"\t return: "+toReturn);
+		return toReturn;
 	}
 
 	public int addDataExprToHeap(Datatypes p) {
@@ -889,17 +892,23 @@ public final class TBox {
 		//
 		// create a concept and check if it's already in the list
 		// TODO needs to be more efficient
+		
+		int toReturn=0;
+		
 		DataTypeName concept = new DataTypeName(p);
 		int index = dlHeap.index(concept);
 		if (index != bpINVALID) {
-			return index;
-		}
+			toReturn= index;
+		}else {
 		//		System.out.println("TBox.addDataExprToHeap(datatypename) "+p);
 		// else, create a new vertex and add it
 		DLVertex ver = new DLVertex(dtDataType, 0, null, bpTOP, null);
 		ver.setConcept(concept);
 		int directAdd = dlHeap.directAdd(ver);
-		return directAdd;
+		toReturn= directAdd;
+		}
+//		System.out.println("TBox.addDataExprToHeap(Datatypes) "+p+"\t return: "+toReturn);
+		return toReturn;
 	}
 
 	public void addConceptToHeap(Concept pConcept) {

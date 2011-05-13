@@ -236,7 +236,7 @@ public enum Datatypes {
 			return super.compatible(d)
 					|| EnumSet
 							.complementOf(
-									EnumSet.of(STRING, LITERAL, DATETIME,
+									EnumSet.of(STRING, DATETIME,
 											DOUBLE, FLOAT)).contains(d);
 		}
 	},
@@ -253,7 +253,7 @@ public enum Datatypes {
 
 		@Override
 		public boolean compatible(Datatypes d) {
-			return REAL.compatible(d);
+			return d!=DECIMAL && REAL.compatible(d);
 		}
 	};
 	public abstract Literal<?> parse(String s);
@@ -322,7 +322,7 @@ public enum Datatypes {
 
 	private static Map<String, Datatypes> buildDatatypeMap() {
 		Map<String, Datatypes> toReturn = new HashMap<String, Datatypes>();
-		toReturn.put(Vocabulary.LITERAL, STRING);
+		toReturn.put(Vocabulary.LITERAL, LITERAL);
 		toReturn.put(Vocabulary.PLAIN_LITERAL, STRING);
 		toReturn.put(Vocabulary.XMLLITERAL, STRING);
 		toReturn.put(Vocabulary.STRING, STRING);
@@ -345,6 +345,7 @@ public enum Datatypes {
 		toReturn.put(Vocabulary.DECIMAL, DECIMAL);
 		toReturn.put(Vocabulary.BOOLEAN, BOOLEAN);
 		toReturn.put(Vocabulary.DATETIME, DATETIME);
+		//XXX this is wrong
 		toReturn.put(Vocabulary.DATE, DATETIME);
 		return toReturn;
 	}
