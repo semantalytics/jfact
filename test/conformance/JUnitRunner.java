@@ -202,11 +202,11 @@ public class JUnitRunner {
 		b.append(" ======================================\n");
 		b.append(description);
 		b.append("\nPremise:\n");
-		try {
-		o.getOWLOntologyManager().saveOntology(o, new OWLFunctionalSyntaxOntologyFormat(), new SystemOutDocumentTarget());
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
+//		try {
+//		o.getOWLOntologyManager().saveOntology(o, new OWLFunctionalSyntaxOntologyFormat(), new SystemOutDocumentTarget());
+//		}catch (Exception e) {
+//			e.printStackTrace();
+//		}
 		for (OWLAxiom x : o.getAxioms()) {
 			b.append(x);
 			b.append("\n");
