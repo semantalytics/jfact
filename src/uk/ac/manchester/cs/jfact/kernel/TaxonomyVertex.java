@@ -8,9 +8,11 @@ You should have received a copy of the GNU Lesser General Public License along w
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import uk.ac.manchester.cs.jfact.helpers.Helper;
 import uk.ac.manchester.cs.jfact.helpers.IfDefs;
@@ -233,6 +235,32 @@ public final class TaxonomyVertex {
 		}
 	}
 
+	/// merge NODE which is independent to THIS
+	void mergeIndepNode(TaxonomyVertex node, Set<TaxonomyVertex> excludes,
+			ClassifiableEntry curEntry) {
+		// copy synonyms here
+		if (!node.getPrimer().equals(curEntry)) {
+			addSynonym(node.getPrimer());
+		}
+		for (ClassifiableEntry q : node.begin_syn()) {
+			addSynonym(q);
+		}
+		boolean upDirection = true;
+		for (TaxonomyVertex p : node.neigh(upDirection)) {
+			if (!excludes.contains(p)) {
+				addNeighbour(upDirection, p);
+			}
+			p.removeLink(!upDirection, node);
+		}
+		upDirection = false;
+		for (TaxonomyVertex p : node.neigh(upDirection)) {
+			if (!excludes.contains(p)) {
+				addNeighbour(upDirection, p);
+			}
+			p.removeLink(!upDirection, node);
+		}
+	}
+
 	public void printSynonyms(LogAdapter o) {
 		assert sample != null;
 		if (synonyms.isEmpty()) {
@@ -250,7 +278,15 @@ public final class TaxonomyVertex {
 
 	public void printNeighbours(LogAdapter o, boolean upDirection) {
 		o.print(String.format(" {%s:", neigh(upDirection).size()));
-		for (TaxonomyVertex p : neigh(upDirection)) {
+		TreeSet<TaxonomyVertex> sorted = new TreeSet<TaxonomyVertex>(
+				new Comparator<TaxonomyVertex>() {
+					public int compare(TaxonomyVertex o1, TaxonomyVertex o2) {
+						return o1.getPrimer().getName()
+								.compareTo(o2.getPrimer().getName());
+					}
+				});
+		sorted.addAll(neigh(upDirection));
+		for (TaxonomyVertex p : sorted) {
 			o.print(String.format(" \"%s\"", p.sample.getName()));
 		}
 		o.print("}");

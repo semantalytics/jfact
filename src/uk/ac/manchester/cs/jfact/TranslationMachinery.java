@@ -182,6 +182,10 @@ public final class TranslationMachinery {
 	}
 
 	public void loadAxiom(OWLAxiom axiom) {
+		//TODO check valid axioms, such as those involving topDataProperty
+		if (axiom2PtrMap.containsKey(axiom)) {
+			return;
+		}
 		final Axiom axiomPointer = axiom.accept(axiomTranslator);
 		if (axiomPointer != null) {
 			axiom2PtrMap.put(axiom, axiomPointer);
@@ -528,7 +532,7 @@ public final class TranslationMachinery {
 		public Boolean visit(SWRLRule rule) {
 			// FIXME!! unsupported by FaCT++ ATM
 			//return null;
-			throw new UnsupportedEntailmentTypeException((OWLAxiom) rule);
+			throw new UnsupportedEntailmentTypeException(rule);
 		}
 
 		public Boolean visit(OWLSubAnnotationPropertyOfAxiom axiom) {

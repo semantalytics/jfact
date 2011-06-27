@@ -183,4 +183,11 @@ public final class IntSet extends AbstractFastSet {
 			remove(i);
 		}
 	}
+
+	public void completeSet(int value) {
+		for (int i = 0; i <= value; i++) {
+			add(i);
+		}
+		//XXX notice: these sets go to negative numbers. Is this the best way?
+	}
 }

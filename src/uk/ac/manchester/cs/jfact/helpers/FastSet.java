@@ -35,4 +35,6 @@ public interface FastSet {
 	void removeAllValues(int... values);
 
 	public boolean containsAny(FastSet c);
+
+	void completeSet(int value);
 }

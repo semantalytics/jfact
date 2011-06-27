@@ -230,6 +230,13 @@ public final class DlCompletionGraph {
 		return nodeBase.get(0).resolvePBlocker();
 	}
 
+	public DlCompletionTree getNode(int i) {
+		if (i >= endUsed) {
+			return null;
+		}
+		return nodeBase.get(i);
+	}
+
 	/** get new node (with internal level) */
 	public DlCompletionTree getNewNode() {
 		if (endUsed >= nodeBase.size()) {
@@ -347,7 +354,8 @@ public final class DlCompletionGraph {
 	/** Create an R-loop of NODE wrt dep-set DEP; @return a loop edge */
 	public DlCompletionTreeArc createLoop(DlCompletionTree node, final Role r,
 			final DepSet dep) {
-		return addRoleLabel(node, node, /*isPredEdge=*/false, r, dep);
+		return addRoleLabel(node, node, /*isPredEdge=*/
+		false, r, dep);
 	}
 
 	/** save given node wrt level */

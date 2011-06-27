@@ -21,7 +21,7 @@ public final class DLCompletionGraphSaveState {
 	}
 
 	public int getnNodes() {
-		return this.nNodes;
+		return nNodes;
 	}
 
 	public void setnNodes(int nNodes) {
@@ -29,7 +29,7 @@ public final class DLCompletionGraphSaveState {
 	}
 
 	public int getsNodes() {
-		return this.sNodes;
+		return sNodes;
 	}
 
 	public void setsNodes(int sNodes) {
@@ -37,7 +37,7 @@ public final class DLCompletionGraphSaveState {
 	}
 
 	public int getnEdges() {
-		return this.nEdges;
+		return nEdges;
 	}
 
 	public void setnEdges(int nEdges) {
@@ -46,7 +46,6 @@ public final class DLCompletionGraphSaveState {
 
 	@Override
 	public String toString() {
-		return "CGSaveState (" + this.nNodes + "," + this.nEdges + ","
-				+ this.sNodes + ")";
+		return "CGSaveState (" + nNodes + "," + nEdges + "," + sNodes + ")";
 	}
 }

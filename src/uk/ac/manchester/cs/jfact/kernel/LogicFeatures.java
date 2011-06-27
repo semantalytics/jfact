@@ -77,6 +77,10 @@ public final class LogicFeatures {
 		return getX(lfSelfRef);
 	}
 
+	public boolean hasTopRole() {
+		return getX(lfTopRole);
+	}
+
 	// overall state
 	/** check whether no flags are set */
 	public boolean isEmpty() {
@@ -109,6 +113,12 @@ public final class LogicFeatures {
 	}
 
 	public void fillRoleData(final Role p, boolean both) {
+		if (p.isTop()) {
+			if (!p.isDataRole()) {
+				setX(lfTopRole);
+			}
+			return;
+		}
 		if (p.getId() > 0) {
 			setX(lfDirectRoles);
 		} else {
@@ -159,7 +169,8 @@ public final class LogicFeatures {
 		String Q = "qualified ";
 		logger.print(Templates.WRITE_STATE, (hasInverseRole() ? "" : NO),
 				(hasRoleHierarchy() ? "" : NO),
-				(hasTransitiveRole() ? "" : NO), (hasSomeAll() ? "" : NO),
+				(hasTransitiveRole() ? "" : NO), (hasTopRole() ? "" : NO),
+				(hasSomeAll() ? "" : NO),
 				(hasFunctionalRestriction() ? "" : NO),
 				(hasNumberRestriction() ? (hasQNumberRestriction() ? Q : "")
 						: NO), (hasSingletons() ? "" : NO));
@@ -184,6 +195,7 @@ public final class LogicFeatures {
 	private static final int lfBothRoles = 13;
 	// new constructions
 	private static final int lfSelfRef = 14;
+	private static final int lfTopRole = 15;
 	//		private final int value;
 	//
 	//		LFEnum(int v) {

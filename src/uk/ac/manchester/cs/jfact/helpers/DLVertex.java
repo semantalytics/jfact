@@ -279,6 +279,7 @@ public final class DLVertex extends DLVertexTagDFS {
 		switch (op) {
 			case dtAnd:
 			case dtCollection:
+			case dtSplitConcept:
 				break;
 			case dtTop:
 			case dtUAll:
@@ -311,6 +312,10 @@ public final class DLVertex extends DLVertexTagDFS {
 			case dtProj:
 				o.print(Templates.DLVERTEXPrint4, role.getName(), conceptIndex,
 						projRole.getName());
+				return;
+			case dtChoose:
+				o.print(" ");
+				o.print(getConceptIndex());
 				return;
 			default:
 				throw new ReasonerInternalException(String.format(

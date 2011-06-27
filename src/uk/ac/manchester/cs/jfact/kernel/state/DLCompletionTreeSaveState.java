@@ -24,15 +24,15 @@ public final class DLCompletionTreeSaveState {
 	}
 
 	public SaveState getLab() {
-		return this.lab;
+		return lab;
 	}
 
 	public int getCurLevel() {
-		return this.curLevel;
+		return curLevel;
 	}
 
 	public int getnNeighbours() {
-		return this.nNeighbours;
+		return nNeighbours;
 	}
 
 	public void setCurLevel(int curLevel) {

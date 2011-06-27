@@ -56,6 +56,12 @@ public final class DLDag {
 	/** flag whether cache should be used */
 	private boolean useDLVCache;
 
+	/// replace existing vertex at index I with a vertex V
+	public void replaceVertex(int i, DLVertex v, NamedEntry C) {
+		heap.set(i > 0 ? i : -i, v);
+		v.setConcept(C);
+	}
+
 	/** @return index of a vertex containing a concept */
 	public int index(NamedEntry c) {
 		for (int i = 0; i < heap.size(); i++) {
@@ -130,7 +136,7 @@ public final class DLDag {
 
 	/** check if given index points to the last DAG entry */
 	public boolean isLast(int p) {
-		return (p == heap.size() - 1) || (-p == heap.size() - 1);
+		return p == heap.size() - 1 || -p == heap.size() - 1;
 	}
 
 	// access methods
@@ -262,12 +268,11 @@ public final class DLDag {
 
 	public void removeAfter(int n) {
 		assert n < size();
-		for(int i=n;i<heap.size();i++) {
-			DLVertex v=heap.get(i);
-			if(v.getConcept()!=null && v.getConcept() instanceof DataEntry) {
-				((DataEntry)v.getConcept()).setBP(bpINVALID);
+		for (int i = n; i < heap.size(); i++) {
+			DLVertex v = heap.get(i);
+			if (v.getConcept() != null && v.getConcept() instanceof DataEntry) {
+				((DataEntry) v.getConcept()).setBP(bpINVALID);
 			}
-
 		}
 		Helper.resize(heap, n);
 	}
@@ -321,6 +326,7 @@ public final class DLDag {
 				// fallthrough
 				//$FALL-THROUGH$
 			case dtAnd: // check all the conjuncts
+			case dtSplitConcept:
 				for (int q : v.begin()) {
 					int index = createBiPointer(q, pos);
 					DLVertex vertex = get(index);
@@ -342,6 +348,7 @@ public final class DLDag {
 			case dtNSingleton:
 			case dtForall:
 			case dtUAll:
+			case dtChoose:
 			case dtLE: // check a single referenced concept
 				int index = createBiPointer(v.getConceptIndex(), pos);
 				DLVertex vertex = get(index);
@@ -427,7 +434,7 @@ public final class DLDag {
 	/** helper for the recursion */
 	private void updateVertexStat(DLVertex v, int p, boolean pos) {
 		DLVertex w = get(p);
-		boolean same = pos == (p > 0);
+		boolean same = pos == p > 0;
 		// update in-cycle information
 		if (w.isInCycle(same)) {
 			v.setInCycle(pos);
@@ -580,6 +587,7 @@ public final class DLDag {
 				break;
 			case dtAnd:
 			case dtCollection:
+			case dtSplitConcept:
 				for (int q : v.begin()) {
 					merge(v.getSort(), q);
 				}
@@ -588,6 +596,7 @@ public final class DLDag {
 			case dtPSingleton:
 			case dtPConcept:
 			case dtNConcept: // merge with description
+			case dtChoose:
 				merge(v.getSort(), v.getConceptIndex());
 				break;
 			case dtDataType: // nothing to do

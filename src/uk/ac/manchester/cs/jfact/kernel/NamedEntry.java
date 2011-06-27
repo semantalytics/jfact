@@ -6,12 +6,14 @@ This library is free software; you can redistribute it and/or modify it under th
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NamedEntity;
 
 public class NamedEntry {
 	/** name of the entry */
 	protected final String extName;
 	/** entry identifier */
 	protected int extId;
+	protected NamedEntity entity = null;
 
 	//protected final BitSet bits = new BitSet();
 	public NamedEntry(final String name) {
@@ -101,12 +103,16 @@ public class NamedEntry {
 		system = true;
 	}
 
-	private boolean top;
+	private boolean top = false;
 
 	// hierarchy interface
 	/** a Top-of-the-hierarchy flag */
 	public boolean isTop() {
 		return top;
+	}
+
+	public void setTop() {
+		top = true;
 	}
 
 	private boolean bottom;
@@ -116,7 +122,19 @@ public class NamedEntry {
 		return bottom;
 	}
 
+	public void setBottom() {
+		bottom = true;
+	}
+
 	public void print(LogAdapter o) {
 		o.print(getName());
+	}
+
+	public NamedEntity getEntity() {
+		return entity;
+	}
+
+	public void setEntity(NamedEntity entity) {
+		this.entity = entity;
 	}
 }

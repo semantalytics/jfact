@@ -82,7 +82,8 @@ public final class DepSet {
 		}
 		if (obj instanceof DepSet) {
 			DepSet obj2 = (DepSet) obj;
-			return (delegate == null && obj2.delegate == null)
+			return delegate == null
+					&& obj2.delegate == null
 					|| (delegate != null ? delegate.equals(obj2.delegate)
 							: false); //obj2.delegate.equals(delegate);
 		}

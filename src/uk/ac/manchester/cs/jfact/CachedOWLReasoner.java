@@ -54,7 +54,7 @@ public final class CachedOWLReasoner implements OWLReasoner,
 
 		public Object compute() {
 			try {
-				return delegate.isSatisfiable(this.classExpression);
+				return delegate.isSatisfiable(classExpression);
 			} catch (Throwable e) {
 				exception = e;
 			}

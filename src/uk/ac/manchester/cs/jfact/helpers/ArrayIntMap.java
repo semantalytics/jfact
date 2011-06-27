@@ -136,8 +136,8 @@ public final class ArrayIntMap {
 			}
 			return true;
 		}
-		if (this.values[0][0] > c.values[0][0]
-				|| this.values[0][size - 1] < c.values[0][c.size() - 1]) {
+		if (values[0][0] > c.values[0][0]
+				|| values[0][size - 1] < c.values[0][c.size() - 1]) {
 			// c boundaries are outside this set
 			return false;
 		}
@@ -255,10 +255,10 @@ public final class ArrayIntMap {
 		}
 		if (obj instanceof ArrayIntMap) {
 			ArrayIntMap o = (ArrayIntMap) obj;
-			if (this.size != o.size) {
+			if (size != o.size) {
 				return false;
 			}
-			if (this.size == 0) {
+			if (size == 0) {
 				// same size and both empty: equal
 				return true;
 			}

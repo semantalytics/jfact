@@ -79,11 +79,13 @@ public final class InAx {
 
 	/// @return true iff P is a FORALL expression suitable for absorption
 	static boolean isAbsForall(DLTree p) {
-		if (!isOForall(p))
+		if (!isOForall(p)) {
 			return false;
+		}
 		DLTree C = p.getChild().getRight();
-		if (isTop(C)) // no sense to replace \AR.BOTTOM as it well lead to the same GCI
+		if (isTop(C)) {
 			return false;
+		}
 		return !C.isName() || !getConcept(C).isSystem();
 	}
 

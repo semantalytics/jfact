@@ -1,10 +1,5 @@
 package uk.ac.manchester.cs.jfact.visitors;
 
-/* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptAnd;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptBottom;
@@ -50,98 +45,137 @@ import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionFrom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionInto;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleTop;
 
-public interface DLExpressionVisitorEmpty {
-	// concept expressions
-	void visit(ConceptTop expr);
+@SuppressWarnings("unused")
+public class DLExpressionVisitorAdapter implements DLExpressionVisitor {
+	public void visit(ConceptTop expr) {
+	}
 
-	void visit(ConceptBottom expr);
+	public void visit(ConceptBottom expr) {
+	}
 
-	void visit(ConceptName expr);
+	public void visit(ConceptName expr) {
+	}
 
-	void visit(ConceptNot expr);
+	public void visit(ConceptNot expr) {
+	}
 
-	void visit(ConceptAnd expr);
+	public void visit(ConceptAnd expr) {
+	}
 
-	void visit(ConceptOr expr);
+	public void visit(ConceptOr expr) {
+	}
 
-	void visit(ConceptOneOf expr);
+	public void visit(ConceptOneOf expr) {
+	}
 
-	void visit(ConceptObjectSelf expr);
+	public void visit(ConceptObjectSelf expr) {
+	}
 
-	void visit(ConceptObjectValue expr);
+	public void visit(ConceptObjectValue expr) {
+	}
 
-	void visit(ConceptObjectExists expr);
+	public void visit(ConceptObjectExists expr) {
+	}
 
-	void visit(ConceptObjectForall expr);
+	public void visit(ConceptObjectForall expr) {
+	}
 
-	void visit(ConceptObjectMinCardinality expr);
+	public void visit(ConceptObjectMinCardinality expr) {
+	}
 
-	void visit(ConceptObjectMaxCardinality expr);
+	public void visit(ConceptObjectMaxCardinality expr) {
+	}
 
-	void visit(ConceptObjectExactCardinality expr);
+	public void visit(ConceptObjectExactCardinality expr) {
+	}
 
-	void visit(ConceptDataValue expr);
+	public void visit(ConceptDataValue expr) {
+	}
 
-	void visit(ConceptDataExists expr);
+	public void visit(ConceptDataExists expr) {
+	}
 
-	void visit(ConceptDataForall expr);
+	public void visit(ConceptDataForall expr) {
+	}
 
-	void visit(ConceptDataMinCardinality expr);
+	public void visit(ConceptDataMinCardinality expr) {
+	}
 
-	void visit(ConceptDataMaxCardinality expr);
+	public void visit(ConceptDataMaxCardinality expr) {
+	}
 
-	void visit(ConceptDataExactCardinality expr);
+	public void visit(ConceptDataExactCardinality expr) {
+	}
 
-	// individual expressions
-	void visit(IndividualName expr);
+	public void visit(IndividualName expr) {
+	}
 
-	// object role expressions
-	void visit(ObjectRoleTop expr);
+	public void visit(ObjectRoleTop expr) {
+	}
 
-	void visit(ObjectRoleBottom expr);
+	public void visit(ObjectRoleBottom expr) {
+	}
 
-	void visit(ObjectRoleName expr);
+	public void visit(ObjectRoleName expr) {
+	}
 
-	void visit(ObjectRoleInverse expr);
+	public void visit(ObjectRoleInverse expr) {
+	}
 
-	void visit(ObjectRoleChain expr);
+	public void visit(ObjectRoleChain expr) {
+	}
 
-	void visit(ObjectRoleProjectionFrom expr);
+	public void visit(ObjectRoleProjectionFrom expr) {
+	}
 
-	void visit(ObjectRoleProjectionInto expr);
+	public void visit(ObjectRoleProjectionInto expr) {
+	}
 
-	// data role expressions
-	void visit(DataRoleTop expr);
+	public void visit(DataRoleTop expr) {
+	}
 
-	void visit(DataRoleBottom expr);
+	public void visit(DataRoleBottom expr) {
+	}
 
-	void visit(DataRoleName expr);
+	public void visit(DataRoleName expr) {
+	}
 
-	// data expressions
-	void visit(DataTop expr);
+	public void visit(DataTop expr) {
+	}
 
-	void visit(DataBottom expr);
+	public void visit(DataBottom expr) {
+	}
 
-	void visit(DataTypeName expr);
+	public void visit(DataTypeName expr) {
+	}
 
-	void visit(DataTypeRestriction expr);
+	public void visit(DataTypeRestriction expr) {
+	}
 
-	void visit(DataValue expr);
+	public void visit(DataValue expr) {
+	}
 
-	void visit(DataNot expr);
+	public void visit(DataNot expr) {
+	}
 
-	void visit(DataAnd expr);
+	public void visit(DataAnd expr) {
+	}
 
-	void visit(DataOr expr);
+	public void visit(DataOr expr) {
+	}
 
-	void visit(DataOneOf expr);
+	public void visit(DataOneOf expr) {
+	}
 
-	// facets
-	void visit(FacetMinInclusive expr);
+	public void visit(FacetMinInclusive expr) {
+	}
 
-	void visit(FacetMinExclusive expr);
+	public void visit(FacetMinExclusive expr) {
+	}
 
-	void visit(FacetMaxInclusive expr);
+	public void visit(FacetMaxInclusive expr) {
+	}
 
-	void visit(FacetMaxExclusive expr);
+	public void visit(FacetMaxExclusive expr) {
+	}
 }

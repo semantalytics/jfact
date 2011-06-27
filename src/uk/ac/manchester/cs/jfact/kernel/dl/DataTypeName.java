@@ -20,7 +20,7 @@ public final class DataTypeName extends NamedEntry implements
 
 	public DataTypeName(Datatypes d) {
 		super(d.name());
-		this.datatype = d;
+		datatype = d;
 	}
 
 	public void accept(DLExpressionVisitor visitor) {
@@ -40,7 +40,7 @@ public final class DataTypeName extends NamedEntry implements
 			return true;
 		}
 		if (obj instanceof DataTypeName) {
-			return this.datatype == ((DataTypeName) obj).datatype;
+			return datatype == ((DataTypeName) obj).datatype;
 		}
 		return false;
 	}
@@ -49,10 +49,12 @@ public final class DataTypeName extends NamedEntry implements
 		return datatype;
 	}
 
+	@Override
 	public NamedEntity getEntity() {
 		return this;
 	}
 
+	@Override
 	public String getName() {
 		return datatype.name();
 	}
@@ -61,6 +63,7 @@ public final class DataTypeName extends NamedEntry implements
 		return new DataValue(name, datatype);
 	}
 
+	@Override
 	public int hashCode() {
 		return datatype.hashCode();
 	}

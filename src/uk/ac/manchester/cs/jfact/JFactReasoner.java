@@ -45,8 +45,6 @@ import org.semanticweb.owlapi.reasoner.ReasonerInterruptedException;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 import org.semanticweb.owlapi.reasoner.TimeOutException;
 import org.semanticweb.owlapi.reasoner.UnsupportedEntailmentTypeException;
-import org.semanticweb.owlapi.reasoner.impl.DefaultNodeSet;
-import org.semanticweb.owlapi.reasoner.impl.OWLClassNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLDataPropertyNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
 import org.semanticweb.owlapi.util.Version;
@@ -407,6 +405,14 @@ public final class JFactReasoner implements OWLReasoner,
 		//TODO have the exception thrown from the entailment checker
 		boolean entailed = axiom.accept(translationMachinery
 				.getEntailmentChecker());
+		//kernel.writeReasoningResult(LeveLogger.logger, 0);
+		//		if(axiom instanceof OWLSubClassOfAxiom && rootOntology.getOntologyID().getOntologyIRI().toString().contains("AnnotatedSiemensStart")) {
+		//		if(!((OWLSubClassOfAxiom) axiom).getSuperClass().isAnonymous() && !((OWLSubClassOfAxiom) axiom).getSubClass().isAnonymous()) {
+		//			System.out.println("JFactReasoner.isEntailed() "+axiom);
+		//		new Exception().printStackTrace(System.out);
+		//		//System.out.println("JFactReasoner.isEntailed() "+axiom);
+		//		}
+		//		}
 		return entailed;
 	}
 
@@ -476,17 +482,22 @@ public final class JFactReasoner implements OWLReasoner,
 
 	public synchronized NodeSet<OWLClass> getDisjointClasses(
 			OWLClassExpression ce) {
-		OWLClassExpression negCE = df.getOWLObjectComplementOf(ce);
-		DefaultNodeSet<OWLClass> nodeSet = new OWLClassNodeSet();
-		Set<Node<OWLClass>> subClasses = getSubClasses(negCE, false).getNodes();
-		if (subClasses.size() > 0) {
-			nodeSet.addAllNodes(subClasses);
-		}
-		Node<OWLClass> equivalentClasses = getEquivalentClasses(negCE);
-		if (equivalentClasses.getSize() > 0) {
-			nodeSet.addNode(equivalentClasses);
-		}
-		return nodeSet;
+		TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
+		ConceptExpression p = translationMachinery.toClassPointer(ce);
+		kernel.getDisjointConcepts(p, actor);
+		return translationMachinery.getClassExpressionTranslator()
+				.getNodeSetFromPointers(actor.getClassElements());
+		//	OWLClassExpression negCE = df.getOWLObjectComplementOf(ce);
+		//		DefaultNodeSet<OWLClass> nodeSet = new OWLClassNodeSet();
+		//		Set<Node<OWLClass>> subClasses = getSubClasses(negCE, false).getNodes();
+		//		if (subClasses.size() > 0) {
+		//			nodeSet.addAllNodes(subClasses);
+		//		}
+		//		Node<OWLClass> equivalentClasses = getEquivalentClasses(negCE);
+		//		if (equivalentClasses.getSize() > 0) {
+		//			nodeSet.addNode(equivalentClasses);
+		//		}
+		//		return nodeSet;
 	}
 
 	// object properties
@@ -743,6 +754,13 @@ public final class JFactReasoner implements OWLReasoner,
 			ConceptExpression arg) {
 		TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
 		kernel.getEquivalentConcepts(arg, actor);
+		return actor.getClassSynonyms();
+	}
+
+	public Collection<ConceptExpression> askDisjointClasses(
+			ConceptExpression arg) {
+		TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
+		kernel.getDisjointConcepts(arg, actor);
 		return actor.getClassSynonyms();
 	}
 

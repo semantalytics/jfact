@@ -100,11 +100,16 @@ public final class RoleMaster {
 		emptyRole.setInverse(emptyRole);
 		emptyRole.setDataRole(dataRoles);
 		emptyRole.setBPDomain(Helper.bpBOTTOM);
+		emptyRole.setBottom();
+		// OWL 2 says Bottom role is non-simple, but this is unnecessary
+		// and leads to inconsistent results wrt presence of an axiom Bot [= R
+		emptyRole.setSimple();
 		// setup universal role
 		universalRole.setId(0);
 		universalRole.setInverse(universalRole);
 		universalRole.setDataRole(dataRoles);
 		universalRole.setBPDomain(Helper.bpTOP);
+		universalRole.setTop();
 		// create roles taxonomy
 		pTax = new Taxonomy(universalRole, emptyRole);
 	}

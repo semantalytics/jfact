@@ -13,7 +13,7 @@ public abstract class Restorer {
 
 	/** for accessing the level on TRareSaveStack */
 	public int getRaresavestackLevel() {
-		return this.raresavestackLevel;
+		return raresavestackLevel;
 	}
 
 	/** for accessing the level on TRareSaveStack */

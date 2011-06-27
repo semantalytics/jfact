@@ -193,6 +193,15 @@ public final class CGLabel {
 		return b;
 	}
 
+	public ConceptWDep getConceptWithBP(int bp) {
+		ConceptWDep toReturn = scLabel.getConceptWithBP(bp);
+		if (toReturn != null) {
+			return toReturn;
+		}
+		toReturn = ccLabel.getConceptWithBP(bp);
+		return toReturn;
+	}
+
 	public int baseSize() {
 		return ccLabel.size() + scLabel.size();
 	}

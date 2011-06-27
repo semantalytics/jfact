@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom;
+import uk.ac.manchester.cs.jfact.split.TSplitVars;
 
 public final class Ontology {
 	/** all the axioms */
@@ -19,10 +20,15 @@ public final class Ontology {
 	private int axiomId;
 	/** true iff ontology was changed */
 	private boolean changed;
+	public TSplitVars Splits = new TSplitVars();
 
 	public Ontology() {
 		axiomId = 0;
 		changed = false;
+	}
+
+	public Axiom get(int i) {
+		return axioms.get(i);
 	}
 
 	/** @return true iff the ontology was changed since its last load */

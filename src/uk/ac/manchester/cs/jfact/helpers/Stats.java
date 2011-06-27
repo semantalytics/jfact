@@ -157,122 +157,122 @@ public final class Stats {
 	}
 
 	public AccumulatedStatistic getnTacticCalls() {
-		return this.nTacticCalls;
+		return nTacticCalls;
 	}
 
 	public AccumulatedStatistic getnUseless() {
-		return this.nUseless;
+		return nUseless;
 	}
 
 	public AccumulatedStatistic getnIdCalls() {
-		return this.nIdCalls;
+		return nIdCalls;
 	}
 
 	public AccumulatedStatistic getnSingletonCalls() {
-		return this.nSingletonCalls;
+		return nSingletonCalls;
 	}
 
 	public AccumulatedStatistic getnOrCalls() {
-		return this.nOrCalls;
+		return nOrCalls;
 	}
 
 	public AccumulatedStatistic getnOrBrCalls() {
-		return this.nOrBrCalls;
+		return nOrBrCalls;
 	}
 
 	public AccumulatedStatistic getnAndCalls() {
-		return this.nAndCalls;
+		return nAndCalls;
 	}
 
 	public AccumulatedStatistic getnSomeCalls() {
-		return this.nSomeCalls;
+		return nSomeCalls;
 	}
 
 	public AccumulatedStatistic getnAllCalls() {
-		return this.nAllCalls;
+		return nAllCalls;
 	}
 
 	public AccumulatedStatistic getnFuncCalls() {
-		return this.nFuncCalls;
+		return nFuncCalls;
 	}
 
 	public AccumulatedStatistic getnLeCalls() {
-		return this.nLeCalls;
+		return nLeCalls;
 	}
 
 	public AccumulatedStatistic getnGeCalls() {
-		return this.nGeCalls;
+		return nGeCalls;
 	}
 
 	public AccumulatedStatistic getnNNCalls() {
-		return this.nNNCalls;
+		return nNNCalls;
 	}
 
 	public AccumulatedStatistic getnMergeCalls() {
-		return this.nMergeCalls;
+		return nMergeCalls;
 	}
 
 	public AccumulatedStatistic getnAutoEmptyLookups() {
-		return this.nAutoEmptyLookups;
+		return nAutoEmptyLookups;
 	}
 
 	public AccumulatedStatistic getnAutoTransLookups() {
-		return this.nAutoTransLookups;
+		return nAutoTransLookups;
 	}
 
 	public AccumulatedStatistic getnSRuleAdd() {
-		return this.nSRuleAdd;
+		return nSRuleAdd;
 	}
 
 	public AccumulatedStatistic getnSRuleFire() {
-		return this.nSRuleFire;
+		return nSRuleFire;
 	}
 
 	public AccumulatedStatistic getnStateSaves() {
-		return this.nStateSaves;
+		return nStateSaves;
 	}
 
 	public AccumulatedStatistic getnStateRestores() {
-		return this.nStateRestores;
+		return nStateRestores;
 	}
 
 	public AccumulatedStatistic getnNodeSaves() {
-		return this.nNodeSaves;
+		return nNodeSaves;
 	}
 
 	public AccumulatedStatistic getnNodeRestores() {
-		return this.nNodeRestores;
+		return nNodeRestores;
 	}
 
 	public AccumulatedStatistic getnLookups() {
-		return this.nLookups;
+		return nLookups;
 	}
 
 	public AccumulatedStatistic getnFairnessViolations() {
-		return this.nFairnessViolations;
+		return nFairnessViolations;
 	}
 
 	public AccumulatedStatistic getnCacheTry() {
-		return this.nCacheTry;
+		return nCacheTry;
 	}
 
 	public AccumulatedStatistic getnCacheFailedNoCache() {
-		return this.nCacheFailedNoCache;
+		return nCacheFailedNoCache;
 	}
 
 	public AccumulatedStatistic getnCacheFailedShallow() {
-		return this.nCacheFailedShallow;
+		return nCacheFailedShallow;
 	}
 
 	public AccumulatedStatistic getnCacheFailed() {
-		return this.nCacheFailed;
+		return nCacheFailed;
 	}
 
 	public AccumulatedStatistic getnCachedSat() {
-		return this.nCachedSat;
+		return nCachedSat;
 	}
 
 	public AccumulatedStatistic getnCachedUnsat() {
-		return this.nCachedUnsat;
+		return nCachedUnsat;
 	}
 }

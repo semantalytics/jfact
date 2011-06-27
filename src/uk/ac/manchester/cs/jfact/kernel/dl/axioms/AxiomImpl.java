@@ -25,7 +25,7 @@ public abstract class AxiomImpl implements Axiom {
 	}
 
 	public boolean isInModule() {
-		return this.inModule;
+		return inModule;
 	}
 
 	public boolean isUsed() {

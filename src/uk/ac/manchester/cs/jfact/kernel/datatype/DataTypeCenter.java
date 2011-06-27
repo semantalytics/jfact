@@ -37,6 +37,16 @@ public final class DataTypeCenter {
 		return DLTreeFactory.wrap(new DataTypeName(Datatypes.STRING));
 	}
 
+	/** get datetime DT that can be used in TBox */
+	public DLTree getDateTimeDataType() {
+		return DLTreeFactory.wrap(new DataTypeName(Datatypes.DATETIME));
+	}
+
+	/// get fresh DT that can be used in TBox
+	public DLTree getFreshDataType() {
+		return DLTreeFactory.wrap(new DataTypeName(Datatypes.FRESH));
+	}
+
 	/** get REAL DT that can be used in TBox */
 	public DLTree getRealType() {
 		//XXX needs extension
@@ -66,11 +76,11 @@ public final class DataTypeCenter {
 	}
 
 	private DataEntry create(String name, Datatypes type) {
-		return this.Types.get(type).get(name);
+		return Types.get(type).get(name);
 	}
 
 	private DataEntry createFacet(Datatypes type) {
-		return this.Types.get(type).getExpr();
+		return Types.get(type).getExpr();
 	}
 
 	public void initDataTypeReasoner(DataTypeReasoner DTReasoner) {

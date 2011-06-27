@@ -18,7 +18,7 @@ public final class LeveLogger {
 				"orSortSat: initial=%s, default=%s"), SET_ORDER_DEFAULTS2(
 				", used=%s\n orSortSub: initial=%s, default=%s"), SET_ORDER_DEFAULTS3(
 				", used=%s\n"), WRITE_STATE(
-				"\nLoaded KB used DL with following features:\nKB contains %sinverse role(s)\nKB contains %srole hierarchy\nKB contains %stransitive role(s)\nKB contains %squanitifier(s)\nKB contains %sfunctional restriction(s)\nKB contains %snumber restriction(s)\nKB contains %snominal(s)\n"), BUILD_CACHE_UNSAT(
+				"\nLoaded KB used DL with following features:\nKB contains %sinverse role(s)\nKB contains %srole hierarchy\nKB contains %stransitive role(s)\nKB contains %stop role expressions\nKB contains quantifier(s)\nKB contains %sfunctional restriction(s)\nKB contains %snumber restriction(s)\nKB contains %snominal(s)\n"), BUILD_CACHE_UNSAT(
 				"\nDAG entry %s is unsatisfiable\n"), CAN_BE_CACHED(" cf(%s)"), CHECK_MERGE_CLASH(
 				" x(%s,%s%s)"), COMMON_TACTIC_BODY_OR(" E(%s)"), COMMON_TACTIC_BODY_SOME(
 				" nf(%s)"), COMMON_TACTIC_BODY_SOME2(" f(%s):"), CONSISTENT_NOMINAL(
@@ -33,7 +33,7 @@ public final class LeveLogger {
 						+ "Besides that %s successfull and %s unsuccessfull subsumption tests were cached\n"
 						+ "%sThere were made %s search calls\n"
 						+ "There were made %s Sub calls, of which %s non-trivial\nCurrent efficiency (wrt Brute-force) is %s\n"), PRINTDAGUSAGE(
-				"There are %s unused DAG entries (% of %s total)\n"), READCONFIG(
+				"There are %s unused DAG entries (%s percent of %s total)\n"), READCONFIG(
 				"Init useSemanticBranching = %s\nInit useBackjumping = %s\nInit useLazyBlocking  = %s\nInit useAnywhereBlocking = %s\n"), PRINT_STAT(
 				"Heap size = %s nodes\nThere were %s cache hits\n"), REPORT1(
 				" cached(%s)"), SAVE(" ss(%s)"), ISSUBHOLDS1(

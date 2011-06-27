@@ -12,8 +12,9 @@ abstract class AbstractFastSet implements FastSet {
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append('[');
-		if (size() > 0)
+		if (size() > 0) {
 			b.append(get(0));
+		}
 		for (int i = 1; i < size(); i++) {
 			b.append(',');
 			b.append(' ');

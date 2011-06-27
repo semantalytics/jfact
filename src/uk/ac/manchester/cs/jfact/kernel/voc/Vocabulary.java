@@ -15,6 +15,7 @@ public final class Vocabulary {
 			+ "topDataProperty";
 	public final static String BOTTOM_DATA_PROPERTY = OWL_NAMESPACE
 			+ "bottomDataProperty";
+	public final static String ANY_SIMPLE_TYPE = "http://www.w3.org/2000/01/rdf-schema#anySimpleType";
 	public final static String LITERAL = "http://www.w3.org/2000/01/rdf-schema#Literal";
 	public final static String PLAIN_LITERAL = "http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral";
 	public final static String XMLLITERAL = "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral";

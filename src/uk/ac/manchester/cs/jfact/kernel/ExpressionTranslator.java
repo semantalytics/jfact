@@ -60,6 +60,7 @@ import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionInto;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleTop;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Expression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NAryExpression;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NamedEntity;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
@@ -82,8 +83,15 @@ public final class ExpressionTranslator implements
 	}
 
 	public DLTree visit(final ConceptName expr) {
-		return DLTreeFactory.buildTree(new Lexeme(CNAME, tbox.getConcept(expr
-				.getName())));
+		return DLTreeFactory.buildTree(setEntry(CNAME,
+				tbox.getConcept(expr.getName()), expr));
+	}
+
+	private Lexeme setEntry(Token cname, NamedEntry expr, NamedEntity e) {
+		if (expr.getEntity() == null) {
+			expr.setEntity(e);
+		}
+		return new Lexeme(cname, expr);
 	}
 
 	public DLTree visit(final ConceptNot expr) {
@@ -112,8 +120,12 @@ public final class ExpressionTranslator implements
 	}
 
 	public DLTree visit(final ConceptObjectSelf expr) {
-		return DLTreeFactory.buildTree(new Lexeme(REFLEXIVE), expr.getOR()
-				.accept(this));
+		DLTree r = expr.getOR().accept(this);
+		if (r.elem().getNE().isBottom()) {
+			return DLTreeFactory.createBottom();
+		}
+		DLTree toReturn = DLTreeFactory.buildTree(new Lexeme(Token.SELF), r);
+		return toReturn;
 	}
 
 	public DLTree visit(final ConceptObjectValue expr) {
@@ -190,8 +202,8 @@ public final class ExpressionTranslator implements
 
 	// individual expressions
 	public DLTree visit(final IndividualName expr) {
-		return DLTreeFactory.buildTree(new Lexeme(INAME, tbox
-				.getIndividual(expr.getName())));
+		return DLTreeFactory.buildTree(setEntry(INAME,
+				tbox.getIndividual(expr.getName()), expr));
 	}
 
 	// object role expressions
@@ -206,8 +218,8 @@ public final class ExpressionTranslator implements
 	}
 
 	public DLTree visit(final ObjectRoleName expr) {
-		return DLTreeFactory.buildTree(new Lexeme(RNAME, tbox.getORM()
-				.ensureRoleName(expr.getName())));
+		return DLTreeFactory.buildTree(setEntry(RNAME, tbox.getORM()
+				.ensureRoleName(expr.getName()), expr));
 	}
 
 	public DLTree visit(final ObjectRoleInverse expr) {

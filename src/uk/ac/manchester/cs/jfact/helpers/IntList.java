@@ -189,7 +189,7 @@ public final class IntList extends AbstractFastSet {
 			throw new IllegalArgumentException("illegal arguments: " + i + " "
 					+ end + " size: " + size);
 		}
-		if (size == 1 || (i == 0 && end == size)) {
+		if (size == 1 || i == 0 && end == size) {
 			values = null;
 			size = 0;
 			return;
@@ -218,5 +218,12 @@ public final class IntList extends AbstractFastSet {
 		if (size == 0) {
 			values = null;
 		}
+	}
+
+	public void completeSet(int value) {
+		for (int i = 0; i <= value; i++) {
+			add(i);
+		}
+		//XXX notice: these sets go to negative numbers. Is this the best way?
 	}
 }

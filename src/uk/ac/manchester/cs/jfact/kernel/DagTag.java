@@ -21,9 +21,10 @@ public enum DagTag {
 	dtPConcept("primconcept"), // primitive concept
 	dtNConcept("concept"), // non-primitive concept
 	dtPSingleton("prim-singleton"), dtNSingleton("singleton"), dtDataType(
-			"data-type"), dtDataValue("data-value"), dtDataExpr("data-expr");
+			"data-type"), dtDataValue("data-value"), dtDataExpr("data-expr"), dtChoose(
+			"choose"), dtSplitConcept("split-concept");
 	private static final EnumSet<DagTag> TRUE = EnumSet.of(dtDataType,
-			dtDataValue, dtDataExpr, dtNN, dtBad, dtTop);
+			dtDataValue, dtDataExpr, dtNN, dtBad, dtTop, dtChoose);
 	private static final EnumSet<DagTag> NotPos = EnumSet.of(dtPConcept,
 			dtPSingleton, dtCollection, dtProj);
 
@@ -69,7 +70,7 @@ public enum DagTag {
 
 	private static final EnumSet<DagTag> complexConceptsEnumSet = EnumSet.of(
 			DagTag.dtForall, DagTag.dtLE, DagTag.dtIrr, DagTag.dtUAll,
-			DagTag.dtNN);
+			DagTag.dtNN, DagTag.dtChoose);
 
 	/** @return true iff TAG represents complex concept */
 	public boolean isComplexConcept() {

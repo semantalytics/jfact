@@ -500,11 +500,14 @@ class ToDoPriorMatrix {
 		switch (Op) {
 			case dtAnd:
 				return Sign ? indexAnd : indexOr;
+			case dtSplitConcept:
+				return indexAnd;
 			case dtForall:
 			case dtUAll:
 			case dtIrr: // process local (ir-)reflexivity as a FORALL
 				return Sign ? indexForall : indexExists;
 			case dtProj: // it should be the lowest priority but now just OR's one
+			case dtChoose:
 				return indexOr;
 			case dtLE:
 				return Sign ? (NominalNode ? priorityIndexNominalNode : indexLE)

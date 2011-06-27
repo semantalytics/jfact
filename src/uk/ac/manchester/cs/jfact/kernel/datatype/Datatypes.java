@@ -67,6 +67,22 @@ public enum Datatypes {
 		public Literal<Short> build(Object s) {
 			return new ShortRep((Short) s);
 		}
+
+		@Override
+		public boolean compatible(Datatypes d) {
+			return super.compatible(d) || d == UNSIGNEDSHORT;
+		}
+	},
+	UNSIGNEDSHORT {
+		@Override
+		public Literal<Short> parse(String s) {
+			return new UnsignedShortRep(Short.valueOf(s));
+		}
+
+		@Override
+		public Literal<Short> build(Object s) {
+			return new UnsignedShortRep((Short) s);
+		}
 	},
 	BYTE {
 		@Override
@@ -81,7 +97,24 @@ public enum Datatypes {
 
 		@Override
 		public boolean compatible(Datatypes d) {
-			return super.compatible(d) || d == SHORT;
+			return super.compatible(d) || d == SHORT || d == UNSIGNEDBYTE
+					|| d == UNSIGNEDSHORT;
+		}
+	},
+	UNSIGNEDBYTE {
+		@Override
+		public Literal<Byte> parse(String s) {
+			return new UnsignedByteRep(Byte.valueOf(s));
+		}
+
+		@Override
+		public Literal<Byte> build(Object s) {
+			return new UnsignedByteRep((Byte) s);
+		}
+
+		@Override
+		public boolean compatible(Datatypes d) {
+			return super.compatible(d) || d == UNSIGNEDSHORT;
 		}
 	},
 	BOOLEAN {
@@ -234,10 +267,9 @@ public enum Datatypes {
 		@Override
 		public boolean compatible(Datatypes d) {
 			return super.compatible(d)
-					|| EnumSet
-							.complementOf(
-									EnumSet.of(STRING, DATETIME,
-											DOUBLE, FLOAT)).contains(d);
+					|| EnumSet.complementOf(
+							EnumSet.of(STRING, DATETIME, DOUBLE, FLOAT))
+							.contains(d);
 		}
 	},
 	RATIONAL {
@@ -253,7 +285,25 @@ public enum Datatypes {
 
 		@Override
 		public boolean compatible(Datatypes d) {
-			return d!=DECIMAL && REAL.compatible(d);
+			return d != DECIMAL && REAL.compatible(d);
+		}
+	},
+	FRESH {
+		@Override
+		public boolean compatible(Datatypes d) {
+			return true;
+		}
+
+		@Override
+		public Literal<?> build(Object s) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public Literal<?> parse(String s) {
+			// TODO Auto-generated method stub
+			return null;
 		}
 	};
 	public abstract Literal<?> parse(String s);
@@ -323,6 +373,7 @@ public enum Datatypes {
 	private static Map<String, Datatypes> buildDatatypeMap() {
 		Map<String, Datatypes> toReturn = new HashMap<String, Datatypes>();
 		toReturn.put(Vocabulary.LITERAL, LITERAL);
+		toReturn.put(Vocabulary.ANY_SIMPLE_TYPE, LITERAL);
 		toReturn.put(Vocabulary.PLAIN_LITERAL, STRING);
 		toReturn.put(Vocabulary.XMLLITERAL, STRING);
 		toReturn.put(Vocabulary.STRING, STRING);
@@ -334,9 +385,9 @@ public enum Datatypes {
 		toReturn.put(Vocabulary.NEGATIVE_INTEGER, NEGINT);
 		toReturn.put(Vocabulary.SHORT, SHORT);
 		toReturn.put(Vocabulary.BYTE, BYTE);
-		toReturn.put(Vocabulary.UNSIGNEDBYTE, BYTE);
+		toReturn.put(Vocabulary.UNSIGNEDBYTE, UNSIGNEDBYTE);
 		toReturn.put(Vocabulary.UNSIGNEDINT, INT);
-		toReturn.put(Vocabulary.UNSIGNEDSHORT, SHORT);
+		toReturn.put(Vocabulary.UNSIGNEDSHORT, UNSIGNEDSHORT);
 		toReturn.put(Vocabulary.NONPOSINT, NONPOSINT);
 		toReturn.put(Vocabulary.FLOAT, FLOAT);
 		toReturn.put(Vocabulary.DOUBLE, DOUBLE);
@@ -389,7 +440,7 @@ class IntRep implements Literal<Integer> {
 	}
 
 	public boolean lesser(Literal<Integer> other) {
-		return this.compareTo(other) < 0;
+		return compareTo(other) < 0;
 	}
 
 	@Override
@@ -455,7 +506,7 @@ class DecimalRep implements Literal<BigDecimal> {
 	}
 
 	public boolean lesser(Literal<BigDecimal> other) {
-		return this.compareTo(other) < 0;
+		return compareTo(other) < 0;
 	}
 
 	@Override
@@ -623,7 +674,7 @@ class DateTimeRep implements Literal<XMLGregorianCalendar> {
 	}
 
 	public boolean lesser(Literal<XMLGregorianCalendar> other) {
-		return this.compareTo(other) < 0;
+		return compareTo(other) < 0;
 	}
 
 	@Override
@@ -689,7 +740,7 @@ class ShortRep implements Literal<Short> {
 	}
 
 	public boolean lesser(Literal<Short> other) {
-		return this.compareTo(other) < 0;
+		return compareTo(other) < 0;
 	}
 
 	@Override
@@ -707,6 +758,76 @@ class ShortRep implements Literal<Short> {
 		}
 		if (obj instanceof ShortRep) {
 			return value.equals(((ShortRep) obj).getValue());
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return value.hashCode();
+	}
+}
+
+class UnsignedShortRep implements Literal<Short> {
+	protected Short value;
+
+	public Datatypes getDatatype() {
+		return Datatypes.SHORT;
+	}
+
+	public UnsignedShortRep(Short v) {
+		if (v.shortValue() < 0) {
+			throw new IllegalArgumentException("v cannot be negative! v: "
+					+ v.shortValue());
+		}
+		value = v;
+	}
+
+	public int compareTo(Literal<Short> o) {
+		return value.compareTo(o.getValue());
+	}
+
+	public Short getValue() {
+		return value;
+	}
+
+	public boolean correctMin(boolean excl) {
+		if (excl) {
+			// transform (n,} into [n+1,}
+			value++;
+			return false;
+		}
+		return excl;
+	}
+
+	public boolean correctMax(boolean excl) {
+		if (excl) {
+			// transform (n,} into [n+1,}
+			value--;
+			return false;
+		}
+		return excl;
+	}
+
+	public boolean lesser(Literal<Short> other) {
+		return compareTo(other) < 0;
+	}
+
+	@Override
+	public String toString() {
+		return " " + value.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (this == obj) {
+			return true;
+		}
+		if (obj instanceof UnsignedShortRep) {
+			return value.equals(((UnsignedShortRep) obj).getValue());
 		}
 		return false;
 	}
@@ -755,7 +876,7 @@ class ByteRep implements Literal<Byte> {
 	}
 
 	public boolean lesser(Literal<Byte> other) {
-		return this.compareTo(other) < 0;
+		return compareTo(other) < 0;
 	}
 
 	@Override
@@ -773,6 +894,76 @@ class ByteRep implements Literal<Byte> {
 		}
 		if (obj instanceof ByteRep) {
 			return value.equals(((ByteRep) obj).getValue());
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return value.hashCode();
+	}
+}
+
+class UnsignedByteRep implements Literal<Byte> {
+	protected Byte value;
+
+	public Datatypes getDatatype() {
+		return Datatypes.UNSIGNEDBYTE;
+	}
+
+	public UnsignedByteRep(Byte v) {
+		if (v.byteValue() < 0) {
+			throw new IllegalArgumentException("v cannot be negative! v: "
+					+ v.byteValue());
+		}
+		value = v;
+	}
+
+	public int compareTo(Literal<Byte> o) {
+		return value.compareTo(o.getValue());
+	}
+
+	public Byte getValue() {
+		return value;
+	}
+
+	public boolean correctMin(boolean excl) {
+		if (excl) {
+			// transform (n,} into [n+1,}
+			value++;
+			return false;
+		}
+		return excl;
+	}
+
+	public boolean correctMax(boolean excl) {
+		if (excl) {
+			// transform (n,} into [n+1,}
+			value--;
+			return false;
+		}
+		return excl;
+	}
+
+	public boolean lesser(Literal<Byte> other) {
+		return compareTo(other) < 0;
+	}
+
+	@Override
+	public String toString() {
+		return " " + value.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (this == obj) {
+			return true;
+		}
+		if (obj instanceof UnsignedByteRep) {
+			return value.equals(((UnsignedByteRep) obj).getValue());
 		}
 		return false;
 	}
@@ -814,7 +1005,7 @@ class BoolRep implements Literal<Boolean> {
 	}
 
 	public boolean lesser(Literal<Boolean> other) {
-		return this.compareTo(other) < 0;
+		return compareTo(other) < 0;
 	}
 
 	@Override
@@ -872,7 +1063,7 @@ class StringRep implements Literal<String> {
 	}
 
 	public boolean lesser(Literal<String> other) {
-		return this.compareTo(other) < 0;
+		return compareTo(other) < 0;
 	}
 
 	@Override
@@ -930,7 +1121,7 @@ class FloatRep implements Literal<Float> {
 	}
 
 	public boolean lesser(Literal<Float> other) {
-		return this.compareTo(other) < 0;
+		return compareTo(other) < 0;
 	}
 
 	@Override
@@ -988,7 +1179,7 @@ class DoubleRep implements Literal<Double> {
 	}
 
 	public boolean lesser(Literal<Double> other) {
-		return this.compareTo(other) < 0;
+		return compareTo(other) < 0;
 	}
 
 	@Override
@@ -1045,7 +1236,7 @@ class RealRep implements Literal<BigDecimal> {
 	}
 
 	public boolean lesser(Literal<BigDecimal> other) {
-		return this.compareTo(other) < 0;
+		return compareTo(other) < 0;
 	}
 
 	@Override
@@ -1119,7 +1310,7 @@ class RationalRep implements Literal<BigDecimal> {
 	}
 
 	public boolean lesser(Literal<BigDecimal> other) {
-		return this.compareTo(other) < 0;
+		return compareTo(other) < 0;
 	}
 
 	@Override

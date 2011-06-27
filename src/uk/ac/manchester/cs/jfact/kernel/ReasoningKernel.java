@@ -27,10 +27,6 @@ import uk.ac.manchester.cs.jfact.kernel.actors.RIActor;
 import uk.ac.manchester.cs.jfact.kernel.actors.SupConceptActor;
 import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptName;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleBottom;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleTop;
-import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleBottom;
-import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleTop;
 import uk.ac.manchester.cs.jfact.kernel.dl.axioms.AxiomConceptInclusion;
 import uk.ac.manchester.cs.jfact.kernel.dl.axioms.AxiomDRoleDomain;
 import uk.ac.manchester.cs.jfact.kernel.dl.axioms.AxiomDRoleFunctional;
@@ -72,6 +68,7 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.IndividualExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleComplexExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.RoleExpression;
+import uk.ac.manchester.cs.jfact.split.TAxiomSplitter;
 
 public final class ReasoningKernel {
 	/** options for the kernel and all related substructures */
@@ -138,22 +135,30 @@ public final class ReasoningKernel {
 		return expr.accept(pET);
 	}
 
-	public static final boolean isUniversalRole(final ObjectRoleExpression R) {
-		return R instanceof ObjectRoleTop;
+	/// get fresh filled depending of a type of R
+	private DLTree getFreshFiller(DLTree R) {
+		if (Role.resolveRole(R).isDataRole()) {
+			return getTBox().getDataTypeCenter().getFreshDataType();
+		} else {
+			return getTBox().getFreshConcept();
+		}
 	}
 
-	public static final boolean isUniversalRole(final DataRoleExpression R) {
-		return R instanceof DataRoleTop;
-	}
-
-	public static final boolean isEmptyRole(ObjectRoleExpression R) {
-		return R instanceof ObjectRoleBottom;
-	}
-
-	public static final boolean isEmptyRole(DataRoleExpression R) {
-		return R instanceof DataRoleBottom;
-	}
-
+	//	public static final boolean isUniversalRole(final ObjectRoleExpression R) {
+	//		return R instanceof ObjectRoleTop;
+	//	}
+	//
+	//	public static final boolean isUniversalRole(final DataRoleExpression R) {
+	//		return R instanceof DataRoleTop;
+	//	}
+	//
+	//	public static final boolean isEmptyRole(ObjectRoleExpression R) {
+	//		return R instanceof ObjectRoleBottom;
+	//	}
+	//
+	//	public static final boolean isEmptyRole(DataRoleExpression R) {
+	//		return R instanceof DataRoleBottom;
+	//	}
 	/** clear cache and flags */
 	private void initCacheAndFlags() {
 		cacheLevel = csEmpty;
@@ -348,6 +353,8 @@ public final class ReasoningKernel {
 		botORoleName = botO;
 		topDRoleName = topD;
 		botDRoleName = botD;
+		ontology.getExpressionManager().setTopBottomRoles(topORoleName,
+				botORoleName, topDRoleName, botDRoleName);
 	}
 
 	/**
@@ -371,9 +378,9 @@ public final class ReasoningKernel {
 	private boolean checkFunctionality(DLTree R) {
 		// R is transitive iff \ER.C and \ER.\not C is unsatisfiable
 		DLTree tmp = DLTreeFactory.createSNFExists(R.copy(),
-				DLTreeFactory.createSNFNot(getTBox().getFreshConcept()));
+				DLTreeFactory.createSNFNot(getFreshFiller(R)));
 		tmp = DLTreeFactory.createSNFAnd(tmp,
-				DLTreeFactory.createSNFExists(R, getTBox().getFreshConcept()));
+				DLTreeFactory.createSNFExists(R, getFreshFiller(R)));
 		return !checkSat(tmp);
 	}
 
@@ -419,12 +426,15 @@ public final class ReasoningKernel {
 
 	/** @return true if R [= S wrt ontology */
 	private boolean checkRoleSubsumption(DLTree R, DLTree S) {
+		if (Role.resolveRole(R).isDataRole() != Role.resolveRole(S)
+				.isDataRole()) {
+			return false;
+		}
 		// R [= S iff \ER.C and \AS.(not C) is unsatisfiable
 		DLTree tmp = DLTreeFactory.createSNFForall(S,
-				DLTreeFactory.createSNFNot(getTBox().getFreshConcept()));
+				DLTreeFactory.createSNFNot(getFreshFiller(S)));
 		tmp = DLTreeFactory.createSNFAnd(
-				DLTreeFactory.createSNFExists(R, getTBox().getFreshConcept()),
-				tmp);
+				DLTreeFactory.createSNFExists(R, getFreshFiller(R)), tmp);
 		return !checkSat(tmp);
 	}
 
@@ -678,10 +688,10 @@ public final class ReasoningKernel {
 	/** @return true iff object role is functional */
 	public boolean isFunctional(final ObjectRoleExpression R) {
 		preprocessKB(); // ensure KB is ready to answer the query
-		if (isUniversalRole(R)) {
+		if (getExpressionManager().isUniversalRole(R)) {
 			return false; // universal role is not functional
 		}
-		if (isEmptyRole(R)) {
+		if (getExpressionManager().isEmptyRole(R)) {
 			return true; // empty role is functional
 		}
 		return getFunctionality(getRole(R,
@@ -691,10 +701,10 @@ public final class ReasoningKernel {
 	/** @return true iff data role is functional */
 	public boolean isFunctional(final DataRoleExpression R) {
 		preprocessKB(); // ensure KB is ready to answer the query
-		if (isUniversalRole(R)) {
+		if (getExpressionManager().isUniversalRole(R)) {
 			return false; // universal role is not functional
 		}
-		if (isEmptyRole(R)) {
+		if (getExpressionManager().isEmptyRole(R)) {
 			return true; // empty role is functional
 		}
 		return getFunctionality(getRole(R,
@@ -704,10 +714,10 @@ public final class ReasoningKernel {
 	/** @return true iff role is inverse-functional */
 	public boolean isInverseFunctional(final ObjectRoleExpression R) {
 		preprocessKB(); // ensure KB is ready to answer the query
-		if (isUniversalRole(R)) {
+		if (getExpressionManager().isUniversalRole(R)) {
 			return false; // universal role is not functional
 		}
-		if (isEmptyRole(R)) {
+		if (getExpressionManager().isEmptyRole(R)) {
 			return true; // empty role is functional
 		}
 		return getFunctionality(getRole(R,
@@ -717,10 +727,10 @@ public final class ReasoningKernel {
 	/** @return true iff role is transitive */
 	public boolean isTransitive(ObjectRoleExpression R) {
 		preprocessKB(); // ensure KB is ready to answer the query
-		if (isUniversalRole(R)) {
+		if (getExpressionManager().isUniversalRole(R)) {
 			return true; // universal role is transitive
 		}
-		if (isEmptyRole(R)) {
+		if (getExpressionManager().isEmptyRole(R)) {
 			return true; // empty role is transitive
 		}
 		Role r = getRole(R, "Role expression expected in isTransitive()");
@@ -733,10 +743,10 @@ public final class ReasoningKernel {
 	/** @return true iff role is symmetric */
 	public boolean isSymmetric(ObjectRoleExpression R) {
 		preprocessKB(); // ensure KB is ready to answer the query
-		if (isUniversalRole(R)) {
+		if (getExpressionManager().isUniversalRole(R)) {
 			return true; // universal role is symmetric
 		}
-		if (isEmptyRole(R)) {
+		if (getExpressionManager().isEmptyRole(R)) {
 			return true; // empty role is symmetric
 		}
 		Role r = getRole(R, "Role expression expected in isSymmetric()");
@@ -749,10 +759,10 @@ public final class ReasoningKernel {
 	/** @return true iff role is asymmetric */
 	public boolean isAsymmetric(ObjectRoleExpression R) {
 		preprocessKB(); // ensure KB is ready to answer the query
-		if (isUniversalRole(R)) {
+		if (getExpressionManager().isUniversalRole(R)) {
 			return false; // universal role is not asymmetric
 		}
-		if (isEmptyRole(R)) {
+		if (getExpressionManager().isEmptyRole(R)) {
 			return true; // empty role is symmetric
 		}
 		Role r = getRole(R, "Role expression expected in isAsymmetric()");
@@ -765,10 +775,10 @@ public final class ReasoningKernel {
 	/** @return true iff role is reflexive */
 	public boolean isReflexive(ObjectRoleExpression R) {
 		preprocessKB(); // ensure KB is ready to answer the query
-		if (isUniversalRole(R)) {
+		if (getExpressionManager().isUniversalRole(R)) {
 			return true; // universal role is reflexive
 		}
-		if (isEmptyRole(R)) {
+		if (getExpressionManager().isEmptyRole(R)) {
 			return false; // empty role is not reflexive
 		}
 		Role r = getRole(R, "Role expression expected in isReflexive()");
@@ -781,10 +791,10 @@ public final class ReasoningKernel {
 	/** @return true iff role is irreflexive */
 	public boolean isIrreflexive(ObjectRoleExpression R) {
 		preprocessKB(); // ensure KB is ready to answer the query
-		if (isUniversalRole(R)) {
+		if (getExpressionManager().isUniversalRole(R)) {
 			return false; // universal role is not irreflexive
 		}
-		if (isEmptyRole(R)) {
+		if (getExpressionManager().isEmptyRole(R)) {
 			return true; // empty role is irreflexive
 		}
 		Role r = getRole(R, "Role expression expected in isIrreflexive()");
@@ -798,10 +808,12 @@ public final class ReasoningKernel {
 	public boolean isDisjointRoles(final ObjectRoleExpression R,
 			final ObjectRoleExpression S) {
 		preprocessKB(); // ensure KB is ready to answer the query
-		if (isUniversalRole(R) || isUniversalRole(S)) {
+		if (getExpressionManager().isUniversalRole(R)
+				|| getExpressionManager().isUniversalRole(S)) {
 			return false; // universal role is not disjoint with anything
 		}
-		if (isEmptyRole(R) || isEmptyRole(S)) {
+		if (getExpressionManager().isEmptyRole(R)
+				|| getExpressionManager().isEmptyRole(S)) {
 			return true; // empty role is disjoint with everything
 		}
 		return getTBox().isDisjointRoles(
@@ -813,10 +825,12 @@ public final class ReasoningKernel {
 	public boolean isDisjointRoles(final DataRoleExpression R,
 			final DataRoleExpression S) {
 		preprocessKB(); // ensure KB is ready to answer the query
-		if (isUniversalRole(R) || isUniversalRole(S)) {
+		if (getExpressionManager().isUniversalRole(R)
+				|| getExpressionManager().isUniversalRole(S)) {
 			return false; // universal role is not disjoint with anything
 		}
-		if (isEmptyRole(R) || isEmptyRole(S)) {
+		if (getExpressionManager().isEmptyRole(R)
+				|| getExpressionManager().isEmptyRole(S)) {
 			return true; // empty role is disjoint with everything
 		}
 		return getTBox().isDisjointRoles(
@@ -827,10 +841,12 @@ public final class ReasoningKernel {
 	/** @return true if R is a sub-role of S */
 	public boolean isSubRoles(ObjectRoleExpression R, ObjectRoleExpression S) {
 		preprocessKB(); // ensure KB is ready to answer the query
-		if (isEmptyRole(R) || isUniversalRole(S)) {
+		if (getExpressionManager().isEmptyRole(R)
+				|| getExpressionManager().isUniversalRole(S)) {
 			return true; // \bot [= X [= \top
 		}
-		if (isUniversalRole(R) && isEmptyRole(S)) {
+		if (getExpressionManager().isUniversalRole(R)
+				&& getExpressionManager().isEmptyRole(S)) {
 			return false; // as \top [= \bot leads to inconsistent ontology
 		}
 		// told case first
@@ -921,6 +937,15 @@ public final class ReasoningKernel {
 		classifyKB(); // ensure KB is ready to answer the query
 		setUpCache(e(C), csClassified);
 		actor.apply(cachedVertex);
+	}
+
+	/// apply actor::apply() to all named concepts disjoint with [complex] C
+	public void getDisjointConcepts(ConceptExpression C, Actor actor) {
+		classifyKB(); // ensure KB is ready to answer the query
+		setUpCache(DLTreeFactory.createSNFNot(e(C)), csClassified);
+		Taxonomy tax = getCTaxonomy();
+		// we are looking for all sub-concepts of (not C) (including synonyms to it)
+		tax.getRelativesInfo(cachedVertex, actor, true, false, false);
 	}
 
 	// role hierarchy
@@ -1088,6 +1113,7 @@ public final class ReasoningKernel {
 		}
 	}
 
+	/// try to perform the incremental reasoning on the changed ontology
 	private boolean tryIncremental() {
 		if (pTBox == null) {
 			return true;
@@ -1098,10 +1124,15 @@ public final class ReasoningKernel {
 		return true;
 	}
 
+	/// force the re-classification of the changed ontology
 	private void forceReload() {
 		clearTBox();
 		newKB();
 		pMonitor = null;
+		// split ontological axioms
+		//TODO switch optimization off here
+		TAxiomSplitter AxiomSplitter = new TAxiomSplitter(ontology);
+		//AxiomSplitter.buildSplit();
 		OntologyLoader OntologyLoader = new OntologyLoader(getTBox());
 		OntologyLoader.visitOntology(ontology);
 		ontology.setProcessed();
@@ -1274,10 +1305,10 @@ public final class ReasoningKernel {
 	/** @return true if R is a super-role of a chain holding in the args */
 	public boolean isSubChain(ObjectRoleExpression R, List<Expression> l) {
 		preprocessKB(); // ensure KB is ready to answer the query
-		if (isUniversalRole(R)) {
+		if (getExpressionManager().isUniversalRole(R)) {
 			return true; // universal role is a super of any chain
 		}
-		if (isEmptyRole(R)) {
+		if (getExpressionManager().isEmptyRole(R)) {
 			return false; // empty role is not a super of any chain
 		}
 		return checkSubChain(
@@ -1287,10 +1318,12 @@ public final class ReasoningKernel {
 	/** @return true if R is a sub-role of S */
 	public boolean isSubRoles(DataRoleExpression R, DataRoleExpression S) {
 		preprocessKB(); // ensure KB is ready to answer the query
-		if (isEmptyRole(R) || isUniversalRole(S)) {
+		if (getExpressionManager().isEmptyRole(R)
+				|| getExpressionManager().isUniversalRole(S)) {
 			return true; // \bot [= X [= \top
 		}
-		if (isUniversalRole(R) && isEmptyRole(S)) {
+		if (getExpressionManager().isUniversalRole(R)
+				&& getExpressionManager().isEmptyRole(S)) {
 			return false; // as \top [= \bot leads to inconsistent ontology
 		}
 		// told case first
@@ -1298,8 +1331,10 @@ public final class ReasoningKernel {
 				getRole(S, "Role expression expected in isSubRoles()"))) {
 			return true;
 		}
-		// FIXME!! we can hardly do better, but need to think more here
-		return false;
+		// check the general case
+		// FIXME!! cache it later
+		DLTree r = e(R), s = e(S);
+		return checkRoleSubsumption(r, s);
 	}
 
 	// all-disjoint query implementation
@@ -1310,10 +1345,10 @@ public final class ReasoningKernel {
 		for (Expression p : l) {
 			if (p instanceof ObjectRoleExpression) {
 				ObjectRoleExpression ORole = (ObjectRoleExpression) p;
-				if (isUniversalRole(ORole)) {
+				if (getExpressionManager().isUniversalRole(ORole)) {
 					return false; // universal role is not disjoint with anything
 				}
-				if (isEmptyRole(ORole)) {
+				if (getExpressionManager().isEmptyRole(ORole)) {
 					continue; // empty role is disjoint with everything
 				}
 				Roles.add(getRole(ORole,
@@ -1324,10 +1359,10 @@ public final class ReasoningKernel {
 							"Role expression expected in isDisjointRoles()");
 				}
 				DataRoleExpression DRole = (DataRoleExpression) p;
-				if (isUniversalRole(DRole)) {
+				if (getExpressionManager().isUniversalRole(DRole)) {
 					return false; // universal role is not disjoint with anything
 				}
-				if (isEmptyRole(DRole)) {
+				if (getExpressionManager().isEmptyRole(DRole)) {
 					continue; // empty role is disjoint with everything
 				}
 				Roles.add(getRole(DRole,

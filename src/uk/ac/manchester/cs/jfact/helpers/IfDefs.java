@@ -20,4 +20,5 @@ public final class IfDefs {
 	public static final boolean TMP_PRINT_TAXONOMY_INFO = false;
 	public static final boolean DEBUG_SAVE_RESTORE = false;
 	public static final boolean RKG_USE_FAIRNESS = false;
+	public static final boolean FPP_DEBUG_SPLIT_MODULES = false;
 }

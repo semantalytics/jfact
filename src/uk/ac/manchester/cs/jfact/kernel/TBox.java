@@ -49,6 +49,8 @@ import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheConst;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheInterface;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheSingleton;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheState;
+import uk.ac.manchester.cs.jfact.split.TSplitVar;
+import uk.ac.manchester.cs.jfact.split.TSplitVars;
 
 public final class TBox {
 	protected static final class IndividualCreator implements
@@ -195,9 +197,11 @@ public final class TBox {
 	/** time spend for consistency checking */
 	private long consistTime;
 	/** number of concepts and individuals; used to set index for modelCache */
-	int nC = 0;
+	protected int nC = 0;
 	/** number of all distinct roles; used to set index for modelCache */
-	int nR = 0;
+	protected int nR = 0;
+	/// maps from concept index to concept itself
+	private final List<Concept> ConceptMap = new ArrayList<Concept>();
 	/** map to show the possible equivalence between individuals */
 	Map<Concept, Pair<Individual, Boolean>> sameIndividuals = new HashMap<Concept, Pair<Individual, Boolean>>();
 	/** all the synonyms in the told subsumers' cycle */
@@ -367,6 +371,13 @@ public final class TBox {
 		for (Individual pi : individuals.getList()) {
 			pi.getClassTag();
 		}
+	}
+
+	/// set new concept index for given C wrt existing nC
+	public void setConceptIndex(Concept C) {
+		C.setIndex(nC);
+		ConceptMap.add(C);
+		++nC;
 	}
 
 	/** get RW reasoner wrt nominal case */
@@ -789,6 +800,15 @@ public final class TBox {
 
 	public void buildDAG() {
 		nNominalReferences = 0;
+		// make fresh concept and datatype
+		concept2dag(pTemp);
+		DLTree freshDT = datatypeCenter.getFreshDataType();
+		NamedEntry ne = freshDT.elem().getNE();
+		if (ne instanceof DataTypeName) {
+			addDataExprToHeap(((DataTypeName) ne).getDatatype());
+		} else {
+			addDataExprToHeap((DataEntry) ne);
+		}
 		for (Concept pc : concepts.getList()) {
 			concept2dag(pc);
 		}
@@ -801,6 +821,10 @@ public final class TBox {
 		// builds Roles range and domain
 		initRangeDomain(objectRoleMaster);
 		initRangeDomain(dataRoleMaster);
+		// build all splits
+		for (TSplitVar s : getSplits().getEntries()) {
+			split2dag(s);
+		}
 		DLTree GCI = axioms.getGCI();
 		// add special domains to the GCIs
 		List<DLTree> list = new ArrayList<DLTree>();
@@ -829,7 +853,7 @@ public final class TBox {
 				p.setFunctional(atmost2dag(1, p, bpTOP));
 			}
 		}
-		concept2dag(pTemp);
+		//concept2dag(pTemp);
 		if (nNominalReferences > 0) {
 			int nInd = individuals.getList().size();
 			if (nInd > 100 && nNominalReferences > nInd) {
@@ -863,26 +887,26 @@ public final class TBox {
 	}
 
 	public int addDataExprToHeap(DataEntry p) {
-		int toReturn=0;
+		int toReturn = 0;
 		if (isValid(p.getBP())) {
-			toReturn= p.getBP();
-		}else {
-		DagTag dt = p.isBasicDataType() ? dtDataType
-				: p.isDataValue() ? dtDataValue : dtDataExpr;
-		int hostBP = bpTOP;
-		if (p.getType() != null) {
-			hostBP = addDataExprToHeap(p.getType());
+			toReturn = p.getBP();
+		} else {
+			DagTag dt = p.isBasicDataType() ? dtDataType
+					: p.isDataValue() ? dtDataValue : dtDataExpr;
+			int hostBP = bpTOP;
+			if (p.getType() != null) {
+				hostBP = addDataExprToHeap(p.getType());
+			}
+			// sets it off 0 and 1 - although it's not necessarily correct
+			//hostBP = p.getDatatype().ordinal() + 2;
+			DLVertex ver = new DLVertex(dt, 0, null, hostBP, null);
+			ver.setConcept(p);
+			//	System.out.println("TBox.addDataExprToHeap() "+p);
+			p.setBP(dlHeap.directAdd(ver));
+			//dlHeap.print(new LeveLogger.LogAdapterStream());
+			toReturn = p.getBP();
 		}
-		// sets it off 0 and 1 - although it's not necessarily correct
-		//hostBP = p.getDatatype().ordinal() + 2;
-		DLVertex ver = new DLVertex(dt, 0, null, hostBP, null);
-		ver.setConcept(p);
-		//	System.out.println("TBox.addDataExprToHeap() "+p);
-		p.setBP(dlHeap.directAdd(ver));
-		//dlHeap.print(new LeveLogger.LogAdapterStream());
-		toReturn= p.getBP();
-		}
-	//	System.out.println("TBox.addDataExprToHeap(DataEntry) "+p+" hashcode "+p.hashCode()+"\t return: "+toReturn);
+		//	System.out.println("TBox.addDataExprToHeap(DataEntry) "+p+" hashcode "+p.hashCode()+"\t return: "+toReturn);
 		return toReturn;
 	}
 
@@ -892,22 +916,20 @@ public final class TBox {
 		//
 		// create a concept and check if it's already in the list
 		// TODO needs to be more efficient
-		
-		int toReturn=0;
-		
+		int toReturn = 0;
 		DataTypeName concept = new DataTypeName(p);
 		int index = dlHeap.index(concept);
 		if (index != bpINVALID) {
-			toReturn= index;
-		}else {
-		//		System.out.println("TBox.addDataExprToHeap(datatypename) "+p);
-		// else, create a new vertex and add it
-		DLVertex ver = new DLVertex(dtDataType, 0, null, bpTOP, null);
-		ver.setConcept(concept);
-		int directAdd = dlHeap.directAdd(ver);
-		toReturn= directAdd;
+			toReturn = index;
+		} else {
+			//		System.out.println("TBox.addDataExprToHeap(datatypename) "+p);
+			// else, create a new vertex and add it
+			DLVertex ver = new DLVertex(dtDataType, 0, null, bpTOP, null);
+			ver.setConcept(concept);
+			int directAdd = dlHeap.directAdd(ver);
+			toReturn = directAdd;
 		}
-//		System.out.println("TBox.addDataExprToHeap(Datatypes) "+p+"\t return: "+toReturn);
+		//		System.out.println("TBox.addDataExprToHeap(Datatypes) "+p+"\t return: "+toReturn);
 		return toReturn;
 	}
 
@@ -972,7 +994,7 @@ public final class TBox {
 				ret = forall2dag(Role.resolveRole(t.getLeft()),
 						tree2dag(t.getRight()));
 				break;
-			case REFLEXIVE:
+			case SELF:
 				ret = reflexive2dag(Role.resolveRole(t.getChild()));
 				break;
 			case LE:
@@ -1042,6 +1064,20 @@ public final class TBox {
 		return ret;
 	}
 
+	/// transform splitted concept registered in SPLIT to a dag representation
+	void split2dag(TSplitVar split) {
+		DLVertex v = new DLVertex(dtSplitConcept);
+		for (TSplitVar.Entry p : split.getEntries()) {
+			v.addChild(p.C.getpName());
+		}
+		split.C.setpBody(dlHeap.directAdd(v));
+		split.C.setPrimitive(false);
+		dlHeap.replaceVertex(split.C.getpName(), new DLVertex(dtNConcept, 0,
+				null, split.C.getpBody(), null), split.C);
+		dlHeap.directAdd(new DLVertex(dtChoose, 0, null, split.C.getpName(),
+				null));
+	}
+
 	private final boolean fillANDVertex(DLVertex v, final DLTree t) {
 		if (t.isAND()) {
 			boolean ret = false;
@@ -1056,10 +1092,9 @@ public final class TBox {
 		}
 	}
 
-	public void initTaxonomy() {
-		pTax = new DLConceptTaxonomy(top, bottom, this, GCIs);
-	}
-
+	//	public void initTaxonomy() {
+	//		pTax = new DLConceptTaxonomy(top, bottom, this, GCIs);
+	//	}
 	private List<Concept> arrayCD = new ArrayList<Concept>(),
 			arrayNoCD = new ArrayList<Concept>(),
 			arrayNP = new ArrayList<Concept>();
@@ -1096,13 +1131,14 @@ public final class TBox {
 
 	public void createTaxonomy(boolean needIndividual) {
 		boolean needConcept = !needIndividual;
-		if (pTax == null) {
-			dlHeap.setSubOrder();
-			initTaxonomy();
-			needConcept |= needIndividual;
-		} else {
-			return;
-		}
+		//	if (pTax == null) {
+		dlHeap.setSubOrder();
+		//initTaxonomy();
+		pTax.setBottomUp(GCIs);
+		needConcept |= needIndividual;
+		//		} else {
+		//			return;
+		//		}
 		if (verboseOutput) {
 			logger.println("Processing query...");
 		}
@@ -1118,9 +1154,18 @@ public final class TBox {
 			pMonitor.reasonerTaskStarted(ReasonerProgressMonitor.CLASSIFYING);
 			pTax.setProgressIndicator(pMonitor);
 		}
+		stdReasoner.setDuringClassification(true);
+		if (nomReasoner != null) {
+			nomReasoner.setDuringClassification(true);
+		}
 		classifyConcepts(arrayCD, true, "completely defined");
 		classifyConcepts(arrayNoCD, false, "regular");
 		classifyConcepts(arrayNP, false, "non-primitive");
+		stdReasoner.setDuringClassification(false);
+		if (nomReasoner != null) {
+			nomReasoner.setDuringClassification(false);
+		}
+		pTax.processSplits();
 		if (pMonitor != null) {
 			pMonitor.reasonerTaskStopped();
 			pMonitor = null;
@@ -1186,7 +1231,7 @@ public final class TBox {
 		stdReasoner = null;
 		nomReasoner = null;
 		pMonitor = null;
-		pTax = null;
+		//pTax = null;
 		pOptions = Options;
 		kbStatus = kbLoading;
 		curFeature = null;
@@ -1210,6 +1255,7 @@ public final class TBox {
 		readConfig(Options);
 		initTopBottom();
 		setForbidUndefinedNames(false);
+		pTax = new DLConceptTaxonomy(top, bottom, this);
 	}
 
 	public Concept getAuxConcept(DLTree desc) {
@@ -1355,7 +1401,9 @@ public final class TBox {
 		return result;
 	}
 
-	public boolean isSameIndividuals(final Individual a, final Individual b) {
+	public boolean isSameIndividuals(final Individual _a, final Individual _b) {
+		Individual a = resolveSynonym(_a);
+		Individual b = resolveSynonym(_b);
 		if (a.equals(b)) {
 			return true;
 		}
@@ -1489,10 +1537,6 @@ public final class TBox {
 
 	public void printDagEntry(LeveLogger.LogAdapter o, int p) {
 		depth++;
-		if (depth % 200 == 0) {
-			System.out.println("TBox.printDagEntry()");
-			return;
-		}
 		assert isValid(p);
 		if (p == bpTOP) {
 			o.print(" *TOP*");
@@ -1532,6 +1576,7 @@ public final class TBox {
 				return;
 			case dtCollection:
 			case dtAnd:
+			case dtSplitConcept:
 				o.print(" (");
 				o.print(type.getName());
 				for (int q : v.begin()) {
@@ -1559,7 +1604,11 @@ public final class TBox {
 				o.print(String.format(" => %s)", v.getProjRole().getName()));
 				return;
 			case dtNN:
+			case dtChoose:
 				throw new UnreachableSituationException();
+			case dtBad:
+				o.println("WRONG: printing a badtag dtBad!");
+				break;
 			default:
 				throw new ReasonerInternalException(
 						"Error printing vertex of type " + type.getName() + "("
@@ -2031,6 +2080,7 @@ public final class TBox {
 
 	private void setAllIndexes() {
 		nC = 1; // start with 1 to make index 0 an indicator of "not processed"
+		ConceptMap.add(null);
 		pTemp.setIndex(nC++);
 		for (Concept pc : concepts.getList()) {
 			if (!pc.isSynonym()) {
@@ -2431,7 +2481,8 @@ public final class TBox {
 					rolesToExplore.add(_role);
 					while (rolesToExplore.size() > 0) {
 						Role roleToExplore = rolesToExplore.remove(0);
-						if (roleToExplore.getId() != 0
+						if ((roleToExplore.getId() != 0 || roleToExplore
+								.isTop())
 								&& !roleToExplore.isRelevant(relevance)) {
 							roleToExplore.setRelevant(relevance);
 							collectLogicFeature(roleToExplore);
@@ -2447,6 +2498,7 @@ public final class TBox {
 					queue.add(v.getConceptIndex());
 					break;
 				case dtProj:
+				case dtChoose:
 					//setRelevant(v.getConceptIndex());
 					queue.add(v.getConceptIndex());
 					break;
@@ -2473,6 +2525,7 @@ public final class TBox {
 					break;
 				case dtAnd:
 				case dtCollection:
+				case dtSplitConcept:
 					for (int q : v.begin()) {
 						//setRelevant(q);
 						queue.add(q);
@@ -2547,6 +2600,10 @@ public final class TBox {
 		}
 		// set up GALEN-like flag; based on r/n^{3/2}, add r/n^2<1
 		isLikeGALEN = bRatio > sqBSize * 20 && bRatio < bSize;
+		// switch off sorted reasoning iff top role appears
+		if (KBFeatures.hasTopRole()) {
+			useSortedReasoning = false;
+		}
 	}
 
 	public void printFeatures() {
@@ -2591,6 +2648,10 @@ public final class TBox {
 
 	public AtomicBoolean isCancelled() {
 		return interrupted;
+	}
+
+	TSplitVars getSplits() {
+		return getTaxonomy().getSplits();
 	}
 }
 

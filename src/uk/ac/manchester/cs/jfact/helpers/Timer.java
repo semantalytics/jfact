@@ -47,7 +47,7 @@ public final class Timer {
 	public long getResultTime() {
 		return resultTime;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Elapsed: " + resultTime;

@@ -231,7 +231,7 @@ public final class Axiom {
 	/// absorb into BOTTOM; @return true if absorption is performed
 	public boolean absorbIntoBottom() {
 		List<DLTree> Pos = new ArrayList<DLTree>(), Neg = new ArrayList<DLTree>();
-		for (DLTree p : disjuncts)
+		for (DLTree p : disjuncts) {
 			switch (p.token()) {
 				case BOTTOM: // axiom in the form T [= T or ...; nothing to do
 					SAbsBApply();
@@ -249,9 +249,10 @@ public final class Axiom {
 					Pos.add(p);
 					break;
 			}
+		}
 		// now check whether there is a concept in both POS and NEG
-		for (DLTree q : Neg)
-			for (DLTree s : Pos)
+		for (DLTree q : Neg) {
+			for (DLTree s : Pos) {
 				if (q.equals(s)) {
 					SAbsBApply();
 					if (IfDefs.RKG_DEBUG_ABSORPTION) {
@@ -261,6 +262,8 @@ public final class Axiom {
 					}
 					return true;
 				}
+			}
+		}
 		return false;
 	}
 

@@ -7,7 +7,9 @@ This library is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import uk.ac.manchester.cs.jfact.dep.DepSet;
@@ -122,32 +124,125 @@ public final class DataTypeReasoner {
 		}
 	}
 
+	// try to find contradiction:
+	// -- if we have 2 same elements or direct contradiction (like "p" and "(not p)")
+	//    then addConcept() will eliminate this;
+	// => negations are not interesting also (p & ~p are eliminated; ~p means "all except p").
+	// -- all cases with 2 different values of the same class are found in previous search;
+	// -- The remaining problems are
+	//   - check if there are 2 different positive classes
+	//   - check if some value is present together with negation of its class
+	//   - check if some value is present together with the other class
+	//   - check if two values of different classes are present at the same time
 	public boolean checkClash() {
-		DataTypeAppearance type = null;
-		for (DataTypeAppearance p : map.values()) {
-			if (p.hasPType()) {
-				if (type == null) {
-					type = p;
-				} else {
-					Datatypes type_datatype = type.getPDatatype();
-					Datatypes p_datatype = p.getPDatatype();
-					if (!p_datatype.compatible(type_datatype)
-							&& !type_datatype.compatible(p_datatype)) {
-						logger.print(Templates.CHECKCLASH);
-						clashDep.setReference(DepSetFactory.plus(
-								type.getPType().second, p.getPType().second));
-						return true;
-					}
-					// if one of them is compatible with the other but not the other way around, then replace type with the most restrictive one
-					// XXX this is still dubious
-					if (type_datatype.compatible(p_datatype)
-							&& !p_datatype.compatible(type_datatype)) {
-						type = p;
-					}
-					// else irrelevant: type is already the most restrictive
-				}
+		List<Map.Entry<Datatypes, DataTypeAppearance>> types = new ArrayList<Map.Entry<Datatypes, DataTypeAppearance>>();
+		for (Map.Entry<Datatypes, DataTypeAppearance> k : map.entrySet()) {
+			if (k.getValue().hasPType() || k.getValue().hasNType()) {
+				types.add(k);
 			}
 		}
-		return type != null ? type.checkPNTypeClash() : false;
+		if (types.size() == 0) {
+			// empty, nothing to do
+			return false;
+		}
+		if (types.size() == 1) {
+			// only one, positive or negative - just check it
+			return types.get(0).getValue().checkPNTypeClash();
+		}
+		if (types.size() > 1) {
+			// check if any value is already clashing with itself
+			for (Map.Entry<Datatypes, DataTypeAppearance> p : types) {
+				if (p.getValue().checkPNTypeClash()) {
+					logger.print(Templates.CHECKCLASH);
+					clashDep.setReference(p.getValue().getPType().second);
+					return true;
+				}
+			}
+			// for every two datatypes, they must either be disjoint and opposite, or one subdatatype of the other
+			// if a subtype b, then b and not a, otherwise clash
+			// a subtype b => b compatible a (all a are b) but not a compatible b (some b might not be a)
+			for (int i = 0; i < types.size(); i++) {
+				Map.Entry<Datatypes, DataTypeAppearance> p1 = types.get(i);
+				for (int j = i + 1; j < types.size(); j++) {
+					Map.Entry<Datatypes, DataTypeAppearance> p2 = types.get(j);
+					if (p1.getKey().compatible(p2.getKey())
+							&& p1.getValue().hasNType()
+							&& p2.getValue().hasPType()) {
+						// clash: not(Literal) && INT is impossible
+						logger.print(Templates.CHECKCLASH);
+						clashDep.setReference(DepSetFactory.plus(p1.getValue()
+								.hasPType() ? p1.getValue().getPType().second
+								: p1.getValue().getNType().second, p2
+								.getValue().hasPType() ? p2.getValue()
+								.getPType().second
+								: p2.getValue().getNType().second));
+						return true;
+					}
+					if (p2.getKey().compatible(p1.getKey())
+							&& p2.getValue().hasNType()
+							&& p1.getValue().hasPType()) {
+						// clash: not(Literal) && INT is impossible
+						logger.print(Templates.CHECKCLASH);
+						clashDep.setReference(DepSetFactory.plus(p1.getValue()
+								.hasPType() ? p1.getValue().getPType().second
+								: p1.getValue().getNType().second, p2
+								.getValue().hasPType() ? p2.getValue()
+								.getPType().second
+								: p2.getValue().getNType().second));
+						return true;
+					}
+					if (!p1.getKey().compatible(p2.getKey())
+							&& !p2.getKey().compatible(p1.getKey())) {
+						// they're disjoint: they can't be both positive (but can be both negative)
+						if (p1.getValue().hasPType()
+								&& p2.getValue().hasPType()) {
+							logger.print(Templates.CHECKCLASH);
+							clashDep.setReference(DepSetFactory.plus(p1
+									.getValue().getPType().second, p2
+									.getValue().getPType().second));
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+		// this will never be reached because the previous ifs are a partition of the possible 
+		//sizes for types, but the compiler is not smart enough to see this
+		return false;
+		//		DataTypeAppearance type = null;
+		//		for (DataTypeAppearance p : map.values()) {
+		//			if (p.hasPType()) {
+		//				if (type == null) {
+		//					type = p;
+		//				} else {
+		//					Datatypes type_datatype = type
+		//							.getPDatatype();
+		//					Datatypes p_datatype = p
+		//							.getPDatatype();
+		//					if (!p_datatype
+		//							.compatible(type_datatype)
+		//							&& !type_datatype
+		//									.compatible(p_datatype)) {
+		//						logger.print(Templates.CHECKCLASH);
+		//						clashDep.setReference(DepSetFactory.plus(
+		//								type.getPType().second,
+		//								p.getPType().second));
+		//						return true;
+		//					}
+		//					// if one of them is compatible with the other but not the other way around, then replace type with the most restrictive one
+		//					// XXX this is still dubious
+		//					if (type_datatype
+		//							.compatible(p_datatype)
+		//							&& !p_datatype
+		//									.compatible(type_datatype)) {
+		//						type = p;
+		//					}
+		//					// else irrelevant: type is already the most restrictive
+		//				}
+		//			}
+		//		}
+		//		return type != null ? type.checkPNTypeClash()
+		//				: false;
 	}
 }

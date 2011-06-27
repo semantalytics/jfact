@@ -110,7 +110,7 @@ public final class DataTypeAppearance {
 	/** clear the appearance flags */
 	protected void clear() {
 		pType = null;
-		pdatatype = null;
+		//pdatatype = null;
 		nType = null;
 		constraints.clear();
 		constraints.add(new DepInterval());
@@ -119,12 +119,12 @@ public final class DataTypeAppearance {
 
 	// presence interface
 	/** check if type is present positively in the node */
-	protected boolean hasPType() {
+	public boolean hasPType() {
 		return pType != null;
 	}
 
 	/** check if type is present negatively in the node */
-	private boolean hasNType() {
+	public boolean hasNType() {
 		return nType != null;
 	}
 
@@ -132,12 +132,15 @@ public final class DataTypeAppearance {
 	protected void setPType(final DepDTE type) {
 		if (!hasPType()) {
 			pType = type;
-			// XXX this would be better with a visitor
-			if (pType.first instanceof DataEntry) {
-				pdatatype = ((DataEntry) pType.first).getDatatype();
-			}
-			if (pType.first instanceof DataTypeName) {
-				pdatatype = ((DataTypeName) pType.first).getDatatype();
+			// cumbersome: the datatype never changes
+			if (pdatatype == null) {
+				// XXX this would be better with a visitor
+				if (pType.first instanceof DataEntry) {
+					pdatatype = ((DataEntry) pType.first).getDatatype();
+				}
+				if (pType.first instanceof DataTypeName) {
+					pdatatype = ((DataTypeName) pType.first).getDatatype();
+				}
 			}
 		}
 	}
@@ -155,7 +158,7 @@ public final class DataTypeAppearance {
 
 	/** @return true iff PType and NType leads to clash */
 	protected boolean checkPNTypeClash() {
-		if (hasNType()) {
+		if (hasNType() && hasPType()) {
 			return reportClash(DepSetFactory.plus(pType.second, nType.second),
 					"TNT");
 		}
@@ -215,6 +218,10 @@ public final class DataTypeAppearance {
 
 	protected DepDTE getPType() {
 		return pType;
+	}
+
+	protected DepDTE getNType() {
+		return nType;
 	}
 }
 

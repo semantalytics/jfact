@@ -10,9 +10,12 @@ import static uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry.resolveSynonym;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.TreeSet;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
@@ -26,6 +29,7 @@ import uk.ac.manchester.cs.jfact.kernel.actors.SupConceptActor;
 public class Taxonomy {
 	/** array of taxonomy verteces */
 	private final List<TaxonomyVertex> graph = new ArrayList<TaxonomyVertex>();
+	List<ClassifiableEntry> Syns = new ArrayList<ClassifiableEntry>();
 	/** aux. vertex to be included to taxonomy */
 	protected TaxonomyVertex current;
 	/** pointer to currently classified entry */
@@ -44,7 +48,7 @@ public class Taxonomy {
 	/** stack for Taxonomy creation */
 	private final LinkedList<ClassifiableEntry> waitStack = new LinkedList<ClassifiableEntry>();
 	/** told subsumers corresponding to a given entry */
-	private final LinkedList<Collection<ClassifiableEntry>> ksStack = new LinkedList<Collection<ClassifiableEntry>>();
+	protected final LinkedList<KnownSubsumers> ksStack = new LinkedList<KnownSubsumers>();
 	/** labellers for marking taxonomy */
 	protected long checkLabel = 1;
 	protected long valueLabel = 1;
@@ -133,13 +137,13 @@ public class Taxonomy {
 		checkLabel++;
 	}
 
-	private void clearLabels() {
+	protected void clearLabels() {
 		checkLabel++;
 		valueLabel++;
 	}
 
 	/** initialise aux entry with given concept p */
-	private void setCurrentEntry(final ClassifiableEntry p) {
+	protected void setCurrentEntry(final ClassifiableEntry p) {
 		current.clear();
 		curEntry = p;
 	}
@@ -175,7 +179,7 @@ public class Taxonomy {
 	/** add top entry together with its known subsumers */
 	private void addTop(ClassifiableEntry p) {
 		waitStack.push(p);
-		ksStack.push(p.getToldSubsumers());
+		ksStack.push(new ToldSubsumers(p.getToldSubsumers()));
 	}
 
 	/** remove top entry */
@@ -245,8 +249,15 @@ public class Taxonomy {
 		o.print(String
 				.format("Taxonomy consists of %s entries\n            of which %s are completely defined\n\nAll entries are in format:\n\"entry\" {n: parent_1 ... parent_n} {m: child_1 child_m}\n\n",
 						nEntries, nCDEntries));
-		for (int i = 1; i < graph.size(); i++) {
-			TaxonomyVertex p = graph.get(i);
+		TreeSet<TaxonomyVertex> sorted = new TreeSet<TaxonomyVertex>(
+				new Comparator<TaxonomyVertex>() {
+					public int compare(TaxonomyVertex o1, TaxonomyVertex o2) {
+						return o1.getPrimer().getName()
+								.compareTo(o2.getPrimer().getName());
+					}
+				});
+		sorted.addAll(graph.subList(1, graph.size()));
+		for (TaxonomyVertex p : sorted) {
 			p.print(o);
 		}
 		getBottomVertex().print(o);
@@ -283,6 +294,27 @@ public class Taxonomy {
 				current.setSample(curEntry);
 			}
 		}
+	}
+
+	/// remove node from the taxonomy; assume no references to the node
+	void removeNode(TaxonomyVertex node) {
+		graph.remove(node);
+	}
+
+	/// @return true if V is a direct parent of current wrt labels
+	boolean isDirectParent(TaxonomyVertex v) {
+		for (TaxonomyVertex q : v.neigh(false)) {
+			if (q.isValued(valueLabel) && q.getValue() == true) {
+				//			if(IfDefs. WARN_EXTRA_SUBSUMPTION) {
+				//				System.out.println("Taxonomy.isDirectParent()\nCTAX!!: Definition (implies '" + 
+				//						curEntry.getName()
+				//						  + "','" +q.getPrimer().getName() + "') is extra because of definition (implies '"
+				//						  + curEntry.getName() + "','" + q.getPrimer().getName() + "')");
+				//			}
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private void performClassification() {
@@ -335,23 +367,29 @@ public class Taxonomy {
 		}
 		logger.print(" completely defines concept ");
 		logger.print(curEntry.getName());
-		for (ClassifiableEntry p : ksStack.peek()) {
+		for (ClassifiableEntry p : ksStack.peek().s_begin()) {
 			TaxonomyVertex par = p.getTaxVertex();
-			boolean stillParent = true;
-			for (TaxonomyVertex q : par.neigh(false)) {
-				if (q.isValued(valueLabel)) {
-					stillParent = false;
-					break;
-				}
+			if (par == null) {
+				continue;
 			}
-			if (stillParent) {
+			if (isDirectParent(par)) {
 				current.addNeighbour(true, par);
 			}
+			//			boolean stillParent = true;
+			//			for (TaxonomyVertex q : par.neigh(false)) {
+			//				if (q.isValued(valueLabel)) {
+			//					stillParent = false;
+			//					break;
+			//				}
+			//			}
+			//			if (stillParent) {
+			//				current.addNeighbour(true, par);
+			//			}
 		}
 	}
 
 	private void setToldSubsumers() {
-		Collection<ClassifiableEntry> top = ksStack.peek();
+		Collection<ClassifiableEntry> top = ksStack.peek().s_begin();
 		if (needLogging() && !top.isEmpty()) {
 			logger.print("\nTAX: told subsumers");
 		}
@@ -372,25 +410,80 @@ public class Taxonomy {
 		//		}
 	}
 
+	/// ensure that all TS of the top entry are classified. @return the reason of cycle or NULL.
+	ClassifiableEntry prepareTS(ClassifiableEntry cur) {
+		// we just found that TS forms a cycle -- return stop-marker
+		if (waitStack.contains(cur)) {
+			return cur;
+		}
+		// starting from the topmost entry
+		addTop(cur);
+		// true iff CUR is a reason of the cycle
+		boolean cycleFound = false;
+		// for all the told subsumers...
+		for (ClassifiableEntry p : ksStack.peek().s_begin()) {
+			if (!p.isClassified()) // need to classify it first
+			{
+				if (p.isNonClassifiable()) {
+					continue;
+				}
+				// prepare TS for *p
+				ClassifiableEntry v = prepareTS(p);
+				// if NULL is returned -- just continue
+				if (v == null) {
+					continue;
+				}
+				if (v == cur) // current cycle is finished, all saved in Syns
+				{
+					// after classification of CUR we need to mark all the Syns as synonyms
+					cycleFound = true;
+					// continue to prepare its classification
+					continue;
+				} else {
+					// arbitrary vertex in a cycle: save in synonyms of a root cause
+					Syns.add(cur);
+					// don't need to classify it
+					removeTop();
+					// return the cycle cause
+					return v;
+				}
+			}
+		}
+		// all TS are ready here -- let's classify!
+		classifyTop();
+		// now if CUR is the reason of cycle mark all SYNs as synonyms
+		if (cycleFound) {
+			TaxonomyVertex syn = cur.getTaxVertex();
+			for (ClassifiableEntry q : Syns) {
+				syn.addSynonym(q);
+			}
+			Syns.clear();
+		}
+		// here the cycle is gone
+		return null;
+	}
+
 	public void classifyEntry(ClassifiableEntry p) {
 		assert waitStack.isEmpty();
+		// don't classify artificial concepts
 		if (p.isNonClassifiable()) {
 			return;
 		}
-		addTop(p);
-		while (!waitStack.isEmpty()) {
-			if (checkToldSubsumers()) {
-				classifyTop();
-			} else {
-				classifyCycle();
-			}
-		}
+		prepareTS(p);
+		//		addTop(p);
+		//		while (!waitStack.isEmpty()) {
+		//			if (checkToldSubsumers()) {
+		//				classifyTop();
+		//			} else {
+		//				classifyCycle();
+		//			}
+		//		}
 	}
 
 	private boolean checkToldSubsumers() {
 		assert !waitStack.isEmpty();
 		boolean ret = true;
-		for (ClassifiableEntry r : ksStack.peek()) {
+		for (ClassifiableEntry r : ksStack.peek().s_begin()) {
 			assert r != null;
 			if (!r.isClassified()) {
 				if (waitStack.contains(r)) {
@@ -440,7 +533,7 @@ public class Taxonomy {
 		throw new ReasonerInternalException(b.toString());
 	}
 
-	private void propagateTrueUp(TaxonomyVertex node) {
+	protected void propagateTrueUp(TaxonomyVertex node) {
 		// if taxonomy class already checked -- do nothing
 		if (node.isValued(valueLabel)) {
 			assert node.getValue();
@@ -452,6 +545,54 @@ public class Taxonomy {
 		List<TaxonomyVertex> list = node.neigh(/*upDirection=*/true);
 		for (int i = 0; i < list.size(); i++) {
 			propagateTrueUp(list.get(i));
+		}
+	}
+
+	/// abstract class to represent the known subsumers of a concept
+	abstract class KnownSubsumers {
+		/// begin of the Sure subsumers interval
+		abstract List<ClassifiableEntry> s_begin();
+
+		/// begin of the Possible subsumers interval
+		abstract List<ClassifiableEntry> p_begin();
+
+		// flags
+		/// whether there are no sure subsumers
+		boolean s_empty() {
+			return s_begin().isEmpty();
+		}
+
+		/// whether there are no possible subsumers
+		boolean p_empty() {
+			return p_begin().isEmpty();
+		}
+
+		/// @return true iff CE is the possible subsumer
+		boolean isPossibleSub(ClassifiableEntry ce) {
+			return true;
+		}
+	}
+
+	/// class to represent the TS's
+	class ToldSubsumers extends KnownSubsumers {
+		/// two iterators for the TS of a concept
+		List<ClassifiableEntry> beg;
+
+		public ToldSubsumers(Collection<ClassifiableEntry> b) {
+			beg = new ArrayList<ClassifiableEntry>(b);
+		}
+
+		/// begin of the Sure subsumers interval
+		@Override
+		List<ClassifiableEntry> s_begin() {
+			return beg;
+		}
+
+		/// end of the Sure subsumers interval
+		/// begin of the Possible subsumers interval
+		@Override
+		List<ClassifiableEntry> p_begin() {
+			return Collections.emptyList();
 		}
 	}
 }

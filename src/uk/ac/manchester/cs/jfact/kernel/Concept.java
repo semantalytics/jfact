@@ -26,6 +26,7 @@ import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 public class Concept extends ClassifiableEntry {
 	public static final Concept getBOTTOM() {
 		Concept toReturn = new Concept("BOTTOM");
+		toReturn.setBottom();
 		toReturn.setId(-1);
 		toReturn.setpName(bpBOTTOM);
 		toReturn.setpBody(bpBOTTOM);
@@ -34,6 +35,7 @@ public class Concept extends ClassifiableEntry {
 
 	public static final Concept getTOP() {
 		Concept toReturn = new Concept("TOP");
+		toReturn.setTop();
 		toReturn.setId(-1);
 		toReturn.setpName(bpTOP);
 		toReturn.setpBody(bpTOP);
@@ -314,14 +316,17 @@ public class Concept extends ClassifiableEntry {
 			}
 		}
 		// there are non-primitive TS
-		if (hasNP)
+		if (hasNP) {
 			return CTTag.cttHasNonPrimitiveTS;
+		}
 		// has something different from CD-like ones (and not CD)
-		if (hasOther || !isCompletelyDefined())
+		if (hasOther || !isCompletelyDefined()) {
 			return CTTag.cttRegular;
+		}
 		// no more 'other' concepts here, and the CD-like structure
-		if (hasLCD)
+		if (hasLCD) {
 			return CTTag.cttLikeCompletelyDefined;
+		}
 		return CTTag.cttTrueCompletelyDefined;
 	}
 
@@ -388,7 +393,7 @@ public class Concept extends ClassifiableEntry {
 			}
 			return false;
 		}
-		if (token == REFLEXIVE) {
+		if (token == SELF) {
 			final Role R = Role.resolveRole(desc.getChild());
 			searchTSbyRoleAndSupers(R, RolesProcessed);
 			searchTSbyRoleAndSupers(R.inverse(), RolesProcessed);
@@ -497,7 +502,7 @@ public class Concept extends ClassifiableEntry {
 		primitive = false;
 	}
 
-	private void setPrimitive(boolean action) {
+	public void setPrimitive(boolean action) {
 		primitive = action;
 	}
 

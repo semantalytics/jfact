@@ -23,11 +23,11 @@ public final class SaveState {
 	}
 
 	public int getSc() {
-		return this.sc;
+		return sc;
 	}
 
 	public int getCc() {
-		return this.cc;
+		return cc;
 	}
 
 	public void setSc(int sc) {

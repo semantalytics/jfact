@@ -58,7 +58,7 @@ public final class CWDArray {
 		//there is at least an element in 20; caches with very dispersed 
 		//elements eat up too much memory
 		createCache = size > cacheLimit
-				&& ((double) size) / (span + 1) > distribution;
+				&& (double) size / (span + 1) > distribution;
 		//		System.out.println("CWDArray.private_add() "+min+"\t"+max+"\tspan:\t"+span+"\t"+base.size()+"\t"+createCache);
 		//		if (!createCache) {
 		//			cache = null;
@@ -120,6 +120,18 @@ public final class CWDArray {
 		return base.get(i).getDep();
 	}
 
+	public ConceptWDep getConceptWithBP(int bp) {
+		// check that the index actually exist: quicker
+		if (cache != null && !cache.get(asPositive(bp))) {
+			return null;
+		}
+		int i = indexes.get(bp);
+		if (i < 0) {
+			return null;
+		}
+		return base.get(i);
+	}
+
 	public int size() {
 		return size;
 	}
@@ -154,7 +166,7 @@ public final class CWDArray {
 		}
 		if (obj instanceof CWDArray) {
 			CWDArray obj2 = (CWDArray) obj;
-			return this.indexes.equals(obj2.indexes);
+			return indexes.equals(obj2.indexes);
 		}
 		return false;
 	}

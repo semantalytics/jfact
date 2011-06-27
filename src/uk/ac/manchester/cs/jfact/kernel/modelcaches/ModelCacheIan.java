@@ -48,6 +48,8 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	public final FastSet funcRoles = FastSetFactory.create();
 	/** current state of cache model; recalculates on every change */
 	public ModelCacheState curState;
+	public final int nC;
+	public final int nR;
 
 	/** process CT label in given interval; set Deterministic accordingly */
 	private void processLabelInterval(final DLDag DLHeap,
@@ -71,12 +73,16 @@ public final class ModelCacheIan extends ModelCacheInterface {
 		super(flagNominals);
 		initCacheByLabel(heap, p);
 		initRolesFromArcs(p);
+		this.nC = nC;
+		this.nR = nR;
 	}
 
 	/** empty c'tor */
 	public ModelCacheIan(boolean flagNominals, int nC, int nR) {
 		super(flagNominals);
 		curState = csValid;
+		this.nC = nC;
+		this.nR = nR;
 	}
 
 	@Override
@@ -146,7 +152,7 @@ public final class ModelCacheIan extends ModelCacheInterface {
 			case dtDataType:
 			case dtDataValue:
 			case dtDataExpr:
-				throw new UnreachableSituationException();
+				throw new UnreachableSituationException(cur.toString());
 			case dtNConcept:
 			case dtPConcept:
 			case dtNSingleton:
@@ -157,7 +163,9 @@ public final class ModelCacheIan extends ModelCacheInterface {
 			case dtIrr: // for \neg \ER.Self: add R to AR-set
 			case dtForall: // add AR.C roles to forallRoles
 			case dtLE: // for <= n R: add R to forallRoles
-				if (pos) // no need to deal with existentials here: they would be created through edges
+				if (cur.getRole().isTop()) {
+					(pos ? forallRoles : existsRoles).completeSet(nR);
+				} else if (pos) // no need to deal with existentials here: they would be created through edges
 				{
 					if (cur.getRole().isSimple()) {
 						forallRoles.add(cur.getRole().index());

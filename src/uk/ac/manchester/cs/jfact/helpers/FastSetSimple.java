@@ -51,7 +51,7 @@ public final class FastSetSimple extends AbstractFastSet {
 	}
 
 	public FastSetSimple(FastSetSimple c1, FastSetSimple c2) {
-		values = new int[((c1.size + c2.size) / defaultSize) * defaultSize
+		values = new int[(c1.size + c2.size) / defaultSize * defaultSize
 				+ defaultSize];
 		int i = 0;
 		int j = 0;
@@ -200,7 +200,7 @@ public final class FastSetSimple extends AbstractFastSet {
 		if (c.size() > size) {
 			return false;
 		}
-		if (this.get(0) > c.get(0) || this.get(size - 1) < c.get(c.size() - 1)) {
+		if (get(0) > c.get(0) || get(size - 1) < c.get(c.size() - 1)) {
 			// c boundaries are outside this set
 			return false;
 		}
@@ -341,7 +341,7 @@ public final class FastSetSimple extends AbstractFastSet {
 			throw new IllegalArgumentException("illegal arguments: " + i + " "
 					+ end + " size: " + size);
 		}
-		if (size == 1 || (i == 0 && end == size)) {
+		if (size == 1 || i == 0 && end == size) {
 			values = null;
 			size = 0;
 			return;
@@ -382,5 +382,12 @@ public final class FastSetSimple extends AbstractFastSet {
 		} else {
 			Arrays.sort(values, 0, originalsize);
 		}
+	}
+
+	public void completeSet(int value) {
+		for (int i = 0; i <= value; i++) {
+			add(i);
+		}
+		//XXX notice: these sets go to negative numbers. Is this the best way?
 	}
 }

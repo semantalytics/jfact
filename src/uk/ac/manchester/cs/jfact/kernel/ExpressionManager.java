@@ -143,14 +143,15 @@ public final class ExpressionManager {
 	private final ConceptTop top = new ConceptTop();
 	/** BOTTOM concept */
 	private final ConceptBottom bottom = new ConceptBottom();
+	private final DataTop DTop = new DataTop();
 	/** TOP object role */
-	private final ObjectRoleTop objectRoleTop = new ObjectRoleTop();
+	private ObjectRoleExpression objectRoleTop = new ObjectRoleTop();
 	/** BOTTOM object role */
-	private final ObjectRoleBottom objectRoleBottom = new ObjectRoleBottom();
+	private ObjectRoleExpression objectRoleBottom = new ObjectRoleBottom();
 	/** TOP data role */
-	private final DataRoleTop dataRoleTop = new DataRoleTop();
+	private DataRoleExpression dataRoleTop = new DataRoleTop();
 	/** BOTTOM data role */
-	private final DataRoleBottom dataRoleBottom = new DataRoleBottom();
+	private DataRoleExpression dataRoleBottom = new DataRoleBottom();
 	/** TOP data element */
 	private final DataTop dataTop = new DataTop();
 	/** BOTTOM data element */
@@ -164,6 +165,36 @@ public final class ExpressionManager {
 	protected <T extends Expression> T record(T arg) {
 		referenceRecorder.add(arg);
 		return arg;
+	}
+
+	/// set Top/Bot properties
+	public void setTopBottomRoles(String topORoleName, String botORoleName,
+			String topDRoleName, String botDRoleName) {
+		objectRoleTop = new ObjectRoleName(topORoleName);
+		objectRoleBottom = new ObjectRoleName(botORoleName);
+		dataRoleTop = new DataRoleName(topDRoleName);
+		dataRoleBottom = new DataRoleName(botDRoleName);
+	}
+
+	// top/bottom roles
+	/// @return true iff R is a top object role
+	public boolean isUniversalRole(ObjectRoleExpression R) {
+		return R.equals(objectRoleTop);
+	}
+
+	/// @return true iff R is a top data role
+	public boolean isUniversalRole(DataRoleExpression R) {
+		return R.equals(dataRoleTop);
+	}
+
+	/// @return true iff R is a bottom object role
+	public boolean isEmptyRole(ObjectRoleExpression R) {
+		return R.equals(objectRoleBottom);
+	}
+
+	/// @return true iff R is a bottom data role
+	public boolean isEmptyRole(DataRoleExpression R) {
+		return R.equals(dataRoleBottom);
 	}
 
 	/** get number of registered concepts */

@@ -15,10 +15,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.semanticweb.owlapi.reasoner.TimeOutException;
 
@@ -41,10 +44,19 @@ import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 import uk.ac.manchester.cs.jfact.kernel.TBox.SimpleRule;
 import uk.ac.manchester.cs.jfact.kernel.ToDoList.ToDoEntry;
 import uk.ac.manchester.cs.jfact.kernel.datatype.DataTypeReasoner;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptName;
+import uk.ac.manchester.cs.jfact.kernel.dl.axioms.AxiomConceptInclusion;
+import uk.ac.manchester.cs.jfact.kernel.dl.axioms.AxiomEquivalentConcepts;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ConceptExpression;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NamedEntity;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheConst;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheIan;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheInterface;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheState;
+import uk.ac.manchester.cs.jfact.split.ModuleType;
+import uk.ac.manchester.cs.jfact.split.TModularizer;
+import uk.ac.manchester.cs.jfact.split.TSignature;
+import uk.ac.manchester.cs.jfact.split.TSplitVar;
 
 public class DlSatTester {
 	private final class LocalFastSet implements FastSet {
@@ -102,7 +114,7 @@ public class DlSatTester {
 		}
 
 		public boolean contains(int o) {
-			return this.pos.get(asPositive(o));
+			return pos.get(asPositive(o));
 		}
 
 		public void clear() {
@@ -114,7 +126,13 @@ public class DlSatTester {
 		}
 
 		public void add(int e) {
-			this.pos.set(asPositive(e));
+			pos.set(asPositive(e));
+		}
+
+		public void completeSet(int value) {
+			for (int i = 0; i <= value; i++) {
+				pos.set(i);
+			}
 		}
 	}
 
@@ -126,6 +144,8 @@ public class DlSatTester {
 		protected ConceptWDep concept = null;
 		/** dependences for branching clashes */
 		protected DepSet branchDep = DepSetFactory.create();
+		/// size of a session GCIs vector
+		int SGsize;
 
 		/** empty c'tor */
 		public BranchingContext() {
@@ -377,6 +397,286 @@ public class DlSatTester {
 		}
 	}
 
+	//	typedef std::set<const TNamedEntity*> SigSet;
+	//	typedef std::vector<const TNamedEntity*> SigVec;
+	/// class to check whether there is a need to unsplit splitted var
+	class SingleSplit {
+		/// signature of equivalent part of the split
+		Set<NamedEntity> eqSig;
+		/// signature of subsumption part of the split
+		Set<NamedEntity> impSig;
+		/// pointer to split vertex to activate
+		int bp;
+
+		SingleSplit() {
+		}
+
+		SingleSplit(Set<NamedEntity> es, Set<NamedEntity> is, int p) {
+			eqSig = new HashSet<NamedEntity>(es);
+			impSig = new HashSet<NamedEntity>(is);
+			bp = p;
+		}
+	}
+
+	List<SingleSplit> SplitRules = new ArrayList<SingleSplit>();
+	/// GCIs local to session
+	List<Integer> SessionGCIs = new ArrayList<Integer>();
+	/// set of active splits
+	FastSet ActiveSplits = FastSetFactory.create();
+	/// concept signature of current CGraph
+	Set<NamedEntity> ActiveSignature = new HashSet<NamedEntity>();
+	/// signature related to a split
+	Set<NamedEntity> PossibleSignature = new HashSet<NamedEntity>();
+	/// map between BP and TNamedEntities
+	List<NamedEntity> EntityMap = new ArrayList<NamedEntity>();
+	/// flag for using active signature
+	boolean useActiveSignature;
+	/// let reasoner know that we are in the classificaton (for splits)
+	boolean duringClassification;
+
+	// split rules support
+	//	/// update active signature wrt given entity
+	boolean updateActiveSignature(NamedEntity entity, DepSet dep) {
+		if (entity == null || // not a named one
+				ActiveSignature.contains(entity)) {
+			return false;
+		}
+		return updateActiveSignature1(entity, dep);
+	}
+
+	/// add new split rule
+	void addSplitRule(Set<NamedEntity> eqSig, Set<NamedEntity> impSig, int bp) {
+		SplitRules.add(new SingleSplit(eqSig, impSig, bp));
+	}
+
+	/// build a set out of signature SIG w/o given ENTITY
+	Set<NamedEntity> buildSet(TSignature sig, NamedEntity entity) {
+		Set<NamedEntity> set = new HashSet<NamedEntity>();
+		//		std::cout << "Building set for " << entity.getName() << "\n";
+		for (NamedEntity p : sig.begin()) {
+			if (!p.equals(entity) && p instanceof ConceptName) {
+				//				std::cout << "In the set: " << (*p).getName() << "\n";
+				set.add(p);
+			}
+		}
+		//		std::cout << "done\n";
+		// register all elements in the set in PossibleSignature
+		PossibleSignature.addAll(set);
+		return set;
+	}
+
+	/// init split as a set-of-sets
+	void initSplit(TSplitVar split) {
+		//		std::cout << "Processing split for " << split.oldName.getName() << ":\n";
+		//TSplitVar::iterator p = split.begin(), p_end = split.end();
+		List<TSplitVar.Entry> vars = split.getEntries();
+		TSplitVar.Entry p = null;
+		if (vars.size() > 0) {
+			p = vars.get(0);
+			Set<NamedEntity> impSet = buildSet(p.sig, p.name);
+			int bp = split.C.getpBody() + 1; // choose-rule stays next to a split-definition of C
+			for (int i = 1; i < vars.size(); i++) {
+				p = vars.get(i);
+				if (p.Module.size() == 1) {
+					addSplitRule(buildSet(p.sig, p.name), impSet, bp);
+				} else {
+					// make set of all the seed signatures of for p.Module
+					Set<TSignature> Out = new HashSet<TSignature>();
+					// prepare vector of available entities
+					List<NamedEntity> Allowed = new ArrayList<NamedEntity>();
+					//				std::cout << "\n\n\nMaking split for module with " << p.name.getName();
+					List<uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom> Module = new ArrayList<uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom>(
+							p.Module);
+					// prepare signature for the process
+					TSignature sig = p.sig;
+					prepareStartSig(Module, sig, Allowed);
+					// build all the seed sigs for p.sig
+					BuildAllSeedSigs(Allowed, sig, Module, Out);
+					for (TSignature q : Out) {
+						addSplitRule(buildSet(q, p.name), impSet, bp);
+					}
+				}
+			}
+		}
+	}
+
+	/// init splits
+	void initSplits() {
+		for (TSplitVar p : tBox.getSplits().getEntries()) {
+			initSplit(p);
+		}
+		// now mark all the entities not in PossibleSignatures NULLs
+		for (int i = 1; i < EntityMap.size(); ++i) {
+			if (!PossibleSignature.contains(EntityMap.get(i))) {
+				EntityMap.set(i, null);
+			}
+		}
+	}
+
+	/// check whether split-set S contains in the active set
+	boolean containsInActive(Set<NamedEntity> S) {
+		return ActiveSignature.containsAll(S);
+	}// includes ( ActiveSignature, S ); }
+
+	/// check whether split-set S intersects with the active set
+	boolean intersectsWithActive(Collection<? extends NamedEntity> S) {
+		for (NamedEntity e : S) {
+			if (ActiveSignature.contains(e)) {
+				return true;
+			}
+		}
+		return false;
+		//		SigSet::const_iterator q = S.begin(), q_end = S.end(), p = ActiveSignature.begin(), p_end = ActiveSignature.end();
+		//		while ( p != p_end && q != q_end )
+		//		{
+		//			if ( *p == *q )
+		//				return true;
+		//			if ( *p < *q )
+		//				++p;
+		//			else
+		//				++q;
+		//		}
+		//		return false;
+	}
+
+	/// @return named entity corresponding to a given bp
+	NamedEntity getEntity(int bp) {
+		return EntityMap.get(bp > 0 ? bp : -bp);
+	}
+
+	/// put TODO entry for either BP or inverse(BP) in NODE's label
+	void updateName(DlCompletionTree node, int bp) {
+		CGLabel lab = node.label();
+		//CGLabel::const_iterator p;
+		ConceptWDep c = lab.getConceptWithBP(bp);
+		if (c == null) {
+			c = lab.getConceptWithBP(-bp);
+		}
+		if (c != null) {
+			//		 if(lab.contains(bp)||lab.contains(-bp)) {
+			addExistingToDoEntry(node, c, "sp");
+		}
+		//		for ( p = lab.begin_sc(); p != lab.end_sc(); ++p )
+		//			if ( p.bp() == bp || p.bp() == inverse(bp) )
+		//			{
+		//				addExistingToDoEntry ( node, lab.getSCOffset(p), "sp" );
+		//				break;
+		//			}
+	}
+
+	/// re-do every BP or inverse(BP) in labels of CGraph
+	void updateName(int bp) {
+		int n = 0;
+		DlCompletionTree node = null;
+		while ((node = cGraph.getNode(n++)) != null) {
+			if (!node.isDataNode()) {
+				updateName(node, bp);
+			}
+		}
+	}
+
+	/// prepare start signature
+	void prepareStartSig(
+			List<uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom> Module,
+			TSignature sig, List<NamedEntity> Allowed) {
+		// remove all defined concepts from signature
+		for (uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom p : Module) {
+			//			AxiomEquivalentConcepts ax = dynamic_cast<const TDLAxiomEquivalentConcepts*>(*p);
+			if (p instanceof AxiomEquivalentConcepts) {
+				for (ConceptExpression q : ((AxiomEquivalentConcepts) p)
+						.getArguments()) {
+					// FIXME!! check for the case A=B for named classes
+					if (q instanceof ConceptName) {
+						sig.remove((ConceptName) q);
+					}
+					//					const TDLConceptName* cn = dynamic_cast<const TDLConceptName*>(*q);
+					//					if ( cn != NULL )
+					//						sig.remove(cn);
+				}
+			} else {
+				//				AxiomConceptInclusion ci = dynamic_cast<const TDLAxiomConceptInclusion*>(*p);
+				//				if ( ci == NULL )
+				//					continue;
+				if (p instanceof AxiomConceptInclusion) {
+					AxiomConceptInclusion ci = (AxiomConceptInclusion) p;
+					// don't need the left-hand part either if it is a name
+					if (ci.getSubConcept() instanceof ConceptName) {
+						//				ConceptName cn = dynamic_cast<const TDLConceptName*>(ci.getSubC());
+						//				if ( cn != NULL )
+						sig.remove((ConceptName) ci.getSubConcept());
+					}
+				}
+			}
+		}
+		// now put every concept name into Allowed
+		for (NamedEntity r : sig.begin()) {
+			if (r instanceof ConceptName) {
+				Allowed.add(r);
+			}
+		}
+	}
+
+	/// build all the seed signatures
+	void BuildAllSeedSigs(List<NamedEntity> Allowed, TSignature StartSig,
+			List<uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom> Module,
+			Set<TSignature> Out) {
+		// copy the signature
+		TSignature sig = new TSignature(StartSig);
+		//		std::cout << "\nBuilding seed signatures:";
+		// create a set of allowed entities for the next round
+		List<NamedEntity> RecAllowed = new ArrayList<NamedEntity>(), Keepers = new ArrayList<NamedEntity>();
+		Set<uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom> outModule = new HashSet<uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom>();
+		TModularizer mod = new TModularizer();
+		for (NamedEntity p : Allowed) {
+			if (sig.contains(p)) {
+				sig.remove(p);
+				//				std::cout << "\nTrying " << (*p).getName() << ": ";
+				mod.extract(Module, sig, ModuleType.M_STAR, outModule);
+				if (outModule.size() == Module.size()) { // possible to remove one
+					//					std::cout << "remove";
+					RecAllowed.add(p);
+				} else {
+					//					std::cout << "keep";
+					Keepers.add(p);
+				}
+				sig.add(p);
+			}
+		}
+		//		std::cout << "\nDone with " << RecAllowed.size() << " sigs left";
+		if (RecAllowed.isEmpty()) // minimal seed signature
+		{
+			Out.add(StartSig);
+			return;
+		}
+		if (!Keepers.isEmpty()) {
+			for (NamedEntity p : RecAllowed) {
+				sig.remove(p);
+			}
+			mod.extract(Module, sig, ModuleType.M_STAR, outModule);
+			if (outModule.size() == Module.size()) {
+				Out.add(sig);
+				return;
+			}
+		}
+		// need to try smaller sigs
+		sig = StartSig;
+		for (NamedEntity p : RecAllowed) {
+			sig.remove(p);
+			BuildAllSeedSigs(RecAllowed, sig, Module, Out);
+			sig.add(p);
+		}
+	}
+
+	/// try to add a concept to a label given by TAG; ~C can't appear in the label
+	boolean findConcept(CWDArray lab, ConceptWDep C) {
+		return findConcept(lab, C.getConcept());
+	}
+
+	/// try to add a concept to a label given by TAG; ~C can't appear in the label; setup clash-set if found
+	boolean findConceptClash(CWDArray lab, ConceptWDep C) {
+		return findConceptClash(lab, C.getConcept(), C.getDep());
+	}
+
 	/** host TBox */
 	protected final TBox tBox;
 	/** link to dag from TBox */
@@ -477,6 +777,7 @@ public class DlSatTester {
 	private void ensureDAGSize() {
 		if (dagSize < dlHeap.size()) {
 			dagSize = dlHeap.maxSize();
+			Helper.resize(EntityMap, dagSize);
 		}
 	}
 
@@ -493,7 +794,7 @@ public class DlSatTester {
 		ModelCacheState ret = canBeCached(node) ? reportNodeCached(node)
 				: ModelCacheState.csFailed;
 		// node is cached if RET is csvalid
-		boolean val = (ret == ModelCacheState.csValid);
+		boolean val = ret == ModelCacheState.csValid;
 		if (node.isCached() != val) {
 			Restorer setCached = node.setCached(val);
 			cGraph.saveRareCond(setCached);
@@ -551,6 +852,10 @@ public class DlSatTester {
 		c.node = curNode;
 		c.concept = new ConceptWDep(curConceptConcept, curConceptDepSet);
 		c.branchDep = DepSetFactory.create(curConceptDepSet);
+		//TODO check why these commented lines do not appear
+		//		bContext.pUsedIndex = pUsed.size();
+		//		bContext.nUsedIndex = nUsed.size();
+		c.SGsize = SessionGCIs.size();
 	}
 
 	/** create BC for Or rule */
@@ -635,12 +940,12 @@ public class DlSatTester {
 		if (C == Helper.bpTOP) {
 			return true;
 		}
-		if (findConceptClash(label, C, null)) {
+		if (findConceptClash(label, C, d)) {
 			if (d != null) {
 				d.add(clashSet);
 			}
 			return true;
-		} else if (findConceptClash(label, -C, null)) {
+		} else if (findConceptClash(label, -C, d)) {
 			if (d != null) {
 				d.add(clashSet);
 			}
@@ -842,6 +1147,11 @@ public class DlSatTester {
 		testTimeout = ms;
 	}
 
+	/// set the in-classification flag
+	public void setDuringClassification(boolean value) {
+		duringClassification = value;
+	}
+
 	/** create model cache for the just-classified entry */
 	public final ModelCacheInterface buildCacheByCGraph(boolean sat) {
 		if (sat) {
@@ -909,7 +1219,7 @@ public class DlSatTester {
 			inProcess.remove(p);
 		} else if (handleforallle.contains(type)) {
 			final Role R = v.getRole();
-			if (!R.isDataRole()) {
+			if (!R.isDataRole() && !R.isTop()) {
 				int x = pos ? v.getConceptIndex() : -v.getConceptIndex();
 				if (x != Helper.bpTOP) {
 					inProcess.add(x);
@@ -924,6 +1234,7 @@ public class DlSatTester {
 				}
 			}
 		}
+		//dttop, dtsplit, etc: do nothing
 		f.add(p);
 	}
 
@@ -967,6 +1278,13 @@ public class DlSatTester {
 		if (gcis.isReflexive() && applyReflexiveRoles(node, dep)) {
 			return true;
 		}
+		if (!SessionGCIs.isEmpty()) {
+			for (int i : SessionGCIs) {
+				if (addToDoEntry(node, i, dep, "sg")) {
+					return true;
+				}
+			}
+		}
 		return false;
 	}
 
@@ -1000,9 +1318,9 @@ public class DlSatTester {
 		// init new nodes/edges. No need to apply restrictions, as no reasoning have been done yet.
 		if (initNewNode(edgeR.getArcEnd(), dummy, Helper.bpTOP)
 				|| initNewNode(edgeS.getArcEnd(), dummy, Helper.bpTOP)
-				|| setupEdge(edgeR, dummy, /*flags=*/0)
-				|| setupEdge(edgeS, dummy, /*flags=*/0)
-				|| merge(edgeS.getArcEnd(), edgeR.getArcEnd(), dummy)) {
+				|| setupEdge(edgeR, dummy, /*flags=*/
+				0) || setupEdge(edgeS, dummy, /*flags=*/
+				0) || merge(edgeS.getArcEnd(), edgeR.getArcEnd(), dummy)) {
 			return true;
 		}
 		// 2 roles are disjoint if current setting is unsatisfiable
@@ -1022,8 +1340,8 @@ public class DlSatTester {
 		DlCompletionTreeArc edgeR = createOneNeighbour(R, dummy);
 		// init new nodes/edges. No need to apply restrictions, as no reasoning have been done yet.
 		if (initNewNode(edgeR.getArcEnd(), dummy, Helper.bpTOP)
-				|| setupEdge(edgeR, dummy, /*flags=*/0)
-				|| merge(edgeR.getArcEnd(), cGraph.getRoot(), dummy)) {
+				|| setupEdge(edgeR, dummy, /*flags=*/
+				0) || merge(edgeR.getArcEnd(), cGraph.getRoot(), dummy)) {
 			return true;
 		}
 		// R is irreflexive if current setting is unsatisfiable
@@ -1061,12 +1379,33 @@ public class DlSatTester {
 
 	private boolean commonTacticBodyAll(final DLVertex cur) {
 		assert curConceptConcept > 0 && cur.getType() == dtForall;
+		if (cur.getRole().isTop()) {
+			//			if(cur.getRole().isDataRole()) {
+			//				return false;
+			//			}
+			stats.getnAllCalls().inc();
+			return addSessionGCI(cur.getConceptIndex(), curConceptDepSet);
+		}
+		//
 		// can't skip singleton models for complex roles due to empty transitions
 		if (cur.getRole().isSimple()) {
 			return commonTacticBodyAllSimple(cur);
 		} else {
 			return commonTacticBodyAllComplex(cur);
 		}
+	}
+
+	/// add C to a set of session GCIs; init all nodes with (C,dep)
+	private boolean addSessionGCI(int C, DepSet dep) {
+		SessionGCIs.add(C);
+		int n = 0;
+		DlCompletionTree node = null;
+		while ((node = cGraph.getNode(n++)) != null) {
+			if (!node.isDataNode() && addToDoEntry(node, C, dep, "sg")) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	protected DlSatTester(TBox tbox, final IFOptionSet Options) {
@@ -1083,6 +1422,7 @@ public class DlSatTester {
 		nonDetShift = 0;
 		curNode = null;
 		dagSize = 0;
+		duringClassification = false;
 		readConfig(Options);
 		if (tBox.hasFC() && useAnywhereBlocking) {
 			useAnywhereBlocking = false;
@@ -1091,6 +1431,23 @@ public class DlSatTester {
 		cGraph.initContext(useLazyBlocking, useAnywhereBlocking);
 		tBox.getDataTypeCenter().initDataTypeReasoner(datatypeReasoner);
 		tbox.getORM().fillReflexiveRoles(reflexiveRoles);
+		useActiveSignature = !tBox.getSplits().empty();
+		if (useActiveSignature) {
+			initSplits();
+			// make entity map
+			int size = dlHeap.size();
+			Helper.resize(EntityMap, size);
+			EntityMap.set(0, null);
+			EntityMap.set(1, null);
+			for (int i = 2; i < size - 1; ++i) {
+				if (dlHeap.get(i).getConcept() != null) {
+					EntityMap.set(i, dlHeap.get(i).getConcept().getEntity());
+				} else {
+					EntityMap.set(i, null);
+				}
+			}
+			EntityMap.set(size - 1, null); // query concept
+		}
 		resetSessionFlags();
 	}
 
@@ -1112,11 +1469,23 @@ public class DlSatTester {
 			TODO.startSaveStateGeneration();
 		}
 		used.clear();
+		SessionGCIs.clear();
+		ActiveSplits.clear();
+		ActiveSignature.clear();
 		curNode = null;
 		bContext = null;
 		tryLevel = Helper.InitBranchingLevelValue;
 		// clear last session information
 		resetSessionFlags();
+	}
+
+	public boolean findConcept(CWDArray lab, int p) {
+		assert Helper.isCorrect(p); // sanity checking
+		// constants are not allowed here
+		assert p != Helper.bpTOP;
+		assert p != Helper.bpBOTTOM;
+		stats.getnLookups().inc();
+		return lab.contains(p);
 	}
 
 	private AddConceptResult checkAddedConcept(final CWDArray lab, int p,
@@ -1158,7 +1527,7 @@ public class DlSatTester {
 				return checkAddedConcept(lab, bp, dep);
 			} else {
 				stats.getnLookups().inc();
-				return lab.contains(bp) ? AddConceptResult.acrExist
+				return findConcept(lab, bp) ? AddConceptResult.acrExist
 						: AddConceptResult.acrDone;
 			}
 		} else {
@@ -1224,6 +1593,11 @@ public class DlSatTester {
 		updateLevel(n, dep);
 		cGraph.addConceptToNode(n, p, tag);
 		used.add(bp);
+		if (useActiveSignature) {
+			if (updateActiveSignature(getEntity(bp), dep)) {
+				return true;
+			}
+		}
 		if (n.isCached()) {
 			return correctCachedEntry(n);
 		}
@@ -1249,7 +1623,9 @@ public class DlSatTester {
 			ConceptWDep p = list.get(i);
 			if (dlHeap.getCache(p.getConcept()) == null) {
 				stats.getnCacheFailedNoCache().inc();
-				logger.print(Templates.CAN_BE_CACHED, p.getConcept());
+				if (IfDefs.USE_LOGGING) {
+					logger.print(Templates.CAN_BE_CACHED, p.getConcept());
+				}
 				return false;
 			}
 			shallow &= dlHeap.getCache(p.getConcept()).shallowCache();
@@ -1260,7 +1636,9 @@ public class DlSatTester {
 			ConceptWDep p = list.get(i);
 			if (dlHeap.getCache(p.getConcept()) == null) {
 				stats.getnCacheFailedNoCache().inc();
-				logger.print(Templates.CAN_BE_CACHED, p.getConcept());
+				if (IfDefs.USE_LOGGING) {
+					logger.print(Templates.CAN_BE_CACHED, p.getConcept());
+				}
 				return false;
 			}
 			shallow &= dlHeap.getCache(p.getConcept()).shallowCache();
@@ -1447,6 +1825,9 @@ public class DlSatTester {
 			curConceptConcept = bContext.concept.getConcept();
 			curConceptDepSet = DepSetFactory.create(bContext.concept.getDep());
 		}
+		if (!SessionGCIs.isEmpty()) {
+			Helper.resize(SessionGCIs, bContext.SGsize);
+		}
 		updateBranchDep();
 		bContext.nextOption();
 	}
@@ -1599,6 +1980,11 @@ public class DlSatTester {
 				assert curConceptConcept > 0;
 				return commonTacticBodyProj(cur.getRole(),
 						cur.getConceptIndex(), cur.getProjRole());
+			case dtSplitConcept:
+				return commonTacticBodySplit(cur);
+			case dtChoose:
+				assert curConceptConcept > 0;
+				return applyChooseRule(curNode, cur.getConceptIndex());
 			default:
 				throw new UnreachableSituationException();
 		}
@@ -1618,6 +2004,24 @@ public class DlSatTester {
 		int C = curConceptConcept > 0 ? cur.getConceptIndex() : -cur
 				.getConceptIndex();
 		return addToDoEntry(curNode, C, curConceptDepSet, null);
+	}
+
+	boolean updateActiveSignature1(NamedEntity entity, DepSet dep) {
+		ActiveSignature.add(entity);
+		// check whether some of the split rules require unsplitting
+		for (SingleSplit p : SplitRules) {
+			if (!ActiveSplits.contains(p.bp - 1) && containsInActive(p.eqSig)
+					&& intersectsWithActive(p.impSig)) {
+				// here p.bp points to Choose(C) node, p.bp-1 -- to the split node
+				ActiveSplits.add(p.bp - 1);
+				if (addSessionGCI(p.bp, dep)) {
+					return true;
+				}
+				// make sure that all existing splits will be re-applied
+				updateName(p.bp - 1);
+			}
+		}
+		return false;
 	}
 
 	protected boolean applicable(final SimpleRule rule) {
@@ -1901,6 +2305,9 @@ public class DlSatTester {
 					if ((flags & redoForall.getValue()) == 0) {
 						break;
 					}
+					if (vR.isTop()) {
+						break;
+					}
 					/** check whether transition is possible */
 					RAStateTransitions RST = vR.getAutomaton().getBase()
 							.get(v.getState());
@@ -1944,6 +2351,12 @@ public class DlSatTester {
 	private boolean commonTacticBodySome(final DLVertex cur) {
 		Role R = cur.getRole();
 		int C = -cur.getConceptIndex();
+		if (R.isTop()) {
+			return commonTacticBodySomeUniv(cur);
+		}
+		if (R.isTop()) {
+			return commonTacticBodySomeUniv(cur);
+		}
 		if (isSomeExists(R, C)) {
 			return false;
 		}
@@ -2077,6 +2490,27 @@ public class DlSatTester {
 		// add all necessary concepts to both ends of the edge
 		return setupEdge(edge, dep, redoForall.getValue() | redoFunc.getValue()
 				| redoAtMost.getValue() | redoIrr.getValue());
+	}
+
+	/// expansion rule for the existential quantifier with universal role
+	boolean commonTacticBodySomeUniv(DLVertex cur) {
+		// check blocking conditions
+		if (isCurNodeBlocked()) {
+			return false;
+		}
+		stats.getnSomeCalls().inc();
+		int C = -cur.getConceptIndex();
+		// check whether C is already in CGraph
+		int i = 0;
+		DlCompletionTree node;
+		while ((node = cGraph.getNode(i++)) != null) {
+			if (node.label().contains(C)) {
+				return false;
+			}
+		}
+		// make new node labelled with C
+		node = cGraph.getNewNode();
+		return initNewNode(node, curConceptDepSet, C);
 	}
 
 	private boolean createNewEdge(final Role R, int C, int flags) {
@@ -2293,7 +2727,7 @@ public class DlSatTester {
 					to = bcLE.getTo();
 					Reference<DepSet> dep = new Reference<DepSet>(
 							DepSetFactory.create()); // empty dep-set
-					// fast check for from->end() and to->end() are in \neq
+					// fast check for from.end() and to.end() are in \neq
 					if (cGraph.nonMergable(from.getArcEnd(), to.getArcEnd(),
 							dep)) {
 						if (C == Helper.bpTOP) {
@@ -2724,8 +3158,27 @@ public class DlSatTester {
 	}
 
 	protected boolean isNNApplicable(final Role r, int C, int stopper) {
-		if (curNode.isNominalNode()) {
-			System.out.println("DlSatTester.isNNApplicable()");
+		// NN rule is only applicable to nominal nodes
+		if (!curNode.isNominalNode()) {
+			return false;
+		}
+		// check whether the NN-rule was already applied here for a given concept
+		if (used.contains(stopper) && curNode.isLabelledBy(stopper)) {
+			return false;
+		}
+		// check for the real applicability of the NN-rule here
+		for (DlCompletionTreeArc p : curNode.getNeighbour()) {
+			DlCompletionTree suspect = p.getArcEnd();
+			// if there is an edge that require to run the rule, then we need it
+			if (p.isPredEdge() && suspect.isBlockableNode() && p.isNeighbour(r)
+					&& suspect.isLabelledBy(C)) {
+				if (IfDefs.USE_LOGGING) {
+					LeveLogger.logger.print(" NN(");
+				}
+				LeveLogger.logger.print(suspect.getId());
+				LeveLogger.logger.print(")");
+				return true;
+			}
 		}
 		return false;
 	}
@@ -2796,6 +3249,24 @@ public class DlSatTester {
 		return setupEdge(cGraph.addRoleLabel(curNode, child, pA.isPredEdge(),
 				ProjR, dep), dep, redoForall.getValue() | redoFunc.getValue()
 				| redoAtMost.getValue() | redoIrr.getValue());
+	}
+
+	/// expansion rule for split
+	private boolean commonTacticBodySplit(DLVertex cur) {
+		if (duringClassification
+				&& !ActiveSplits
+						.contains(curConceptConcept > 0 ? curConceptConcept
+								: -curConceptConcept)) {
+			return false;
+		}
+		DepSet dep = curConceptDepSet;
+		boolean pos = curConceptConcept > 0;
+		for (int q : cur.begin()) {
+			if (addToDoEntry(curNode, Helper.createBiPointer(q, pos), dep, null)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
 

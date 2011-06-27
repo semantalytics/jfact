@@ -8,7 +8,9 @@ You should have received a copy of the GNU Lesser General Public License along w
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
@@ -17,8 +19,47 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.kernel.Concept.CTTag;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheInterface;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheState;
+import uk.ac.manchester.cs.jfact.split.TSplitVar;
+import uk.ac.manchester.cs.jfact.split.TSplitVars;
 
 public final class DLConceptTaxonomy extends Taxonomy {
+	/// all the derived subsumers of a class (came from the model)
+	class DerivedSubsumers extends KnownSubsumers {
+		//protected:	// typedefs
+		/// set of the subsumers
+		//typedef Taxonomy::SubsumerSet SubsumerSet;
+		/// SS RW iterator
+		//typedef SubsumerSet::iterator ss_iterator;
+		//protected:	// members
+		/// set of sure- and possible subsumers
+		protected List<ClassifiableEntry> Sure, Possible;
+
+		//public:		// interface
+		/// c'tor: copy given sets
+		public DerivedSubsumers(List<ClassifiableEntry> sure,
+				List<ClassifiableEntry> possible) {
+			Sure = new ArrayList<ClassifiableEntry>(sure);
+			Possible = new ArrayList<ClassifiableEntry>(possible);
+		}
+
+		// iterators
+		/// begin of the Sure subsumers interval
+		@Override
+		public List<ClassifiableEntry> s_begin() {
+			return Sure;
+		}
+
+		/// begin of the Possible subsumers interval
+		@Override
+		public List<ClassifiableEntry> p_begin() {
+			return Possible;
+		}
+	}
+
+	/// set of split vars
+	TSplitVars Splits;
+	/// flag shows that subsumption check could be simplified
+	boolean inSplitCheck;
 	/** host tBox */
 	private final TBox tBox;
 	/** common descendants of all parents of currently classified concept */
@@ -41,7 +82,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 	private ReasonerProgressMonitor pTaxProgress;
 	// flags
 	/** flag to use Bottom-Up search */
-	private final boolean flagNeedBottomUp;
+	private boolean flagNeedBottomUp;
 	/// number of processed common parents
 	protected int nCommon = 1;
 
@@ -109,8 +150,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 	}
 
 	/** the only c'tor */
-	public DLConceptTaxonomy(final Concept pTop, final Concept pBottom,
-			TBox kb, final KBFlags GCIs) {
+	public DLConceptTaxonomy(final Concept pTop, final Concept pBottom, TBox kb) {
 		super(pTop, pBottom);
 		tBox = kb;
 		nConcepts = 0;
@@ -124,6 +164,29 @@ public final class DLConceptTaxonomy extends Taxonomy {
 		nCachedNegative = 0;
 		nSortedNegative = 0;
 		pTaxProgress = null;
+		//	flagNeedBottomUp = GCIs.isGCI() || GCIs.isReflexive() && GCIs.isRnD();
+		inSplitCheck = false;
+	}
+
+	/// process all splits
+	void processSplits() {
+		for (TSplitVar v : Splits.getEntries()) {
+			mergeSplitVars(v);
+		}
+	}
+
+	/// set split vars
+	void setSplitVars(TSplitVars s) {
+		Splits = s;
+	}
+
+	/// get access to split vars
+	TSplitVars getSplits() {
+		return Splits;
+	}
+
+	/// set bottom-up flag
+	public void setBottomUp(KBFlags GCIs) {
 		flagNeedBottomUp = GCIs.isGCI() || GCIs.isReflexive() && GCIs.isRnD();
 	}
 
@@ -176,6 +239,12 @@ public final class DLConceptTaxonomy extends Taxonomy {
 				&& q.isPrimitive() // it is primitive
 				&& !q.isNominal()) {
 			return false;
+		}
+		if (inSplitCheck) {
+			if (q.isPrimitive()) {
+				return false;
+			}
+			return testSubTBox(p, q);
 		}
 		logger.print(Templates.TAX_TRYING, p.getName(), q.getName());
 		if (tBox.testSortedNonSubsumption(p, q)) {
@@ -270,7 +339,21 @@ public final class DLConceptTaxonomy extends Taxonomy {
 		if (upDirection && !cur.isCommon()) {
 			return false;
 		}
+		if (!upDirection && !possibleSub(cur)) {
+			return false;
+		}
 		return enhancedSubs1(upDirection, cur);
+	}
+
+	/// test whether a node could be a super-node of CUR
+	private boolean possibleSub(TaxonomyVertex v) {
+		Concept C = (Concept) v.getPrimer();
+		// non-prim concepts are candidates
+		if (!C.isPrimitive()) {
+			return true;
+		}
+		// all others should be in the possible sups list
+		return ksStack.peek().isPossibleSub(C);
 	}
 
 	private boolean testSubsumption(boolean upDirection, TaxonomyVertex cur) {
@@ -343,8 +426,9 @@ public final class DLConceptTaxonomy extends Taxonomy {
 	private boolean isEqualToTop() {
 		// check this up-front to avoid Sorted check's flaw wrt equals-to-top
 		ModelCacheInterface cache = tBox.initCache(curConcept(), true);
-		if (cache.getState() != ModelCacheState.csInvalid)
+		if (cache.getState() != ModelCacheState.csInvalid) {
 			return false;
+		}
 		// here concept = TOP
 		current.addNeighbour(false, getTopVertex());
 		return true;
@@ -377,5 +461,55 @@ public final class DLConceptTaxonomy extends Taxonomy {
 			}
 		}
 		return false;
+	}
+
+	/// after merging, check whether there are extra neighbours that should be taken into account
+	void checkExtraParents() {
+		inSplitCheck = true;
+		for (TaxonomyVertex p : current.neigh(true)) {
+			propagateTrueUp(p);
+		}
+		current.clearLinks(/*upDirection=*/true);
+		runTopDown();
+		List<TaxonomyVertex> vec = new ArrayList<TaxonomyVertex>();
+		for (TaxonomyVertex p : current.neigh(true)) {
+			if (!isDirectParent(p)) {
+				vec.add(p);
+			}
+		}
+		for (TaxonomyVertex p : vec) {
+			p.removeLink(false, current);
+			current.removeLink(true, p);
+		}
+		clearLabels();
+		inSplitCheck = false;
+	}
+
+	/// merge vars came from a given SPLIT together
+	void mergeSplitVars(TSplitVar split) {
+		setCurrentEntry(split.C);
+		Set<TaxonomyVertex> excludes = new HashSet<TaxonomyVertex>();
+		excludes.add(getTopVertex());
+		TaxonomyVertex v = split.C.getTaxVertex();
+		if (v != null) {
+			excludes.add(v);
+		}
+		for (TSplitVar.Entry q : split.getEntries()) {
+			excludes.add(q.C.getTaxVertex());
+		}
+		if (v != null) // there is C-node in the taxonomy
+		{
+			current.mergeIndepNode(v, excludes, curEntry);
+			removeNode(v);
+		}
+		for (TSplitVar.Entry q : split.getEntries()) {
+			v = q.C.getTaxVertex();
+			current.mergeIndepNode(v, excludes, curEntry);
+			removeNode(v);
+		}
+		checkExtraParents();
+		v = current;
+		insertCurrent(null);
+		//		v->print(std::cout);
 	}
 }

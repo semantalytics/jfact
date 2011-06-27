@@ -23,7 +23,7 @@ import uk.ac.manchester.cs.jfact.kernel.Token;
 public final class DLTreeFactory {
 	private static final EnumSet<Token> snfCalls = EnumSet.of(TOP, BOTTOM,
 			CNAME, INAME, RNAME, DNAME, DATAEXPR, NOT, INV, AND, FORALL, LE,
-			REFLEXIVE, RCOMPOSITION, PROJFROM, PROJINTO);
+			SELF, RCOMPOSITION, PROJFROM, PROJINTO);
 
 	/** create BOTTOM element */
 	public static DLTree createBottom() {
@@ -133,9 +133,25 @@ public final class DLTreeFactory {
 	public static DLTree createSNFForall(DLTree R, DLTree C) {
 		if (C.isTOP()) {
 			return C;
+		} else if (Role.resolveRole(R).isBottom()) {
+			return createTop();
 		} else {
 			return new TWODLTree(new Lexeme(FORALL), R, C);
 		}
+	}
+
+	/** create at-most (LE) restriction of given formulas (<= n R.C) */
+	public static DLTree createSNFLE(int n, DLTree R, DLTree C) {
+		if (C.isBOTTOM()) { // <= n R.F -> T;
+			return createTop();
+		}
+		if (n == 0) {
+			return createSNFForall(R, createSNFNot(C));
+		}
+		if (Role.resolveRole(R).isBottom()) { // <=n Bot.C = T
+			return createTop();
+		}
+		return new TWODLTree(new Lexeme(LE, n), R, C);
 	}
 
 	public static DLTree createSNFGE(int n, DLTree R, DLTree C) {
@@ -147,18 +163,6 @@ public final class DLTreeFactory {
 		} else {
 			return createSNFNot(createSNFLE(n - 1, R, C));
 		}
-	}
-
-	/** create at-most (LE) restriction of given formulas (<= n R.C) */
-	public static DLTree createSNFLE(int n, DLTree R, DLTree C) {
-		if (C.isBOTTOM()) {
-			// <= n R.F . T;
-			return createTop();
-		}
-		if (n == 0) {
-			return createSNFForall(R, createSNFNot(C));
-		}
-		return new TWODLTree(new Lexeme(LE, n), R, C);
 	}
 
 	public static DLTree createSNFNot(DLTree C) {
@@ -312,9 +316,10 @@ public final class DLTreeFactory {
 			ClassifiableEntry entry = (ClassifiableEntry) desc.elem.getNE();
 			if (entry.isSynonym()) {
 				entry = resolveSynonym(entry);
-				if (entry.getId() == -1) {
-					desc.elem = new Lexeme(entry.getName().equals("TOP") ? TOP
-							: BOTTOM);
+				if (entry.isTop()) {
+					desc.elem = new Lexeme(TOP);
+				} else if (entry.isBottom()) {
+					desc.elem = new Lexeme(BOTTOM);
 				} else {
 					desc.elem = new Lexeme(
 							((Concept) entry).isSingleton() ? INAME : CNAME,
