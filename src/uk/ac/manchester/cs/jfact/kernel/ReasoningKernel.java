@@ -880,15 +880,7 @@ public final class ReasoningKernel {
 	public boolean isSubsumedBy(final ConceptExpression C,
 			final ConceptExpression D) {
 		preprocessKB();
-		try {
-			return checkSub(e(C), e(D));
-		} catch (OWLRuntimeException e) {
-			//XXX this needs a better approach
-			System.out
-					.println("ReasoningKernel.isSameIndividuals() WARNING: an exception was thrown: returning false as default\n"
-							+ e.getMessage());
-			return false;
-		}
+		return checkSub(e(C), e(D));
 	}
 
 	/** @return true iff C is disjoint with D; that is, C [= \not D holds */
@@ -1060,43 +1052,19 @@ public final class ReasoningKernel {
 	public boolean isSameIndividuals(final IndividualExpression I,
 			final IndividualExpression J) {
 		realiseKB();
-		try {
 			Individual i = getIndividual(I,
 					"Only known individuals are allowed in the isSameAs()");
 			Individual j = getIndividual(J,
 					"Only known individuals are allowed in the isSameAs()");
 			return getTBox().isSameIndividuals(i, j);
-		} catch (OWLRuntimeException e) {
-			//XXX this needs a better approach
-			System.out
-					.println("ReasoningKernel.isSameIndividuals() WARNING: an exception was thrown: returning false as default\n"
-							+ e.getMessage());
-			//			StringWriter w = new StringWriter();
-			//			PrintWriter p = new PrintWriter(w);
-			//			e.printStackTrace(p);
-			//			System.out.println(w.toString());
-			return false;
-		}
 	}
 
 	/** @return true iff individual I is instance of given [complex] C */
 	public boolean isInstance(final IndividualExpression I,
 			final ConceptExpression C) {
 		realiseKB(); // ensure KB is ready to answer the query
-		try {
 			getIndividual(I, "individual name expected in the isInstance()");
 			return isSubsumedBy(getExpressionManager().oneOf(I), C);
-		} catch (OWLRuntimeException e) {
-			//XXX this needs a better approach
-			System.out
-					.println("ReasoningKernel.isSameIndividuals() WARNING: an exception was thrown: returning false as default\n"
-							+ e.getMessage());
-			//			StringWriter w = new StringWriter();
-			//			PrintWriter p = new PrintWriter(w);
-			//			e.printStackTrace(p);
-			//			System.out.println(w.toString());
-			return false;
-		}
 	}
 
 	public ReasoningKernel() {

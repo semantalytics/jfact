@@ -30,9 +30,9 @@ public final class DataTypeEntryCollection extends
 	}
 
 	public DataEntry getExpr() {
-		if (isLocked()) {
-			return null; // FIXME!! exception later
-		}
+//		if (isLocked()) {
+//			return null; // FIXME!! exception later
+//		}
 		DataEntry ret = registerElem(new DataEntry("expr"));
 		return ret;
 	}
