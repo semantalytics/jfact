@@ -152,7 +152,9 @@ public final class ModelCacheIan extends ModelCacheInterface {
 			case dtDataType:
 			case dtDataValue:
 			case dtDataExpr:
-				throw new UnreachableSituationException(cur.toString());
+				throw new UnreachableSituationException(
+						cur.toString()
+								+ " Top datatype property, datatype, data value or data expression used in an unexpected position");
 			case dtNConcept:
 			case dtPConcept:
 			case dtNSingleton:
