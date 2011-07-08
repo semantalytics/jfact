@@ -8,7 +8,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,40 +17,43 @@ import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.helpers.Reference;
+import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 import uk.ac.manchester.cs.jfact.kernel.DLDag;
 import uk.ac.manchester.cs.jfact.kernel.NamedEntry;
 import uk.ac.manchester.cs.jfact.kernel.datatype.DataTypeAppearance.DepDTE;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 
 public final class DataTypeReasoner {
 	/** map Type.pName.Type appearance */
-	private final Map<Datatypes, DataTypeAppearance> map = new LinkedHashMap<Datatypes, DataTypeAppearance>();
+	private final Map<Datatypes, DataTypeAppearance<?>> map = new HashMap<Datatypes, DataTypeAppearance<?>>();
 	/** external DAG */
 	private final DLDag dlHeap;
 	/** dep-set for the clash for *all* the types */
 	private final Reference<DepSet> clashDep = new Reference<DepSet>();
 
 	/** process data value */
-	private boolean processDataValue(boolean pos, DataEntry c, final DepSet dep) {
-		DataTypeAppearance type = map.get(c.getDatatype());
+	private <O> boolean processDataValue(boolean pos, DataEntry<O> c,
+			final DepSet dep) {
+		DataTypeAppearance<O> type = (DataTypeAppearance<O>) map.get(c
+				.getDatatype());
 		if (pos) {
 			type.setPType(new DepDTE(c, dep));
 		}
 		// create interval [c,c]
-		DataInterval constraints = new DataInterval();
-		constraints.updateMin( /*excl=*/false, c.getComp());
-		constraints.updateMax( /*excl=*/false, c.getComp());
+		DataInterval<O> constraints = new DataInterval<O>();
+		constraints.updateMin(false, c.getComp());
+		constraints.updateMax(false, c.getComp());
 		return type.addInterval(pos, constraints, dep);
 	}
 
 	/** process data expr */
-	private boolean processDataExpr(boolean pos, final DataEntry c,
+	private <O> boolean processDataExpr(boolean pos, final DataEntry<O> c,
 			final DepSet dep) {
-		final DataInterval constraints = c.getFacet();
+		DataInterval<O> constraints = c.getFacet();
 		if (constraints.isEmpty()) {
 			return false;
 		}
-		DataTypeAppearance type = map.get(c.getDatatype());
+		DataTypeAppearance<O> type = (DataTypeAppearance<O>) map.get(c
+				.getDatatype());
 		if (pos) {
 			type.setPType(new DepDTE(c, dep));
 		}
@@ -80,7 +83,7 @@ public final class DataTypeReasoner {
 
 	/** prepare types for the reasoning */
 	public void clear() {
-		for (DataTypeAppearance p : map.values()) {
+		for (DataTypeAppearance<?> p : map.values()) {
 			p.clear();
 		}
 	}
@@ -95,10 +98,8 @@ public final class DataTypeReasoner {
 		NamedEntry dataEntry = getDataEntry(p);
 		switch (v.getType()) {
 			case dtDataType: {
-				DataTypeAppearance type = map
-						.get(dataEntry instanceof DataEntry ? ((DataEntry) dataEntry)
-								.getDatatype() : ((DataTypeName) dataEntry)
-								.getDatatype());
+				Datatypes t = ((Datatyped) dataEntry).getDatatype();
+				DataTypeAppearance<?> type = map.get(t);
 				logger.print(Templates.INTERVAL, (p > 0 ? "+" : "-"),
 						dataEntry.getName());
 				if (p > 0) {
@@ -117,10 +118,10 @@ public final class DataTypeReasoner {
 			default:
 				//TODO this case needs investigation; is it a mistake? whenever something is supposed to be a data node and is actually a primitive concept?
 				// or is it just a regular clash?
-				System.out
-						.println("DataTypeReasoner.addDataEntry() warning: this case might indicate errors in the datatype reasoning");
-				return true;
-				//throw new UnreachableSituationException(v.toString());
+				//				System.out
+				//						.println("DataTypeReasoner.addDataEntry() warning: this case might indicate errors in the datatype reasoning");
+				//				return true;
+				throw new UnreachableSituationException(v.toString());
 		}
 	}
 
@@ -135,8 +136,8 @@ public final class DataTypeReasoner {
 	//   - check if some value is present together with the other class
 	//   - check if two values of different classes are present at the same time
 	public boolean checkClash() {
-		List<Map.Entry<Datatypes, DataTypeAppearance>> types = new ArrayList<Map.Entry<Datatypes, DataTypeAppearance>>();
-		for (Map.Entry<Datatypes, DataTypeAppearance> k : map.entrySet()) {
+		List<Map.Entry<Datatypes, DataTypeAppearance<?>>> types = new ArrayList<Map.Entry<Datatypes, DataTypeAppearance<?>>>();
+		for (Map.Entry<Datatypes, DataTypeAppearance<?>> k : map.entrySet()) {
 			if (k.getValue().hasPType() || k.getValue().hasNType()) {
 				types.add(k);
 			}
@@ -151,7 +152,7 @@ public final class DataTypeReasoner {
 		}
 		if (types.size() > 1) {
 			// check if any value is already clashing with itself
-			for (Map.Entry<Datatypes, DataTypeAppearance> p : types) {
+			for (Map.Entry<Datatypes, DataTypeAppearance<?>> p : types) {
 				if (p.getValue().checkPNTypeClash()) {
 					logger.print(Templates.CHECKCLASH);
 					clashDep.setReference(p.getValue().getPType().second);
@@ -162,9 +163,10 @@ public final class DataTypeReasoner {
 			// if a subtype b, then b and not a, otherwise clash
 			// a subtype b => b compatible a (all a are b) but not a compatible b (some b might not be a)
 			for (int i = 0; i < types.size(); i++) {
-				Map.Entry<Datatypes, DataTypeAppearance> p1 = types.get(i);
+				Map.Entry<Datatypes, DataTypeAppearance<?>> p1 = types.get(i);
 				for (int j = i + 1; j < types.size(); j++) {
-					Map.Entry<Datatypes, DataTypeAppearance> p2 = types.get(j);
+					Map.Entry<Datatypes, DataTypeAppearance<?>> p2 = types
+							.get(j);
 					if (p1.getKey().compatible(p2.getKey())
 							&& p1.getValue().hasNType()
 							&& p2.getValue().hasPType()) {
@@ -196,11 +198,15 @@ public final class DataTypeReasoner {
 						// they're disjoint: they can't be both positive (but can be both negative)
 						if (p1.getValue().hasPType()
 								&& p2.getValue().hasPType()) {
-							logger.print(Templates.CHECKCLASH);
-							clashDep.setReference(DepSetFactory.plus(p1
-									.getValue().getPType().second, p2
-									.getValue().getPType().second));
-							return true;
+							// special case: disjoint datatypes with overlapping value spaces, e.g., nongeginteger, and nonposinteger and value = 0
+							if (!p1.getValue().checkCompatibleValue(
+									p2.getValue(), p1.getKey(), p2.getKey())) {
+								logger.print(Templates.CHECKCLASH);
+								clashDep.setReference(DepSetFactory.plus(p1
+										.getValue().getPType().second, p2
+										.getValue().getPType().second));
+								return true;
+							}
 						}
 					}
 				}

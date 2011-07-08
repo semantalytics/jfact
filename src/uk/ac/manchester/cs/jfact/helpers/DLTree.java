@@ -363,12 +363,12 @@ class TWODLTree extends DLTree {
 
 	@Override
 	public DLTree getLeft() {
-		return (children).get(0);
+		return children.get(0);
 	}
 
 	@Override
 	public DLTree getRight() {
-		return (children).get(1);
+		return children.get(1);
 	}
 
 	@Override
@@ -383,9 +383,9 @@ class TWODLTree extends DLTree {
 
 	@Override
 	public void replace(DLTree toReplace, DLTree replacement) {
-		int p = (children).indexOf(toReplace);
+		int p = children.indexOf(toReplace);
 		if (p > -1) {
-			(children).set(p, replacement);
+			children.set(p, replacement);
 			if (replacement != null) {
 				replacement.ancestor = this;
 			}

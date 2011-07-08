@@ -2,7 +2,7 @@ package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.DLTree.equalTrees;
@@ -213,8 +213,8 @@ public final class TBox {
 	}
 
 	/** get concept by it's BP (non-final version) */
-	public DataEntry getDataEntryByBP(int bp) {
-		DataEntry p = (DataEntry) dlHeap.get(bp).getConcept();
+	public DataEntry<?> getDataEntryByBP(int bp) {
+		DataEntry<?> p = (DataEntry<?>) dlHeap.get(bp).getConcept();
 		assert p != null;
 		return p;
 	}
@@ -809,13 +809,19 @@ public final class TBox {
 		} else {
 			addDataExprToHeap((DataEntry) ne);
 		}
+
 		for (Concept pc : concepts.getList()) {
+		//	i=0;
+			System.out.println("TBox.buildDAG() "+pc+"\t"+pc.getDescription());
 			concept2dag(pc);
 		}
 		for (Individual pi : individuals.getList()) {
+		//	i=0;
+			System.out.println("TBox.buildDAG() "+pi+"\t"+pi.getDescription());
 			concept2dag(pi);
 		}
 		for (SimpleRule q : simpleRules) {
+	//		i=0;
 			q.setBpHead(tree2dag(q.tHead));
 		}
 		// builds Roles range and domain
@@ -838,6 +844,7 @@ public final class TBox {
 			list.add(GCI);
 			GCI = DLTreeFactory.createSNFAnd(list);
 		}
+	//	i=0;
 		internalisedGeneralAxiom = tree2dag(GCI);
 		GCI = null;
 		// mark GCI flags
@@ -873,6 +880,7 @@ public final class TBox {
 				DLTree dom = R.getTDomain();
 				int bp = bpTOP;
 				if (dom != null) {
+			//		i=0;
 					bp = tree2dag(dom);
 					GCIs.setRnD();
 				}
@@ -880,6 +888,7 @@ public final class TBox {
 				// special domain for R is AR.Range
 				R.initSpecialDomain();
 				if (R.hasSpecialDomain()) {
+				//	i=0;
 					R.setSpecialDomain(tree2dag(R.getTSpecialDomain()));
 				}
 			}
@@ -954,12 +963,18 @@ public final class TBox {
 		ver.setChild(desc);
 	}
 
+	//int i=0;
 	public int tree2dag(DLTree t) {
+	//	System.out.println("TBox.tree2dag() "+t);
+//		i++;if(i>500) {
+//			System.out.println("TBox.tree2dag()");
+//		}
 		if (t == null) {
 			return bpINVALID;
 		}
 		final Lexeme cur = t.elem();
 		int ret = bpINVALID;
+		int index=0;
 		switch (cur.getToken()) {
 			case BOTTOM:
 				ret = bpBOTTOM;
@@ -968,6 +983,11 @@ public final class TBox {
 				ret = bpTOP;
 				break;
 			case DATAEXPR:
+			/*	index=dlHeap.index(cur.getNE());
+				if(index!=bpINVALID) {
+					ret=index;
+					break;
+				}*/
 				if (cur.getNE() instanceof DataEntry) {
 					ret = addDataExprToHeap((DataEntry) cur.getNE());
 				} else {
@@ -976,9 +996,19 @@ public final class TBox {
 				}
 				break;
 			case CNAME:
+		/*		index=dlHeap.index(cur.getNE());
+				if(index!=bpINVALID) {
+					ret=index;
+					break;
+				}*/
 				ret = concept2dag((Concept) cur.getNE());
 				break;
 			case INAME:
+				/*index=dlHeap.index(cur.getNE());
+				if(index!=bpINVALID) {
+					ret=index;
+					break;
+				}*/
 				++nNominalReferences;// definitely a nominal
 				Individual ind = (Individual) cur.getNE();
 				ind.setNominal(true);

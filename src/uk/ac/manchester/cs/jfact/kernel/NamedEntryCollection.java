@@ -8,8 +8,6 @@ You should have received a copy of the GNU Lesser General Public License along w
 import java.util.ArrayList;
 import java.util.List;
 
-import org.semanticweb.owlapi.model.OWLRuntimeException;
-
 import uk.ac.manchester.cs.jfact.helpers.Helper;
 
 /**
@@ -74,8 +72,9 @@ public class NamedEntryCollection<T extends NamedEntry> {
 		}
 		// check if it is possible to insert name
 		if (isLocked()) {
-			throw new OWLRuntimeException("Unable to register '" + name
-					+ "' as a " + typeName);
+			// TODO add check to the fresh entity policy in the OWLReasoner interface
+			throw new ReasonerFreshEntityException("Unable to register '"
+					+ name + "' as a " + typeName);
 		}
 		// name in name set, and it
 		return registerElem(nameset.add(name));

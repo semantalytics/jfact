@@ -2,7 +2,7 @@ package uk.ac.manchester.cs.jfact.kernel.datatype;
 
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import java.math.BigDecimal;
@@ -23,12 +23,12 @@ import uk.ac.manchester.cs.jfact.kernel.voc.Vocabulary;
 public enum Datatypes {
 	INT {
 		@Override
-		public Literal<Integer> parse(String s) {
+		public DatatypeRepresentation<Integer> parse(String s) {
 			return new IntRep(Integer.valueOf(s));
 		}
 
 		@Override
-		public Literal<Integer> build(Object s) {
+		public DatatypeRepresentation<Integer> build(Object s) {
 			return new IntRep((Integer) s);
 		}
 
@@ -41,12 +41,12 @@ public enum Datatypes {
 	},
 	DECIMAL {
 		@Override
-		public Literal<BigDecimal> parse(String s) {
+		public DatatypeRepresentation<BigDecimal> parse(String s) {
 			return new DecimalRep(new BigDecimal(s));
 		}
 
 		@Override
-		public Literal<BigDecimal> build(Object s) {
+		public DatatypeRepresentation<BigDecimal> build(Object s) {
 			return new DecimalRep((BigDecimal) s);
 		}
 
@@ -59,12 +59,12 @@ public enum Datatypes {
 	},
 	SHORT {
 		@Override
-		public Literal<Short> parse(String s) {
+		public DatatypeRepresentation<Short> parse(String s) {
 			return new ShortRep(Short.valueOf(s));
 		}
 
 		@Override
-		public Literal<Short> build(Object s) {
+		public DatatypeRepresentation<Short> build(Object s) {
 			return new ShortRep((Short) s);
 		}
 
@@ -75,23 +75,23 @@ public enum Datatypes {
 	},
 	UNSIGNEDSHORT {
 		@Override
-		public Literal<Short> parse(String s) {
+		public DatatypeRepresentation<Short> parse(String s) {
 			return new UnsignedShortRep(Short.valueOf(s));
 		}
 
 		@Override
-		public Literal<Short> build(Object s) {
+		public DatatypeRepresentation<Short> build(Object s) {
 			return new UnsignedShortRep((Short) s);
 		}
 	},
 	BYTE {
 		@Override
-		public Literal<Byte> parse(String s) {
+		public DatatypeRepresentation<Byte> parse(String s) {
 			return new ByteRep(Byte.valueOf(s));
 		}
 
 		@Override
-		public Literal<Byte> build(Object s) {
+		public DatatypeRepresentation<Byte> build(Object s) {
 			return new ByteRep((Byte) s);
 		}
 
@@ -103,12 +103,12 @@ public enum Datatypes {
 	},
 	UNSIGNEDBYTE {
 		@Override
-		public Literal<Byte> parse(String s) {
+		public DatatypeRepresentation<Byte> parse(String s) {
 			return new UnsignedByteRep(Byte.valueOf(s));
 		}
 
 		@Override
-		public Literal<Byte> build(Object s) {
+		public DatatypeRepresentation<Byte> build(Object s) {
 			return new UnsignedByteRep((Byte) s);
 		}
 
@@ -119,58 +119,58 @@ public enum Datatypes {
 	},
 	BOOLEAN {
 		@Override
-		public Literal<Boolean> parse(String s) {
+		public DatatypeRepresentation<Boolean> parse(String s) {
 			return new BoolRep(Boolean.valueOf(s));
 		}
 
 		@Override
-		public Literal<Boolean> build(Object s) {
+		public DatatypeRepresentation<Boolean> build(Object s) {
 			return new BoolRep((Boolean) s);
 		}
 	},
 	DOUBLE {
 		@Override
-		public Literal<Double> parse(String s) {
+		public DatatypeRepresentation<Double> parse(String s) {
 			return new DoubleRep(parseDouble(s));
 		}
 
 		@Override
-		public Literal<Double> build(Object s) {
+		public DatatypeRepresentation<Double> build(Object s) {
 			return new DoubleRep((Double) s);
 		}
 	},
 	FLOAT {
 		@Override
-		public Literal<Float> parse(String s) {
+		public DatatypeRepresentation<Float> parse(String s) {
 			return new FloatRep(Float.valueOf(s.replace("inf", "Infinity")
 					.replace("INF", "Infinity")));
 		}
 
 		@Override
-		public Literal<Float> build(Object s) {
+		public DatatypeRepresentation<Float> build(Object s) {
 			return new FloatRep((Float) s);
 		}
 	},
 	STRING {
 		@Override
-		public Literal<String> parse(String s) {
+		public DatatypeRepresentation<String> parse(String s) {
 			return new StringRep(s);
 		}
 
 		@Override
-		public Literal<String> build(Object s) {
+		public DatatypeRepresentation<String> build(Object s) {
 			return new StringRep((String) s);
 		}
 	},
 	LITERAL {
 		@Override
-		public Literal<?> parse(String s) {
+		public DatatypeRepresentation<Object> parse(String s) {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
-		public Literal<?> build(Object s) {
+		public DatatypeRepresentation<Object> build(Object s) {
 			// TODO Auto-generated method stub
 			return null;
 		}
@@ -182,7 +182,7 @@ public enum Datatypes {
 	},
 	DATETIME {
 		@Override
-		public Literal<XMLGregorianCalendar> parse(String s) {
+		public DatatypeRepresentation<XMLGregorianCalendar> parse(String s) {
 			XMLGregorianCalendar cal;
 			try {
 				cal = DatatypeFactory.newInstance().newXMLGregorianCalendar(s);
@@ -195,40 +195,40 @@ public enum Datatypes {
 		}
 
 		@Override
-		public Literal<XMLGregorianCalendar> build(Object s) {
+		public DatatypeRepresentation<XMLGregorianCalendar> build(Object s) {
 			return new DateTimeRep((XMLGregorianCalendar) s);
 		}
 	},
 	POSINT {
 		@Override
-		public Literal<Integer> parse(String s) {
+		public DatatypeRepresentation<Integer> parse(String s) {
 			return new PosIntRep(Integer.valueOf(s));
 		}
 
 		@Override
-		public Literal<Integer> build(Object s) {
+		public DatatypeRepresentation<Integer> build(Object s) {
 			return new PosIntRep((Integer) s);
 		}
 	},
 	NEGINT {
 		@Override
-		public Literal<Integer> parse(String s) {
+		public DatatypeRepresentation<Integer> parse(String s) {
 			return new NegIntRep(Integer.valueOf(s));
 		}
 
 		@Override
-		public Literal<Integer> build(Object s) {
+		public DatatypeRepresentation<Integer> build(Object s) {
 			return new NegIntRep((Integer) s);
 		}
 	},
 	NONPOSINT {
 		@Override
-		public Literal<Integer> parse(String s) {
+		public DatatypeRepresentation<Integer> parse(String s) {
 			return new NonPosIntRep(Integer.valueOf(s));
 		}
 
 		@Override
-		public Literal<Integer> build(Object s) {
+		public DatatypeRepresentation<Integer> build(Object s) {
 			return new NonPosIntRep((Integer) s);
 		}
 
@@ -236,15 +236,29 @@ public enum Datatypes {
 		public boolean compatible(Datatypes d) {
 			return super.compatible(d) || d == NEGINT;
 		}
+
+		@Override
+		public boolean compatible(Datatypes d, Object o) {
+			if (d == NONNEGINT) {
+				if (o == null) {
+					// undefined value, but there is one possible valid one
+					return true;
+				}
+				if (o instanceof Integer) {
+					return ((Integer) o).intValue() == 0;
+				}
+			}
+			return super.compatible(d, o);
+		}
 	},
 	NONNEGINT {
 		@Override
-		public Literal<Integer> parse(String s) {
+		public DatatypeRepresentation<Integer> parse(String s) {
 			return new NonNegIntRep(Integer.valueOf(s));
 		}
 
 		@Override
-		public Literal<Integer> build(Object s) {
+		public DatatypeRepresentation<Integer> build(Object s) {
 			return new NonNegIntRep((Integer) s);
 		}
 
@@ -252,15 +266,29 @@ public enum Datatypes {
 		public boolean compatible(Datatypes d) {
 			return super.compatible(d) || d == POSINT;
 		}
+
+		@Override
+		public boolean compatible(Datatypes d, Object o) {
+			if (d == NONPOSINT) {
+				if (o == null) {
+					// undefined value, but there is one possible valid one
+					return true;
+				}
+				if (o instanceof Integer) {
+					return ((Integer) o).intValue() == 0;
+				}
+			}
+			return super.compatible(d, o);
+		}
 	},
 	REAL {
 		@Override
-		public Literal<BigDecimal> parse(String s) {
+		public DatatypeRepresentation<BigDecimal> parse(String s) {
 			return new RealRep(new BigDecimal(s));
 		}
 
 		@Override
-		public Literal<BigDecimal> build(Object s) {
+		public DatatypeRepresentation<BigDecimal> build(Object s) {
 			return new RealRep((BigDecimal) s);
 		}
 
@@ -274,12 +302,12 @@ public enum Datatypes {
 	},
 	RATIONAL {
 		@Override
-		public Literal<BigDecimal> parse(String s) {
+		public DatatypeRepresentation<BigDecimal> parse(String s) {
 			return new RationalRep(new BigDecimal(parseDouble(s)));
 		}
 
 		@Override
-		public Literal<BigDecimal> build(Object s) {
+		public DatatypeRepresentation<BigDecimal> build(Object s) {
 			return new RationalRep((BigDecimal) s);
 		}
 
@@ -295,23 +323,27 @@ public enum Datatypes {
 		}
 
 		@Override
-		public Literal<?> build(Object s) {
+		public DatatypeRepresentation<Object> build(Object s) {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
-		public Literal<?> parse(String s) {
+		public DatatypeRepresentation<Object> parse(String s) {
 			// TODO Auto-generated method stub
 			return null;
 		}
 	};
-	public abstract Literal<?> parse(String s);
+	public abstract <O> DatatypeRepresentation<O> parse(String s);
 
-	public abstract Literal<?> build(Object s);
+	public abstract <O> DatatypeRepresentation<O> build(O s);
 
 	public boolean compatible(Datatypes d) {
 		return d == this;// || d == LITERAL;
+	}
+
+	public boolean compatible(Datatypes d, Object o) {
+		return compatible(d);
 	}
 
 	static final String pattern = "\\-?[0-9]+(\\.[0-9]+)?([eE]\\-?[0-9]+)?";
@@ -374,6 +406,8 @@ public enum Datatypes {
 		Map<String, Datatypes> toReturn = new HashMap<String, Datatypes>();
 		toReturn.put(Vocabulary.LITERAL, LITERAL);
 		toReturn.put(Vocabulary.ANY_SIMPLE_TYPE, LITERAL);
+		toReturn.put(Vocabulary.ANY_TYPE, LITERAL);
+		toReturn.put(Vocabulary.XML_ANY_SIMPLE_TYPE, LITERAL);
 		toReturn.put(Vocabulary.PLAIN_LITERAL, STRING);
 		toReturn.put(Vocabulary.XMLLITERAL, STRING);
 		toReturn.put(Vocabulary.STRING, STRING);
@@ -402,7 +436,7 @@ public enum Datatypes {
 	}
 }
 
-class IntRep implements Literal<Integer> {
+class IntRep implements DatatypeRepresentation<Integer> {
 	protected Integer value;
 
 	public Datatypes getDatatype() {
@@ -413,7 +447,7 @@ class IntRep implements Literal<Integer> {
 		value = v;
 	}
 
-	public int compareTo(Literal<Integer> o) {
+	public int compareTo(DatatypeRepresentation<Integer> o) {
 		return value.compareTo(o.getValue());
 	}
 
@@ -439,7 +473,7 @@ class IntRep implements Literal<Integer> {
 		return excl;
 	}
 
-	public boolean lesser(Literal<Integer> other) {
+	public boolean lesser(DatatypeRepresentation<Integer> other) {
 		return compareTo(other) < 0;
 	}
 
@@ -468,7 +502,7 @@ class IntRep implements Literal<Integer> {
 	}
 }
 
-class DecimalRep implements Literal<BigDecimal> {
+class DecimalRep implements DatatypeRepresentation<BigDecimal> {
 	protected BigDecimal value;
 
 	public Datatypes getDatatype() {
@@ -479,7 +513,7 @@ class DecimalRep implements Literal<BigDecimal> {
 		value = v;
 	}
 
-	public int compareTo(Literal<BigDecimal> o) {
+	public int compareTo(DatatypeRepresentation<BigDecimal> o) {
 		return value.compareTo(o.getValue());
 	}
 
@@ -505,7 +539,7 @@ class DecimalRep implements Literal<BigDecimal> {
 		return excl;
 	}
 
-	public boolean lesser(Literal<BigDecimal> other) {
+	public boolean lesser(DatatypeRepresentation<BigDecimal> other) {
 		return compareTo(other) < 0;
 	}
 
@@ -646,7 +680,7 @@ class NonNegIntRep extends IntRep {
 	}
 }
 
-class DateTimeRep implements Literal<XMLGregorianCalendar> {
+class DateTimeRep implements DatatypeRepresentation<XMLGregorianCalendar> {
 	protected XMLGregorianCalendar value;
 
 	public Datatypes getDatatype() {
@@ -657,7 +691,7 @@ class DateTimeRep implements Literal<XMLGregorianCalendar> {
 		value = v;
 	}
 
-	public int compareTo(Literal<XMLGregorianCalendar> o) {
+	public int compareTo(DatatypeRepresentation<XMLGregorianCalendar> o) {
 		return value.compare(o.getValue());
 	}
 
@@ -673,7 +707,7 @@ class DateTimeRep implements Literal<XMLGregorianCalendar> {
 		return excl;
 	}
 
-	public boolean lesser(Literal<XMLGregorianCalendar> other) {
+	public boolean lesser(DatatypeRepresentation<XMLGregorianCalendar> other) {
 		return compareTo(other) < 0;
 	}
 
@@ -702,7 +736,7 @@ class DateTimeRep implements Literal<XMLGregorianCalendar> {
 	}
 }
 
-class ShortRep implements Literal<Short> {
+class ShortRep implements DatatypeRepresentation<Short> {
 	protected Short value;
 
 	public Datatypes getDatatype() {
@@ -713,7 +747,7 @@ class ShortRep implements Literal<Short> {
 		value = v;
 	}
 
-	public int compareTo(Literal<Short> o) {
+	public int compareTo(DatatypeRepresentation<Short> o) {
 		return value.compareTo(o.getValue());
 	}
 
@@ -739,7 +773,7 @@ class ShortRep implements Literal<Short> {
 		return excl;
 	}
 
-	public boolean lesser(Literal<Short> other) {
+	public boolean lesser(DatatypeRepresentation<Short> other) {
 		return compareTo(other) < 0;
 	}
 
@@ -768,7 +802,7 @@ class ShortRep implements Literal<Short> {
 	}
 }
 
-class UnsignedShortRep implements Literal<Short> {
+class UnsignedShortRep implements DatatypeRepresentation<Short> {
 	protected Short value;
 
 	public Datatypes getDatatype() {
@@ -783,7 +817,7 @@ class UnsignedShortRep implements Literal<Short> {
 		value = v;
 	}
 
-	public int compareTo(Literal<Short> o) {
+	public int compareTo(DatatypeRepresentation<Short> o) {
 		return value.compareTo(o.getValue());
 	}
 
@@ -809,7 +843,7 @@ class UnsignedShortRep implements Literal<Short> {
 		return excl;
 	}
 
-	public boolean lesser(Literal<Short> other) {
+	public boolean lesser(DatatypeRepresentation<Short> other) {
 		return compareTo(other) < 0;
 	}
 
@@ -838,7 +872,7 @@ class UnsignedShortRep implements Literal<Short> {
 	}
 }
 
-class ByteRep implements Literal<Byte> {
+class ByteRep implements DatatypeRepresentation<Byte> {
 	protected Byte value;
 
 	public Datatypes getDatatype() {
@@ -849,7 +883,7 @@ class ByteRep implements Literal<Byte> {
 		value = v;
 	}
 
-	public int compareTo(Literal<Byte> o) {
+	public int compareTo(DatatypeRepresentation<Byte> o) {
 		return value.compareTo(o.getValue());
 	}
 
@@ -875,7 +909,7 @@ class ByteRep implements Literal<Byte> {
 		return excl;
 	}
 
-	public boolean lesser(Literal<Byte> other) {
+	public boolean lesser(DatatypeRepresentation<Byte> other) {
 		return compareTo(other) < 0;
 	}
 
@@ -904,7 +938,7 @@ class ByteRep implements Literal<Byte> {
 	}
 }
 
-class UnsignedByteRep implements Literal<Byte> {
+class UnsignedByteRep implements DatatypeRepresentation<Byte> {
 	protected Byte value;
 
 	public Datatypes getDatatype() {
@@ -919,7 +953,7 @@ class UnsignedByteRep implements Literal<Byte> {
 		value = v;
 	}
 
-	public int compareTo(Literal<Byte> o) {
+	public int compareTo(DatatypeRepresentation<Byte> o) {
 		return value.compareTo(o.getValue());
 	}
 
@@ -945,7 +979,7 @@ class UnsignedByteRep implements Literal<Byte> {
 		return excl;
 	}
 
-	public boolean lesser(Literal<Byte> other) {
+	public boolean lesser(DatatypeRepresentation<Byte> other) {
 		return compareTo(other) < 0;
 	}
 
@@ -975,7 +1009,7 @@ class UnsignedByteRep implements Literal<Byte> {
 }
 
 /// representation of a boolean value
-class BoolRep implements Literal<Boolean> {
+class BoolRep implements DatatypeRepresentation<Boolean> {
 	/// value of a bool: 0/1
 	protected Boolean value;
 
@@ -984,7 +1018,7 @@ class BoolRep implements Literal<Boolean> {
 	}
 
 	/// main comparison method; @returns -1 if this < val, 0 if this == val, 1 if this > val
-	public int compareTo(Literal<Boolean> val) {
+	public int compareTo(DatatypeRepresentation<Boolean> val) {
 		return value.compareTo(val.getValue());
 	}
 
@@ -1004,7 +1038,7 @@ class BoolRep implements Literal<Boolean> {
 		return excl;
 	}
 
-	public boolean lesser(Literal<Boolean> other) {
+	public boolean lesser(DatatypeRepresentation<Boolean> other) {
 		return compareTo(other) < 0;
 	}
 
@@ -1034,7 +1068,7 @@ class BoolRep implements Literal<Boolean> {
 }
 
 /// representation of a string value
-class StringRep implements Literal<String> {
+class StringRep implements DatatypeRepresentation<String> {
 	/// string itself
 	protected String value;
 
@@ -1042,7 +1076,7 @@ class StringRep implements Literal<String> {
 		return Datatypes.STRING;
 	}
 
-	public int compareTo(Literal<String> val) {
+	public int compareTo(DatatypeRepresentation<String> val) {
 		return value.compareTo(((StringRep) val).value);
 	}
 
@@ -1062,7 +1096,7 @@ class StringRep implements Literal<String> {
 		return excl;
 	}
 
-	public boolean lesser(Literal<String> other) {
+	public boolean lesser(DatatypeRepresentation<String> other) {
 		return compareTo(other) < 0;
 	}
 
@@ -1092,7 +1126,7 @@ class StringRep implements Literal<String> {
 }
 
 /// representation of a float value
-class FloatRep implements Literal<Float> {
+class FloatRep implements DatatypeRepresentation<Float> {
 	/// float value of a string
 	protected Float value;
 
@@ -1100,7 +1134,7 @@ class FloatRep implements Literal<Float> {
 		return Datatypes.FLOAT;
 	}
 
-	public int compareTo(Literal<Float> val) {
+	public int compareTo(DatatypeRepresentation<Float> val) {
 		return value.compareTo(val.getValue());
 	}
 
@@ -1120,7 +1154,7 @@ class FloatRep implements Literal<Float> {
 		return excl;
 	}
 
-	public boolean lesser(Literal<Float> other) {
+	public boolean lesser(DatatypeRepresentation<Float> other) {
 		return compareTo(other) < 0;
 	}
 
@@ -1150,7 +1184,7 @@ class FloatRep implements Literal<Float> {
 }
 
 /// representation of a double value
-class DoubleRep implements Literal<Double> {
+class DoubleRep implements DatatypeRepresentation<Double> {
 	/// double value of a string
 	protected Double value;
 
@@ -1158,7 +1192,7 @@ class DoubleRep implements Literal<Double> {
 		return Datatypes.DOUBLE;
 	}
 
-	public int compareTo(Literal<Double> val) {
+	public int compareTo(DatatypeRepresentation<Double> val) {
 		return value.compareTo(val.getValue());
 	}
 
@@ -1178,7 +1212,7 @@ class DoubleRep implements Literal<Double> {
 		return excl;
 	}
 
-	public boolean lesser(Literal<Double> other) {
+	public boolean lesser(DatatypeRepresentation<Double> other) {
 		return compareTo(other) < 0;
 	}
 
@@ -1207,7 +1241,7 @@ class DoubleRep implements Literal<Double> {
 	}
 }
 
-class RealRep implements Literal<BigDecimal> {
+class RealRep implements DatatypeRepresentation<BigDecimal> {
 	/// double value of a string
 	protected BigDecimal value;
 
@@ -1215,7 +1249,7 @@ class RealRep implements Literal<BigDecimal> {
 		return Datatypes.REAL;
 	}
 
-	public int compareTo(Literal<BigDecimal> val) {
+	public int compareTo(DatatypeRepresentation<BigDecimal> val) {
 		return value.compareTo(val.getValue());
 	}
 
@@ -1235,7 +1269,7 @@ class RealRep implements Literal<BigDecimal> {
 		return excl;
 	}
 
-	public boolean lesser(Literal<BigDecimal> other) {
+	public boolean lesser(DatatypeRepresentation<BigDecimal> other) {
 		return compareTo(other) < 0;
 	}
 
@@ -1264,7 +1298,7 @@ class RealRep implements Literal<BigDecimal> {
 	}
 }
 
-class RationalRep implements Literal<BigDecimal> {
+class RationalRep implements DatatypeRepresentation<BigDecimal> {
 	/// double value of a string
 	protected BigDecimal value;
 
@@ -1272,7 +1306,7 @@ class RationalRep implements Literal<BigDecimal> {
 		return Datatypes.RATIONAL;
 	}
 
-	public int compareTo(Literal<BigDecimal> val) {
+	public int compareTo(DatatypeRepresentation<BigDecimal> val) {
 		return value.compareTo(val.getValue());
 	}
 
@@ -1309,7 +1343,7 @@ class RationalRep implements Literal<BigDecimal> {
 		return excl;
 	}
 
-	public boolean lesser(Literal<BigDecimal> other) {
+	public boolean lesser(DatatypeRepresentation<BigDecimal> other) {
 		return compareTo(other) < 0;
 	}
 

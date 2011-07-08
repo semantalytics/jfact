@@ -20,6 +20,7 @@ import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
+import uk.ac.manchester.cs.jfact.helpers.IfDefs;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 import uk.ac.manchester.cs.jfact.kernel.actors.Actor;
@@ -289,11 +290,15 @@ public final class ReasoningKernel {
 	/** get individual by the TIndividualExpr */
 	private Individual getIndividual(final IndividualExpression i,
 			final String reason) {
-		DLTree I = e(i);
-		if (I == null) {
-			throw new ReasonerInternalException(reason);
+		try {
+			DLTree I = e(i);
+			if (I == null) {
+				throw new ReasonerInternalException(reason);
+			}
+			return (Individual) getTBox().getCI(I);
+		} catch (ReasonerFreshEntityException e) {
+			throw new ReasonerInternalException(reason, e);
 		}
-		return (Individual) getTBox().getCI(I);
 	}
 
 	/** get role by the TRoleExpr */
@@ -1052,19 +1057,19 @@ public final class ReasoningKernel {
 	public boolean isSameIndividuals(final IndividualExpression I,
 			final IndividualExpression J) {
 		realiseKB();
-			Individual i = getIndividual(I,
-					"Only known individuals are allowed in the isSameAs()");
-			Individual j = getIndividual(J,
-					"Only known individuals are allowed in the isSameAs()");
-			return getTBox().isSameIndividuals(i, j);
+		Individual i = getIndividual(I,
+				"Only known individuals are allowed in the isSameAs()");
+		Individual j = getIndividual(J,
+				"Only known individuals are allowed in the isSameAs()");
+		return getTBox().isSameIndividuals(i, j);
 	}
 
 	/** @return true iff individual I is instance of given [complex] C */
 	public boolean isInstance(final IndividualExpression I,
 			final ConceptExpression C) {
 		realiseKB(); // ensure KB is ready to answer the query
-			getIndividual(I, "individual name expected in the isInstance()");
-			return isSubsumedBy(getExpressionManager().oneOf(I), C);
+		getIndividual(I, "individual name expected in the isInstance()");
+		return isSubsumedBy(getExpressionManager().oneOf(I), C);
 	}
 
 	public ReasoningKernel() {
@@ -1098,9 +1103,10 @@ public final class ReasoningKernel {
 		newKB();
 		pMonitor = null;
 		// split ontological axioms
-		//TODO switch optimization off here
-		TAxiomSplitter AxiomSplitter = new TAxiomSplitter(ontology);
-		//AxiomSplitter.buildSplit();
+		if (IfDefs.splits) {
+			TAxiomSplitter AxiomSplitter = new TAxiomSplitter(ontology);
+			AxiomSplitter.buildSplit();
+		}
 		OntologyLoader OntologyLoader = new OntologyLoader(getTBox());
 		OntologyLoader.visitOntology(ontology);
 		ontology.setProcessed();

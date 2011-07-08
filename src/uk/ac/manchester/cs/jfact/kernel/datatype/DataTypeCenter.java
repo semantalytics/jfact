@@ -17,7 +17,7 @@ public final class DataTypeCenter {
 	 * vector of registered data types; initially contains unrestricted NUMBER
 	 * and STRING
 	 */
-	private final Map<Datatypes, DataTypeEntryCollection> Types = new HashMap<Datatypes, DataTypeEntryCollection>();
+	private final Map<Datatypes, DataTypeEntryCollection<?>> Types = new HashMap<Datatypes, DataTypeEntryCollection<?>>();
 
 	public DataTypeCenter() {
 		// primitive DataTypes
@@ -67,7 +67,7 @@ public final class DataTypeCenter {
 	/** facet for >=/>/</<= */
 	public DLTree getIntervalFacetExpr(DLTree val, boolean min, boolean excl) {
 		// get value as an DTE
-		DataEntry value = (DataEntry) DLTreeFactory.unwrap(val);
+		DataEntry<?> value = (DataEntry<?>) DLTreeFactory.unwrap(val);
 		// create new (unnamed) expression
 		DataEntry ret = createFacet(value.getDatatype());
 		// apply appropriate facet to it

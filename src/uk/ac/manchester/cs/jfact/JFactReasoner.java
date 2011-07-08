@@ -2,7 +2,7 @@ package uk.ac.manchester.cs.jfact;
 
 /* This file is part of the JFact DL reasoner
 Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import java.util.ArrayList;
@@ -45,6 +45,8 @@ import org.semanticweb.owlapi.reasoner.ReasonerInterruptedException;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 import org.semanticweb.owlapi.reasoner.TimeOutException;
 import org.semanticweb.owlapi.reasoner.UnsupportedEntailmentTypeException;
+import org.semanticweb.owlapi.reasoner.impl.DefaultNode;
+import org.semanticweb.owlapi.reasoner.impl.OWLDataPropertyNode;
 import org.semanticweb.owlapi.reasoner.impl.OWLDataPropertyNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
 import org.semanticweb.owlapi.util.Version;
@@ -69,7 +71,7 @@ import uk.ac.manchester.cs.jfact.kernel.voc.Vocabulary;
  * the methods which do not touch the kernel or only affect threadsafe data
  * structures. inner private classes are not synchronized since methods from
  * those classes cannot be invoked from outsize synchronized methods.
- * 
+ *
  */
 public final class JFactReasoner implements OWLReasoner,
 		OWLOntologyChangeListener {
@@ -163,7 +165,7 @@ public final class JFactReasoner implements OWLReasoner,
 	 * then the changes will be stored in a buffer. If the reasoner is a
 	 * non-buffering reasoner then the changes will be automatically flushed
 	 * through to the change filter and passed on to the reasoner.
-	 * 
+	 *
 	 * @param changes
 	 *            The list of raw changes.
 	 */
@@ -233,7 +235,7 @@ public final class JFactReasoner implements OWLReasoner,
 	 * removed from the list of pending changes. Note that even if the list of
 	 * pending changes is non-empty then there may be no changes for the
 	 * reasoner to deal with.
-	 * 
+	 *
 	 * @param added
 	 *            The logical axioms that have been added to the imports closure
 	 *            of the reasoner root ontology
@@ -264,7 +266,7 @@ public final class JFactReasoner implements OWLReasoner,
 
 	/**
 	 * Gets the axioms that should be currently being reasoned over.
-	 * 
+	 *
 	 * @return A collections of axioms (not containing duplicates) that the
 	 *         reasoner should be taking into consideration when reasoning. This
 	 *         set of axioms many not correspond to the current state of the
@@ -291,7 +293,7 @@ public final class JFactReasoner implements OWLReasoner,
 	 * Asks the reasoner implementation to handle axiom additions and removals
 	 * from the imports closure of the root ontology. The changes will not
 	 * include annotation axiom additions and removals.
-	 * 
+	 *
 	 * @param addAxioms
 	 *            The axioms to be added to the reasoner.
 	 * @param removeAxioms
@@ -591,8 +593,9 @@ public final class JFactReasoner implements OWLReasoner,
 
 	// data properties
 	public Node<OWLDataProperty> getTopDataPropertyNode() {
-		return getEquivalentDataProperties(getOWLDataFactory()
-				.getOWLTopDataProperty());
+		OWLDataPropertyNode toReturn=new OWLDataPropertyNode();
+		toReturn.add(getOWLDataFactory().getOWLTopDataProperty());
+		return toReturn;
 	}
 
 	public Node<OWLDataProperty> getBottomDataPropertyNode() {
@@ -628,6 +631,7 @@ public final class JFactReasoner implements OWLReasoner,
 			OWLDataProperty pe) throws InconsistentOntologyException,
 			ReasonerInterruptedException, TimeOutException {
 		checkConsistency();
+
 		return translationMachinery.getDataPropertyTranslator()
 				.getNodeFromPointers(
 						askEquivalentDataProperties(translationMachinery

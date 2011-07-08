@@ -286,7 +286,7 @@ public final class DLVertex extends DLVertexTagDFS {
 			case dtNN:
 				return;
 			case dtDataExpr:
-				o.print(Templates.SPACE, ((DataEntry) concept).getFacet());
+				o.print(Templates.SPACE, ((DataEntry<?>) concept).getFacet());
 				return;
 			case dtDataValue:
 			case dtDataType:

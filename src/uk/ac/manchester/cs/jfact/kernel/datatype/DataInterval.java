@@ -5,11 +5,11 @@ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-public class DataInterval {
+public class DataInterval<O> {
 	/** left border of the interval */
-	protected Literal min;
+	protected DatatypeRepresentation<O> min;
 	/** right border of the interval */
-	protected Literal max;
+	protected DatatypeRepresentation<O> max;
 	/** type of the left border */
 	protected boolean minExcl;
 	/** type of the right border */
@@ -18,7 +18,7 @@ public class DataInterval {
 	public DataInterval() {
 	}
 
-	public DataInterval(DataInterval copy) {
+	public DataInterval(DataInterval<O> copy) {
 		min = copy.min == null ? null : copy.min.getDatatype().build(
 				copy.min.getValue());
 		max = copy.max == null ? null : copy.max.getDatatype().build(
@@ -48,7 +48,7 @@ public class DataInterval {
 	}
 
 	/** update MIN border of an interval with VALUE wrt EXCL */
-	public boolean updateMin(boolean excl, final Literal value) {
+	public boolean updateMin(boolean excl, final DatatypeRepresentation<O> value) {
 		if (hasMin()) {
 			// another min value: check if we need update
 			// constraint is >= or >
@@ -71,7 +71,7 @@ public class DataInterval {
 	}
 
 	/** update MAX border of an interval with VALUE wrt EXCL */
-	public boolean updateMax(boolean excl, final Literal value) {
+	public boolean updateMax(boolean excl, final DatatypeRepresentation<O> value) {
 		if (hasMax()) {
 			// another max value: check if we need update
 			// constraint is <= or <
@@ -94,12 +94,13 @@ public class DataInterval {
 	}
 
 	/** update given border of an interval with VALUE wrt EXCL */
-	public boolean update(boolean minimum, boolean excl, final Literal value) {
+	public boolean update(boolean minimum, boolean excl,
+			final DatatypeRepresentation<O> value) {
 		return minimum ? updateMin(excl, value) : updateMax(excl, value);
 	}
 
 	/** @return true iff all the data is consistent wrt given TYPE */
-	public boolean consistent(final Literal dtype) {
+	public boolean consistent(DatatypeRepresentation<?> dtype) {
 		if (hasMin() && !min.getDatatype().compatible(dtype.getDatatype())) {
 			return false;
 		}

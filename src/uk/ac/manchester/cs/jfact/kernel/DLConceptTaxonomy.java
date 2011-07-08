@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
+import uk.ac.manchester.cs.jfact.helpers.IfDefs;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.kernel.Concept.CTTag;
@@ -339,8 +340,10 @@ public final class DLConceptTaxonomy extends Taxonomy {
 		if (upDirection && !cur.isCommon()) {
 			return false;
 		}
-		if (!upDirection && !possibleSub(cur)) {
-			return false;
+		if (IfDefs.splits) {
+			if (!upDirection && !possibleSub(cur)) {
+				return false;
+			}
 		}
 		return enhancedSubs1(upDirection, cur);
 	}

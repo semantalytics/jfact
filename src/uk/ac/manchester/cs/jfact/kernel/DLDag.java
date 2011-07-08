@@ -271,7 +271,7 @@ public final class DLDag {
 		for (int i = n; i < heap.size(); i++) {
 			DLVertex v = heap.get(i);
 			if (v.getConcept() != null && v.getConcept() instanceof DataEntry) {
-				((DataEntry) v.getConcept()).setBP(bpINVALID);
+				((DataEntry<?>) v.getConcept()).setBP(bpINVALID);
 			}
 		}
 		Helper.resize(heap, n);

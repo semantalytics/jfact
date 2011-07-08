@@ -15,7 +15,7 @@ public final class DataValue implements DataExpression,
 		DataExpressionArg<Datatypes>, NamedEntity {
 	/** name of the entity */
 	protected final String name;
-	private Literal<?> literal;
+	private DatatypeRepresentation<?> literal;
 	private final Datatypes delegate;
 
 	public DataValue(String value, Datatypes T) {

@@ -7,6 +7,7 @@ This library is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import uk.ac.manchester.cs.jfact.kernel.NamedEntry;
 import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
+import uk.ac.manchester.cs.jfact.kernel.datatype.Datatyped;
 import uk.ac.manchester.cs.jfact.kernel.datatype.Datatypes;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataType;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataTypeExpression;
@@ -15,7 +16,7 @@ import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
 public final class DataTypeName extends NamedEntry implements
-		DataTypeExpression, NamedEntity, DataType {
+		DataTypeExpression, NamedEntity, DataType, Datatyped {
 	private final Datatypes datatype;
 
 	public DataTypeName(Datatypes d) {

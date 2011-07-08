@@ -11,7 +11,7 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom;
 /// class to create modules of an ontology wrt module type
 public class TModularizer {
 	/// shared signature signature
-	TSignature sig=new TSignature();
+	TSignature sig = new TSignature();
 	/// internal syntactic locality checker
 	SyntacticLocalityChecker Checker;
 	/// signature updater

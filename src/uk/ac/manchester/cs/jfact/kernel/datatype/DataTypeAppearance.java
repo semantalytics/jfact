@@ -15,9 +15,8 @@ import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.FastSetSimple;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.helpers.Reference;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 
-public final class DataTypeAppearance {
+public final class DataTypeAppearance<O> {
 	public static class DepDTE {
 		protected DepDTE(Object e, DepSet s) {
 			first = e;
@@ -30,11 +29,11 @@ public final class DataTypeAppearance {
 
 	/** positive type appearance */
 	private DepDTE pType;
-	private Datatypes pdatatype;
+	//private Datatypes pdatatype;
 	/** negative type appearance */
 	private DepDTE nType;
 	/** interval of possible values */
-	private List<DepInterval> constraints = new ArrayList<DepInterval>();
+	private List<DepInterval<O>> constraints = new ArrayList<DepInterval<O>>();
 	/** accumulated dep-set */
 	private DepSet accDep = DepSetFactory.create();
 	/** dep-set for the clash */
@@ -45,7 +44,7 @@ public final class DataTypeAppearance {
 	/** local value for the incl/excl flag */
 	private boolean localExcl;
 	/** local value for the added value */
-	private Literal localValue;
+	private DatatypeRepresentation<O> localValue;
 	/** local dep-set for the update */
 	private DepSet localDep;
 
@@ -60,8 +59,8 @@ public final class DataTypeAppearance {
 	}
 
 	/** set the local parameters for updating */
-	private void setLocal(boolean min, boolean excl, final Literal value,
-			final DepSet dep) {
+	private void setLocal(boolean min, boolean excl,
+			DatatypeRepresentation<O> value, DepSet dep) {
 		localMin = min;
 		localExcl = excl;
 		localValue = value.getDatatype().build(value.getValue());
@@ -72,7 +71,7 @@ public final class DataTypeAppearance {
 	 * update and add a single interval I to the constraints. @return true iff
 	 * clash occurs
 	 */
-	private boolean addUpdatedInterval(DepInterval i) {
+	private boolean addUpdatedInterval(DepInterval<O> i) {
 		Reference<DepSet> ref = new Reference<DepSet>(localDep);
 		if (!i.consistent(localValue, ref)) {
 			localDep = ref.getReference();
@@ -93,10 +92,10 @@ public final class DataTypeAppearance {
 	 * update and add all the intervals from the given range. @return true iff
 	 * clash occurs
 	 */
-	private boolean addIntervals(List<DepInterval> c) {
+	private boolean addIntervals(List<DepInterval<O>> c) {
 		final int size = c.size();
 		for (int i = 0; i < size; i++) {
-			if (addUpdatedInterval(new DepInterval(c.get(i)))) {
+			if (addUpdatedInterval(new DepInterval<O>(c.get(i)))) {
 				return true;
 			}
 		}
@@ -132,26 +131,24 @@ public final class DataTypeAppearance {
 	protected void setPType(final DepDTE type) {
 		if (!hasPType()) {
 			pType = type;
-			// cumbersome: the datatype never changes
-			if (pdatatype == null) {
-				// XXX this would be better with a visitor
-				if (pType.first instanceof DataEntry) {
-					pdatatype = ((DataEntry) pType.first).getDatatype();
-				}
-				if (pType.first instanceof DataTypeName) {
-					pdatatype = ((DataTypeName) pType.first).getDatatype();
-				}
-			}
+			//			// cumbersome: the datatype never changes
+			//			if (pdatatype == null) {
+			//				// XXX this would be better with a visitor
+			//				if (pType.first instanceof DataEntry) {
+			//					pdatatype = ((DataEntry) pType.first).getDatatype();
+			//				}
+			//				if (pType.first instanceof DataTypeName) {
+			//					pdatatype = ((DataTypeName) pType.first).getDatatype();
+			//				}
+			//			}
 		}
 	}
 
-	public Datatypes getPDatatype() {
-		return pdatatype;
-	}
-
+	//	public Datatypes getPDatatype() {
+	//		return pdatatype;
+	//	}
 	/** add restrictions [POS]INT to intervals */
-	protected boolean addInterval(boolean pos, final DataInterval Int,
-			final DepSet dep) {
+	protected boolean addInterval(boolean pos, DataInterval<O> Int, DepSet dep) {
 		logger.print(Templates.INTERVAL, (pos ? "+" : "-"), Int);
 		return pos ? addPosInterval(Int, dep) : addNegInterval(Int, dep);
 	}
@@ -165,9 +162,10 @@ public final class DataTypeAppearance {
 		return false;
 	}
 
-	private boolean addPosInterval(final DataInterval Int, final DepSet dep) {
+	private boolean addPosInterval(final DataInterval<O> Int, final DepSet dep) {
 		if (Int.hasMin()) {
-			List<DepInterval> aux = new ArrayList<DepInterval>(constraints);
+			List<DepInterval<O>> aux = new ArrayList<DepInterval<O>>(
+					constraints);
 			constraints.clear();
 			setLocal(true, Int.minExcl, Int.min, dep);
 			if (addIntervals(aux)) {
@@ -176,7 +174,8 @@ public final class DataTypeAppearance {
 			aux.clear();
 		}
 		if (Int.hasMax()) {
-			List<DepInterval> aux = new ArrayList<DepInterval>(constraints);
+			List<DepInterval<O>> aux = new ArrayList<DepInterval<O>>(
+					constraints);
 			constraints.clear();
 			setLocal(false, Int.maxExcl, Int.max, dep);
 			if (addIntervals(aux)) {
@@ -190,8 +189,8 @@ public final class DataTypeAppearance {
 		return false;
 	}
 
-	private boolean addNegInterval(final DataInterval Int, final DepSet dep) {
-		List<DepInterval> aux = new ArrayList<DepInterval>(constraints);
+	private boolean addNegInterval(final DataInterval<O> Int, final DepSet dep) {
+		List<DepInterval<O>> aux = new ArrayList<DepInterval<O>>(constraints);
 		constraints.clear();
 		if (Int.hasMin()) {
 			setLocal(false, !Int.minExcl, Int.min, dep);
@@ -223,24 +222,33 @@ public final class DataTypeAppearance {
 	protected DepDTE getNType() {
 		return nType;
 	}
+
+	public boolean checkCompatibleValue(DataTypeAppearance<?> other,
+			Datatypes thisDatatype, Datatypes otherDatatype) {
+		if (localValue == null && other.localValue == null
+				|| this.localValue.equals(other.localValue)) {
+			return thisDatatype.compatible(otherDatatype, localValue);
+		}
+		return false;
+	}
 }
 
 /** data interval with dep-sets */
-final class DepInterval extends DataInterval {
+final class DepInterval<O> extends DataInterval<O> {
 	/** local dep-set */
 	private FastSetSimple locDep;
 
 	public DepInterval() {
 	}
 
-	public DepInterval(DepInterval d) {
+	public DepInterval(DepInterval<O> d) {
 		super(d);
 		locDep = d.locDep;
 	}
 
 	/** update MIN border of an TYPE's interval with VALUE wrt EXCL */
-	public boolean update(boolean min, boolean excl, final Literal value,
-			final DepSet dep) {
+	public boolean update(boolean min, boolean excl,
+			final DatatypeRepresentation<O> value, final DepSet dep) {
 		if (!super.update(min, excl, value)) {
 			return false;
 		}
@@ -249,7 +257,8 @@ final class DepInterval extends DataInterval {
 	}
 
 	/** check if the interval is consistent wrt given type */
-	public boolean consistent(final Literal type, Reference<DepSet> dep) {
+	public boolean consistent(DatatypeRepresentation<?> type,
+			Reference<DepSet> dep) {
 		if (super.consistent(type)) {
 			return true;
 		}

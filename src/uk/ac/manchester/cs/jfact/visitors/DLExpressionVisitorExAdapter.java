@@ -46,7 +46,7 @@ import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionInto;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleTop;
 
 @SuppressWarnings("unused")
-public class DLExpressionVisitorExAdapter<A> implements
+public abstract class DLExpressionVisitorExAdapter<A> implements
 		DLExpressionVisitorEx<A> {
 	public A visit(ConceptTop expr) {
 		return null;

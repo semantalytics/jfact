@@ -14,15 +14,15 @@ import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
 import uk.ac.manchester.cs.jfact.kernel.NamedEntry;
 
-public class DataEntry extends NamedEntry {
+public class DataEntry<O> extends NamedEntry implements Datatyped {
 	/** corresponding type (Type has null in the field) */
 	private Datatypes type;
 	/** DAG index of the entry */
 	private int pName;
 	/** ComparableDT, used only for values */
-	private Literal comp;
+	private DatatypeRepresentation<O> comp;
 	/** restriction to the entry */
-	private final DataInterval constraints = new DataInterval();
+	private final DataInterval<O> constraints = new DataInterval<O>();
 
 	/** create data entry with given name */
 	public DataEntry(final String name) {
@@ -49,8 +49,9 @@ public class DataEntry extends NamedEntry {
 			if (type == Datatypes.DATETIME) {
 				// then a neutral date of some sort
 				try {
-					comp = type.build(DatatypeFactory.newInstance()
-							.newXMLGregorianCalendar());
+					comp = (DatatypeRepresentation<O>) type
+							.build(DatatypeFactory.newInstance()
+									.newXMLGregorianCalendar());
 				} catch (DatatypeConfigurationException e) {
 					throw new ReasonerInternalException(e);
 				}
@@ -75,7 +76,7 @@ public class DataEntry extends NamedEntry {
 		}
 	}
 
-	public Literal getComp() {
+	public DatatypeRepresentation<O> getComp() {
 		return comp;
 	}
 
@@ -90,7 +91,7 @@ public class DataEntry extends NamedEntry {
 
 	// facet part
 	/** get RW access to constraints of the DE */
-	public DataInterval getFacet() {
+	public DataInterval<O> getFacet() {
 		return constraints;
 	}
 
