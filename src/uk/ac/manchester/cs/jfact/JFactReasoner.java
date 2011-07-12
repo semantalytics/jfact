@@ -401,9 +401,9 @@ public final class JFactReasoner implements OWLReasoner,
 			AxiomNotInProfileException, FreshEntitiesException,
 			InconsistentOntologyException {
 		checkConsistency();
-		//		if (rootOntology.containsAxiom(axiom, true)) {
-		//			return true;
-		//		}
+				if (rootOntology.containsAxiom(axiom, true)) {
+					return true;
+				}
 		//TODO have the exception thrown from the entailment checker
 		boolean entailed = axiom.accept(translationMachinery
 				.getEntailmentChecker());
