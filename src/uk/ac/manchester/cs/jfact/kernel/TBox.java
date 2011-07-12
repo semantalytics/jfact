@@ -811,17 +811,12 @@ public final class TBox {
 		}
 
 		for (Concept pc : concepts.getList()) {
-		//	i=0;
-			System.out.println("TBox.buildDAG() "+pc+"\t"+pc.getDescription());
 			concept2dag(pc);
 		}
 		for (Individual pi : individuals.getList()) {
-		//	i=0;
-			System.out.println("TBox.buildDAG() "+pi+"\t"+pi.getDescription());
 			concept2dag(pi);
 		}
 		for (SimpleRule q : simpleRules) {
-	//		i=0;
 			q.setBpHead(tree2dag(q.tHead));
 		}
 		// builds Roles range and domain
@@ -844,7 +839,6 @@ public final class TBox {
 			list.add(GCI);
 			GCI = DLTreeFactory.createSNFAnd(list);
 		}
-	//	i=0;
 		internalisedGeneralAxiom = tree2dag(GCI);
 		GCI = null;
 		// mark GCI flags
