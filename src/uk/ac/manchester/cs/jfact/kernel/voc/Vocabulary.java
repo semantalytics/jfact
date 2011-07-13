@@ -38,6 +38,7 @@ public final class Vocabulary {
 	public final static String BOOLEAN = "http://www.w3.org/2001/XMLSchema#boolean";
 	public final static String UNSIGNEDBYTE = "http://www.w3.org/2001/XMLSchema#unsignedByte";
 	public final static String UNSIGNEDSHORT = "http://www.w3.org/2001/XMLSchema#unsignedShort";
+	public final static String UNSIGNEDLONG = "http://www.w3.org/2001/XMLSchema#unsignedLong";
 	public final static String UNSIGNEDINT = "http://www.w3.org/2001/XMLSchema#unsignedInt";
 	public final static String NONPOSINT = "http://www.w3.org/2001/XMLSchema#nonPositiveInteger";
 	public final static String DATETIME = "http://www.w3.org/2001/XMLSchema#dateTime";
