@@ -432,6 +432,7 @@ public enum Datatypes {
 		toReturn.put(Vocabulary.DATETIME, DATETIME);
 		//XXX this is wrong
 		toReturn.put(Vocabulary.DATE, DATETIME);
+		toReturn.put(Vocabulary.UNSIGNEDLONG, INT);
 		return toReturn;
 	}
 }
