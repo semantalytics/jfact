@@ -6,6 +6,7 @@ This library is free software; you can redistribute it and/or modify it under th
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -316,6 +317,22 @@ public enum Datatypes {
 			return d != DECIMAL && REAL.compatible(d);
 		}
 	},
+	INTEGER {
+		@Override
+		public DatatypeRepresentation<BigInteger> parse(String s) {
+			return new IntegerRep(new BigInteger(s));
+		}
+
+		@Override
+		public DatatypeRepresentation<BigInteger> build(Object s) {
+			return new IntegerRep((BigInteger) s);
+		}
+
+		@Override
+		public boolean compatible(Datatypes d) {
+			return d != DECIMAL && REAL.compatible(d);
+		}
+	},
 	FRESH {
 		@Override
 		public boolean compatible(Datatypes d) {
@@ -412,7 +429,7 @@ public enum Datatypes {
 		toReturn.put(Vocabulary.XMLLITERAL, STRING);
 		toReturn.put(Vocabulary.STRING, STRING);
 		toReturn.put(Vocabulary.ANY_URI, STRING);
-		toReturn.put(Vocabulary.INTEGER, INT);
+		toReturn.put(Vocabulary.INTEGER, INTEGER);
 		toReturn.put(Vocabulary.INT, INT);
 		toReturn.put(Vocabulary.NON_NEGATIVE_INTEGER, NONNEGINT);
 		toReturn.put(Vocabulary.POSITIVE_INTEGER, POSINT);
@@ -433,6 +450,7 @@ public enum Datatypes {
 		//XXX this is wrong
 		toReturn.put(Vocabulary.DATE, DATETIME);
 		toReturn.put(Vocabulary.UNSIGNEDLONG, INT);
+		toReturn.put(Vocabulary.LONG, INT);
 		return toReturn;
 	}
 }
@@ -1363,6 +1381,77 @@ class RationalRep implements DatatypeRepresentation<BigDecimal> {
 		}
 		if (obj instanceof RationalRep) {
 			return value.equals(((RationalRep) obj).getValue());
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return value.hashCode();
+	}
+}
+
+class IntegerRep implements DatatypeRepresentation<BigInteger> {
+	/// double value of a string
+	protected BigInteger value;
+
+	public Datatypes getDatatype() {
+		return Datatypes.INTEGER;
+	}
+
+	public int compareTo(DatatypeRepresentation<BigInteger> val) {
+		return value.compareTo(val.getValue());
+	}
+
+	public IntegerRep(BigInteger d) {
+		value = d;
+	}
+
+	public IntegerRep(String d) {
+		this(parse(d));
+	}
+
+	private static BigInteger parse(String s) {
+		int i = s.indexOf('/');
+		if (i == -1) {
+			throw new IllegalArgumentException(
+					"invalid string used: no '/' character separating longs: "
+							+ s);
+		}
+		return new BigInteger(s);
+	}
+
+	public BigInteger getValue() {
+		return value;
+	}
+
+	public boolean correctMin(boolean excl) {
+		return excl;
+	}
+
+	public boolean correctMax(boolean excl) {
+		return excl;
+	}
+
+	public boolean lesser(DatatypeRepresentation<BigInteger> other) {
+		return compareTo(other) < 0;
+	}
+
+	@Override
+	public String toString() {
+		return " " + value.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (this == obj) {
+			return true;
+		}
+		if (obj instanceof IntegerRep) {
+			return value.equals(((IntegerRep) obj).getValue());
 		}
 		return false;
 	}
