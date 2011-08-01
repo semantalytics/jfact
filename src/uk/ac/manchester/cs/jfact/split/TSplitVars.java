@@ -9,11 +9,10 @@ import uk.ac.manchester.cs.jfact.kernel.dl.ConceptName;
 
 /// set of all known var splits with access by name
 public class TSplitVars {
-	protected List<TSplitVar> Base = new ArrayList<TSplitVar>();
-	protected Map<ConceptName, TSplitVar> Index = new HashMap<ConceptName, TSplitVar>();
+	protected final List<TSplitVar> Base = new ArrayList<TSplitVar>();
+	protected final Map<ConceptName, TSplitVar> Index = new HashMap<ConceptName, TSplitVar>();
 
-	public TSplitVars() {
-	}
+	public TSplitVars() {}
 
 	/// @return true iff the NAME has split in the set
 	boolean hasCN(ConceptName name) {

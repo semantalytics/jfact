@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.Helper.*;
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
@@ -84,10 +84,9 @@ public final class DLDag {
 		}
 		char Method = str.charAt(0), Order = n >= 2 ? str.charAt(1) : 'a', NGPref = n == 3 ? str
 				.charAt(2) : 'p';
-		return (Method == 'S' || Method == 'D' || Method == 'F'
-				|| Method == 'B' || Method == 'G' || Method == '0')
-				&& (Order == 'a' || Order == 'd')
-				&& (NGPref == 'p' || NGPref == 'n');
+		return (Method == 'S' || Method == 'D' || Method == 'F' || Method == 'B'
+				|| Method == 'G' || Method == '0')
+				&& (Order == 'a' || Order == 'd') && (NGPref == 'p' || NGPref == 'n');
 	}
 
 	/** change order of ADD elements wrt statistic */
@@ -292,8 +291,7 @@ public final class DLDag {
 		if (orSortSat.charAt(0) == '0') {
 			orSortSat = defSat;
 		}
-		logger.print(Templates.SET_ORDER_DEFAULTS2, orSortSat, orSortSub,
-				defSub);
+		logger.print(Templates.SET_ORDER_DEFAULTS2, orSortSat, orSortSub, defSub);
 		if (orSortSub.charAt(0) == '0') {
 			orSortSub = defSub;
 		}
@@ -578,8 +576,7 @@ public final class DLDag {
 				v.merge(v.getRole().getDomainLabel());
 				v.merge(v.getProjRole().getDomainLabel());
 				merge(v.getRole().getDomainLabel(), v.getConceptIndex());
-				v.getRole().getRangeLabel()
-						.merge(v.getProjRole().getRangeLabel());
+				v.getRole().getRangeLabel().merge(v.getProjRole().getRangeLabel());
 				break;
 			case dtIrr: // equate R&D for role
 				v.merge(v.getRole().getDomainLabel());

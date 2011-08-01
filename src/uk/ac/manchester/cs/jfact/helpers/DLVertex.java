@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.helpers;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.Helper.*;
 import static uk.ac.manchester.cs.jfact.kernel.DagTag.*;
 
@@ -160,8 +160,7 @@ public final class DLVertex extends DLVertexTagDFS {
 		}
 		if (obj instanceof DLVertex) {
 			DLVertex v = (DLVertex) obj;
-			return op == v.op && compare(role, v.role)
-					&& compare(projRole, v.projRole)
+			return op == v.op && compare(role, v.role) && compare(projRole, v.projRole)
 					&& conceptIndex == v.conceptIndex && n == v.n
 					&& child.equals(v.child);
 		}
@@ -177,10 +176,9 @@ public final class DLVertex extends DLVertexTagDFS {
 
 	@Override
 	public int hashCode() {
-		return (op == null ? 0 : op.hashCode())
-				+ (role == null ? 0 : role.hashCode())
-				+ (projRole == null ? 0 : projRole.hashCode()) + conceptIndex
-				+ n + (child == null ? 0 : child.hashCode());
+		return (op == null ? 0 : op.hashCode()) + (role == null ? 0 : role.hashCode())
+				+ (projRole == null ? 0 : projRole.hashCode()) + conceptIndex + n
+				+ (child == null ? 0 : child.hashCode());
 	}
 
 	/** return C for concepts/quantifiers/NR verteces */
@@ -273,9 +271,8 @@ public final class DLVertex extends DLVertexTagDFS {
 	}
 
 	public void print(LeveLogger.LogAdapter o) {
-		o.print(Templates.DLVERTEXPrint, stat[0], stat[1], stat[2], stat[3],
-				stat[4], stat[5], stat[6], stat[7], stat[8], stat[9],
-				op.getName());
+		o.print(Templates.DLVERTEXPrint, stat[0], stat[1], stat[2], stat[3], stat[4],
+				stat[5], stat[6], stat[7], stat[8], stat[9], op.getName());
 		switch (op) {
 			case dtAnd:
 			case dtCollection:
@@ -303,8 +300,7 @@ public final class DLVertex extends DLVertexTagDFS {
 				o.print(Templates.SPACE, conceptIndex);
 				return;
 			case dtForall:
-				o.print(Templates.DLVERTEXPrint3, role.getName(), n,
-						conceptIndex);
+				o.print(Templates.DLVERTEXPrint3, role.getName(), n, conceptIndex);
 				return;
 			case dtIrr:
 				o.print(Templates.SPACE, role.getName());
@@ -319,8 +315,7 @@ public final class DLVertex extends DLVertexTagDFS {
 				return;
 			default:
 				throw new ReasonerInternalException(String.format(
-						"Error printing vertex of type %s(%s)", op.getName(),
-						op));
+						"Error printing vertex of type %s(%s)", op.getName(), op));
 		}
 		for (int q : child.sorted()) {
 			o.print(Templates.SPACE, q);

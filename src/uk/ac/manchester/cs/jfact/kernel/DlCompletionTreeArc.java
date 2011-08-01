@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import uk.ac.manchester.cs.jfact.dep.DepSet;
 import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
@@ -28,34 +28,34 @@ public final class DlCompletionTreeArc {
 	 */
 	/** class for restoring edge */
 	final static class EdgeRestorer extends Restorer {
-		private DlCompletionTreeArc p;
-		private Role r;
+		private final DlCompletionTreeArc arc;
+		private final Role role;
 
 		public EdgeRestorer(DlCompletionTreeArc q) {
-			p = q;
-			r = q.role;
+			arc = q;
+			role = q.role;
 		}
 
 		@Override
 		public void restore() {
-			p.role = r;
-			p.reverse.role = r.inverse();
+			arc.role = role;
+			arc.reverse.role = role.inverse();
 		}
 	}
 
 	/** class for restoring dep-set */
 	final static class EdgeDepRestorer extends Restorer {
-		private DlCompletionTreeArc p;
+		private final DlCompletionTreeArc arc;
 		private final DepSet dep;
 
 		public EdgeDepRestorer(DlCompletionTreeArc q) {
-			p = q;
+			arc = q;
 			dep = DepSetFactory.create(q.getDep());
 		}
 
 		@Override
 		public void restore() {
-			p.depSet = DepSetFactory.create(dep);
+			arc.depSet = DepSetFactory.create(dep);
 		}
 	}
 
@@ -65,8 +65,7 @@ public final class DlCompletionTreeArc {
 		v.reverse = this;
 	}
 
-	public DlCompletionTreeArc(final Role r, final DepSet dep,
-			DlCompletionTree n) {
+	public DlCompletionTreeArc(final Role r, final DepSet dep, DlCompletionTree n) {
 		role = r;
 		depSet = DepSetFactory.create(dep);
 		node = n;
@@ -156,7 +155,7 @@ public final class DlCompletionTreeArc {
 
 	/** print current arc */
 	public void print(LogAdapter o) {
-		o.print(Templates.DLCOMPLETIONTREEARC,
-				(isIBlocked() ? "-" : role.getName()), depSet);
+		o.print(Templates.DLCOMPLETIONTREEARC, (isIBlocked() ? "-" : role.getName()),
+				depSet);
 	}
 }

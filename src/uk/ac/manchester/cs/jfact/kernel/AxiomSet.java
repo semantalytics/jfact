@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.*;
 import static uk.ac.manchester.cs.jfact.kernel.InAx.*;
 
@@ -26,13 +26,12 @@ public final class AxiomSet {
 	}
 
 	/// set of absorption action, in order
-	List<Abs> actions = new ArrayList<AxiomSet.Abs>();
+	private final List<Abs> actions = new ArrayList<AxiomSet.Abs>();
 
 	/** add already built GCI p */
 	private void insertGCI(Axiom p) {
 		if (LeveLogger.isAbsorptionActive()) {
-			logger_absorption.print("\n new axiom (" + accumulator.size()
-					+ "):");
+			logger_absorption.print("\n new axiom (" + accumulator.size() + "):");
 			p.dump(logger_absorption);
 		}
 		accumulator.add(p);
@@ -127,8 +126,8 @@ public final class AxiomSet {
 		// clear absorbed and remove them from Accum
 		accumulator = GCIs;
 		if (LeveLogger.isAbsorptionActive()) {
-			logger_absorption.print("\nAbsorption done with "
-					+ accumulator.size() + " GCIs left\n");
+			logger_absorption.print("\nAbsorption done with " + accumulator.size()
+					+ " GCIs left\n");
 		}
 		printStatistics();
 		return size();
@@ -224,12 +223,10 @@ public final class AxiomSet {
 				+ " input axioms\nThere were made " + get("SAbsAction")
 				+ " absorption actions, of which:");
 		if (get("SAbsRepCN") > 0) {
-			logger.print("\n\t" + get("SAbsRepCN")
-					+ " concept name replacements");
+			logger.print("\n\t" + get("SAbsRepCN") + " concept name replacements");
 		}
 		if (get("SAbsRepForall") > 0) {
-			logger.print("\n\t" + get("SAbsRepForall")
-					+ " universals replacements");
+			logger.print("\n\t" + get("SAbsRepForall") + " universals replacements");
 		}
 		if (get("SAbsSplit") > 0) {
 			logger.print("\n\t" + get("SAbsSplit") + " conjunction splits");
@@ -241,19 +238,16 @@ public final class AxiomSet {
 			logger.print("\n\t" + get("SAbsTApply") + " TOP absorptions");
 		}
 		if (get("SAbsCApply") > 0) {
-			logger.print("\n\t" + get("SAbsCApply")
-					+ " concept absorption with " + get("SAbsCAttempt")
-					+ " possibilities");
+			logger.print("\n\t" + get("SAbsCApply") + " concept absorption with "
+					+ get("SAbsCAttempt") + " possibilities");
 		}
 		if (get("SAbsNApply") > 0) {
-			logger.print("\n\t" + get("SAbsNApply")
-					+ " negated concept absorption with " + get("SAbsNAttempt")
-					+ " possibilities");
+			logger.print("\n\t" + get("SAbsNApply") + " negated concept absorption with "
+					+ get("SAbsNAttempt") + " possibilities");
 		}
 		if (get("SAbsRApply") > 0) {
-			logger.print("\n\t" + get("SAbsRApply")
-					+ " role domain absorption with " + get("SAbsRAttempt")
-					+ " possibilities");
+			logger.print("\n\t" + get("SAbsRApply") + " role domain absorption with "
+					+ get("SAbsRAttempt") + " possibilities");
 		}
 		if (!accumulator.isEmpty()) {
 			logger.print("\nThere are " + accumulator.size() + " GCIs left");

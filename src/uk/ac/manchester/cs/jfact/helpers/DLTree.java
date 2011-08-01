@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.helpers;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.kernel.Token.*;
 
 import java.util.ArrayList;
@@ -155,8 +155,7 @@ public abstract class DLTree {
 			}
 			Collection<DLTree> c1 = t1.getChildren();
 			Collection<DLTree> c2 = t2.getChildren();
-			return c1.size() == c2.size() && c1.containsAll(c2)
-					&& c2.containsAll(c1);
+			return c1.size() == c2.size() && c1.containsAll(c2) && c2.containsAll(c1);
 		}
 		return false;
 	}
@@ -214,8 +213,8 @@ class CloningVisitor implements DLTreeVisitorEx<DLTree> {
 	}
 
 	public DLTree visit(TWODLTree t) {
-		return new TWODLTree(new Lexeme(t.elem), t.getLeft().accept(this), t
-				.getRight().accept(this));
+		return new TWODLTree(new Lexeme(t.elem), t.getLeft().accept(this), t.getRight()
+				.accept(this));
 	}
 
 	public DLTree visit(NDLTree t) {
@@ -237,8 +236,8 @@ class ReverseCloningVisitor implements DLTreeVisitorEx<DLTree> {
 	}
 
 	public DLTree visit(TWODLTree t) {
-		return new TWODLTree(new Lexeme(t.elem), t.getRight().accept(this), t
-				.getLeft().accept(this));
+		return new TWODLTree(new Lexeme(t.elem), t.getRight().accept(this), t.getLeft()
+				.accept(this));
 	}
 
 	public DLTree visit(NDLTree t) {
@@ -398,8 +397,7 @@ class NDLTree extends DLTree {
 		super(l);
 		children = new ArrayList<DLTree>();
 		if (trees.size() < 2) {
-			throw new RuntimeException(
-					"not enough elements in the n-ary element");
+			throw new RuntimeException("not enough elements in the n-ary element");
 		}
 		for (DLTree d : trees) {
 			addChild(d);
@@ -410,8 +408,7 @@ class NDLTree extends DLTree {
 		super(l);
 		children = new ArrayList<DLTree>();
 		if (C == null || D == null) {
-			throw new RuntimeException(
-					"not enough elements in the n-ary element");
+			throw new RuntimeException("not enough elements in the n-ary element");
 		}
 		addChild(C);
 		addChild(D);

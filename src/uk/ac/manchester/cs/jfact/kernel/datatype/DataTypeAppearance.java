@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel.datatype;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
 import java.util.ArrayList;
@@ -59,8 +59,8 @@ public final class DataTypeAppearance<O> {
 	}
 
 	/** set the local parameters for updating */
-	private void setLocal(boolean min, boolean excl,
-			DatatypeRepresentation<O> value, DepSet dep) {
+	private void setLocal(boolean min, boolean excl, DatatypeRepresentation<O> value,
+			DepSet dep) {
 		localMin = min;
 		localExcl = excl;
 		localValue = value.getDatatype().build(value.getValue());
@@ -156,16 +156,14 @@ public final class DataTypeAppearance<O> {
 	/** @return true iff PType and NType leads to clash */
 	protected boolean checkPNTypeClash() {
 		if (hasNType() && hasPType()) {
-			return reportClash(DepSetFactory.plus(pType.second, nType.second),
-					"TNT");
+			return reportClash(DepSetFactory.plus(pType.second, nType.second), "TNT");
 		}
 		return false;
 	}
 
 	private boolean addPosInterval(final DataInterval<O> Int, final DepSet dep) {
 		if (Int.hasMin()) {
-			List<DepInterval<O>> aux = new ArrayList<DepInterval<O>>(
-					constraints);
+			List<DepInterval<O>> aux = new ArrayList<DepInterval<O>>(constraints);
 			constraints.clear();
 			setLocal(true, Int.minExcl, Int.min, dep);
 			if (addIntervals(aux)) {
@@ -174,8 +172,7 @@ public final class DataTypeAppearance<O> {
 			aux.clear();
 		}
 		if (Int.hasMax()) {
-			List<DepInterval<O>> aux = new ArrayList<DepInterval<O>>(
-					constraints);
+			List<DepInterval<O>> aux = new ArrayList<DepInterval<O>>(constraints);
 			constraints.clear();
 			setLocal(false, Int.maxExcl, Int.max, dep);
 			if (addIntervals(aux)) {
@@ -226,7 +223,7 @@ public final class DataTypeAppearance<O> {
 	public boolean checkCompatibleValue(DataTypeAppearance<?> other,
 			Datatypes thisDatatype, Datatypes otherDatatype) {
 		if ((localValue == null && other.localValue == null)
-				|| (localValue!=null &&this.localValue.equals(other.localValue))) {
+				|| (localValue != null && this.localValue.equals(other.localValue))) {
 			return thisDatatype.compatible(otherDatatype, localValue);
 		}
 		return false;
@@ -238,8 +235,7 @@ final class DepInterval<O> extends DataInterval<O> {
 	/** local dep-set */
 	private FastSetSimple locDep;
 
-	public DepInterval() {
-	}
+	public DepInterval() {}
 
 	public DepInterval(DepInterval<O> d) {
 		super(d);
@@ -247,9 +243,9 @@ final class DepInterval<O> extends DataInterval<O> {
 	}
 
 	/** update MIN border of an TYPE's interval with VALUE wrt EXCL */
-	public boolean update(boolean min, boolean excl,
+	public boolean update(boolean minValue, boolean excl,
 			final DatatypeRepresentation<O> value, final DepSet dep) {
-		if (!super.update(min, excl, value)) {
+		if (!super.update(minValue, excl, value)) {
 			return false;
 		}
 		locDep = dep == null ? null : dep.getDelegate();
@@ -257,8 +253,7 @@ final class DepInterval<O> extends DataInterval<O> {
 	}
 
 	/** check if the interval is consistent wrt given type */
-	public boolean consistent(DatatypeRepresentation<?> type,
-			Reference<DepSet> dep) {
+	public boolean consistent(DatatypeRepresentation<?> type, Reference<DepSet> dep) {
 		if (super.consistent(type)) {
 			return true;
 		}

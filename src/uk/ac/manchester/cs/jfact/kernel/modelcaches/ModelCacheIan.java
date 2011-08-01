@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel.modelcaches;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 import static uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheState.*;
 import static uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheType.mctIan;
@@ -52,8 +52,7 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	public final int nR;
 
 	/** process CT label in given interval; set Deterministic accordingly */
-	private void processLabelInterval(final DLDag DLHeap,
-			List<ConceptWDep> start) {
+	private void processLabelInterval(final DLDag DLHeap, List<ConceptWDep> start) {
 		for (int i = 0; i < start.size(); i++) {
 			ConceptWDep p = start.get(i);
 			int bp = p.getConcept();
@@ -248,8 +247,9 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	public ModelCacheState isMergableIan(final ModelCacheIan q) {
 		if (posDConcepts.intersects(q.negDConcepts)
 				|| q.posDConcepts.intersects(negDConcepts)
-				|| IfDefs.RKG_USE_SIMPLE_RULES
-				&& getExtra(true).intersect(q.getExtra(true))) {
+		//				|| IfDefs.RKG_USE_SIMPLE_RULES
+		//				&& getExtra(true).intersect(q.getExtra(true))
+		) {
 			return csInvalid;
 		} else if (existsRoles.intersect(q.forallRoles)
 				|| q.existsRoles.intersect(forallRoles)
@@ -260,12 +260,22 @@ public final class ModelCacheIan extends ModelCacheInterface {
 				|| q.posDConcepts.intersects(negNConcepts)
 				|| q.posNConcepts.intersects(negDConcepts)
 				|| q.posNConcepts.intersects(negNConcepts)
-				|| IfDefs.RKG_USE_SIMPLE_RULES
-				&& (getExtra(true).intersect(q.getExtra(false))
-						|| getExtra(false).intersect(q.getExtra(true)) || getExtra(
-						false).intersect(q.getExtra(false)))) {
+		//				|| IfDefs.RKG_USE_SIMPLE_RULES
+		//				&& (getExtra(true).intersect(q.getExtra(false))
+		//						|| getExtra(false).intersect(q.getExtra(true)) || getExtra(
+		//						false).intersect(q.getExtra(false)))
+		) {
 			return csFailed;
 		} else {
+			if (IfDefs.RKG_USE_SIMPLE_RULES && getExtra(true).intersect(q.getExtra(true))) {
+				return csInvalid;
+			}
+			if (IfDefs.RKG_USE_SIMPLE_RULES
+					&& (getExtra(true).intersect(q.getExtra(false))
+							|| getExtra(false).intersect(q.getExtra(true)) || getExtra(
+								false).intersect(q.getExtra(false)))) {
+				return csFailed;
+			}
 			return csValid;
 		}
 	}

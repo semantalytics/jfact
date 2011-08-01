@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
@@ -54,11 +54,10 @@ public final class CWDArray {
 		indexes.put(p.getConcept(), size - 1);
 		int span = Math.max(asPositive(indexes.keySet(0)),
 				indexes.keySet(indexes.size() - 1));
-		// create a cache only if the size is higher than a preset minimum and 
-		//there is at least an element in 20; caches with very dispersed 
+		// create a cache only if the size is higher than a preset minimum and
+		//there is at least an element in 20; caches with very dispersed
 		//elements eat up too much memory
-		createCache = size > cacheLimit
-				&& (double) size / (span + 1) > distribution;
+		createCache = size > cacheLimit && (double) size / (span + 1) > distribution;
 		//		System.out.println("CWDArray.private_add() "+min+"\t"+max+"\tspan:\t"+span+"\t"+base.size()+"\t"+createCache);
 		//		if (!createCache) {
 		//			cache = null;
@@ -74,8 +73,7 @@ public final class CWDArray {
 		//		}
 	}
 
-	static int calls = 0;
-
+	//	static int calls = 0;
 	/** check whether label contains BP (ignoring dep-set) */
 	public boolean contains(int bp) {
 		if (cache == null && createCache) {
@@ -244,7 +242,7 @@ final class UnMerge extends Restorer {
 	public void restore() {
 		label.getBase().set(
 				offset,
-				new ConceptWDep(label.getBase().get(offset).getConcept(),
-						DepSetFactory.create(dep)));
+				new ConceptWDep(label.getBase().get(offset).getConcept(), DepSetFactory
+						.create(dep)));
 	}
 }

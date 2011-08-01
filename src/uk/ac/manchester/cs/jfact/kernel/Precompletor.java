@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import java.util.LinkedList;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
@@ -19,16 +19,13 @@ public final class Precompletor {
 	private final LinkedList<Pair<Individual, DLTree>> toDoList = new LinkedList<Pair<Individual, DLTree>>();
 
 	/** init precompletion process */
-	private void initPrecompletion() {
-	}
+	private void initPrecompletion() {}
 
 	/** propagate RIA and rules throughout individual cloud */
-	private void propagateRIA() {
-	}
+	private void propagateRIA() {}
 
 	/** init labels of related elements with R&D */
-	private void addRnD() {
-	}
+	private void addRnD() {}
 
 	/** init ToDo List with elements in every individuals' description */
 	private void initToDoList() {
@@ -104,15 +101,15 @@ public final class Precompletor {
 				case BOTTOM:
 					return true;
 				case CNAME:
-					addToDoEntry(cur.first, ((Concept) cur.second.elem()
-							.getNE()).getDescription());
+					addToDoEntry(cur.first,
+							((Concept) cur.second.elem().getNE()).getDescription());
 					break;
 				case AND:
 					processTree(cur.first, cur.second);
 					break;
 				case FORALL:
-					processForall(cur.first, (Role) cur.second.getLeft().elem()
-							.getNE(), cur.second.getRight());
+					processForall(cur.first, (Role) cur.second.getLeft().elem().getNE(),
+							cur.second.getRight());
 					break;
 				case NOT:
 					switch (cur.second.getChild().token()) {
@@ -126,8 +123,7 @@ public final class Precompletor {
 					break;
 				default:
 					throw new ReasonerInternalException(
-							"Unsupported concept expression: " + cur.second
-									+ "\n");
+							"Unsupported concept expression: " + cur.second + "\n");
 			}
 		}
 		return false;

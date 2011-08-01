@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.Helper.*;
 import static uk.ac.manchester.cs.jfact.kernel.Token.*;
 
@@ -97,7 +97,7 @@ public class Concept extends ClassifiableEntry {
 	/** features for ~C */
 	private final LogicFeatures negFeatures = new LogicFeatures();
 	/** all extra rules for a given concept */
-	private final FastSet erSet = FastSetFactory.create();
+	private final FastSet extraRules = FastSetFactory.create();
 	protected DLTree description;
 
 	/**
@@ -108,7 +108,7 @@ public class Concept extends ClassifiableEntry {
 		if (p != this) {
 			addParentIfNew(p);
 			if (p.isSingleton() || p.isHasSP()) {
-				setHasSP(); // this has singleton parent
+				setHasSP(true); // this has singleton parent
 			}
 		}
 		// if non-primitive concept was found in a description, it's not CD
@@ -127,18 +127,18 @@ public class Concept extends ClassifiableEntry {
 
 	/** add index of a simple rule in TBox to the ER set */
 	public void addExtraRule(int p) {
-		erSet.add(p);
+		extraRules.add(p);
 		setCompletelyDefined(false);
 	}
 
 	/** check if a concept is in a disjoint relation with anything */
 	public boolean hasExtraRules() {
-		return !erSet.isEmpty();
+		return !extraRules.isEmpty();
 	}
 
 	/** iterator for accessing DJ elements */
-	public FastSet er_begin() {
-		return erSet;
+	public FastSet getExtraRules() {
+		return extraRules;
 	}
 
 	/** check whether a concept is indeed a singleton */
@@ -207,7 +207,7 @@ public class Concept extends ClassifiableEntry {
 	/** init told subsumers of the concept by it's description */
 	public void initToldSubsumers() {
 		toldSubsumers.clear();
-		clearHasSP();
+		setHasSP(false);
 		// normalise description if the only parent is TOP
 		if (isPrimitive() && description != null && description.isTOP()) {
 			removeDescription();
@@ -330,8 +330,8 @@ public class Concept extends ClassifiableEntry {
 		return CTTag.cttTrueCompletelyDefined;
 	}
 
-	private static final EnumSet<Token> replacements = EnumSet.of(CNAME, INAME,
-			RNAME, DNAME);
+	private static final EnumSet<Token> replacements = EnumSet.of(CNAME, INAME, RNAME,
+			DNAME);
 
 	public void push(LinkedList<DLTree> stack, DLTree current) {
 		// push subtrees: stack size increases by one or two, or current is a leaf
@@ -349,8 +349,7 @@ public class Concept extends ClassifiableEntry {
 		Token token = t.token();
 		// the three ifs are actually exclusive
 		if (replacements.contains(token)
-				&& resolveSynonym((ClassifiableEntry) t.elem().getNE()).equals(
-						this)) {
+				&& resolveSynonym((ClassifiableEntry) t.elem().getNE()).equals(this)) {
 			return DLTreeFactory.createTop();
 		}
 		if (token == AND) {
@@ -361,10 +360,8 @@ public class Concept extends ClassifiableEntry {
 			return DLTreeFactory.createSNFAnd(l, t);
 		}
 		if (token == NOT) {
-			if (t.getChild().isAND()
-					|| replacements.contains(t.getChild().token())) {
-				return DLTreeFactory.createSNFNot(replaceWithConstOld(t
-						.getChild()));
+			if (t.getChild().isAND() || replacements.contains(t.getChild().token())) {
+				return DLTreeFactory.createSNFNot(replaceWithConstOld(t.getChild()));
 			}
 		}
 		return t;
@@ -374,8 +371,7 @@ public class Concept extends ClassifiableEntry {
 	 * init told subsumers of the concept by given DESCription; @return TRUE iff
 	 * concept is CD
 	 */
-	public boolean initToldSubsumers(final DLTree _desc,
-			Set<Role> RolesProcessed) {
+	public boolean initToldSubsumers(final DLTree _desc, Set<Role> RolesProcessed) {
 		if (_desc == null || _desc.isTOP()) {
 			return true;
 		}
@@ -385,10 +381,8 @@ public class Concept extends ClassifiableEntry {
 			return addToldSubsumer((Concept) desc.elem().getNE());
 		}
 		if (token == NOT) {
-			if (desc.getChild().token() == FORALL
-					|| desc.getChild().token() == LE) {
-				searchTSbyRoleAndSupers(
-						Role.resolveRole(desc.getChild().getLeft()),
+			if (desc.getChild().token() == FORALL || desc.getChild().token() == LE) {
+				searchTSbyRoleAndSupers(Role.resolveRole(desc.getChild().getLeft()),
 						RolesProcessed);
 			}
 			return false;
@@ -513,14 +507,6 @@ public class Concept extends ClassifiableEntry {
 		return hasSP;
 	}
 
-	private void setHasSP() {
-		hasSP = true;
-	}
-
-	public void clearHasSP() {
-		hasSP = false;
-	}
-
 	public void setHasSP(boolean action) {
 		hasSP = action;
 	}
@@ -554,6 +540,6 @@ public class Concept extends ClassifiableEntry {
 
 	/** make given concept irrelevant to given Labeller's state */
 	public void dropRelevant(long lab) {
-		rel = 0;//lab.clear(rel); 
+		rel = 0;//lab.clear(rel);
 	}
 }

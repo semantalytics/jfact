@@ -76,8 +76,8 @@ public class TModularizer {
 	}
 
 	/// extract module wrt SIGNATURE and TYPE from the set of axioms [BEGIN,END); @return result in the Set
-	public void extract(Collection<Axiom> begin, TSignature signature,
-			ModuleType type, Set<Axiom> Set) {
+	public void extract(Collection<Axiom> begin, TSignature signature, ModuleType type,
+			Set<Axiom> Set) {
 		extract(begin, signature, type);
 		Set.clear();
 		Set.addAll(Module);
@@ -89,8 +89,7 @@ public class TModularizer {
 	}
 
 	/// extract module wrt SIGNATURE and TYPE from O; @return result in the Set
-	public void extract(Ontology O, TSignature signature, ModuleType type,
-			Set<Axiom> Set) {
+	public void extract(Ontology O, TSignature signature, ModuleType type, Set<Axiom> Set) {
 		extract(O.begin(), signature, type, Set);
 	}
 

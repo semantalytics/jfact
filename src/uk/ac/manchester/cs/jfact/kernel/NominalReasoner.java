@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 import static uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry.resolveSynonym;
 
@@ -30,8 +30,7 @@ public final class NominalReasoner extends DlSatTester {
 	///		internal nominal reasoning interface
 	/** create cache entry for given singleton */
 	protected void registerNominalCache(Individual p) {
-		dlHeap.setCache(p.getpName(), createModelCache(p.getNode()
-				.resolvePBlocker()));
+		dlHeap.setCache(p.getpName(), createModelCache(p.getNode().resolvePBlocker()));
 	}
 
 	/** init single nominal node */
@@ -47,12 +46,11 @@ public final class NominalReasoner extends DlSatTester {
 		registerNominalCache(p);
 		if (p.getNode().isPBlocked()) {
 			// BP of the individual P is merged to
-			int bp = p.getNode().getBlocker().label().get_sc().get(0)
-					.getConcept();
+			int bp = p.getNode().getBlocker().label().get_sc().get(0).getConcept();
 			Individual blocker = (Individual) dlHeap.get(bp).getConcept();
 			assert blocker.getNode().equals(p.getNode().getBlocker());
-			tBox.sameIndividuals.put(p, new Pair<Individual, Boolean>(blocker,
-					p.getNode().getPurgeDep().isEmpty()));
+			tBox.sameIndividuals.put(p, new Pair<Individual, Boolean>(blocker, p
+					.getNode().getPurgeDep().isEmpty()));
 		}
 	}
 

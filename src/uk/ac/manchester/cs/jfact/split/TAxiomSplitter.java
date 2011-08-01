@@ -16,16 +16,15 @@ import uk.ac.manchester.cs.jfact.kernel.dl.axioms.AxiomEquivalentConcepts;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ConceptExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Expression;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NamedEntity;
 
 public class TAxiomSplitter {
 	/// keep the single rename: named concept C in an axiom (C=D or C[=D) into a new name C' and new axiom C'=D or C'[=D
 	protected class TRecord {
 		ConceptName oldName, newName;
-		List<Axiom> oldAxioms = new ArrayList<Axiom>();
+		final List<Axiom> oldAxioms = new ArrayList<Axiom>();
 		Axiom newAxiom;
 		TSignature newAxSig;
-		Set<Axiom> Module = new HashSet<Axiom>(); // module for a new axiom
+		final Set<Axiom> Module = new HashSet<Axiom>(); // module for a new axiom
 
 		/// set old axiom as an equivalent AX; create a new one
 		void setEqAx(AxiomEquivalentConcepts ax) {
@@ -47,11 +46,11 @@ public class TAxiomSplitter {
 		}
 
 		/// register the new axiom and retract the old one
-		void Register(Ontology O) {
+		void Register(Ontology ontology) {
 			for (Axiom p : oldAxioms) {
-				O.retract(p);
+				ontology.retract(p);
 			}
-			O.add(newAxiom);
+			ontology.add(newAxiom);
 		}
 
 		/// un-register record
@@ -61,24 +60,23 @@ public class TAxiomSplitter {
 			}
 			newAxiom.setUsed(false);
 		}
-	};
+	}
 
-	protected Set<ConceptName> SubNames = new HashSet<ConceptName>(),
-			Rejects = new HashSet<ConceptName>();
-	List<TRecord> Renames = new ArrayList<TRecord>(),
+	protected final Set<ConceptName> SubNames = new HashSet<ConceptName>();
+	protected final Set<ConceptName> Rejects = new HashSet<ConceptName>();
+	protected final List<TRecord> Renames = new ArrayList<TRecord>(),
 			R2 = new ArrayList<TRecord>();
-	Map<ConceptName, TRecord> ImpRens = new HashMap<ConceptName, TRecord>();
-	Map<ConceptName, Set<AxiomConceptInclusion>> ImplNames = new HashMap<ConceptName, Set<AxiomConceptInclusion>>();
-	//TLISPOntologyPrinter pr;
-	int newNameId;
-	TModularizer mod = new TModularizer();
-	TSignature sig = new TSignature(); // seed signature
-	TSignatureUpdater Updater;
-	Set<TSplitVar> RejSplits = new HashSet<TSplitVar>();
-	Ontology O;
+	protected final Map<ConceptName, TRecord> ImpRens = new HashMap<ConceptName, TRecord>();
+	protected final Map<ConceptName, Set<AxiomConceptInclusion>> ImplNames = new HashMap<ConceptName, Set<AxiomConceptInclusion>>();
+	private int newNameId;
+	protected final TModularizer mod = new TModularizer();
+	protected final TSignature sig = new TSignature(); // seed signature
+	protected final TSignatureUpdater Updater;
+	protected final Set<TSplitVar> RejSplits = new HashSet<TSplitVar>();
+	protected final Ontology O;
 
-	protected/// rename old concept into a new one with a fresh name
-	ConceptName rename(ConceptName oldName) {
+	/// rename old concept into a new one with a fresh name
+	protected ConceptName rename(ConceptName oldName) {
 		ConceptExpression c = O.getExpressionManager().concept(
 				oldName.getName() + "+" + ++newNameId);
 		if (c instanceof ConceptName) {
@@ -88,7 +86,7 @@ public class TAxiomSplitter {
 	}
 
 	/// create a signature of a module corresponding to a new axiom in record
-	void buildSig(TRecord rec) {
+	protected void buildSig(TRecord rec) {
 		sig.clear(); // make sig a signature of a new axiom
 		rec.newAxiom.accept(Updater);
 		mod.extract(O, sig, ModuleType.M_STAR, rec.Module); // build a module/signature for the axiom
@@ -103,7 +101,7 @@ public class TAxiomSplitter {
 	}
 
 	/// add axiom CI in a form C [= D for D != TOP
-	void addSingleCI(AxiomConceptInclusion ci) {
+	protected void addSingleCI(AxiomConceptInclusion ci) {
 		if (ci != null && !(ci.getSupConcept() instanceof ConceptTop)) { // skip axioms with RHS=TOP
 			if (ci.getSubConcept() instanceof ConceptName) {
 				ConceptName name = (ConceptName) ci.getSubConcept();
@@ -117,7 +115,7 @@ public class TAxiomSplitter {
 	}
 
 	/// register all axioms in a form C [= D
-	void registerCIs() {
+	protected void registerCIs() {
 		// FIXME!! check for the case (not D) [= (not C) later
 		// FIXME!! disjoints here as well
 		for (Axiom p : O.begin()) {
@@ -128,7 +126,7 @@ public class TAxiomSplitter {
 	}
 
 	/// check whether an equivalent axiom is splittable; @return split name or NULL if not splittable
-	ConceptName getEqSplit(AxiomEquivalentConcepts ce) {
+	protected ConceptName getEqSplit(AxiomEquivalentConcepts ce) {
 		// check whether it is not a synonym definition
 		ConceptName splitName = null, name = null;
 		int size = ce.size();
@@ -155,7 +153,7 @@ public class TAxiomSplitter {
 	}
 
 	/// make the axiom split for the equivalence axiom
-	void makeEqSplit(AxiomEquivalentConcepts ce) {
+	protected void makeEqSplit(AxiomEquivalentConcepts ce) {
 		if (ce == null) {
 			return;
 		}
@@ -176,18 +174,17 @@ public class TAxiomSplitter {
 	}
 
 	/// split all possible EQ axioms
-	void registerEQ() {
+	protected void registerEQ() {
 		// use index instead of iterators will be invalidated during additions
 		for (int i = 0; i < O.size(); ++i) {
-			if (O.get(i).isUsed()
-					&& O.get(i) instanceof AxiomEquivalentConcepts) {
+			if (O.get(i).isUsed() && O.get(i) instanceof AxiomEquivalentConcepts) {
 				makeEqSplit((AxiomEquivalentConcepts) O.get(i));
 			}
 		}
 	}
 
 	/// make implication split for a given old NAME
-	TRecord makeImpSplit(ConceptName oldName) {
+	protected TRecord makeImpSplit(ConceptName oldName) {
 		ConceptName newName = rename(oldName);
 		//		std::cout << "split " << oldName.getName() << " into " << newName.getName() << "\n";
 		TRecord rec = new TRecord();
@@ -208,7 +205,7 @@ public class TAxiomSplitter {
 	}
 
 	/// get imp record of a given name; create if necessary
-	TRecord getImpRec(ConceptName oldName) {
+	protected TRecord getImpRec(ConceptName oldName) {
 		if (!ImpRens.containsKey(oldName)) {
 			ImpRens.put(oldName, makeImpSplit(oldName));
 		}
@@ -216,14 +213,14 @@ public class TAxiomSplitter {
 	}
 
 	/// create all the necessary records for the implications
-	void createAllImplications() {
+	protected void createAllImplications() {
 		for (TRecord r : Renames) {
 			getImpRec(r.oldName);
 		}
 	}
 
 	/// clear modules of Imp and Eq split records
-	void clearModules() {
+	protected void clearModules() {
 		for (Map.Entry<ConceptName, TRecord> p : ImpRens.entrySet()) {
 			p.getValue().newAxSig.clear();
 		}
@@ -233,12 +230,10 @@ public class TAxiomSplitter {
 	}
 
 	/// check whether the record is independent wrt modularity; @return true iff split was incorrect
-	boolean checkSplitCorrectness(TRecord rec) {
+	protected boolean checkSplitCorrectness(TRecord rec) {
 		if (Rejects.contains(rec.oldName)) {
 			//		unsplit:	// restore the old axiom, get rid of the new one
 			rec.Unregister();
-			//			std::cout << "unsplit " << rec.oldName.getName() << "\n";
-			//delete rec;
 			return true;
 		}
 		TRecord imp = getImpRec(rec.oldName);
@@ -246,26 +241,22 @@ public class TAxiomSplitter {
 			buildSig(imp);
 		}
 		buildSig(rec);
-		if (rec.newAxSig.contains((NamedEntity) rec.oldName)
+		if (rec.newAxSig.containsNamedEntity(rec.oldName)
 				|| !rec.newAxSig.intersect(imp.newAxSig).isEmpty()) {
 			// mark name as rejected, un-register imp
 			Rejects.add(rec.oldName);
 			imp.Unregister();
-			//goto unsplit;
 			rec.Unregister();
-			//			std::cout << "unsplit " << rec.oldName.getName() << "\n";
-			//delete rec;
 			return true;
 		} else // keep the split
 		{
 			R2.add(rec);
-			//			std::cout << "keep split " << rec.oldName.getName() << "\n";
 			return false;
 		}
 	}
 
 	/// move all independent splits in R2; delete all the rest
-	void keepIndependentSplits() {
+	protected void keepIndependentSplits() {
 		boolean change;
 		int oSize = Renames.size();
 		do {
@@ -276,16 +267,15 @@ public class TAxiomSplitter {
 				change |= checkSplitCorrectness(r);
 			}
 			Renames.clear();
-			Renames = R2;
-			R2 = new ArrayList<TRecord>();
-			//	R2.clear();
+			Renames.addAll(R2);
+			R2.clear();
 		} while (change);
-		System.out.print("There were made " + Renames.size()
-				+ " splits out of " + oSize + " tries\n");
+		System.out.print("There were made " + Renames.size() + " splits out of " + oSize
+				+ " tries\n");
 	}
 
 	/// split all implications corresponding to oldName; @return split pointer
-	TSplitVar splitImplicationsFor(ConceptName oldName) {
+	protected TSplitVar splitImplicationsFor(ConceptName oldName) {
 		// check whether we already did translation for such a name
 		if (O.Splits.hasCN(oldName)) {
 			return O.Splits.get(oldName);
@@ -300,7 +290,7 @@ public class TAxiomSplitter {
 	}
 
 	/// split all implications for which equivalences were split as well
-	void splitImplications() {
+	protected void splitImplications() {
 		for (TRecord r : Renames) {
 			if (!Rejects.contains(r.oldName)) {
 				TSplitVar split = splitImplicationsFor(r.oldName);
@@ -311,7 +301,7 @@ public class TAxiomSplitter {
 		}
 	}
 
-	public TAxiomSplitter(Ontology o) { //pr(std::cout), 
+	public TAxiomSplitter(Ontology o) { //pr(std::cout),
 		newNameId = 0;
 		Updater = new TSignatureUpdater(sig);
 		O = o;

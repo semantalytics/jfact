@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel.datatype;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
 import java.util.ArrayList;
@@ -31,10 +31,8 @@ public final class DataTypeReasoner {
 	private final Reference<DepSet> clashDep = new Reference<DepSet>();
 
 	/** process data value */
-	private <O> boolean processDataValue(boolean pos, DataEntry<O> c,
-			final DepSet dep) {
-		DataTypeAppearance<O> type = (DataTypeAppearance<O>) map.get(c
-				.getDatatype());
+	private <O> boolean processDataValue(boolean pos, DataEntry<O> c, final DepSet dep) {
+		DataTypeAppearance<O> type = (DataTypeAppearance<O>) map.get(c.getDatatype());
 		if (pos) {
 			type.setPType(new DepDTE(c, dep));
 		}
@@ -52,8 +50,7 @@ public final class DataTypeReasoner {
 		if (constraints.isEmpty()) {
 			return false;
 		}
-		DataTypeAppearance<O> type = (DataTypeAppearance<O>) map.get(c
-				.getDatatype());
+		DataTypeAppearance<O> type = (DataTypeAppearance<O>) map.get(c.getDatatype());
 		if (pos) {
 			type.setPType(new DepDTE(c, dep));
 		}
@@ -100,8 +97,7 @@ public final class DataTypeReasoner {
 			case dtDataType: {
 				Datatypes t = ((Datatyped) dataEntry).getDatatype();
 				DataTypeAppearance<?> type = map.get(t);
-				logger.print(Templates.INTERVAL, (p > 0 ? "+" : "-"),
-						dataEntry.getName());
+				logger.print(Templates.INTERVAL, (p > 0 ? "+" : "-"), dataEntry.getName());
 				if (p > 0) {
 					type.setPType(getDTE(p, dep));
 				} else {
@@ -142,17 +138,19 @@ public final class DataTypeReasoner {
 				types.add(k);
 			}
 		}
-		if (types.size() == 0) {
+		int size = types.size();
+		if (size == 0) {
 			// empty, nothing to do
 			return false;
 		}
-		if (types.size() == 1) {
+		if (size == 1) {
 			// only one, positive or negative - just check it
 			return types.get(0).getValue().checkPNTypeClash();
 		}
-		if (types.size() > 1) {
+		if (size > 1) {
 			// check if any value is already clashing with itself
-			for (Map.Entry<Datatypes, DataTypeAppearance<?>> p : types) {
+			for (int i = 0; i < size; i++) {
+				Map.Entry<Datatypes, DataTypeAppearance<?>> p = types.get(i);
 				if (p.getValue().checkPNTypeClash()) {
 					logger.print(Templates.CHECKCLASH);
 					clashDep.setReference(p.getValue().getPType().second);
@@ -162,49 +160,43 @@ public final class DataTypeReasoner {
 			// for every two datatypes, they must either be disjoint and opposite, or one subdatatype of the other
 			// if a subtype b, then b and not a, otherwise clash
 			// a subtype b => b compatible a (all a are b) but not a compatible b (some b might not be a)
-			for (int i = 0; i < types.size(); i++) {
+			for (int i = 0; i < size; i++) {
 				Map.Entry<Datatypes, DataTypeAppearance<?>> p1 = types.get(i);
-				for (int j = i + 1; j < types.size(); j++) {
-					Map.Entry<Datatypes, DataTypeAppearance<?>> p2 = types
-							.get(j);
-					if (p1.getKey().compatible(p2.getKey())
-							&& p1.getValue().hasNType()
+				for (int j = i + 1; j < size; j++) {
+					Map.Entry<Datatypes, DataTypeAppearance<?>> p2 = types.get(j);
+					if (p1.getKey().compatible(p2.getKey()) && p1.getValue().hasNType()
 							&& p2.getValue().hasPType()) {
 						// clash: not(Literal) && INT is impossible
 						logger.print(Templates.CHECKCLASH);
-						clashDep.setReference(DepSetFactory.plus(p1.getValue()
-								.hasPType() ? p1.getValue().getPType().second
-								: p1.getValue().getNType().second, p2
-								.getValue().hasPType() ? p2.getValue()
-								.getPType().second
-								: p2.getValue().getNType().second));
+						clashDep.setReference(DepSetFactory
+								.plus(p1.getValue().hasPType() ? p1.getValue().getPType().second
+										: p1.getValue().getNType().second, p2.getValue()
+										.hasPType() ? p2.getValue().getPType().second
+										: p2.getValue().getNType().second));
 						return true;
 					}
-					if (p2.getKey().compatible(p1.getKey())
-							&& p2.getValue().hasNType()
+					if (p2.getKey().compatible(p1.getKey()) && p2.getValue().hasNType()
 							&& p1.getValue().hasPType()) {
 						// clash: not(Literal) && INT is impossible
 						logger.print(Templates.CHECKCLASH);
-						clashDep.setReference(DepSetFactory.plus(p1.getValue()
-								.hasPType() ? p1.getValue().getPType().second
-								: p1.getValue().getNType().second, p2
-								.getValue().hasPType() ? p2.getValue()
-								.getPType().second
-								: p2.getValue().getNType().second));
+						clashDep.setReference(DepSetFactory
+								.plus(p1.getValue().hasPType() ? p1.getValue().getPType().second
+										: p1.getValue().getNType().second, p2.getValue()
+										.hasPType() ? p2.getValue().getPType().second
+										: p2.getValue().getNType().second));
 						return true;
 					}
 					if (!p1.getKey().compatible(p2.getKey())
 							&& !p2.getKey().compatible(p1.getKey())) {
 						// they're disjoint: they can't be both positive (but can be both negative)
-						if (p1.getValue().hasPType()
-								&& p2.getValue().hasPType()) {
+						if (p1.getValue().hasPType() && p2.getValue().hasPType()) {
 							// special case: disjoint datatypes with overlapping value spaces, e.g., nongeginteger, and nonposinteger and value = 0
-							if (!p1.getValue().checkCompatibleValue(
-									p2.getValue(), p1.getKey(), p2.getKey())) {
+							if (!p1.getValue().checkCompatibleValue(p2.getValue(),
+									p1.getKey(), p2.getKey())) {
 								logger.print(Templates.CHECKCLASH);
-								clashDep.setReference(DepSetFactory.plus(p1
-										.getValue().getPType().second, p2
-										.getValue().getPType().second));
+								clashDep.setReference(DepSetFactory.plus(p1.getValue()
+										.getPType().second,
+										p2.getValue().getPType().second));
 								return true;
 							}
 						}
@@ -213,7 +205,7 @@ public final class DataTypeReasoner {
 			}
 			return false;
 		}
-		// this will never be reached because the previous ifs are a partition of the possible 
+		// this will never be reached because the previous ifs are a partition of the possible
 		//sizes for types, but the compiler is not smart enough to see this
 		return false;
 		//		DataTypeAppearance type = null;

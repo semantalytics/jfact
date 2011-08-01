@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 import static uk.ac.manchester.cs.jfact.kernel.ToDoPriorMatrix.*;
 
@@ -56,8 +56,7 @@ public final class ToDoList {
 		@Override
 		public String toString() {
 			return "Node(" + node.getId() + "), offset("
-					+ new ConceptWDep(concept, DepSetFactory.create(delegate))
-					+ ")";
+					+ new ConceptWDep(concept, DepSetFactory.create(delegate)) + ")";
 		}
 
 		public void print(LogAdapter l) {
@@ -223,9 +222,8 @@ public final class ToDoList {
 
 		@Override
 		public String toString() {
-			return "{" + (!isEmpty() ? _Wait.get(sPointer) : "empty")
-					+ " sPointer: " + sPointer + " size: " + size + " Wait: "
-					+ _Wait + "}";
+			return "{" + (!isEmpty() ? _Wait.get(sPointer) : "empty") + " sPointer: "
+					+ sPointer + " size: " + size + " Wait: " + _Wait + "}";
 		}
 	}
 
@@ -240,13 +238,12 @@ public final class ToDoList {
 		/** save number-of-entries to do */
 		protected int noe;
 
-		TODOListSaveState() {
-		}
+		TODOListSaveState() {}
 
 		@Override
 		public String toString() {
-			return "" + noe + " " + backupID_sp + "," + backupID_ep + " "
-					+ backupNN + " " + Arrays.toString(backup);
+			return "" + noe + " " + backupID_sp + "," + backupID_ep + " " + backupNN
+					+ " " + Arrays.toString(backup);
 		}
 	}
 
@@ -313,8 +310,7 @@ public final class ToDoList {
 	/** waiting ops queue for <= ops in nominal nodes */
 	private QueueQueue queueNN = new QueueQueue();
 	/** waiting ops queues */
-	private List<ArrayQueue> waitQueue = new ArrayList<ArrayQueue>(
-			nRegularOptions);
+	private List<ArrayQueue> waitQueue = new ArrayList<ArrayQueue>(nRegularOptions);
 	/** stack of saved states */
 	private SaveStack<TODOListSaveState> saveStack = new SaveStack<TODOListSaveState>();
 	/** priority matrix */
@@ -352,8 +348,7 @@ public final class ToDoList {
 	}
 
 	/** init priorities via Options */
-	public void initPriorities(final IFOptionSet Options,
-			final String optionName) {
+	public void initPriorities(final IFOptionSet Options, final String optionName) {
 		matrix.initPriorities(Options.getText(optionName), optionName);
 	}
 
@@ -378,8 +373,7 @@ public final class ToDoList {
 	 * add entry with given NODE and CONCEPT with given OFFSET to the Todo table
 	 */
 	public void addEntry(DlCompletionTree node, DagTag type, ConceptWDep C) {
-		int index = matrix.getIndex(type, C.getConcept() > 0,
-				node.isNominalNode());
+		int index = matrix.getIndex(type, C.getConcept() > 0, node.isNominalNode());
 		switch (index) {
 			case nRegularOptions: // unused entry
 				return;
@@ -454,8 +448,7 @@ class ToDoPriorMatrix {
 	private int indexLE;
 	private int indexGE;
 
-	public ToDoPriorMatrix() {
-	}
+	public ToDoPriorMatrix() {}
 
 	/** number of regular options (o- and NN-rules are not included) */
 	protected static final int nRegularOptions = 7;
@@ -483,16 +476,14 @@ class ToDoPriorMatrix {
 		indexGE = options.charAt(6) - '0';
 		// correctness checking
 		if (indexAnd >= nRegularOptions || indexOr >= nRegularOptions
-				|| indexExists >= nRegularOptions
-				|| indexForall >= nRegularOptions || indexGE >= nRegularOptions
-				|| indexLE >= nRegularOptions) {
+				|| indexExists >= nRegularOptions || indexForall >= nRegularOptions
+				|| indexGE >= nRegularOptions || indexLE >= nRegularOptions) {
 			throw new ReasonerInternalException("ToDo List option out of range");
 		}
 		// inform about used rules order
 		if (IfDefs.USE_LOGGING) {
-			logger.print(String.format("\nInit %s = %s%s%s%s%s%s", optionName,
-					indexAnd, indexOr, indexExists, indexForall, indexLE,
-					indexGE));
+			logger.print(String.format("\nInit %s = %s%s%s%s%s%s", optionName, indexAnd,
+					indexOr, indexExists, indexForall, indexLE, indexGE));
 		}
 	}
 

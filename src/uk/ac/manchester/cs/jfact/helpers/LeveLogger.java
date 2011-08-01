@@ -1,17 +1,17 @@
 package uk.ac.manchester.cs.jfact.helpers;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import java.io.IOException;
 import java.io.OutputStream;
 
 public final class LeveLogger {
 	public enum Templates {
-		TAX_TRYING("\nTAX: trying '%s' [= '%s'... "), INTERVAL(" %s%s"), CLASH(
-				" DT-%s"), CHECKCLASH(" DT-TT"), CREATE_EDGE(" ce(%s%s%s,%s)"), IS_BLOCKED_FAILURE_BY(
+		TAX_TRYING("\nTAX: trying '%s' [= '%s'... "), INTERVAL(" %s%s"), CLASH(" DT-%s"), CHECKCLASH(
+				" DT-TT"), CREATE_EDGE(" ce(%s%s%s,%s)"), IS_BLOCKED_FAILURE_BY(
 				" fb(%s,%s)"), LOG_NODE_BLOCKED(" %sb(%s%s%s)"), LOG_SR_NODE(
 				" %s(%s[%s],%s)"), DETERMINE_SORTS(
 				"\nThere are %s different sorts in TBox\n"), SET_ORDER_DEFAULTS1(
@@ -22,9 +22,8 @@ public final class LeveLogger {
 				"\nDAG entry %s is unsatisfiable\n"), CAN_BE_CACHED(" cf(%s)"), CHECK_MERGE_CLASH(
 				" x(%s,%s%s)"), COMMON_TACTIC_BODY_OR(" E(%s)"), COMMON_TACTIC_BODY_SOME(
 				" nf(%s)"), COMMON_TACTIC_BODY_SOME2(" f(%s):"), CONSISTENT_NOMINAL(
-				"\nThe ontology is %s"), DN(" DN(%s%s)"), CN(" cn(%s%s)"), NN(
-				" NN(%s)"), E(" E(%s,%s,%s)"), LOG_FINISH_ENTRY(" Clash%s"), SPACE(
-				" %s"), DLVERTEXPrint(
+				"\nThe ontology is %s"), DN(" DN(%s%s)"), CN(" cn(%s%s)"), NN(" NN(%s)"), E(
+				" E(%s,%s,%s)"), LOG_FINISH_ENTRY(" Clash%s"), SPACE(" %s"), DLVERTEXPrint(
 				"[d(%s/%s),s(%s/%s),b(%s/%s),g(%s/%s),f(%s/%s)] %s"), DLVERTEXPrint2(
 				"(%s) %s %s"), DLVERTEXPrint3(" %s{%s} %s"), DLVERTEXPrint4(
 				" %s, %s => %s"), LOGCACHEENTRY("\nConst cache: element %s"), DLCOMPLETIONTREEARC(
@@ -40,8 +39,7 @@ public final class LeveLogger {
 				"\n----------------------\nChecking subsumption '%s [= %s':\n"), ISSUBHOLDS2(
 				"\nThe '%s [= %s' subsumption%s holds w.r.t. TBox"), INCORPORATE(
 				"\nTAX:inserting '%s' with up = {"), MERGE(" m(%s->%s)"), RESTORE(
-				" sr(%s)"), CLASSIFY_CONCEPTS(
-				"\n\n---Start classifying %s concepts"), CLASSIFY_CONCEPTS2(
+				" sr(%s)"), CLASSIFY_CONCEPTS("\n\n---Start classifying %s concepts"), CLASSIFY_CONCEPTS2(
 				"\n---Done: %s %s concepts classified"), READ_CONFIG(
 				"Init useCompletelyDefined = %s\nInit useRelevantOnly = %s\nInit dumpQuery = %s\nInit alwaysPreferEquals = %s\nInit usePrecompletion = %s"), TOLD_SUBSUMERS(
 				" '%s'"), TRANSFORM_TOLD_CYCLES(
@@ -105,62 +103,43 @@ public final class LeveLogger {
 
 	@SuppressWarnings("unused")
 	public static class LogAdapterImpl implements LogAdapter {
-		public void print(Templates t, Object... strings) {
-		}
+		public void print(Templates t, Object... strings) {}
 
-		public void println(Templates t, Object... strings) {
-		}
+		public void println(Templates t, Object... strings) {}
 
-		public void print(int i) {
-		}
+		public void print(int i) {}
 
-		public void println(int i) {
-		}
+		public void println(int i) {}
 
-		public void print(double d) {
-		}
+		public void print(double d) {}
 
-		public void println(double d) {
-		}
+		public void println(double d) {}
 
-		public void print(float f) {
-		}
+		public void print(float f) {}
 
-		public void println(float f) {
-		}
+		public void println(float f) {}
 
-		public void print(boolean b) {
-		}
+		public void print(boolean b) {}
 
-		public void println(boolean b) {
-		}
+		public void println(boolean b) {}
 
-		public void print(byte b) {
-		}
+		public void print(byte b) {}
 
-		public void println(byte b) {
-		}
+		public void println(byte b) {}
 
-		public void print(char c) {
-		}
+		public void print(char c) {}
 
-		public void println(char c) {
-		}
+		public void println(char c) {}
 
-		public void print(short s) {
-		}
+		public void print(short s) {}
 
-		public void println(short s) {
-		}
+		public void println(short s) {}
 
-		public void print(String s) {
-		}
+		public void print(String s) {}
 
-		public void println(String s) {
-		}
+		public void println(String s) {}
 
-		public void println() {
-		}
+		public void println() {}
 	}
 
 	public static class LogAdapterStream implements LogAdapter {
@@ -270,7 +249,7 @@ public final class LeveLogger {
 	}
 
 	public static class LogAdapterStringBuilder implements LogAdapter {
-		StringBuilder b = new StringBuilder();
+		private final StringBuilder b = new StringBuilder();
 
 		public void print(Templates t, Object... strings) {
 			b.append(String.format(t.getTemplate(), strings));

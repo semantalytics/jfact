@@ -120,7 +120,7 @@ class TExpressionSignatureUpdater implements DLExpressionVisitor {
 
 	/// helper for the named entity
 	void vE(NamedEntity e) {
-		sig.add(e.getEntity());
+		sig.add(e);
 	}
 
 	/// array helper
@@ -136,11 +136,9 @@ class TExpressionSignatureUpdater implements DLExpressionVisitor {
 	}
 
 	// concept expressions
-	public void visit(ConceptTop expr) {
-	}
+	public void visit(ConceptTop expr) {}
 
-	public void visit(ConceptBottom expr) {
-	}
+	public void visit(ConceptBottom expr) {}
 
 	public void visit(ConceptName expr) {
 		vE(expr);
@@ -226,11 +224,9 @@ class TExpressionSignatureUpdater implements DLExpressionVisitor {
 	}
 
 	// object role expressions
-	public void visit(ObjectRoleTop expr) {
-	}
+	public void visit(ObjectRoleTop expr) {}
 
-	public void visit(ObjectRoleBottom expr) {
-	}
+	public void visit(ObjectRoleBottom expr) {}
 
 	public void visit(ObjectRoleName expr) {
 		vE(expr);
@@ -255,56 +251,41 @@ class TExpressionSignatureUpdater implements DLExpressionVisitor {
 	}
 
 	// data role expressions
-	public void visit(DataRoleTop expr) {
-	}
+	public void visit(DataRoleTop expr) {}
 
-	public void visit(DataRoleBottom expr) {
-	}
+	public void visit(DataRoleBottom expr) {}
 
 	public void visit(DataRoleName expr) {
 		vE(expr);
 	}
 
 	// data expressions
-	public void visit(DataTop expr) {
-	}
+	public void visit(DataTop expr) {}
 
-	public void visit(DataBottom expr) {
-	}
+	public void visit(DataBottom expr) {}
 
-	public void visit(DataTypeName expr) {
-	}
+	public void visit(DataTypeName expr) {}
 
-	public void visit(DataTypeRestriction expr) {
-	}
+	public void visit(DataTypeRestriction expr) {}
 
-	public void visit(DataValue expr) {
-	}
+	public void visit(DataValue expr) {}
 
-	public void visit(DataNot expr) {
-	}
+	public void visit(DataNot expr) {}
 
-	public void visit(DataAnd expr) {
-	}
+	public void visit(DataAnd expr) {}
 
-	public void visit(DataOr expr) {
-	}
+	public void visit(DataOr expr) {}
 
-	public void visit(DataOneOf expr) {
-	}
+	public void visit(DataOneOf expr) {}
 
 	// facets
-	public void visit(FacetMinInclusive expr) {
-	}
+	public void visit(FacetMinInclusive expr) {}
 
-	public void visit(FacetMinExclusive expr) {
-	}
+	public void visit(FacetMinExclusive expr) {}
 
-	public void visit(FacetMaxInclusive expr) {
-	}
+	public void visit(FacetMaxInclusive expr) {}
 
-	public void visit(FacetMaxExclusive expr) {
-	}
+	public void visit(FacetMaxExclusive expr) {}
 }
 
 /// update signature by adding the signature of a given axiom to it

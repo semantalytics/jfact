@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 import static uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry.resolveSynonym;
 
@@ -100,8 +100,8 @@ public class Taxonomy {
 	}
 
 	/** apply ACTOR to subgraph starting from NODE as defined by flags; */
-	public void getRelativesInfo(TaxonomyVertex node, Actor actor,
-			boolean needCurrent, boolean onlyDirect, boolean upDirection) {
+	public void getRelativesInfo(TaxonomyVertex node, Actor actor, boolean needCurrent,
+			boolean onlyDirect, boolean upDirection) {
 		// if current node processed OK and there is no need to continue -- exit
 		// this is the helper to the case like getDomain():
 		//   if there is a named concept that represent's a domain -- that's what we need
@@ -159,8 +159,7 @@ public class Taxonomy {
 	}
 
 	/** explicitely run TD phase */
-	protected void runTopDown() {
-	}
+	protected void runTopDown() {}
 
 	/** check if it is possible to skip BU phase */
 	protected boolean needBottomUp() {
@@ -168,12 +167,10 @@ public class Taxonomy {
 	}
 
 	/** explicitely run BU phase */
-	protected void runBottomUp() {
-	}
+	protected void runBottomUp() {}
 
 	/** actions that to be done BEFORE entry will be classified */
-	protected void preClassificationActions() {
-	}
+	protected void preClassificationActions() {}
 
 	//--	DFS-based classification
 	/** add top entry together with its known subsumers */
@@ -193,8 +190,7 @@ public class Taxonomy {
 		return true;
 	}
 
-	public Taxonomy(final ClassifiableEntry pTop,
-			final ClassifiableEntry pBottom) {
+	public Taxonomy(final ClassifiableEntry pTop, final ClassifiableEntry pBottom) {
 		current = new TaxonomyVertex();
 		curEntry = null;
 		nEntries = 0;
@@ -519,8 +515,7 @@ public class Taxonomy {
 		assert !waitStack.isEmpty();
 		ClassifiableEntry p = waitStack.peek();
 		classifyTop();
-		StringBuilder b = new StringBuilder(
-				"\n* Concept definitions cycle found: ");
+		StringBuilder b = new StringBuilder("\n* Concept definitions cycle found: ");
 		b.append(p.getName());
 		b.append('\n');
 		while (!waitStack.isEmpty()) {
@@ -542,7 +537,7 @@ public class Taxonomy {
 		// overwise -- value it...
 		node.setValued(true, valueLabel);
 		// ... and value all parents
-		List<TaxonomyVertex> list = node.neigh(/*upDirection=*/true);
+		List<TaxonomyVertex> list = node.neigh(/* upDirection= */true);
 		for (int i = 0; i < list.size(); i++) {
 			propagateTrueUp(list.get(i));
 		}

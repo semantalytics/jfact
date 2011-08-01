@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.kernel.InAx.*;
 import static uk.ac.manchester.cs.jfact.kernel.Token.*;
 
@@ -29,8 +29,7 @@ public final class Axiom {
 		for (DLTree p : disjuncts) {
 			if (p.token() == NOT && p.getChild().isName()
 					&& (Concept = getConcept(p.getChild())).isPrimitive()
-					&& !Concept.isSingleton()
-					&& Concept.getDescription() == null) {
+					&& !Concept.isSingleton() && Concept.getDescription() == null) {
 				SAbsNAttempt();
 				Cons.add(p);
 			}
@@ -52,10 +51,8 @@ public final class Axiom {
 			if (Cons.size() > 1) {
 				LeveLogger.logger_absorption.print(" (other options are");
 				for (int j = 1; j < Cons.size(); ++j) {
-					LeveLogger.logger_absorption
-							.print(" "
-									+ InAx.getConcept(Cons.get(j).getChild())
-											.getName());
+					LeveLogger.logger_absorption.print(" "
+							+ InAx.getConcept(Cons.get(j).getChild()).getName());
 				}
 				LeveLogger.logger_absorption.print(")");
 			}
@@ -101,8 +98,7 @@ public final class Axiom {
 		Axiom ret = copy(pos);
 		ret.add(InAx.getConcept(pos).getDescription().copy());
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.print(" simplify ~CN expression for "
-					+ pos);
+			LeveLogger.logger_absorption.print(" simplify ~CN expression for " + pos);
 		}
 		return ret;
 	}
@@ -147,16 +143,14 @@ public final class Axiom {
 	}
 
 	/** create an empty GCI */
-	public Axiom() {
-	}
+	public Axiom() {}
 
-	/** create a copy of a given GCI */
-	public Axiom(final Axiom ax) {
-		for (DLTree i : ax.disjuncts) {
-			disjuncts.add(i.copy());
-		}
-	}
-
+	//	/** create a copy of a given GCI */
+	//	public Axiom(final Axiom ax) {
+	//		for (DLTree i : ax.disjuncts) {
+	//			disjuncts.add(i.copy());
+	//		}
+	//	}
 	/** add DLTree to an axiom */
 	public void add(DLTree p) {
 		if (InAx.isBot(p)) {
@@ -207,8 +201,7 @@ public final class Axiom {
 		SAbsRepForall();
 		DLTree pAll = pos.getChild(); // (all R ~C)
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.print(" simplify ALL expression"
-					+ pAll);
+			LeveLogger.logger_absorption.print(" simplify ALL expression" + pAll);
 		}
 		Axiom ret = copy(pos);
 		ret.add(KB.getTree(KB.replaceForall(pAll.copy())));
@@ -236,8 +229,7 @@ public final class Axiom {
 				case BOTTOM: // axiom in the form T [= T or ...; nothing to do
 					SAbsBApply();
 					if (IfDefs.RKG_DEBUG_ABSORPTION) {
-						LeveLogger.logger_absorption
-								.print(" Absorb into BOTTOM");
+						LeveLogger.logger_absorption.print(" Absorb into BOTTOM");
 					}
 					return true;
 				case TOP: // skip it here
@@ -257,8 +249,8 @@ public final class Axiom {
 					SAbsBApply();
 					if (IfDefs.RKG_DEBUG_ABSORPTION) {
 						LeveLogger.logger_absorption
-								.print(" Absorb into BOTTOM due to (not" + q
-										+ ") and" + s);
+								.print(" Absorb into BOTTOM due to (not" + q + ") and"
+										+ s);
 					}
 					return true;
 				}
@@ -333,17 +325,14 @@ public final class Axiom {
 			role = Role.resolveRole(Cons.get(0).getChild().getLeft());
 		}
 		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption
-					.print(" R-Absorb GCI to the domain of role "
-							+ role.getName());
+			LeveLogger.logger_absorption.print(" R-Absorb GCI to the domain of role "
+					+ role.getName());
 			if (Cons.size() > 1) {
 				LeveLogger.logger_absorption.print(" (other options are");
 				for (int j = 1; j < Cons.size(); ++j) {
-					LeveLogger.logger_absorption
-							.print(" "
-									+ Role.resolveRole(
-											Cons.get(j).getChild().getLeft())
-											.getName());
+					LeveLogger.logger_absorption.print(" "
+							+ Role.resolveRole(Cons.get(j).getChild().getLeft())
+									.getName());
 				}
 				LeveLogger.logger_absorption.print(")");
 			}
@@ -382,8 +371,7 @@ public final class Axiom {
 			LeveLogger.logger_absorption
 					.println("TAxiom.absorbIntoTop() T-Absorb GCI to axiom");
 			if (desc != null) {
-				LeveLogger.logger_absorption.println("s *TOP* [=" + desc
-						+ " and");
+				LeveLogger.logger_absorption.println("s *TOP* [=" + desc + " and");
 			}
 			LeveLogger.logger.println(" " + C.getName() + " = *TOP*");
 		}

@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.helpers;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry.resolveSynonym;
 import static uk.ac.manchester.cs.jfact.kernel.Token.*;
 
@@ -21,9 +21,9 @@ import uk.ac.manchester.cs.jfact.kernel.Role;
 import uk.ac.manchester.cs.jfact.kernel.Token;
 
 public final class DLTreeFactory {
-	private static final EnumSet<Token> snfCalls = EnumSet.of(TOP, BOTTOM,
-			CNAME, INAME, RNAME, DNAME, DATAEXPR, NOT, INV, AND, FORALL, LE,
-			SELF, RCOMPOSITION, PROJFROM, PROJINTO);
+	private static final EnumSet<Token> snfCalls = EnumSet.of(TOP, BOTTOM, CNAME, INAME,
+			RNAME, DNAME, DATAEXPR, NOT, INV, AND, FORALL, LE, SELF, RCOMPOSITION,
+			PROJFROM, PROJINTO);
 
 	/** create BOTTOM element */
 	public static DLTree createBottom() {
@@ -97,8 +97,7 @@ public final class DLTreeFactory {
 		return new NDLTree(new Lexeme(AND), l);
 	}
 
-	public static DLTree createSNFAnd(Collection<DLTree> collection,
-			DLTree ancestor) {
+	public static DLTree createSNFAnd(Collection<DLTree> collection, DLTree ancestor) {
 		boolean hasTop = false;
 		List<DLTree> l = new ArrayList<DLTree>();
 		for (DLTree d : collection) {
@@ -222,8 +221,7 @@ public final class DLTreeFactory {
 		if (tree.token() == RCOMPOSITION) {
 			return tree.accept(new ReverseCloningVisitor());
 		} else {
-			return new LEAFDLTree(new Lexeme(RNAME, Role.resolveRole(tree)
-					.inverse()));
+			return new LEAFDLTree(new Lexeme(RNAME, Role.resolveRole(tree).inverse()));
 		}
 	}
 
@@ -262,8 +260,7 @@ public final class DLTreeFactory {
 
 	/** check whether T is an expression in the form (atmost 1 RNAME) */
 	public static boolean isFunctionalExpr(final DLTree t, final NamedEntry R) {
-		return t != null && t.token() == LE
-				&& R.equals(t.getLeft().elem().getNE())
+		return t != null && t.token() == LE && R.equals(t.getLeft().elem().getNE())
 				&& t.elem().getData() == 1 && t.getRight().isTOP();
 	}
 
@@ -321,9 +318,8 @@ public final class DLTreeFactory {
 				} else if (entry.isBottom()) {
 					desc.elem = new Lexeme(BOTTOM);
 				} else {
-					desc.elem = new Lexeme(
-							((Concept) entry).isSingleton() ? INAME : CNAME,
-							entry);
+					desc.elem = new Lexeme(((Concept) entry).isSingleton() ? INAME
+							: CNAME, entry);
 				}
 				return true;
 			} else {

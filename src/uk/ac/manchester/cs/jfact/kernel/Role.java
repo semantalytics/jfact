@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.DLTree.equalTrees;
 import static uk.ac.manchester.cs.jfact.helpers.Helper.bpINVALID;
 import static uk.ac.manchester.cs.jfact.kernel.Token.RCOMPOSITION;
@@ -125,8 +125,7 @@ public final class Role extends ClassifiableEntry {
 	}
 
 	/** get an automaton by a (possibly synonymical) role */
-	private final RoleAutomaton completeAutomatonByRole(Role R,
-			Set<Role> RInProcess) {
+	private final RoleAutomaton completeAutomatonByRole(Role R, Set<Role> RInProcess) {
 		assert !R.isSynonym(); // no synonyms here
 		assert R != this; // no case ...*S*... [= S
 		R.completeAutomaton(RInProcess);
@@ -220,9 +219,8 @@ public final class Role extends ClassifiableEntry {
 		if (!hasSpecialDomain() || getTRange() == null) {
 			pSpecialDomain = DLTreeFactory.createTop();
 		} else {
-			pSpecialDomain = DLTreeFactory.createSNFForall(
-					DLTreeFactory.buildTree(new Lexeme(Token.RNAME, this)),
-					getTRange().copy());
+			pSpecialDomain = DLTreeFactory.createSNFForall(DLTreeFactory
+					.buildTree(new Lexeme(Token.RNAME, this)), getTRange().copy());
 		}
 	}
 
@@ -548,16 +546,16 @@ public final class Role extends ClassifiableEntry {
 			return;
 		}
 		if (isFunctional()) {
-			throw new ReasonerInternalException(
-					"Non simple role used as simple: " + getName());
+			throw new ReasonerInternalException("Non simple role used as simple: "
+					+ getName());
 		}
 		if (isDataRole()) {
-			throw new ReasonerInternalException(
-					"Non simple role used as simple: " + getName());
+			throw new ReasonerInternalException("Non simple role used as simple: "
+					+ getName());
 		}
 		if (isDisjoint()) {
-			throw new ReasonerInternalException(
-					"Non simple role used as simple: " + getName());
+			throw new ReasonerInternalException("Non simple role used as simple: "
+					+ getName());
 		}
 	}
 
@@ -653,8 +651,7 @@ public final class Role extends ClassifiableEntry {
 		addParent(syn);
 	}
 
-	private Role eliminateToldCycles(Set<Role> RInProcess,
-			List<Role> ToldSynonyms) {
+	private Role eliminateToldCycles(Set<Role> RInProcess, List<Role> ToldSynonyms) {
 		if (isSynonym()) {
 			return null;
 		}
@@ -705,8 +702,7 @@ public final class Role extends ClassifiableEntry {
 		}
 		if (!toldSubsumers.isEmpty()) {
 			o.print(" parents={\"");
-			List<ClassifiableEntry> l = new ArrayList<ClassifiableEntry>(
-					toldSubsumers);
+			List<ClassifiableEntry> l = new ArrayList<ClassifiableEntry>(toldSubsumers);
 			for (int i = 0; i < l.size(); i++) {
 				if (i > 0) {
 					o.print("\", \"");
@@ -733,8 +729,7 @@ public final class Role extends ClassifiableEntry {
 			o.print(String.format(" Range=(%s)=%s", getBPRange(), getTRange()));
 		}
 		o.print(String.format("\nAutomaton (size %s): %s%s", automaton.size(),
-				(automaton.isISafe() ? "I" : "i"), (automaton.isOSafe() ? "O"
-						: "o")));
+				(automaton.isISafe() ? "I" : "i"), (automaton.isOSafe() ? "O" : "o")));
 		automaton.print(o);
 		o.print("\n");
 	}
@@ -844,8 +839,7 @@ public final class Role extends ClassifiableEntry {
 			}
 			if (R.equals(this)) {
 				if (i != 0 && i != last) {
-					throw new ReasonerInternalException("Cycle in RIA "
-							+ getName());
+					throw new ReasonerInternalException("Cycle in RIA " + getName());
 				}
 				if (same) {
 					if (last == 1) {
@@ -853,8 +847,7 @@ public final class Role extends ClassifiableEntry {
 						setTransitive();
 						return;
 					} else {
-						throw new ReasonerInternalException("Cycle in RIA "
-								+ getName());
+						throw new ReasonerInternalException("Cycle in RIA " + getName());
 					}
 				} else {
 					same = true;
@@ -884,8 +877,8 @@ public final class Role extends ClassifiableEntry {
 		}
 		// check for the transitivity
 		if (isTransitive()) {
-			automaton.addTransitionSafe(RoleAutomaton.final_state,
-					new RATransition(RoleAutomaton.initial));
+			automaton.addTransitionSafe(RoleAutomaton.final_state, new RATransition(
+					RoleAutomaton.initial));
 		}
 		// here automaton is complete
 		setFinished(true);
@@ -926,12 +919,11 @@ public final class Role extends ClassifiableEntry {
 		boolean oSafe = false; // we couldn't assume that the current role automaton is i- or o-safe
 		automaton.initChain(from);
 		for (; p != p_last; ++p) {
-			oSafe = automaton.addToChain(
-					completeAutomatonByRole(RS.get(p), RInProcess), oSafe);
+			oSafe = automaton.addToChain(completeAutomatonByRole(RS.get(p), RInProcess),
+					oSafe);
 		}
 		// add the last automaton to chain
-		automaton.addToChain(completeAutomatonByRole(RS.get(p), RInProcess),
-				oSafe, to);
+		automaton.addToChain(completeAutomatonByRole(RS.get(p), RInProcess), oSafe, to);
 	}
 
 	public Role getInverse() {

@@ -22,8 +22,8 @@ public enum StatIndex {
 	}
 
 	/** add-up all stat values at once by explicit values */
-	public static void updateStatValues(int d, int s, int b, int g,
-			boolean pos, int[] stat) {
+	public static void updateStatValues(int d, int s, int b, int g, boolean pos,
+			int[] stat) {
 		stat[Size.getIndex(pos)] += s;
 		stat[Branch.getIndex(pos)] += b;
 		stat[Gener.getIndex(pos)] += g;
@@ -33,8 +33,7 @@ public enum StatIndex {
 	}
 
 	/** add-up all values at once by a given vertex */
-	public static void updateStatValues(DLVertex v, boolean posV, boolean pos,
-			int[] stat) {
+	public static void updateStatValues(DLVertex v, boolean posV, boolean pos, int[] stat) {
 		updateStatValues(getDepth(posV, v.stat), getSize(posV, v.stat),
 				getBranch(posV, v.stat), getGener(posV, v.stat), pos, stat);
 	}

@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel.datatype;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.EnumSet;
@@ -21,6 +21,7 @@ import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
 import uk.ac.manchester.cs.jfact.kernel.voc.Vocabulary;
 
+@SuppressWarnings("unchecked")
 public enum Datatypes {
 	INT {
 		@Override
@@ -36,8 +37,7 @@ public enum Datatypes {
 		@Override
 		public boolean compatible(Datatypes d) {
 			return super.compatible(d)
-					|| EnumSet.of(NEGINT, POSINT, NONNEGINT, NONPOSINT)
-							.contains(d);
+					|| EnumSet.of(NEGINT, POSINT, NONNEGINT, NONPOSINT).contains(d);
 		}
 	},
 	DECIMAL {
@@ -54,11 +54,11 @@ public enum Datatypes {
 		@Override
 		public boolean compatible(Datatypes d) {
 			return super.compatible(d)
-					|| EnumSet.of(INT, NEGINT, POSINT, NONNEGINT, NONPOSINT)
-							.contains(d);
+					|| EnumSet.of(INT, NEGINT, POSINT, NONNEGINT, NONPOSINT).contains(d);
 		}
 	},
 	SHORT {
+
 		@Override
 		public DatatypeRepresentation<Short> parse(String s) {
 			return new ShortRep(Short.valueOf(s));
@@ -143,8 +143,8 @@ public enum Datatypes {
 	FLOAT {
 		@Override
 		public DatatypeRepresentation<Float> parse(String s) {
-			return new FloatRep(Float.valueOf(s.replace("inf", "Infinity")
-					.replace("INF", "Infinity")));
+			return new FloatRep(Float.valueOf(s.replace("inf", "Infinity").replace("INF",
+					"Infinity")));
 		}
 
 		@Override
@@ -296,8 +296,7 @@ public enum Datatypes {
 		@Override
 		public boolean compatible(Datatypes d) {
 			return super.compatible(d)
-					|| EnumSet.complementOf(
-							EnumSet.of(STRING, DATETIME, DOUBLE, FLOAT))
+					|| EnumSet.complementOf(EnumSet.of(STRING, DATETIME, DOUBLE, FLOAT))
 							.contains(d);
 		}
 	},
@@ -374,15 +373,14 @@ public enum Datatypes {
 			return Float.valueOf(s);
 		} else {
 			if (s.contains("inf") || s.contains("INF") || s.contains("Inf")) {
-				return Float.valueOf(s.replace("inf", "Infinity").replace(
-						"INF", "Infinity"));
+				return Float.valueOf(s.replace("inf", "Infinity").replace("INF",
+						"Infinity"));
 			}
 			Pattern p = Pattern.compile(fractionPattern);
 			m = p.matcher(s);
 			if (m.matches()) {
 				return (m.group(1).length() == 0 ? +1 : -1)
-						* Float.parseFloat(m.group(2))
-						/ Float.parseFloat(m.group(3));
+						* Float.parseFloat(m.group(2)) / Float.parseFloat(m.group(3));
 			}
 			throw new NumberFormatException("Unparsable float: " + s);
 		}
@@ -394,15 +392,14 @@ public enum Datatypes {
 			return Double.valueOf(s);
 		} else {
 			if (s.contains("inf") || s.contains("INF") || s.contains("Inf")) {
-				return Double.valueOf(s.replace("inf", "Infinity").replace(
-						"INF", "Infinity"));
+				return Double.valueOf(s.replace("inf", "Infinity").replace("INF",
+						"Infinity"));
 			}
 			Pattern p = Pattern.compile(fractionPattern);
 			m = p.matcher(s);
 			if (m.matches()) {
 				return (m.group(1).length() == 0 ? +1 : -1)
-						* Double.parseDouble(m.group(2))
-						/ Double.parseDouble(m.group(3));
+						* Double.parseDouble(m.group(2)) / Double.parseDouble(m.group(3));
 			}
 			throw new NumberFormatException("Unparsable double: " + s);
 		}
@@ -1341,8 +1338,7 @@ class RationalRep implements DatatypeRepresentation<BigDecimal> {
 		int i = s.indexOf('/');
 		if (i == -1) {
 			throw new IllegalArgumentException(
-					"invalid string used: no '/' character separating longs: "
-							+ s);
+					"invalid string used: no '/' character separating longs: " + s);
 		}
 		double n = Long.parseLong(s.substring(0, i));
 		double d = Long.parseLong(s.substring(i + 1));
@@ -1415,8 +1411,7 @@ class IntegerRep implements DatatypeRepresentation<BigInteger> {
 		int i = s.indexOf('/');
 		if (i == -1) {
 			throw new IllegalArgumentException(
-					"invalid string used: no '/' character separating longs: "
-							+ s);
+					"invalid string used: no '/' character separating longs: " + s);
 		}
 		return new BigInteger(s);
 	}

@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.Helper.bpTOP;
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
@@ -28,8 +28,7 @@ public final class LogicFeatures {
 	}
 
 	/** default c'tor */
-	public LogicFeatures() {
-	}
+	public LogicFeatures() {}
 
 	/** copy c'tor */
 	public LogicFeatures(final LogicFeatures lf) {
@@ -99,8 +98,7 @@ public final class LogicFeatures {
 		setX(lfBothRoles);
 	}
 
-	public static LogicFeatures plus(final LogicFeatures f1,
-			final LogicFeatures f2) {
+	public static LogicFeatures plus(final LogicFeatures f1, final LogicFeatures f2) {
 		LogicFeatures f = new LogicFeatures(f1);
 		f.flags.or(f2.flags);
 		return f;
@@ -168,12 +166,11 @@ public final class LogicFeatures {
 		String NO = "NO ";
 		String Q = "qualified ";
 		logger.print(Templates.WRITE_STATE, (hasInverseRole() ? "" : NO),
-				(hasRoleHierarchy() ? "" : NO),
-				(hasTransitiveRole() ? "" : NO), (hasTopRole() ? "" : NO),
-				(hasSomeAll() ? "" : NO),
+				(hasRoleHierarchy() ? "" : NO), (hasTransitiveRole() ? "" : NO),
+				(hasTopRole() ? "" : NO), (hasSomeAll() ? "" : NO),
 				(hasFunctionalRestriction() ? "" : NO),
-				(hasNumberRestriction() ? (hasQNumberRestriction() ? Q : "")
-						: NO), (hasSingletons() ? "" : NO));
+				(hasNumberRestriction() ? (hasQNumberRestriction() ? Q : "") : NO),
+				(hasSingletons() ? "" : NO));
 	}
 
 	//private static final int lfInvalid = 0;

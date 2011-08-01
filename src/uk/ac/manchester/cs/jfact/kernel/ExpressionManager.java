@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -99,8 +99,7 @@ public final class ExpressionManager {
 		}
 	}
 
-	protected static final class DataroleNameCreator implements
-			NameCreator<DataRoleName> {
+	protected static final class DataroleNameCreator implements NameCreator<DataRoleName> {
 		public DataRoleName makeEntry(String name) {
 			return new DataRoleName(name);
 		}
@@ -120,8 +119,7 @@ public final class ExpressionManager {
 		}
 	}
 
-	protected static final class ConceptNameCreator implements
-			NameCreator<ConceptName> {
+	protected static final class ConceptNameCreator implements NameCreator<ConceptName> {
 		public ConceptName makeEntry(String name) {
 			return new ConceptName(name);
 		}
@@ -307,8 +305,8 @@ public final class ExpressionManager {
 	 * get min cardinality restriction wrt number N, an object role R and a
 	 * concept C
 	 */
-	public ConceptExpression minCardinality(int n,
-			final ObjectRoleExpression R, final ConceptExpression C) {
+	public ConceptExpression minCardinality(int n, final ObjectRoleExpression R,
+			final ConceptExpression C) {
 		return record(new ConceptObjectMinCardinality(n, R, C));
 	}
 
@@ -316,8 +314,8 @@ public final class ExpressionManager {
 	 * get max cardinality restriction wrt number N, an object role R and a
 	 * concept C
 	 */
-	public ConceptExpression maxCardinality(int n,
-			final ObjectRoleExpression R, final ConceptExpression C) {
+	public ConceptExpression maxCardinality(int n, final ObjectRoleExpression R,
+			final ConceptExpression C) {
 		return record(new ConceptObjectMaxCardinality(n, R, C));
 	}
 
@@ -336,14 +334,12 @@ public final class ExpressionManager {
 	}
 
 	/** get existential restriction wrt a data role R and a data expression E */
-	public ConceptExpression exists(final DataRoleExpression R,
-			final DataExpression E) {
+	public ConceptExpression exists(final DataRoleExpression R, final DataExpression E) {
 		return record(new ConceptDataExists(R, E));
 	}
 
 	/** get universal restriction wrt a data role R and a data expression E */
-	public ConceptExpression forall(final DataRoleExpression R,
-			final DataExpression E) {
+	public ConceptExpression forall(final DataRoleExpression R, final DataExpression E) {
 		return record(new ConceptDataForall(R, E));
 	}
 
@@ -405,14 +401,14 @@ public final class ExpressionManager {
 	}
 
 	/** get a expression corresponding to R projected from C */
-	public ObjectRoleComplexExpression projectFrom(
-			final ObjectRoleExpression R, final ConceptExpression C) {
+	public ObjectRoleComplexExpression projectFrom(final ObjectRoleExpression R,
+			final ConceptExpression C) {
 		return record(new ObjectRoleProjectionFrom(R, C));
 	}
 
 	/** get a expression corresponding to R projected into C */
-	public ObjectRoleComplexExpression projectInto(
-			final ObjectRoleExpression R, final ConceptExpression C) {
+	public ObjectRoleComplexExpression projectInto(final ObjectRoleExpression R,
+			final ConceptExpression C) {
 		return record(new ObjectRoleProjectionInto(R, C));
 	}
 

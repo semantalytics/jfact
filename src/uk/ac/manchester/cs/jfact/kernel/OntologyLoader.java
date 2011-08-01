@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.kernel.Role.resolveRole;
 
 import java.util.ArrayList;
@@ -67,14 +67,12 @@ public final class OntologyLoader implements DLAxiomVisitor {
 		try {
 			return resolveRole(r.accept(expressionTranslator));
 		} catch (OWLRuntimeException e) {
-			throw new ReasonerInternalException(reason + "\t" + e.getMessage(),
-					e);
+			throw new ReasonerInternalException(reason + "\t" + e.getMessage(), e);
 		}
 	}
 
 	/** get an individual be the DLTree; throw exception if unable */
-	public Individual getIndividual(final IndividualExpression I,
-			final String reason) {
+	public Individual getIndividual(final IndividualExpression I, final String reason) {
 		DLTree i = I.accept(expressionTranslator);
 		if (i == null) {
 			throw new ReasonerInternalException(reason);
@@ -106,7 +104,7 @@ public final class OntologyLoader implements DLAxiomVisitor {
 		for (TSplitVar.Entry p : sv.getEntries()) {
 			Concept C = tbox.getConcept(p.name.getName());
 			C.setSystem();
-			p.C = C;
+			p.concept = C;
 		}
 	}
 
@@ -200,33 +198,29 @@ public final class OntologyLoader implements DLAxiomVisitor {
 	public void visit(AxiomORoleDomain axiom) {
 		ensureNames(axiom.getRole());
 		ensureNames(axiom.getDomain());
-		getRole(axiom.getRole(),
-				"Role expression expected in Object Role Domain axiom")
+		getRole(axiom.getRole(), "Role expression expected in Object Role Domain axiom")
 				.setDomain(axiom.getDomain().accept(expressionTranslator));
 	}
 
 	public void visit(AxiomDRoleDomain axiom) {
 		ensureNames(axiom.getRole());
 		ensureNames(axiom.getDomain());
-		getRole(axiom.getRole(),
-				"Role expression expected in Data Role Domain axiom")
+		getRole(axiom.getRole(), "Role expression expected in Data Role Domain axiom")
 				.setDomain(axiom.getDomain().accept(expressionTranslator));
 	}
 
 	public void visit(AxiomORoleRange axiom) {
 		ensureNames(axiom.getRole());
 		ensureNames(axiom.getRange());
-		getRole(axiom.getRole(),
-				"Role expression expected in Object Role Range axiom")
+		getRole(axiom.getRole(), "Role expression expected in Object Role Range axiom")
 				.setRange(axiom.getRange().accept(expressionTranslator));
 	}
 
 	public void visit(AxiomDRoleRange axiom) {
 		ensureNames(axiom.getRole());
 		ensureNames(axiom.getRange());
-		getRole(axiom.getRole(),
-				"Role expression expected in Data Role Range axiom").setRange(
-				axiom.getRange().accept(expressionTranslator));
+		getRole(axiom.getRole(), "Role expression expected in Data Role Range axiom")
+				.setRange(axiom.getRange().accept(expressionTranslator));
 	}
 
 	public void visit(AxiomRoleTransitive axiom) {
@@ -263,9 +257,8 @@ public final class OntologyLoader implements DLAxiomVisitor {
 			throw new InconsistentOntologyException();
 		}
 		if (!R.isBottom()) {
-			R.setDomain(DLTreeFactory.createSNFNot(DLTreeFactory.buildTree(
-					new Lexeme(Token.SELF),
-					axiom.getRole().accept(expressionTranslator))));
+			R.setDomain(DLTreeFactory.createSNFNot(DLTreeFactory.buildTree(new Lexeme(
+					Token.SELF), axiom.getRole().accept(expressionTranslator))));
 			R.setIrreflexive(true);
 		}
 	}
@@ -346,8 +339,7 @@ public final class OntologyLoader implements DLAxiomVisitor {
 	public void visit(AxiomInstanceOf axiom) {
 		ensureNames(axiom.getIndividual());
 		ensureNames(axiom.getC());
-		getIndividual(axiom.getIndividual(),
-				"Individual expected in Instance axiom");
+		getIndividual(axiom.getIndividual(), "Individual expected in Instance axiom");
 		DLTree I = axiom.getIndividual().accept(expressionTranslator);
 		DLTree C = axiom.getC().accept(expressionTranslator);
 		tbox.addSubsumeAxiom(I, C);
@@ -391,21 +383,18 @@ public final class OntologyLoader implements DLAxiomVisitor {
 			getIndividual(axiom.getRelatedIndividual(),
 					"Individual expected in Related To Not axiom");
 			// make an axiom i:AR.\neg{j}
-			tbox.addSubsumeAxiom(
-					axiom.getIndividual().accept(expressionTranslator),
+			tbox.addSubsumeAxiom(axiom.getIndividual().accept(expressionTranslator),
 					DLTreeFactory.createSNFForall(
 							axiom.getRelation().accept(expressionTranslator),
-							DLTreeFactory.createSNFNot(axiom
-									.getRelatedIndividual().accept(
-											expressionTranslator))));
+							DLTreeFactory.createSNFNot(axiom.getRelatedIndividual()
+									.accept(expressionTranslator))));
 		}
 	}
 
 	public void visit(AxiomValueOf axiom) {
 		ensureNames(axiom.getIndividual());
 		ensureNames(axiom.getAttribute());
-		getIndividual(axiom.getIndividual(),
-				"Individual expected in Value Of axiom");
+		getIndividual(axiom.getIndividual(), "Individual expected in Value Of axiom");
 		Role R = getRole(axiom.getAttribute(),
 				"Role expression expected in Value Of axiom");
 		if (R.isBottom()) {
@@ -414,19 +403,17 @@ public final class OntologyLoader implements DLAxiomVisitor {
 		if (!R.isTop()) {
 			// nothing to do for universal role
 			// make an axiom i:EA.V
-			tbox.addSubsumeAxiom(
-					axiom.getIndividual().accept(expressionTranslator),
+			tbox.addSubsumeAxiom(axiom.getIndividual().accept(expressionTranslator),
 					DLTreeFactory.createSNFExists(
-							axiom.getAttribute().accept(expressionTranslator),
-							axiom.getValue().accept(expressionTranslator)));
+							axiom.getAttribute().accept(expressionTranslator), axiom
+									.getValue().accept(expressionTranslator)));
 		}
 	}
 
 	public void visit(AxiomValueOfNot axiom) {
 		ensureNames(axiom.getIndividual());
 		ensureNames(axiom.getAttribute());
-		getIndividual(axiom.getIndividual(),
-				"Individual expected in Value Of Not axiom");
+		getIndividual(axiom.getIndividual(), "Individual expected in Value Of Not axiom");
 		Role R = getRole(axiom.getAttribute(),
 				"Role expression expected in Value Of Not axiom");
 		if (R.isTop()) {
@@ -435,8 +422,7 @@ public final class OntologyLoader implements DLAxiomVisitor {
 		}
 		if (!R.isBottom()) {
 			// make an axiom i:AA.\neg V
-			tbox.addSubsumeAxiom(
-					axiom.getIndividual().accept(expressionTranslator),
+			tbox.addSubsumeAxiom(axiom.getIndividual().accept(expressionTranslator),
 					DLTreeFactory.createSNFForall(
 							axiom.getAttribute().accept(expressionTranslator),
 							DLTreeFactory.createSNFNot(axiom.getValue().accept(

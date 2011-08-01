@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.helpers;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import java.util.Arrays;
 
 public final class FastSetSimple extends AbstractFastSet {
@@ -47,12 +47,10 @@ public final class FastSetSimple extends AbstractFastSet {
 		return -lowerbound - 1;
 	}
 
-	public FastSetSimple() {
-	}
+	public FastSetSimple() {}
 
 	public FastSetSimple(FastSetSimple c1, FastSetSimple c2) {
-		values = new int[(c1.size + c2.size) / defaultSize * defaultSize
-				+ defaultSize];
+		values = new int[(c1.size + c2.size) / defaultSize * defaultSize + defaultSize];
 		int i = 0;
 		int j = 0;
 		int index = 0;
@@ -91,8 +89,7 @@ public final class FastSetSimple extends AbstractFastSet {
 		if (values != null) {
 			return values[i];
 		}
-		throw new IllegalArgumentException("Illegal argument " + i
-				+ ": no such element");
+		throw new IllegalArgumentException("Illegal argument " + i + ": no such element");
 	}
 
 	protected final void init() {
@@ -338,8 +335,8 @@ public final class FastSetSimple extends AbstractFastSet {
 			return;
 		}
 		if (end < -1 || end < i || end > size || i < -1 || i > size) {
-			throw new IllegalArgumentException("illegal arguments: " + i + " "
-					+ end + " size: " + size);
+			throw new IllegalArgumentException("illegal arguments: " + i + " " + end
+					+ " size: " + size);
 		}
 		if (size == 1 || i == 0 && end == size) {
 			values = null;

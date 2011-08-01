@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.kernel.Token.*;
 
 import java.util.ArrayList;
@@ -74,8 +74,7 @@ public final class RoleMaster {
 		}
 		final Role R = (Role) p;
 		int ind = R.getAbsoluteIndex();
-		return ind >= firstRoleIndex && ind < roles.size()
-				&& roles.get(ind).equals(p);
+		return ind >= firstRoleIndex && ind < roles.size() && roles.get(ind).equals(p);
 	}
 
 	/** get number of roles */
@@ -83,12 +82,10 @@ public final class RoleMaster {
 		return roles.size() / 2 - 1;
 	}
 
-	public RoleMaster(boolean d, final String TopRoleName,
-			final String BotRoleName) {
+	public RoleMaster(boolean d, final String TopRoleName, final String BotRoleName) {
 		newRoleId = 1;
 		emptyRole = new Role(BotRoleName.equals("") ? "emptyRole" : BotRoleName);
-		universalRole = new Role(TopRoleName.equals("") ? "universalRole"
-				: TopRoleName);
+		universalRole = new Role(TopRoleName.equals("") ? "universalRole" : TopRoleName);
 		roleNS = new NameSet<Role>(new RoleCreator());
 		dataRoles = d;
 		useUndefinedNames = true;
@@ -127,16 +124,16 @@ public final class RoleMaster {
 		Role p = roleNS.insert(name);
 		// check what happens
 		if (p == null) {
-			throw new OWLRuntimeException("Unable to register '" + name
-					+ "' as a " + (dataRoles ? "data role" : "role"));
+			throw new OWLRuntimeException("Unable to register '" + name + "' as a "
+					+ (dataRoles ? "data role" : "role"));
 		}
 		if (isRegisteredRole(p)) {
 			return p;
 		}
 		if (p.getId() != 0 || // not registered but has non-null ID
 				!useUndefinedNames) {
-			throw new OWLRuntimeException("Unable to register '" + name
-					+ "' as a " + (dataRoles ? "data role" : "role"));
+			throw new OWLRuntimeException("Unable to register '" + name + "' as a "
+					+ (dataRoles ? "data role" : "role"));
 		}
 		registerRole(p);
 		return p;
@@ -230,10 +227,8 @@ public final class RoleMaster {
 						"Projection into not implemented for the data role");
 			}
 			DLTree C = tree.getRight().copy();
-			DLTree InvP = DLTreeFactory.buildTree(new Lexeme(RNAME, parent
-					.inverse()));
-			DLTree InvR = DLTreeFactory
-					.buildTree(new Lexeme(RNAME, R.inverse()));
+			DLTree InvP = DLTreeFactory.buildTree(new Lexeme(RNAME, parent.inverse()));
+			DLTree InvR = DLTreeFactory.buildTree(new Lexeme(RNAME, R.inverse()));
 			// C = PROJINTO(PARENT-,C)
 			C = DLTreeFactory.buildTree(new Lexeme(PROJINTO), InvP, C);
 			// C = PROJFROM(R-,PROJINTO(PARENT-,C))
@@ -246,8 +241,7 @@ public final class RoleMaster {
 			// C = PROJINTO(PARENT,C)
 			C = DLTreeFactory.buildTree(new Lexeme(PROJINTO), P, C);
 			// C = PROJFROM(R,PROJINTO(PARENT,C))
-			C = DLTreeFactory.buildTree(new Lexeme(PROJFROM), tree.getLeft()
-					.copy(), C);
+			C = DLTreeFactory.buildTree(new Lexeme(PROJFROM), tree.getLeft().copy(), C);
 			R.setDomain(C);
 		} else {
 			addRoleParent(Role.resolveRole(tree), parent);

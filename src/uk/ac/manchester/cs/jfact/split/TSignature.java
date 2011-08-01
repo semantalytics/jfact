@@ -16,8 +16,7 @@ public class TSignature {
 	/// true if TOP-locality; false if BOTTOM-locality
 	private boolean topLocality;
 
-	public TSignature() {
-	}
+	public TSignature() {}
 
 	/// copy c'tor
 	public TSignature(TSignature copy) {
@@ -74,14 +73,14 @@ public class TSignature {
 	/// operator <
 	//	boolean operator < (  TSignature& sig )  { return Set < sig.Set; }
 	/// @return true iff signature contains given element
-	public boolean contains(NamedEntity p) {
+	public boolean containsNamedEntity(NamedEntity p) {
 		return set.contains(p);
 	}
 
 	/// @return true iff signature contains given element
 	public boolean contains(Expression p) {
 		if (p instanceof NamedEntity) {
-			return contains((NamedEntity) p);
+			return containsNamedEntity((NamedEntity) p);
 		}
 		if (p instanceof ObjectRoleInverse) {
 			return contains(((ObjectRoleInverse) p).getOR());

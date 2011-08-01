@@ -68,7 +68,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ConceptExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataRoleExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Expression;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NamedEntity;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
@@ -82,21 +81,6 @@ class SigAccessor extends DLExpressionVisitorAdapter {
 	/// init c'tor
 	SigAccessor(TSignature s) {
 		sig = new TSignature(s);
-	}
-
-	/// @return true iff concepts are treated as TOPs
-	boolean topCLocal() {
-		return sig.topCLocal();
-	}
-
-	/// @return true iff roles are treated as TOPs
-	boolean topRLocal() {
-		return sig.topRLocal();
-	}
-
-	/// @return true iff SIGnature does NOT contain given expression
-	boolean nc(NamedEntity expr) {
-		return !sig.contains(expr);
 	}
 
 	/// @return true iff EXPR is a top datatype
@@ -116,8 +100,7 @@ class SigAccessor extends DLExpressionVisitorAdapter {
 }
 
 /// check whether class expressions are equivalent to bottom wrt given locality class
-class BotEquivalenceEvaluator extends SigAccessor implements
-		DLExpressionVisitor {
+class BotEquivalenceEvaluator extends SigAccessor implements DLExpressionVisitor {
 	/// corresponding top evaluator
 	TopEquivalenceEvaluator TopEval;
 	/// keep the value here
@@ -130,7 +113,7 @@ class BotEquivalenceEvaluator extends SigAccessor implements
 
 	/// @return true iff role expression in equivalent to const wrt locality
 	boolean isREquivalent(Expression expr) {
-		return topRLocal() ? isTopEquivalent(expr) : isBotEquivalent(expr);
+		return sig.topRLocal() ? isTopEquivalent(expr) : isBotEquivalent(expr);
 	}
 
 	/// init c'tor
@@ -163,7 +146,7 @@ class BotEquivalenceEvaluator extends SigAccessor implements
 
 	@Override
 	public void visit(ConceptName expr) {
-		isBotEq = !topCLocal() && nc(expr.getEntity());
+		isBotEq = !sig.topCLocal() && !sig.contains(expr);
 	}
 
 	@Override
@@ -198,87 +181,84 @@ class BotEquivalenceEvaluator extends SigAccessor implements
 
 	@Override
 	public void visit(ConceptObjectSelf expr) {
-		isBotEq = !topRLocal() && isBotEquivalent(expr.getOR());
+		isBotEq = !sig.topRLocal() && isBotEquivalent(expr.getOR());
 	}
 
 	@Override
 	public void visit(ConceptObjectValue expr) {
-		isBotEq = !topRLocal() && isBotEquivalent(expr.getOR());
+		isBotEq = !sig.topRLocal() && isBotEquivalent(expr.getOR());
 	}
 
 	@Override
 	public void visit(ConceptObjectExists expr) {
 		isBotEq = isBotEquivalent(expr.getConcept());
-		if (!topRLocal()) {
+		if (!sig.topRLocal()) {
 			isBotEq |= isBotEquivalent(expr.getOR());
 		}
 	}
 
 	@Override
 	public void visit(ConceptObjectForall expr) {
-		isBotEq = topRLocal() && isTopEquivalent(expr.getOR())
+		isBotEq = sig.topRLocal() && isTopEquivalent(expr.getOR())
 				&& isBotEquivalent(expr.getConcept());
 	}
 
 	@Override
 	public void visit(ConceptObjectMinCardinality expr) {
 		isBotEq = expr.getCardinality() > 0
-				&& (isBotEquivalent(expr.getConcept()) || !topRLocal()
+				&& (isBotEquivalent(expr.getConcept()) || !sig.topRLocal()
 						&& isBotEquivalent(expr.getOR()));
 	}
 
 	@Override
 	public void visit(ConceptObjectMaxCardinality expr) {
-		isBotEq = topRLocal() && expr.getCardinality() > 0
-				&& isTopEquivalent(expr.getOR())
-				&& isTopEquivalent(expr.getConcept());
+		isBotEq = sig.topRLocal() && expr.getCardinality() > 0
+				&& isTopEquivalent(expr.getOR()) && isTopEquivalent(expr.getConcept());
 	}
 
 	@Override
 	public void visit(ConceptObjectExactCardinality expr) {
 		isBotEq = expr.getCardinality() > 0
-				&& (isBotEquivalent(expr.getConcept()) || isREquivalent(expr
-						.getOR())
-						&& (topRLocal() ? isTopEquivalent(expr.getConcept())
-								: true));
+				&& (isBotEquivalent(expr.getConcept()) || isREquivalent(expr.getOR())
+						&& (sig.topRLocal() ? isTopEquivalent(expr.getConcept()) : true));
 	}
 
 	@Override
 	public void visit(ConceptDataValue expr) {
-		isBotEq = !topRLocal() && isBotEquivalent(expr.getDataRoleExpression());
+		isBotEq = !sig.topRLocal() && isBotEquivalent(expr.getDataRoleExpression());
 	}
 
 	@Override
 	public void visit(ConceptDataExists expr) {
-		isBotEq = !topRLocal() && isBotEquivalent(expr.getDataRoleExpression());
+		isBotEq = !sig.topRLocal() && isBotEquivalent(expr.getDataRoleExpression());
 	}
 
 	@Override
 	public void visit(ConceptDataForall expr) {
-		isBotEq = topRLocal() && isTopEquivalent(expr.getDataRoleExpression())
+		isBotEq = sig.topRLocal() && isTopEquivalent(expr.getDataRoleExpression())
 				&& !isTopDT(expr.getExpr());
 	}
 
 	@Override
 	public void visit(ConceptDataMinCardinality expr) {
-		isBotEq = !topRLocal() && expr.getCardinality() > 0
+		isBotEq = !sig.topRLocal() && expr.getCardinality() > 0
 				&& isBotEquivalent(expr.getDataRoleExpression());
 	}
 
 	@Override
 	public void visit(ConceptDataMaxCardinality expr) {
-		isBotEq = topRLocal()
+		isBotEq = sig.topRLocal()
 				&& isTopEquivalent(expr.getDataRoleExpression())
-				&& (expr.getCardinality() <= 1 ? isTopOrBuiltInDT(expr
-						.getExpr()) : isTopOrBuiltInInfDT(expr.getExpr()));
+				&& (expr.getCardinality() <= 1 ? isTopOrBuiltInDT(expr.getExpr())
+						: isTopOrBuiltInInfDT(expr.getExpr()));
 	}
 
 	@Override
 	public void visit(ConceptDataExactCardinality expr) {
 		isBotEq = isREquivalent(expr.getDataRoleExpression())
-				&& (topRLocal() ? (expr.getCardinality() == 0 ? isTopOrBuiltInDT(expr
-						.getExpr()) : isTopOrBuiltInInfDT(expr.getExpr()))
-						: expr.getCardinality() > 0);
+				&& (sig.topRLocal() ? (expr.getCardinality() == 0 ? isTopOrBuiltInDT(expr
+						.getExpr()) : isTopOrBuiltInInfDT(expr.getExpr())) : expr
+						.getCardinality() > 0);
 	}
 
 	// object role expressions
@@ -294,7 +274,7 @@ class BotEquivalenceEvaluator extends SigAccessor implements
 
 	@Override
 	public void visit(ObjectRoleName expr) {
-		isBotEq = !topRLocal() && nc(expr.getEntity());
+		isBotEq = !sig.topRLocal() && !sig.contains(expr);
 	}
 
 	@Override
@@ -325,13 +305,12 @@ class BotEquivalenceEvaluator extends SigAccessor implements
 
 	@Override
 	public void visit(DataRoleName expr) {
-		isBotEq = !topRLocal() && nc(expr.getEntity());
+		isBotEq = !sig.topRLocal() && !sig.contains(expr);
 	}
-}; // BotEquivalenceEvaluator
+}
 
 /// check whether class expressions are equivalent to top wrt given locality class
-class TopEquivalenceEvaluator extends SigAccessor implements
-		DLExpressionVisitor {
+class TopEquivalenceEvaluator extends SigAccessor implements DLExpressionVisitor {
 	/// corresponding bottom evaluator
 	BotEquivalenceEvaluator BotEval;
 	/// keep the value here
@@ -344,7 +323,7 @@ class TopEquivalenceEvaluator extends SigAccessor implements
 
 	/// @return true iff role expression in equivalent to const wrt locality
 	boolean isREquivalent(Expression expr) {
-		return topRLocal() ? isTopEquivalent(expr) : isBotEquivalent(expr);
+		return sig.topRLocal() ? isTopEquivalent(expr) : isBotEquivalent(expr);
 	}
 
 	/// init c'tor
@@ -377,7 +356,7 @@ class TopEquivalenceEvaluator extends SigAccessor implements
 
 	@Override
 	public void visit(ConceptName expr) {
-		isTopEq = topCLocal() && nc(expr.getEntity());
+		isTopEq = sig.topCLocal() && !sig.contains(expr);
 	}
 
 	@Override
@@ -412,81 +391,80 @@ class TopEquivalenceEvaluator extends SigAccessor implements
 
 	@Override
 	public void visit(ConceptObjectSelf expr) {
-		isTopEq = topRLocal() && isTopEquivalent(expr.getOR());
+		isTopEq = sig.topRLocal() && isTopEquivalent(expr.getOR());
 	}
 
 	@Override
 	public void visit(ConceptObjectValue expr) {
-		isTopEq = topRLocal() && isTopEquivalent(expr.getOR());
+		isTopEq = sig.topRLocal() && isTopEquivalent(expr.getOR());
 	}
 
 	@Override
 	public void visit(ConceptObjectExists expr) {
-		isTopEq = topRLocal() && isTopEquivalent(expr.getOR())
+		isTopEq = sig.topRLocal() && isTopEquivalent(expr.getOR())
 				&& isTopEquivalent(expr.getConcept());
 	}
 
 	@Override
 	public void visit(ConceptObjectForall expr) {
-		isTopEq = isTopEquivalent(expr.getConcept()) || !topRLocal()
+		isTopEq = isTopEquivalent(expr.getConcept()) || !sig.topRLocal()
 				&& isBotEquivalent(expr.getOR());
 	}
 
 	@Override
 	public void visit(ConceptObjectMinCardinality expr) {
-		isTopEq = expr.getCardinality() == 0 || topRLocal()
-				&& isTopEquivalent(expr.getOR())
-				&& isTopEquivalent(expr.getConcept());
+		isTopEq = expr.getCardinality() == 0 || sig.topRLocal()
+				&& isTopEquivalent(expr.getOR()) && isTopEquivalent(expr.getConcept());
 	}
 
 	@Override
 	public void visit(ConceptObjectMaxCardinality expr) {
-		isTopEq = isBotEquivalent(expr.getConcept()) || !topRLocal()
+		isTopEq = isBotEquivalent(expr.getConcept()) || !sig.topRLocal()
 				&& isBotEquivalent(expr.getOR());
 	}
 
 	@Override
 	public void visit(ConceptObjectExactCardinality expr) {
 		isTopEq = expr.getCardinality() == 0
-				&& (isBotEquivalent(expr.getConcept()) || !topRLocal()
+				&& (isBotEquivalent(expr.getConcept()) || !sig.topRLocal()
 						&& isBotEquivalent(expr.getOR()));
 	}
 
 	@Override
 	public void visit(ConceptDataValue expr) {
-		isTopEq = topRLocal() && isTopEquivalent(expr.getDataRoleExpression());
+		isTopEq = sig.topRLocal() && isTopEquivalent(expr.getDataRoleExpression());
 	}
 
 	@Override
 	public void visit(ConceptDataExists expr) {
-		isTopEq = topRLocal() && isTopEquivalent(expr.getDataRoleExpression())
+		isTopEq = sig.topRLocal() && isTopEquivalent(expr.getDataRoleExpression())
 				&& isTopOrBuiltInDT(expr.getExpr());
 	}
 
 	@Override
 	public void visit(ConceptDataForall expr) {
-		isTopEq = isTopDT(expr.getExpr()) || !topRLocal()
+		isTopEq = isTopDT(expr.getExpr()) || !sig.topRLocal()
 				&& isBotEquivalent(expr.getDataRoleExpression());
 	}
 
 	@Override
 	public void visit(ConceptDataMinCardinality expr) {
 		isTopEq = expr.getCardinality() == 0;
-		if (topRLocal()) {
+		if (sig.topRLocal()) {
 			isTopEq |= isTopEquivalent(expr.getDataRoleExpression())
-					&& (expr.getCardinality() == 1 ? isTopOrBuiltInDT(expr
-							.getExpr()) : isTopOrBuiltInInfDT(expr.getExpr()));
+					&& (expr.getCardinality() == 1 ? isTopOrBuiltInDT(expr.getExpr())
+							: isTopOrBuiltInInfDT(expr.getExpr()));
 		}
 	}
 
 	@Override
 	public void visit(ConceptDataMaxCardinality expr) {
-		isTopEq = !topRLocal() && isBotEquivalent(expr.getDataRoleExpression());
+		isTopEq = !sig.topRLocal() && isBotEquivalent(expr.getDataRoleExpression());
 	}
 
 	@Override
 	public void visit(ConceptDataExactCardinality expr) {
-		isTopEq = !topRLocal() && expr.getCardinality() == 0
+		isTopEq = !sig.topRLocal() && expr.getCardinality() == 0
 				&& isBotEquivalent(expr.getDataRoleExpression());
 	}
 
@@ -503,7 +481,7 @@ class TopEquivalenceEvaluator extends SigAccessor implements
 
 	@Override
 	public void visit(ObjectRoleName expr) {
-		isTopEq = topRLocal() && nc(expr.getEntity());
+		isTopEq = sig.topRLocal() && !sig.contains(expr);
 	}
 
 	@Override
@@ -534,7 +512,7 @@ class TopEquivalenceEvaluator extends SigAccessor implements
 
 	@Override
 	public void visit(DataRoleName expr) {
-		isTopEq = topRLocal() && nc(expr.getEntity());
+		isTopEq = sig.topRLocal() && !sig.contains(expr);
 	}
 }
 
@@ -559,7 +537,7 @@ class SyntacticLocalityChecker extends SigAccessor implements DLAxiomVisitor {
 
 	/// @return true iff role expression in equivalent to const wrt locality
 	boolean isREquivalent(Expression expr) {
-		return topRLocal() ? isTopEquivalent(expr) : isBotEquivalent(expr);
+		return sig.topRLocal() ? isTopEquivalent(expr) : isBotEquivalent(expr);
 	}
 
 	/// init c'tor
@@ -639,9 +617,8 @@ class SyntacticLocalityChecker extends SigAccessor implements DLAxiomVisitor {
 
 	public void visit(AxiomDisjointUnion axiom) {
 		isLocal = false;
-		boolean topLoc = topCLocal();
-		if (!(topLoc ? isTopEquivalent(axiom.getC()) : isBotEquivalent(axiom
-				.getC()))) {
+		boolean topLoc = sig.topCLocal();
+		if (!(topLoc ? isTopEquivalent(axiom.getC()) : isBotEquivalent(axiom.getC()))) {
 			return;
 		}
 		boolean topEqDesc = false;
@@ -692,7 +669,7 @@ class SyntacticLocalityChecker extends SigAccessor implements DLAxiomVisitor {
 
 	public void visit(AxiomDisjointORoles axiom) {
 		isLocal = false;
-		if (topRLocal()) {
+		if (sig.topRLocal()) {
 			return;
 		}
 		boolean hasNBE = false;
@@ -710,7 +687,7 @@ class SyntacticLocalityChecker extends SigAccessor implements DLAxiomVisitor {
 
 	public void visit(AxiomDisjointDRoles axiom) {
 		isLocal = false;
-		if (topRLocal()) {
+		if (sig.topRLocal()) {
 			return;
 		}
 		boolean hasNBE = false;
@@ -740,44 +717,41 @@ class SyntacticLocalityChecker extends SigAccessor implements DLAxiomVisitor {
 	}
 
 	public void visit(AxiomRoleInverse axiom) {
-		isLocal = isREquivalent(axiom.getRole())
-				&& isREquivalent(axiom.getInvRole());
+		isLocal = isREquivalent(axiom.getRole()) && isREquivalent(axiom.getInvRole());
 	}
 
 	public void visit(AxiomORoleSubsumption axiom) {
-		isLocal = isREquivalent(topRLocal() ? axiom.getRole() : axiom
-				.getSubRole());
+		isLocal = isREquivalent(sig.topRLocal() ? axiom.getRole() : axiom.getSubRole());
 	}
 
 	public void visit(AxiomDRoleSubsumption axiom) {
-		isLocal = isREquivalent(topRLocal() ? axiom.getRole() : axiom
-				.getSubRole());
+		isLocal = isREquivalent(sig.topRLocal() ? axiom.getRole() : axiom.getSubRole());
 	}
 
 	public void visit(AxiomORoleDomain axiom) {
 		isLocal = isTopEquivalent(axiom.getDomain());
-		if (!topRLocal()) {
+		if (!sig.topRLocal()) {
 			isLocal |= isBotEquivalent(axiom.getRole());
 		}
 	}
 
 	public void visit(AxiomDRoleDomain axiom) {
 		isLocal = isTopEquivalent(axiom.getDomain());
-		if (!topRLocal()) {
+		if (!sig.topRLocal()) {
 			isLocal |= isBotEquivalent(axiom.getRole());
 		}
 	}
 
 	public void visit(AxiomORoleRange axiom) {
 		isLocal = isTopEquivalent(axiom.getRange());
-		if (!topRLocal()) {
+		if (!sig.topRLocal()) {
 			isLocal |= isBotEquivalent(axiom.getRole());
 		}
 	}
 
 	public void visit(AxiomDRoleRange axiom) {
 		isLocal = isTopDT(axiom.getRange());
-		if (!topRLocal()) {
+		if (!sig.topRLocal()) {
 			isLocal |= isBotEquivalent(axiom.getRole());
 		}
 	}
@@ -791,7 +765,7 @@ class SyntacticLocalityChecker extends SigAccessor implements DLAxiomVisitor {
 	}
 
 	public void visit(AxiomRoleIrreflexive axiom) {
-		isLocal = !topRLocal();
+		isLocal = !sig.topRLocal();
 	}
 
 	public void visit(AxiomRoleSymmetric axiom) {
@@ -799,19 +773,19 @@ class SyntacticLocalityChecker extends SigAccessor implements DLAxiomVisitor {
 	}
 
 	public void visit(AxiomRoleAsymmetric axiom) {
-		isLocal = !topRLocal();
+		isLocal = !sig.topRLocal();
 	}
 
 	public void visit(AxiomORoleFunctional axiom) {
-		isLocal = !topRLocal() && isBotEquivalent(axiom.getRole());
+		isLocal = !sig.topRLocal() && isBotEquivalent(axiom.getRole());
 	}
 
 	public void visit(AxiomDRoleFunctional axiom) {
-		isLocal = !topRLocal() && isBotEquivalent(axiom.getRole());
+		isLocal = !sig.topRLocal() && isBotEquivalent(axiom.getRole());
 	}
 
 	public void visit(AxiomRoleInverseFunctional axiom) {
-		isLocal = !topRLocal() && isBotEquivalent(axiom.getRole());
+		isLocal = !sig.topRLocal() && isBotEquivalent(axiom.getRole());
 	}
 
 	public void visit(AxiomConceptInclusion axiom) {
@@ -824,18 +798,18 @@ class SyntacticLocalityChecker extends SigAccessor implements DLAxiomVisitor {
 	}
 
 	public void visit(AxiomRelatedTo axiom) {
-		isLocal = topRLocal() && isTopEquivalent(axiom.getRelation());
+		isLocal = sig.topRLocal() && isTopEquivalent(axiom.getRelation());
 	}
 
 	public void visit(AxiomRelatedToNot axiom) {
-		isLocal = !topRLocal() && isBotEquivalent(axiom.getRelation());
+		isLocal = !sig.topRLocal() && isBotEquivalent(axiom.getRelation());
 	}
 
 	public void visit(AxiomValueOf axiom) {
-		isLocal = topRLocal() && isTopEquivalent(axiom.getAttribute());
+		isLocal = sig.topRLocal() && isTopEquivalent(axiom.getAttribute());
 	}
 
 	public void visit(AxiomValueOfNot axiom) {
-		isLocal = !topRLocal() && isBotEquivalent(axiom.getAttribute());
+		isLocal = !sig.topRLocal() && isBotEquivalent(axiom.getAttribute());
 	}
 }

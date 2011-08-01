@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.kernel.Token.*;
 
 import java.util.ArrayList;
@@ -64,8 +64,7 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NamedEntity;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
-public final class ExpressionTranslator implements
-		DLExpressionVisitorEx<DLTree> {
+public final class ExpressionTranslator implements DLExpressionVisitorEx<DLTree> {
 	/** TBox to get access to the named entities */
 	private final TBox tbox;
 
@@ -83,8 +82,8 @@ public final class ExpressionTranslator implements
 	}
 
 	public DLTree visit(final ConceptName expr) {
-		return DLTreeFactory.buildTree(setEntry(CNAME,
-				tbox.getConcept(expr.getName()), expr));
+		return DLTreeFactory.buildTree(setEntry(CNAME, tbox.getConcept(expr.getName()),
+				expr));
 	}
 
 	private Lexeme setEntry(Token cname, NamedEntry expr, NamedEntity e) {
@@ -129,74 +128,70 @@ public final class ExpressionTranslator implements
 	}
 
 	public DLTree visit(final ConceptObjectValue expr) {
-		return DLTreeFactory.createSNFExists(expr.getOR().accept(this), expr
-				.getI().accept(this));
+		return DLTreeFactory.createSNFExists(expr.getOR().accept(this), expr.getI()
+				.accept(this));
 	}
 
 	public DLTree visit(final ConceptObjectExists expr) {
-		return DLTreeFactory.createSNFExists(expr.getOR().accept(this), expr
-				.getConcept().accept(this));
+		return DLTreeFactory.createSNFExists(expr.getOR().accept(this), expr.getConcept()
+				.accept(this));
 	}
 
 	public DLTree visit(final ConceptObjectForall expr) {
-		return DLTreeFactory.createSNFForall(expr.getOR().accept(this), expr
-				.getConcept().accept(this));
+		return DLTreeFactory.createSNFForall(expr.getOR().accept(this), expr.getConcept()
+				.accept(this));
 	}
 
 	public DLTree visit(final ConceptObjectMinCardinality expr) {
-		return DLTreeFactory.createSNFGE(expr.getCardinality(), expr.getOR()
-				.accept(this), expr.getConcept().accept(this));
+		return DLTreeFactory.createSNFGE(expr.getCardinality(),
+				expr.getOR().accept(this), expr.getConcept().accept(this));
 	}
 
 	public DLTree visit(final ConceptObjectMaxCardinality expr) {
-		return DLTreeFactory.createSNFLE(expr.getCardinality(), expr.getOR()
-				.accept(this), expr.getConcept().accept(this));
+		return DLTreeFactory.createSNFLE(expr.getCardinality(),
+				expr.getOR().accept(this), expr.getConcept().accept(this));
 	}
 
 	public DLTree visit(final ConceptObjectExactCardinality expr) {
-		DLTree le = DLTreeFactory.createSNFLE(expr.getCardinality(), expr
-				.getOR().accept(this).copy(), expr.getConcept().accept(this)
-				.copy());
-		DLTree ge = DLTreeFactory.createSNFGE(expr.getCardinality(), expr
-				.getOR().accept(this).copy(), expr.getConcept().accept(this)
-				.copy());
+		DLTree le = DLTreeFactory.createSNFLE(expr.getCardinality(),
+				expr.getOR().accept(this).copy(), expr.getConcept().accept(this).copy());
+		DLTree ge = DLTreeFactory.createSNFGE(expr.getCardinality(),
+				expr.getOR().accept(this).copy(), expr.getConcept().accept(this).copy());
 		return DLTreeFactory.createSNFAnd(ge, le);
 	}
 
 	public DLTree visit(final ConceptDataValue expr) {
-		return DLTreeFactory.createSNFExists(expr.getDataRoleExpression()
-				.accept(this), expr.getExpr().accept(this));
+		return DLTreeFactory.createSNFExists(expr.getDataRoleExpression().accept(this),
+				expr.getExpr().accept(this));
 	}
 
 	public DLTree visit(final ConceptDataExists expr) {
-		return DLTreeFactory.createSNFExists(expr.getDataRoleExpression()
-				.accept(this), expr.getExpr().accept(this));
+		return DLTreeFactory.createSNFExists(expr.getDataRoleExpression().accept(this),
+				expr.getExpr().accept(this));
 	}
 
 	public DLTree visit(final ConceptDataForall expr) {
-		return DLTreeFactory.createSNFForall(expr.getDataRoleExpression()
-				.accept(this), expr.getExpr().accept(this));
+		return DLTreeFactory.createSNFForall(expr.getDataRoleExpression().accept(this),
+				expr.getExpr().accept(this));
 	}
 
 	public DLTree visit(final ConceptDataMinCardinality expr) {
 		return DLTreeFactory.createSNFGE(expr.getCardinality(), expr
-				.getDataRoleExpression().accept(this),
-				expr.getExpr().accept(this));
+				.getDataRoleExpression().accept(this), expr.getExpr().accept(this));
 	}
 
 	public DLTree visit(final ConceptDataMaxCardinality expr) {
 		return DLTreeFactory.createSNFLE(expr.getCardinality(), expr
-				.getDataRoleExpression().accept(this),
-				expr.getExpr().accept(this));
+				.getDataRoleExpression().accept(this), expr.getExpr().accept(this));
 	}
 
 	public DLTree visit(final ConceptDataExactCardinality expr) {
 		DLTree le = DLTreeFactory.createSNFLE(expr.getCardinality(), expr
-				.getDataRoleExpression().accept(this).copy(), expr.getExpr()
-				.accept(this).copy());
+				.getDataRoleExpression().accept(this).copy(), expr.getExpr().accept(this)
+				.copy());
 		DLTree ge = DLTreeFactory.createSNFGE(expr.getCardinality(), expr
-				.getDataRoleExpression().accept(this).copy(), expr.getExpr()
-				.accept(this).copy());
+				.getDataRoleExpression().accept(this).copy(), expr.getExpr().accept(this)
+				.copy());
 		return DLTreeFactory.createSNFAnd(ge, le);
 	}
 
@@ -218,8 +213,8 @@ public final class ExpressionTranslator implements
 	}
 
 	public DLTree visit(final ObjectRoleName expr) {
-		return DLTreeFactory.buildTree(setEntry(RNAME, tbox.getORM()
-				.ensureRoleName(expr.getName()), expr));
+		return DLTreeFactory.buildTree(setEntry(RNAME,
+				tbox.getORM().ensureRoleName(expr.getName()), expr));
 	}
 
 	public DLTree visit(final ObjectRoleInverse expr) {
@@ -243,13 +238,13 @@ public final class ExpressionTranslator implements
 	}
 
 	public DLTree visit(final ObjectRoleProjectionFrom expr) {
-		return DLTreeFactory.buildTree(new Lexeme(PROJFROM), expr.getOR()
-				.accept(this), expr.getConcept().accept(this));
+		return DLTreeFactory.buildTree(new Lexeme(PROJFROM), expr.getOR().accept(this),
+				expr.getConcept().accept(this));
 	}
 
 	public DLTree visit(final ObjectRoleProjectionInto expr) {
-		return DLTreeFactory.buildTree(new Lexeme(PROJINTO), expr.getOR()
-				.accept(this), expr.getConcept().accept(this));
+		return DLTreeFactory.buildTree(new Lexeme(PROJINTO), expr.getOR().accept(this),
+				expr.getConcept().accept(this));
 	}
 
 	// data role expressions
@@ -264,8 +259,8 @@ public final class ExpressionTranslator implements
 	}
 
 	public DLTree visit(final DataRoleName expr) {
-		return DLTreeFactory.buildTree(new Lexeme(DNAME, tbox.getDRM()
-				.ensureRoleName(expr.getName())));
+		return DLTreeFactory.buildTree(new Lexeme(DNAME, tbox.getDRM().ensureRoleName(
+				expr.getName())));
 	}
 
 	// data expressions
@@ -287,8 +282,7 @@ public final class ExpressionTranslator implements
 
 	public DLTree visit(final DataValue expr) {
 		// process type
-		return tbox.getDataTypeCenter().getDataValue(expr.getName(),
-				expr.getExpr());
+		return tbox.getDataTypeCenter().getDataValue(expr.getName(), expr.getExpr());
 	}
 
 	public DLTree visit(final DataNot expr) {
@@ -309,22 +303,22 @@ public final class ExpressionTranslator implements
 
 	// facets
 	public DLTree visit(final FacetMinInclusive expr) {
-		return tbox.getDataTypeCenter().getIntervalFacetExpr(
-				expr.getExpr().accept(this), true, false);
+		return tbox.getDataTypeCenter().getIntervalFacetExpr(expr.getExpr().accept(this),
+				true, false);
 	}
 
 	public DLTree visit(final FacetMinExclusive expr) {
-		return tbox.getDataTypeCenter().getIntervalFacetExpr(
-				expr.getExpr().accept(this), true, true);
+		return tbox.getDataTypeCenter().getIntervalFacetExpr(expr.getExpr().accept(this),
+				true, true);
 	}
 
 	public DLTree visit(final FacetMaxInclusive expr) {
-		return tbox.getDataTypeCenter().getIntervalFacetExpr(
-				expr.getExpr().accept(this), false, false);
+		return tbox.getDataTypeCenter().getIntervalFacetExpr(expr.getExpr().accept(this),
+				false, false);
 	}
 
 	public DLTree visit(final FacetMaxExclusive expr) {
-		return tbox.getDataTypeCenter().getIntervalFacetExpr(
-				expr.getExpr().accept(this), false, true);
+		return tbox.getDataTypeCenter().getIntervalFacetExpr(expr.getExpr().accept(this),
+				false, true);
 	}
 }

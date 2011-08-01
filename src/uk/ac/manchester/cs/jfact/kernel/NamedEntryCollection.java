@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,8 +26,7 @@ public class NamedEntryCollection<T extends NamedEntry> {
 	private boolean locked;
 
 	/** abstract method for additional tuning of newly created element */
-	public void registerNew(T p) {
-	}
+	public void registerNew(T p) {}
 
 	/** new element in a collection; return this element */
 	public T registerElem(T p) {
@@ -73,8 +72,8 @@ public class NamedEntryCollection<T extends NamedEntry> {
 		// check if it is possible to insert name
 		if (isLocked()) {
 			// TODO add check to the fresh entity policy in the OWLReasoner interface
-			throw new ReasonerFreshEntityException("Unable to register '"
-					+ name + "' as a " + typeName);
+			throw new ReasonerFreshEntityException("Unable to register '" + name
+					+ "' as a " + typeName, name);
 		}
 		// name in name set, and it
 		return registerElem(nameset.add(name));

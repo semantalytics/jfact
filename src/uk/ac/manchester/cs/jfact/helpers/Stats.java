@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.helpers;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,9 +12,9 @@ import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 import uk.ac.manchester.cs.jfact.kernel.DlCompletionGraph;
 
 public final class Stats {
-	public AccumulatedStatistic build(List<AccumulatedStatistic> root) {
+	public AccumulatedStatistic build(List<AccumulatedStatistic> list) {
 		AccumulatedStatistic toReturn = new AccumulatedStatistic();
-		root.add(toReturn);
+		list.add(toReturn);
 		return toReturn;
 	}
 
@@ -25,7 +25,7 @@ public final class Stats {
 		private int local;
 
 		/** c'tor: link itself to the list */
-		private AccumulatedStatistic() {
+		AccumulatedStatistic() {
 			total = 0;
 			local = 0;
 		}
@@ -36,7 +36,7 @@ public final class Stats {
 		}
 
 		/** add local value to a global one */
-		private void accumulate() {
+		void accumulate() {
 			total += local;
 			local = 0;
 		}
@@ -93,8 +93,7 @@ public final class Stats {
 		}
 	}
 
-	public void logStatisticData(LogAdapter o, boolean needLocal,
-			DlCompletionGraph CGraph) {
+	public void logStatisticData(LogAdapter o, boolean needLocal, DlCompletionGraph CGraph) {
 		if (IfDefs.USE_REASONING_STATISTICS) {
 			nTacticCalls.print(o, needLocal, "\nThere were made ",
 					" tactic operations, of which:");
@@ -102,8 +101,7 @@ public final class Stats {
 			nSingletonCalls.print(o, needLocal, "\n           including ",
 					" singleton ones");
 			nOrCalls.print(o, needLocal, "\n    OR   operations: ", "");
-			nOrBrCalls.print(o, needLocal, "\n           ",
-					" of which are branching");
+			nOrBrCalls.print(o, needLocal, "\n           ", " of which are branching");
 			nAndCalls.print(o, needLocal, "\n    AND  operations: ", "");
 			nSomeCalls.print(o, needLocal, "\n    SOME operations: ", "");
 			nAllCalls.print(o, needLocal, "\n    ALL  operations: ", "");
@@ -111,28 +109,23 @@ public final class Stats {
 			nLeCalls.print(o, needLocal, "\n    LE   operations: ", "");
 			nGeCalls.print(o, needLocal, "\n    GE   operations: ", "");
 			nUseless.print(o, needLocal, "\n    N/A  operations: ", "");
-			nNNCalls.print(o, needLocal, "\nThere were made ",
-					" NN rule application");
-			nMergeCalls.print(o, needLocal, "\nThere were made ",
-					" merging operations");
+			nNNCalls.print(o, needLocal, "\nThere were made ", " NN rule application");
+			nMergeCalls.print(o, needLocal, "\nThere were made ", " merging operations");
 			nAutoEmptyLookups.print(o, needLocal, "\nThere were made ",
 					" RA empty transition lookups");
 			nAutoTransLookups.print(o, needLocal, "\nThere were made ",
 					" RA applicable transition lookups");
-			nSRuleAdd.print(o, needLocal, "\nThere were made ",
-					" simple rule additions");
-			nSRuleFire.print(o, needLocal, "\n       of which ",
-					" simple rules fired");
+			nSRuleAdd.print(o, needLocal, "\nThere were made ", " simple rule additions");
+			nSRuleFire.print(o, needLocal, "\n       of which ", " simple rules fired");
 			nStateSaves.print(o, needLocal, "\nThere were made ",
 					" save(s) of global state");
 			nStateRestores.print(o, needLocal, "\nThere were made ",
 					" restore(s) of global state");
-			nNodeSaves.print(o, needLocal, "\nThere were made ",
-					" save(s) of tree state");
+			nNodeSaves
+					.print(o, needLocal, "\nThere were made ", " save(s) of tree state");
 			nNodeRestores.print(o, needLocal, "\nThere were made ",
 					" restore(s) of tree state");
-			nLookups.print(o, needLocal, "\nThere were made ",
-					" concept lookups");
+			nLookups.print(o, needLocal, "\nThere were made ", " concept lookups");
 			if (IfDefs.RKG_USE_FAIRNESS) {
 				nFairnessViolations.print(o, needLocal, "\nThere were ",
 						" fairness constraints violation");

@@ -1,10 +1,10 @@
 package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
-Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
-This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
-This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
+ Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+ This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+ You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 		//typedef SubsumerSet::iterator ss_iterator;
 		//protected:	// members
 		/// set of sure- and possible subsumers
-		protected List<ClassifiableEntry> Sure, Possible;
+		protected final List<ClassifiableEntry> Sure, Possible;
 
 		//public:		// interface
 		/// c'tor: copy given sets
@@ -105,7 +105,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 	/** explicitely run TD phase */
 	@Override
 	public void runTopDown() {
-		searchBaader( /*upDirection=*/false, getTopVertex());
+		searchBaader( /* upDirection= */false, getTopVertex());
 	}
 
 	/** explicitely run BU phase */
@@ -119,7 +119,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 				return;
 			}
 			if (!willInsertIntoTaxonomy) { // after classification -- bottom set up already
-				searchBaader( /*upDirection=*/true, getBottomVertex());
+				searchBaader( /* upDirection= */true, getBottomVertex());
 				return;
 			}
 			// during classification -- have to find leaf nodes
@@ -129,7 +129,8 @@ public final class DLConceptTaxonomy extends Taxonomy {
 					searchBaader(true, p);
 				}
 			}
-		} finally {
+		}
+		finally {
 			clearCommon();
 		}
 	}
@@ -139,8 +140,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 	public void preClassificationActions() {
 		++nConcepts;
 		if (pTaxProgress != null) {
-			pTaxProgress.reasonerTaskProgressChanged((int) nConcepts,
-					tBox.getNItems());
+			pTaxProgress.reasonerTaskProgressChanged((int) nConcepts, tBox.getNItems());
 		}
 	}
 
@@ -229,8 +229,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 		// we DON'T need bottom-up phase for primitive concepts during CD-like reasoning
 		// if no GCIs are in the TBox (C [= T, T [= X or Y, X [= D, Y [= D)
 		// or no reflexive roles w/RnD precent (Refl(R), Range(R)=D)
-		return flagNeedBottomUp || !useCompletelyDefined
-				|| curConcept().isNonPrimitive();
+		return flagNeedBottomUp || !useCompletelyDefined || curConcept().isNonPrimitive();
 	}
 
 	private boolean testSub(final Concept p, final Concept q) {
@@ -293,8 +292,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 				(nSortedNegative > 0 ? String.format(
 						"Sorted reasoning deals with %s non-subsumptions\n",
 						nSortedNegative) : ""), nSearchCalls, nSubCalls,
-				nNonTrivialSubCalls,
-				nEntries * (nEntries - 1) / Math.max(1, nTries));
+				nNonTrivialSubCalls, nEntries * (nEntries - 1) / Math.max(1, nTries));
 		super.print(o);
 	}
 
@@ -472,7 +470,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 		for (TaxonomyVertex p : current.neigh(true)) {
 			propagateTrueUp(p);
 		}
-		current.clearLinks(/*upDirection=*/true);
+		current.clearLinks(/* upDirection= */true);
 		runTopDown();
 		List<TaxonomyVertex> vec = new ArrayList<TaxonomyVertex>();
 		for (TaxonomyVertex p : current.neigh(true)) {
@@ -498,7 +496,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 			excludes.add(v);
 		}
 		for (TSplitVar.Entry q : split.getEntries()) {
-			excludes.add(q.C.getTaxVertex());
+			excludes.add(q.concept.getTaxVertex());
 		}
 		if (v != null) // there is C-node in the taxonomy
 		{
@@ -506,7 +504,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 			removeNode(v);
 		}
 		for (TSplitVar.Entry q : split.getEntries()) {
-			v = q.C.getTaxVertex();
+			v = q.concept.getTaxVertex();
 			current.mergeIndepNode(v, excludes, curEntry);
 			removeNode(v);
 		}
