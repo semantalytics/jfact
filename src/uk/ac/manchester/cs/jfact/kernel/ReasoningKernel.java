@@ -93,7 +93,8 @@ public final class ReasoningKernel {
 	/** progress monitor (if any) */
 	private ReasonerProgressMonitor pMonitor;
 	private AtomicBoolean interrupted;
-
+	/// whether EL polynomial reasoner should be used
+	private boolean useELReasoner;
 	public void setInterruptedSwitch(AtomicBoolean b) {
 		interrupted = b;
 	}
@@ -145,21 +146,6 @@ public final class ReasoningKernel {
 		}
 	}
 
-	//	public static final boolean isUniversalRole(final ObjectRoleExpression R) {
-	//		return R instanceof ObjectRoleTop;
-	//	}
-	//
-	//	public static final boolean isUniversalRole(final DataRoleExpression R) {
-	//		return R instanceof DataRoleTop;
-	//	}
-	//
-	//	public static final boolean isEmptyRole(ObjectRoleExpression R) {
-	//		return R instanceof ObjectRoleBottom;
-	//	}
-	//
-	//	public static final boolean isEmptyRole(DataRoleExpression R) {
-	//		return R instanceof DataRoleBottom;
-	//	}
 	/** clear cache and flags */
 	private void initCacheAndFlags() {
 		cacheLevel = csEmpty;
@@ -1068,6 +1054,7 @@ public final class ReasoningKernel {
 		if (initOptions()) {
 			throw new ReasonerInternalException("FaCT++ kernel: Cannot init options");
 		}
+		 useELReasoner=false;
 	}
 
 	/// try to perform the incremental reasoning on the changed ontology
@@ -1419,13 +1406,7 @@ public final class ReasoningKernel {
 						IFOption.IOType.iotBool, "true")) {
 			return true;
 		}
-		if (kernelOptions
-				.registerOption(
-						"usePrecompletion",
-						"Option 'usePrecompletion' switchs on and off precompletion process for ABox.",
-						IFOption.IOType.iotBool, "false")) {
-			return true;
-		}
+
 		if (kernelOptions
 				.registerOption(
 						"orSortSub",

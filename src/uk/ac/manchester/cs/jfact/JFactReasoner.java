@@ -138,13 +138,17 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 			ReasonerInterruptedException, TimeOutException {
 		Collection<ConceptExpression> pointers;
 		if (!ce.isAnonymous()
-				&& !rootOntology.containsClassInSignature(ce.asOWLClass().getIRI())) {
+				&& !rootOntology.containsClassInSignature(ce.asOWLClass().getIRI())&&!ce.isOWLNothing() &&!ce.isOWLThing()) {
 			pointers = Collections.emptyList();
 		} else {
 			checkConsistency();
 			TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
 			kernel.getEquivalentConcepts(translationMachinery.toClassPointer(ce), actor);
 			pointers = actor.getClassSynonyms();
+//			//XXX this is a bug: the class itself should be included in the synonyms
+//			if(!ce.isAnonymous()) {
+//				pointers.add(translationMachinery.toClassPointer(ce));
+//			}
 		}
 		return translationMachinery.getClassExpressionTranslator().getNodeFromPointers(
 				pointers);

@@ -186,11 +186,11 @@ public final class TBox {
 	/** flag whether TBox is WINE-like */
 	private boolean isLikeWINE;
 	/** flag whether precompletion should be used */
-	private boolean usePrecompletion;
+	//private boolean usePrecompletion;
 	/** whether KB is consistent */
 	private boolean consistent;
 	/** whether KB(ABox) is precompleted */
-	private boolean precompleted;
+	//private boolean precompleted;
 	/** time spend for preprocessing */
 	private long preprocTime;
 	/** time spend for consistency checking */
@@ -737,14 +737,14 @@ public final class TBox {
 	}
 
 	/** inform that KB is precompleted */
-	public void setPrecompleted() {
-		precompleted = true;
-	}
+//	public void setPrecompleted() {
+//		precompleted = true;
+//	}
 
 	/** if KB is precompleted */
-	public boolean isPrecompleted() {
-		return precompleted;
-	}
+//	public boolean isPrecompleted() {
+//		return precompleted;
+//	}
 
 	/** get status flag */
 	public KBStatus getStatus() {
@@ -1256,7 +1256,7 @@ public final class TBox {
 		isLikeGALEN = false;
 		isLikeWINE = false;
 		consistent = true;
-		precompleted = false;
+		//precompleted = false;
 		preprocTime = 0;
 		consistTime = 0;
 		readConfig(Options);
@@ -1445,9 +1445,9 @@ public final class TBox {
 		useRelevantOnly = Options.getBool("useRelevantOnly");
 		dumpQuery = Options.getBool("dumpQuery");
 		alwaysPreferEquals = Options.getBool("alwaysPreferEquals");
-		usePrecompletion = Options.getBool("usePrecompletion");
+		//usePrecompletion = Options.getBool("usePrecompletion");
 		logger.println(Templates.READ_CONFIG, useCompletelyDefined, useRelevantOnly,
-				dumpQuery, alwaysPreferEquals, usePrecompletion);
+				dumpQuery, alwaysPreferEquals);//, usePrecompletion);
 		if (axioms.initAbsorptionFlags(Options.getText("absorptionFlags"))) {
 			throw new ReasonerInternalException("Incorrect absorption flags given");
 		}
@@ -2047,9 +2047,9 @@ public final class TBox {
 		transformSingletonHierarchy();
 		absorbAxioms();
 		setToldTop();
-		if (usePrecompletion) {
-			performPrecompletion();
-		}
+//		if (usePrecompletion) {
+//			performPrecompletion();
+//		}
 		buildDAG();
 		fillsClassificationTag();
 		calculateTSDepth();
@@ -2255,10 +2255,10 @@ public final class TBox {
 		return i;
 	}
 
-	public void performPrecompletion() {
-		Precompletor PC = new Precompletor(this);
-		PC.performPrecompletion();
-	}
+//	public void performPrecompletion() {
+//		Precompletor PC = new Precompletor(this);
+//		PC.performPrecompletion();
+//	}
 
 	public void determineSorts() {
 		if (IfDefs.RKG_USE_SORTED_REASONING) {

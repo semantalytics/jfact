@@ -41,7 +41,7 @@ public final class LeveLogger {
 				"\nTAX:inserting '%s' with up = {"), MERGE(" m(%s->%s)"), RESTORE(
 				" sr(%s)"), CLASSIFY_CONCEPTS("\n\n---Start classifying %s concepts"), CLASSIFY_CONCEPTS2(
 				"\n---Done: %s %s concepts classified"), READ_CONFIG(
-				"Init useCompletelyDefined = %s\nInit useRelevantOnly = %s\nInit dumpQuery = %s\nInit alwaysPreferEquals = %s\nInit usePrecompletion = %s"), TOLD_SUBSUMERS(
+				"Init useCompletelyDefined = %s\nInit useRelevantOnly = %s\nInit dumpQuery = %s\nInit alwaysPreferEquals = %s"/*\nInit usePrecompletion = %s"*/), TOLD_SUBSUMERS(
 				" '%s'"), TRANSFORM_TOLD_CYCLES(
 				"\nTold cycle elimination done with %s synonyms created"), IS_SATISFIABLE(
 				"\n-----------\nChecking satisfiability of '%s':"), IS_SATISFIABLE1(

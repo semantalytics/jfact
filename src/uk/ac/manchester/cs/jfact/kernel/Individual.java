@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import uk.ac.manchester.cs.jfact.helpers.DLTree;
-
 public class Individual extends Concept {
 	/** pointer to nominal node (works for singletons only) */
 	private DlCompletionTree node;
@@ -21,14 +19,6 @@ public class Individual extends Concept {
 	private final List<Related> relatedIndex = new ArrayList<Related>();
 	/** map for the related individuals: Map[R]={i:R(this,i)} */
 	private Map<Role, List<Individual>> pRelatedMap;
-	// precompletion support
-	/**
-	 * vector that contains LINKS to the concept expressions that are labels of
-	 * an individual
-	 */
-	private final Set<DLTree> conceptExpressions = new HashSet<DLTree>();
-	// TODO not sure what's the use
-	private List<DLTree> copy = new ArrayList<DLTree>();
 
 	public Individual(final String name) {
 		super(name);
@@ -103,49 +93,6 @@ public class Individual extends Concept {
 		pRelatedMap.put(R, v);
 	}
 
-	// precompletion interface
-	/** check whether EXPR already exists in the precompletion set */
-	private boolean containsPCExpr(final DLTree expr) {
-		if (expr == null) {
-			return true;
-		}
-		return conceptExpressions.contains(expr);
-	}
-
-	/** unconditionally adds EXPR to the precompletion information */
-	private void addPCExprAlways(final DLTree expr) {
-		conceptExpressions.add(expr);
-		copy.add(expr.copy());
-	}
-
-	/**
-	 * add EXPR to th ePC information if it is a new expression; @return true if
-	 * was added
-	 */
-	public boolean addPCExpr(final DLTree expr) {
-		if (containsPCExpr(expr)) {
-			return false;
-		}
-		addPCExprAlways(expr);
-		return true;
-	}
-
-	/** update individual's description from precompletion information */
-	public void usePCInfo() {
-		removeDescription();
-		addLeaves(copy);
-		copy.clear();
-		// we change description of a concept, so we need to rebuild the TS info
-		// note that precompletion succeed; so there is no need to take into account
-		// RELATED information
-		super.initToldSubsumers();
-	}
-
-	/** remove all precompletion-related information */
-	public void clearPCInfo() {
-		copy.clear();
-		conceptExpressions.clear();
-	}
 
 	// TIndividual RELATED-dependent method' implementation
 	private void updateToldFromRelated() {
