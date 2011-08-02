@@ -95,12 +95,13 @@ public final class ReasoningKernel {
 	private AtomicBoolean interrupted;
 	/// whether EL polynomial reasoner should be used
 	private boolean useELReasoner;
+
 	public void setInterruptedSwitch(AtomicBoolean b) {
 		interrupted = b;
 	}
 
 	/** timeout value */
-	private long opTimeout;
+	private final long opTimeout;
 	/** tell reasoner to use verbose output */
 	private boolean verboseOutput;
 	// reasoning cache
@@ -350,14 +351,6 @@ public final class ReasoningKernel {
 		getTBox().writeReasoningResult(o, time);
 	}
 
-	/** set timeout value to VALUE */
-	public void setOperationTimeout(long value) {
-		opTimeout = value;
-		if (pTBox != null) {
-			pTBox.setTestTimeout(value);
-		}
-	}
-
 	// helper methods to query properties of roles
 	/** @return true if R is functional wrt ontology */
 	private boolean checkFunctionality(DLTree R) {
@@ -432,8 +425,7 @@ public final class ReasoningKernel {
 			return true;
 		}
 		pTBox = new TBox(getOptions(), topORoleName, botORoleName, topDRoleName,
-				botDRoleName, interrupted);
-		pTBox.setTestTimeout(opTimeout);
+				botDRoleName, interrupted, opTimeout);
 		pTBox.setProgressMonitor(pMonitor);
 		pTBox.setVerboseOutput(verboseOutput);
 		pET = new ExpressionTranslator(pTBox);
@@ -890,11 +882,7 @@ public final class ReasoningKernel {
 		classifyKB(); // ensure KB is ready to answer the query
 		setUpCache(e(C), csClassified);
 		Taxonomy tax = getCTaxonomy();
-		if (direct) {
-			tax.getRelativesInfo(cachedVertex, actor, false, true, false);
-		} else {
-			tax.getRelativesInfo(cachedVertex, actor, false, false, false);
-		}
+		tax.getRelativesInfo(cachedVertex, actor, false, direct, false);
 	}
 
 	/** apply actor__apply() to all synonyms of [complex] C */
@@ -919,11 +907,7 @@ public final class ReasoningKernel {
 		preprocessKB(); // ensure KB is ready to answer the query
 		Role R = getRole(r, "Role expression expected in getSupRoles()");
 		Taxonomy tax = getTaxonomy(R);
-		if (direct) {
-			tax.getRelativesInfo(getTaxVertex(R), actor, false, true, true);
-		} else {
-			tax.getRelativesInfo(getTaxVertex(R), actor, false, false, true);
-		}
+		tax.getRelativesInfo(getTaxVertex(R), actor, false, direct, true);
 	}
 
 	/** apply actor__apply() to all DIRECT sub-roles of [complex] R */
@@ -931,11 +915,7 @@ public final class ReasoningKernel {
 		preprocessKB(); // ensure KB is ready to answer the query
 		Role R = getRole(r, "Role expression expected in getSubRoles()");
 		Taxonomy tax = getTaxonomy(R);
-		if (direct) {
-			tax.getRelativesInfo(getTaxVertex(R), actor, false, true, false);
-		} else {
-			tax.getRelativesInfo(getTaxVertex(R), actor, false, false, false);
-		}
+		tax.getRelativesInfo(getTaxVertex(R), actor, false, direct, false);
 	}
 
 	/** apply actor__apply() to all synonyms of [complex] R */
@@ -955,12 +935,7 @@ public final class ReasoningKernel {
 		setUpCache(DLTreeFactory.createSNFExists(e(r), DLTreeFactory.createTop()),
 				csClassified);
 		Taxonomy tax = getCTaxonomy();
-		if (direct) {
-			tax.getRelativesInfo(cachedVertex, actor, true, true, true);
-		} else {
-			// gets all named classes that are in the domain of a role
-			tax.getRelativesInfo(cachedVertex, actor, true, false, true);
-		}
+		tax.getRelativesInfo(cachedVertex, actor, true, direct, true);
 	}
 
 	/**
@@ -1012,11 +987,7 @@ public final class ReasoningKernel {
 		realiseKB(); // ensure KB is ready to answer the query
 		setUpCache(e(I), csClassified);
 		Taxonomy tax = getCTaxonomy();
-		if (direct) {
-			tax.getRelativesInfo(cachedVertex, actor, true, true, true);
-		} else {
-			tax.getRelativesInfo(cachedVertex, actor, true, false, true);
-		}
+		tax.getRelativesInfo(cachedVertex, actor, true, direct, true);
 	}
 
 	/** apply actor__apply() to all synonyms of an individual I */
@@ -1043,18 +1014,18 @@ public final class ReasoningKernel {
 		return isSubsumedBy(getExpressionManager().oneOf(I), C);
 	}
 
-	public ReasoningKernel() {
+	public ReasoningKernel(long timeOut) {
 		pTBox = null;
 		pET = null;
 		pMonitor = null;
-		opTimeout = 0;
+		opTimeout = timeOut;
 		verboseOutput = false;
 		cachedQuery = null;
 		initCacheAndFlags();
 		if (initOptions()) {
 			throw new ReasonerInternalException("FaCT++ kernel: Cannot init options");
 		}
-		 useELReasoner=false;
+		useELReasoner = false;
 	}
 
 	/// try to perform the incremental reasoning on the changed ontology
@@ -1406,7 +1377,6 @@ public final class ReasoningKernel {
 						IFOption.IOType.iotBool, "true")) {
 			return true;
 		}
-
 		if (kernelOptions
 				.registerOption(
 						"orSortSub",

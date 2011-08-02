@@ -167,7 +167,7 @@ public final class TBox {
 	/** fairness constraints */
 	private List<Concept> fairness = new ArrayList<Concept>();
 	/** single SAT/SUB test timeout in milliseconds */
-	private long testTimeout;
+	private final long testTimeout;
 	// Flags section
 	/** flag for full/short KB */
 	private boolean useRelevantOnly;
@@ -1231,11 +1231,12 @@ public final class TBox {
 
 	public TBox(final IFOptionSet Options, final String TopORoleName,
 			final String BotORoleName, final String TopDRoleName,
-			final String BotDRoleName, AtomicBoolean interrupted) {
+			final String BotDRoleName, AtomicBoolean interrupted, long timeOut) {
 		this.interrupted = interrupted;
 		axioms = new AxiomSet(this);
 		GCIs = new KBFlags();
 		dlHeap = new DLDag(Options);
+		testTimeout=timeOut;
 		stdReasoner = null;
 		nomReasoner = null;
 		pMonitor = null;
@@ -2342,16 +2343,7 @@ public final class TBox {
 		}
 	}
 
-	/** set the value of a test timeout in milliseconds to VALUE */
-	public void setTestTimeout(long value) {
-		testTimeout = value;
-		if (stdReasoner != null) {
-			stdReasoner.setTestTimeout(value);
-		}
-		if (nomReasoner != null) {
-			nomReasoner.setTestTimeout(value);
-		}
-	}
+
 
 	/** set ToDo priorities using local OPTIONS */
 	public void setToDoPriorities() {

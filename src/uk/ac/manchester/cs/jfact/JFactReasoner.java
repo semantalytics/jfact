@@ -97,22 +97,30 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	//holds the consistency status: true for consistent, false for inconsistent, null for not verified (or changes received)
 	private Boolean consistencyVerified = null;
 
+	private final Set<OWLEntity> knownEntities=new HashSet<OWLEntity>();
+
 	public JFactReasoner(OWLOntology rootOntology,
 			OWLReasonerConfiguration configuration, BufferingMode bufferingMode) {
 		this.rootOntology = rootOntology;
 		df = this.rootOntology.getOWLOntologyManager().getOWLDataFactory();
-		kernel = new ReasoningKernel();
+		kernel = new ReasoningKernel(configuration.getTimeOut());
 		em = kernel.getExpressionManager();
 		this.bufferingMode = bufferingMode;
 		this.configuration = configuration;
 		timeOut = configuration.getTimeOut();
 		manager = rootOntology.getOWLOntologyManager();
+		knownEntities.add(df.getOWLThing());
+		knownEntities.add(df.getOWLNothing());
 		for (OWLOntology ont : rootOntology.getImportsClosure()) {
 			for (OWLAxiom ax : ont.getLogicalAxioms()) {
-				reasonerAxioms.add(ax.getAxiomWithoutAnnotations());
+				OWLAxiom axiom = ax.getAxiomWithoutAnnotations();
+				reasonerAxioms.add(axiom);
+				knownEntities.addAll(axiom.getSignature());
 			}
 			for (OWLAxiom ax : ont.getAxioms(AxiomType.DECLARATION)) {
-				reasonerAxioms.add(ax.getAxiomWithoutAnnotations());
+				OWLAxiom axiom = ax.getAxiomWithoutAnnotations();
+				reasonerAxioms.add(axiom);
+				knownEntities.addAll(axiom.getSignature());
 			}
 		}
 		kernel.setTopBottomRoleNames(Vocabulary.TOP_OBJECT_PROPERTY,
@@ -120,11 +128,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 				Vocabulary.BOTTOM_DATA_PROPERTY);
 		kernel.setProgressMonitor(configuration.getProgressMonitor());
 		kernel.setInterruptedSwitch(interrupted);
-		long millis = configuration.getTimeOut();
-		if (millis == Long.MAX_VALUE) {
-			millis = 0;
-		}
-		kernel.setOperationTimeout(millis);
+
 		configuration.getProgressMonitor().reasonerTaskStarted(
 				ReasonerProgressMonitor.LOADING);
 		configuration.getProgressMonitor().reasonerTaskBusy();
@@ -151,16 +155,11 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	}
 
 	private boolean isFreshName(OWLClassExpression ce) {
-		if(ce.isAnonymous()||ce.isOWLNothing()||ce.isOWLThing()) {
+
+		if(ce.isAnonymous()) {
 			return false;
 		}
-		IRI iri = ce.asOWLClass().getIRI();
-		for(OWLOntology o:rootOntology.getImportsClosure()) {
-			if(o.containsClassInSignature(iri)) {
-				return false;
-			}
-		}
-		return true;
+		return !knownEntities.contains(ce);
 	}
 
 	public void ontologiesChanged(List<? extends OWLOntologyChange> changes)
@@ -237,6 +236,10 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 			if (!added.isEmpty() || !removed.isEmpty()) {
 				reasonerAxioms.removeAll(removed);
 				reasonerAxioms.addAll(added);
+				knownEntities.clear();
+				for(OWLAxiom ax:reasonerAxioms) {
+					knownEntities.addAll(ax.getSignature());
+				}
 				// set the consistency status to not verified
 				consistencyVerified = null;
 				handleChanges(added, removed);
@@ -377,7 +380,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 			TimeOutException, AxiomNotInProfileException, FreshEntitiesException,
 			InconsistentOntologyException {
 		checkConsistency();
-		if (rootOntology.containsAxiom(axiom, true)) {
+		if(reasonerAxioms.contains(axiom.getAxiomWithoutAnnotations())) {
 			return true;
 		}
 		try {
@@ -448,12 +451,23 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		if (isFreshName(ce)) {
 			return new OWLClassNodeSet(getBottomClassNode());
 		}
+		try {
+			System.out.println("JFactReasoner.getSubClasses() "+ce);
+			for(OWLAxiom ax:reasonerAxioms) {
+				if(ax.getSignature().contains(ce.asOWLClass())) {
+					System.out.println(ax);
+				}
+			}
 		checkConsistency();
 		TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
 		kernel.getSubConcepts(translationMachinery.toClassPointer(ce), direct, actor);
 		Collection<Collection<ConceptExpression>> pointers = actor.getClassElements();
 		return translationMachinery.getClassExpressionTranslator()
 				.getNodeSetFromPointers(pointers);
+		}catch (ReasonerFreshEntityException e) {
+			e.printStackTrace();
+			throw new FreshEntitiesException(ce.getSignature());
+		}
 	}
 
 	public synchronized NodeSet<OWLClass> getSuperClasses(OWLClassExpression ce,
