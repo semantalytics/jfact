@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -137,21 +138,29 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 			throws InconsistentOntologyException, ClassExpressionNotInProfileException,
 			ReasonerInterruptedException, TimeOutException {
 		Collection<ConceptExpression> pointers;
-		if (!ce.isAnonymous()
-				&& !rootOntology.containsClassInSignature(ce.asOWLClass().getIRI())&&!ce.isOWLNothing() &&!ce.isOWLThing()) {
+		if (isFreshName(ce)) {
 			pointers = Collections.emptyList();
 		} else {
 			checkConsistency();
 			TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
 			kernel.getEquivalentConcepts(translationMachinery.toClassPointer(ce), actor);
 			pointers = actor.getClassSynonyms();
-//			//XXX this is a bug: the class itself should be included in the synonyms
-//			if(!ce.isAnonymous()) {
-//				pointers.add(translationMachinery.toClassPointer(ce));
-//			}
 		}
 		return translationMachinery.getClassExpressionTranslator().getNodeFromPointers(
 				pointers);
+	}
+
+	private boolean isFreshName(OWLClassExpression ce) {
+		if(ce.isAnonymous()||ce.isOWLNothing()||ce.isOWLThing()) {
+			return false;
+		}
+		IRI iri = ce.asOWLClass().getIRI();
+		for(OWLOntology o:rootOntology.getImportsClosure()) {
+			if(o.containsClassInSignature(iri)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public void ontologiesChanged(List<? extends OWLOntologyChange> changes)
@@ -180,14 +189,8 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 * @param changes
 	 *            The list of raw changes.
 	 */
-	private final static boolean log = false;
-
 	private synchronized void handleRawOntologyChanges(
 			List<? extends OWLOntologyChange> changes) {
-		if (log) {
-			System.out.println(Thread.currentThread().getName()
-					+ " OWLReasonerBase.handleRawOntologyChanges() " + changes);
-		}
 		rawChanges.addAll(changes);
 		// We auto-flush the changes if the reasoner is non-buffering
 		if (bufferingMode.equals(BufferingMode.NON_BUFFERING)) {
@@ -442,8 +445,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	public synchronized NodeSet<OWLClass> getSubClasses(OWLClassExpression ce,
 			boolean direct) throws ReasonerInterruptedException, TimeOutException,
 			FreshEntitiesException, InconsistentOntologyException {
-		if (!ce.isAnonymous()
-				&& !rootOntology.containsClassInSignature(ce.asOWLClass().getIRI())) {
+		if (isFreshName(ce)) {
 			return new OWLClassNodeSet(getBottomClassNode());
 		}
 		checkConsistency();
@@ -458,8 +460,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 			boolean direct) throws InconsistentOntologyException,
 			ClassExpressionNotInProfileException, ReasonerInterruptedException,
 			TimeOutException {
-		if (!ce.isAnonymous()
-				&& !rootOntology.containsClassInSignature(ce.asOWLClass().getIRI())) {
+		if (isFreshName(ce)) {
 			return new OWLClassNodeSet(getTopClassNode());
 		}
 		checkConsistency();
