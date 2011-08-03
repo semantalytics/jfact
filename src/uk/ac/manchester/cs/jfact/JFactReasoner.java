@@ -449,25 +449,18 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 			boolean direct) throws ReasonerInterruptedException, TimeOutException,
 			FreshEntitiesException, InconsistentOntologyException {
 		if (isFreshName(ce)) {
+			if(configuration.getFreshEntityPolicy()==FreshEntityPolicy.DISALLOW) {
+				throw new FreshEntitiesException(ce.getSignature());
+			}
 			return new OWLClassNodeSet(getBottomClassNode());
 		}
-		try {
-			System.out.println("JFactReasoner.getSubClasses() "+ce);
-			for(OWLAxiom ax:reasonerAxioms) {
-				if(ax.getSignature().contains(ce.asOWLClass())) {
-					System.out.println(ax);
-				}
-			}
 		checkConsistency();
 		TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
 		kernel.getSubConcepts(translationMachinery.toClassPointer(ce), direct, actor);
 		Collection<Collection<ConceptExpression>> pointers = actor.getClassElements();
 		return translationMachinery.getClassExpressionTranslator()
 				.getNodeSetFromPointers(pointers);
-		}catch (ReasonerFreshEntityException e) {
-			e.printStackTrace();
-			throw new FreshEntitiesException(ce.getSignature());
-		}
+
 	}
 
 	public synchronized NodeSet<OWLClass> getSuperClasses(OWLClassExpression ce,

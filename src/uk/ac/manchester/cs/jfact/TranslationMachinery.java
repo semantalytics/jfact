@@ -181,18 +181,16 @@ public final class TranslationMachinery {
 		return em.dataRole(Vocabulary.BOTTOM_DATA_PROPERTY);
 	}
 
-
-
 	public void loadAxioms(Collection<OWLAxiom> axioms) {
-		for(OWLAxiom axiom:axioms) {
-		//TODO check valid axioms, such as those involving topDataProperty
-		if (axiom2PtrMap.containsKey(axiom)) {
-			return;
-		}
-		final Axiom axiomPointer = axiom.accept(axiomTranslator);
-		if (axiomPointer != null) {
-			axiom2PtrMap.put(axiom, axiomPointer);
-		}
+		for (OWLAxiom axiom : axioms) {
+			//TODO check valid axioms, such as those involving topDataProperty
+			if (axiom2PtrMap.containsKey(axiom)) {
+				continue;
+			}
+			final Axiom axiomPointer = axiom.accept(axiomTranslator);
+			if (axiomPointer != null) {
+				axiom2PtrMap.put(axiom, axiomPointer);
+			}
 		}
 	}
 
@@ -492,7 +490,6 @@ public final class TranslationMachinery {
 			for (OWLObjectPropertyExpression p : axiom.getPropertyChain()) {
 				l.add(toObjectPropertyPointer(p));
 			}
-
 			return kernel
 					.isSubChain(toObjectPropertyPointer(axiom.getSuperProperty()), l);
 		}
@@ -1316,8 +1313,6 @@ public final class TranslationMachinery {
 			return new OWLNamedIndividualNodeSet();
 		}
 	}
-
-
 
 	public ClassExpressionTranslator getClassExpressionTranslator() {
 		return classExpressionTranslator;
