@@ -82,7 +82,9 @@ public final class Ontology {
 	}
 
 	/** accept method for the visitor pattern */
-	public void accept(DLAxiomVisitor visitor) {visitor.visitOntology(this);}
+	public void accept(DLAxiomVisitor visitor) {
+		visitor.visitOntology(this);
+	}
 
 	public <O> O accept(DLAxiomVisitorEx<O> visitor) {
 		return visitor.visitOntology(this);

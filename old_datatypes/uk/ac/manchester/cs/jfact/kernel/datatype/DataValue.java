@@ -15,13 +15,13 @@ public final class DataValue implements DataExpression, DataExpressionArg<Dataty
 		NamedEntity {
 	/** name of the entity */
 	protected final String name;
-	private DatatypeRepresentation<?> literal;
+	//private DatatypeRepresentation<?> literal;
 	private final Datatypes delegate;
 
 	public DataValue(String value, Datatypes T) {
 		name = value;
 		delegate = T;
-		literal = delegate.parse(name);
+		//literal = delegate.parse(name);
 	}
 
 	public String getName() {
@@ -40,8 +40,5 @@ public final class DataValue implements DataExpression, DataExpressionArg<Dataty
 		return delegate;
 	}
 
-	@Override
-	public String toString() {
-		return literal.toString();
-	}
+
 }

@@ -737,15 +737,13 @@ public final class TBox {
 	}
 
 	/** inform that KB is precompleted */
-//	public void setPrecompleted() {
-//		precompleted = true;
-//	}
-
+	//	public void setPrecompleted() {
+	//		precompleted = true;
+	//	}
 	/** if KB is precompleted */
-//	public boolean isPrecompleted() {
-//		return precompleted;
-//	}
-
+	//	public boolean isPrecompleted() {
+	//		return precompleted;
+	//	}
 	/** get status flag */
 	public KBStatus getStatus() {
 		return kbStatus;
@@ -970,10 +968,6 @@ public final class TBox {
 				ret = bpTOP;
 				break;
 			case DATAEXPR:
-				/*
-				 * index=dlHeap.index(cur.getNE()); if(index!=bpINVALID) {
-				 * ret=index; break; }
-				 */
 				if (cur.getNE() instanceof DataEntry) {
 					ret = addDataExprToHeap((DataEntry) cur.getNE());
 				} else {
@@ -981,17 +975,9 @@ public final class TBox {
 				}
 				break;
 			case CNAME:
-				/*
-				 * index=dlHeap.index(cur.getNE()); if(index!=bpINVALID) {
-				 * ret=index; break; }
-				 */
 				ret = concept2dag((Concept) cur.getNE());
 				break;
 			case INAME:
-				/*
-				 * index=dlHeap.index(cur.getNE()); if(index!=bpINVALID) {
-				 * ret=index; break; }
-				 */
 				++nNominalReferences;// definitely a nominal
 				Individual ind = (Individual) cur.getNE();
 				ind.setNominal(true);
@@ -1236,7 +1222,7 @@ public final class TBox {
 		axioms = new AxiomSet(this);
 		GCIs = new KBFlags();
 		dlHeap = new DLDag(Options);
-		testTimeout=timeOut;
+		testTimeout = timeOut;
 		stdReasoner = null;
 		nomReasoner = null;
 		pMonitor = null;
@@ -2048,9 +2034,9 @@ public final class TBox {
 		transformSingletonHierarchy();
 		absorbAxioms();
 		setToldTop();
-//		if (usePrecompletion) {
-//			performPrecompletion();
-//		}
+		//		if (usePrecompletion) {
+		//			performPrecompletion();
+		//		}
 		buildDAG();
 		fillsClassificationTag();
 		calculateTSDepth();
@@ -2256,11 +2242,10 @@ public final class TBox {
 		return i;
 	}
 
-//	public void performPrecompletion() {
-//		Precompletor PC = new Precompletor(this);
-//		PC.performPrecompletion();
-//	}
-
+	//	public void performPrecompletion() {
+	//		Precompletor PC = new Precompletor(this);
+	//		PC.performPrecompletion();
+	//	}
 	public void determineSorts() {
 		if (IfDefs.RKG_USE_SORTED_REASONING) {
 			// Related individuals does not appears in DLHeap,
@@ -2342,8 +2327,6 @@ public final class TBox {
 			pi.removeDescription();
 		}
 	}
-
-
 
 	/** set ToDo priorities using local OPTIONS */
 	public void setToDoPriorities() {

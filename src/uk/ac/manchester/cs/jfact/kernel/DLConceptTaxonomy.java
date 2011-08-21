@@ -339,7 +339,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 			return false;
 		}
 		if (IfDefs.splits) {
-			if (!inSplitCheck &&!upDirection && !possibleSub(cur)) {
+			if (!inSplitCheck && !upDirection && !possibleSub(cur)) {
 				return false;
 			}
 		}

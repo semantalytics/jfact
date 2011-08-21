@@ -119,11 +119,11 @@ public final class NominalReasoner extends DlSatTester {
 				return true;
 			}
 		}
-			for (int i = 0; i < tBox.getRelatedI().size(); i += 2) {
-				if (initRelatedNominals(tBox.getRelatedI().get(i))) {
-					return true;
-				}
+		for (int i = 0; i < tBox.getRelatedI().size(); i += 2) {
+			if (initRelatedNominals(tBox.getRelatedI().get(i))) {
+				return true;
 			}
+		}
 		if (tBox.getDifferent().isEmpty()) {
 			return false;
 		}

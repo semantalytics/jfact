@@ -93,7 +93,6 @@ public class Individual extends Concept {
 		pRelatedMap.put(R, v);
 	}
 
-
 	// TIndividual RELATED-dependent method' implementation
 	private void updateToldFromRelated() {
 		Set<Role> RolesProcessed = new HashSet<Role>();

@@ -487,7 +487,6 @@ public final class DlCompletionGraph {
 		forward.setSuccEdge(!isPredEdge);
 		DlCompletionTreeArc backward = new DlCompletionTreeArc(roleName.inverse(), dep,
 				from);
-
 		ctEdgeHeap.add(backward);
 		backward.setSuccEdge(isPredEdge);
 		forward.setReverse(backward);

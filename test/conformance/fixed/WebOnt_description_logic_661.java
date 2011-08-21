@@ -1,21 +1,6 @@
 package conformance.fixed;
 
-import java.util.Set;
-
 import junit.framework.TestCase;
-
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.StringDocumentSource;
-import org.semanticweb.owlapi.model.OWLLogicalAxiom;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.profiles.OWL2DLProfile;
-import org.semanticweb.owlapi.profiles.OWLProfileReport;
-import org.semanticweb.owlapi.reasoner.InferenceType;
-import org.semanticweb.owlapi.reasoner.OWLReasoner;
-import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
-import org.semanticweb.owlapi.reasoner.TimedConsoleProgressMonitor;
-
 import conformance.Factory;
 import conformance.JUnitRunner;
 import conformance.TestClasses;
@@ -1587,81 +1572,9 @@ public class WebOnt_description_logic_661 extends TestCase {
 				+ "</rdf:type>\n" + "</owl:Thing>\n" + "</rdf:RDF>";
 		String id = "WebOnt_description_logic_661";
 		TestClasses tc = TestClasses.valueOf("POSITIVE_IMPL");
-		String d = "DL Test: k_branch\n"
-				+ "ABox test from DL98 systems comparison.";
-				JUnitRunner r = new JUnitRunner(premise, conclusion, id, tc, d);
-				r.setReasonerFactory(Factory.factory());
-				
-				r.run();
-		//verify(premise, conclusion);
-	}
-
-	public static void verify(String premise, String consequence)
-			throws Exception {
-		OWLOntology premiseOntology = null;
-		OWLOntology conclusionOntology = null;
-		OWLOntologyManager m = OWLManager.createOWLOntologyManager();
-		m.setSilentMissingImportsHandling(true);
-		try {
-			if (premise != null) {
-				StringDocumentSource documentSource = new StringDocumentSource(
-						premise);
-				premiseOntology = m
-						.loadOntologyFromOntologyDocument(documentSource);
-				OWL2DLProfile profile = new OWL2DLProfile();
-				OWLProfileReport report = profile
-						.checkOntology(premiseOntology);
-				if (report.getViolations().size() > 0) {
-					System.out
-							.println("JUnitRunner.run() premise violations:\n"
-									+ report.toString());
-					System.out.println("\n" + premise + "\n");
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("JUnitRunner.run() premise:\n" + premise);
-			throw new RuntimeException(e);
-		}
-		try {
-			if (consequence != null) {
-				StringDocumentSource documentSource = new StringDocumentSource(
-						consequence);
-				conclusionOntology = m
-						.loadOntologyFromOntologyDocument(documentSource);
-				OWL2DLProfile profile = new OWL2DLProfile();
-				OWLProfileReport report = profile
-						.checkOntology(conclusionOntology);
-				if (report.getViolations().size() > 0) {
-					System.out
-							.println("JUnitRunner.run() conclusion violations:\n"
-									+ report.toString());
-					System.out.println("\n" + consequence + "\n");
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("JUnitRunner.run() conclusion:\n" + consequence);
-			throw new RuntimeException(e);
-		}
-		System.out
-				.println("WebOnt_description_logic_661.testWebOnt_description_logic_661()");
-		System.in.read();
-		OWLReasoner reasoner = Factory.factory().createReasoner(
-				premiseOntology,
-				new SimpleConfiguration(new TimedConsoleProgressMonitor()));
-		reasoner.precomputeInferences(InferenceType.values());
-		Set<OWLLogicalAxiom> logicalAxioms = conclusionOntology
-				.getLogicalAxioms();
-		for (OWLLogicalAxiom ax : logicalAxioms) {
-			System.out.println("checking "
-					+ ax.toString().replace(
-							"http://oiled.man.example.net/test#", ""));
-			if (!reasoner.isEntailed(ax)) {
-				System.out
-						.println("WebOnt_description_logic_661.verify() Not entailed: "
-								+ ax);
-			}
-		}
+		String d = "DL Test: k_branch\n" + "ABox test from DL98 systems comparison.";
+		JUnitRunner r = new JUnitRunner(premise, conclusion, id, tc, d);
+		r.setReasonerFactory(Factory.factory());
+		r.run();
 	}
 }

@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.semanticweb.owlapi.model.AxiomType;
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -73,7 +72,7 @@ import uk.ac.manchester.cs.jfact.kernel.voc.Vocabulary;
  * the methods which do not touch the kernel or only affect threadsafe data
  * structures. inner private classes are not synchronized since methods from
  * those classes cannot be invoked from outsize synchronized methods.
- *
+ * 
  */
 public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListener {
 	private static final String REASONER_NAME = "JFact";
@@ -96,8 +95,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	private TranslationMachinery translationMachinery;
 	//holds the consistency status: true for consistent, false for inconsistent, null for not verified (or changes received)
 	private Boolean consistencyVerified = null;
-
-	private final Set<OWLEntity> knownEntities=new HashSet<OWLEntity>();
+	private final Set<OWLEntity> knownEntities = new HashSet<OWLEntity>();
 
 	public JFactReasoner(OWLOntology rootOntology,
 			OWLReasonerConfiguration configuration, BufferingMode bufferingMode) {
@@ -128,7 +126,6 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 				Vocabulary.BOTTOM_DATA_PROPERTY);
 		kernel.setProgressMonitor(configuration.getProgressMonitor());
 		kernel.setInterruptedSwitch(interrupted);
-
 		configuration.getProgressMonitor().reasonerTaskStarted(
 				ReasonerProgressMonitor.LOADING);
 		configuration.getProgressMonitor().reasonerTaskBusy();
@@ -155,8 +152,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	}
 
 	private boolean isFreshName(OWLClassExpression ce) {
-
-		if(ce.isAnonymous()) {
+		if (ce.isAnonymous()) {
 			return false;
 		}
 		return !knownEntities.contains(ce);
@@ -184,7 +180,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 * then the changes will be stored in a buffer. If the reasoner is a
 	 * non-buffering reasoner then the changes will be automatically flushed
 	 * through to the change filter and passed on to the reasoner.
-	 *
+	 * 
 	 * @param changes
 	 *            The list of raw changes.
 	 */
@@ -237,7 +233,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 				reasonerAxioms.removeAll(removed);
 				reasonerAxioms.addAll(added);
 				knownEntities.clear();
-				for(OWLAxiom ax:reasonerAxioms) {
+				for (OWLAxiom ax : reasonerAxioms) {
 					knownEntities.addAll(ax.getSignature());
 				}
 				// set the consistency status to not verified
@@ -252,7 +248,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 * removed from the list of pending changes. Note that even if the list of
 	 * pending changes is non-empty then there may be no changes for the
 	 * reasoner to deal with.
-	 *
+	 * 
 	 * @param added
 	 *            The logical axioms that have been added to the imports closure
 	 *            of the reasoner root ontology
@@ -292,7 +288,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 * Asks the reasoner implementation to handle axiom additions and removals
 	 * from the imports closure of the root ontology. The changes will not
 	 * include annotation axiom additions and removals.
-	 *
+	 * 
 	 * @param addAxioms
 	 *            The axioms to be added to the reasoner.
 	 * @param removeAxioms
@@ -380,7 +376,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 			TimeOutException, AxiomNotInProfileException, FreshEntitiesException,
 			InconsistentOntologyException {
 		checkConsistency();
-		if(reasonerAxioms.contains(axiom.getAxiomWithoutAnnotations())) {
+		if (reasonerAxioms.contains(axiom.getAxiomWithoutAnnotations())) {
 			return true;
 		}
 		try {
@@ -449,7 +445,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 			boolean direct) throws ReasonerInterruptedException, TimeOutException,
 			FreshEntitiesException, InconsistentOntologyException {
 		if (isFreshName(ce)) {
-			if(configuration.getFreshEntityPolicy()==FreshEntityPolicy.DISALLOW) {
+			if (configuration.getFreshEntityPolicy() == FreshEntityPolicy.DISALLOW) {
 				throw new FreshEntitiesException(ce.getSignature());
 			}
 			return new OWLClassNodeSet(getBottomClassNode());
@@ -460,7 +456,6 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		Collection<Collection<ConceptExpression>> pointers = actor.getClassElements();
 		return translationMachinery.getClassExpressionTranslator()
 				.getNodeSetFromPointers(pointers);
-
 	}
 
 	public synchronized NodeSet<OWLClass> getSuperClasses(OWLClassExpression ce,

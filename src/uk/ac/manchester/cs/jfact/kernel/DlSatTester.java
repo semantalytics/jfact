@@ -925,7 +925,7 @@ public class DlSatTester {
 
 	/**
 	 * aux method that fills the dep-set for either C or ~C found in the label;
-	 *
+	 * 
 	 * @param d
 	 *            depset to be changed if a clash is found
 	 * @return whether C was found
@@ -1888,13 +1888,13 @@ public class DlSatTester {
 
 	/**
 	 * Tactics section;
-	 *
+	 * 
 	 * Each Tactic should have a (small) Usability function <name> and a Real
 	 * tactic function <name>Body
-	 *
+	 * 
 	 * Each tactic returns: - true - if expansion of CUR lead to clash - false -
 	 * overwise
-	 *
+	 * 
 	 */
 	private boolean commonTactic() {
 		if (curNode.isCached() || curNode.isPBlocked()) {

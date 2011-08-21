@@ -2,7 +2,7 @@ package uk.ac.manchester.cs.jfact.helpers;
 
 /* This file is part of the JFact DL reasoner
  Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
- This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.Helper.*;
@@ -22,7 +22,6 @@ import uk.ac.manchester.cs.jfact.kernel.DagTag;
 import uk.ac.manchester.cs.jfact.kernel.MergableLabel;
 import uk.ac.manchester.cs.jfact.kernel.NamedEntry;
 import uk.ac.manchester.cs.jfact.kernel.Role;
-import uk.ac.manchester.cs.jfact.kernel.datatype.DataEntry;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheInterface;
 
 public final class DLVertex extends DLVertexTagDFS {
@@ -283,7 +282,7 @@ public final class DLVertex extends DLVertexTagDFS {
 			case dtNN:
 				return;
 			case dtDataExpr:
-				o.print(Templates.SPACE, ((DataEntry<?>) concept).getFacet());
+				o.print(Templates.SPACE, concept.toString());
 				return;
 			case dtDataValue:
 			case dtDataType:

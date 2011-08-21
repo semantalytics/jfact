@@ -184,12 +184,11 @@ public final class TranslationMachinery {
 	public void loadAxioms(Collection<OWLAxiom> axioms) {
 		for (OWLAxiom axiom : axioms) {
 			//TODO check valid axioms, such as those involving topDataProperty
-			if (axiom2PtrMap.containsKey(axiom)) {
-				continue;
-			}
-			final Axiom axiomPointer = axiom.accept(axiomTranslator);
-			if (axiomPointer != null) {
-				axiom2PtrMap.put(axiom, axiomPointer);
+			if (!axiom2PtrMap.containsKey(axiom)) {
+				final Axiom axiomPointer = axiom.accept(axiomTranslator);
+				if (axiomPointer != null) {
+					axiom2PtrMap.put(axiom, axiomPointer);
+				}
 			}
 		}
 	}
@@ -241,7 +240,7 @@ public final class TranslationMachinery {
 
 	protected synchronized DataTypeExpression toDataTypePointer(OWLDatatype datatype) {
 		if (datatype == null) {
-			throw new NullPointerException();
+			throw new IllegalArgumentException("datatype cannot be null");
 		}
 		return getBuiltInDataType(datatype.toStringID());
 	}

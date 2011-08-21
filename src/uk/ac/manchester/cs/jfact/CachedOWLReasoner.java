@@ -391,7 +391,6 @@ public final class CachedOWLReasoner implements OWLReasoner, OWLOntologyChangeLi
 				return null;
 			}
 		};
-
 		NodeSet<OWLClass> toReturn = (NodeSet<OWLClass>) cache.get(key,
 				CachedReasoner.makeKey(ce, direct), checker);
 		if (checker.hasThrownException()) {

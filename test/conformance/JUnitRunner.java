@@ -199,27 +199,28 @@ public class JUnitRunner {
 		b.append(testId);
 		b.append(" ======================================\n");
 		b.append(description);
-		b.append("\nPremise:\n");
+//		b.append("\nPremise:\n");
 //		try {
 //		o.getOWLOntologyManager().saveOntology(o, new OWLFunctionalSyntaxOntologyFormat(), new SystemOutDocumentTarget());
 //		}catch (Exception e) {
 //			e.printStackTrace();
 //		}
-		for (OWLAxiom x : o.getAxioms()) {
-			b.append(x);
-			b.append("\n");
-		}
-		b.append("end premise\nexpected: ");
+//		for (OWLAxiom x : o.getAxioms()) {
+//			b.append(x);
+//			b.append("\n");
+//		}
+//		b.append("end premise\n");
+		b.append("\nexpected: ");
 		b.append(expected);
 		b.append("\t actual: ");
 		b.append(actual);
-		b.append("\n");
-		if (ax != null) {
-			b.append("JUnitRunner.logTroubles() conclusion");
-			b.append("\n");
-			b.append(ax);
-			b.append("\n");
-		}
+//		b.append("\n");
+//		if (ax != null) {
+//			b.append("JUnitRunner.logTroubles() conclusion");
+//			b.append("\n");
+//			b.append(ax);
+//			b.append("\n");
+//		}
 		String string = b.toString();
 		System.out.println(string);
 		return string;
@@ -230,7 +231,7 @@ public class JUnitRunner {
 	//			try {
 	//				//				ByteArrayOutputStream fake=new ByteArrayOutputStream();
 	//				//				o.getOWLOntologyManager().saveOntology(o, fake);
-	//				//				
+	//				//
 	//				FileOutputStream out = new FileOutputStream(new File(folder,
 	//						string));
 	//				//out.write(fake.toByteArray());
