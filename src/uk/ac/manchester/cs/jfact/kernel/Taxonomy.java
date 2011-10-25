@@ -2,10 +2,9 @@ package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
  Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
- This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 import static uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry.resolveSynonym;
 
 import java.util.ArrayList;
@@ -19,12 +18,10 @@ import java.util.TreeSet;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
-import uk.ac.manchester.cs.jfact.helpers.IfDefs;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
+import uk.ac.manchester.cs.jfact.helpers.Templates;
 import uk.ac.manchester.cs.jfact.kernel.actors.Actor;
 import uk.ac.manchester.cs.jfact.kernel.actors.SupConceptActor;
+import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
 
 public class Taxonomy {
 	/** array of taxonomy verteces */
@@ -52,6 +49,7 @@ public class Taxonomy {
 	/** labellers for marking taxonomy */
 	protected long checkLabel = 1;
 	protected long valueLabel = 1;
+	private JFactReasonerConfiguration options;
 
 	/**
 	 * apply ACTOR to subgraph starting from NODE as defined by flags; this
@@ -190,7 +188,9 @@ public class Taxonomy {
 		return true;
 	}
 
-	public Taxonomy(final ClassifiableEntry pTop, final ClassifiableEntry pBottom) {
+	public Taxonomy(final ClassifiableEntry pTop, final ClassifiableEntry pBottom,
+			JFactReasonerConfiguration c) {
+		this.options = c;
 		current = new TaxonomyVertex();
 		curEntry = null;
 		nEntries = 0;
@@ -241,10 +241,14 @@ public class Taxonomy {
 		}
 	}
 
-	public void print(LogAdapter o) {
-		o.print(String
-				.format("Taxonomy consists of %s entries\n            of which %s are completely defined\n\nAll entries are in format:\n\"entry\" {n: parent_1 ... parent_n} {m: child_1 child_m}\n\n",
-						nEntries, nCDEntries));
+	@Override
+	public String toString() {
+		StringBuilder o = new StringBuilder();
+		o.append("Taxonomy consists of ");
+		o.append(nEntries);
+		o.append(" entries\n            of which ");
+		o.append(nCDEntries);
+		o.append(" are completely defined\n\nAll entries are in format:\n\"entry\" {n: parent_1 ... parent_n} {m: child_1 child_m}\n\n");
 		TreeSet<TaxonomyVertex> sorted = new TreeSet<TaxonomyVertex>(
 				new Comparator<TaxonomyVertex>() {
 					public int compare(TaxonomyVertex o1, TaxonomyVertex o2) {
@@ -254,16 +258,10 @@ public class Taxonomy {
 				});
 		sorted.addAll(graph.subList(1, graph.size()));
 		for (TaxonomyVertex p : sorted) {
-			p.print(o);
+			o.append(p);
 		}
-		getBottomVertex().print(o);
-	}
-
-	@Override
-	public String toString() {
-		LogAdapter l = new LeveLogger.LogAdapterStringBuilder();
-		print(l);
-		return l.toString();
+		o.append(getBottomVertex());
+		return o.toString();
 	}
 
 	public void insertCurrent(TaxonomyVertex syn) {
@@ -271,19 +269,17 @@ public class Taxonomy {
 			// check if current concept is synonym to someone
 			if (syn != null) {
 				syn.addSynonym(curEntry);
-				if (IfDefs.USE_LOGGING) {
-					logger.print("\nTAX:set " + curEntry.getName() + " equal "
-							+ syn.getPrimer().getName());
-				}
+				options.getLog().print("\nTAX:set ", curEntry.getName(),
+						" equal ", syn.getPrimer().getName());
 			} else {
 				// just incorporate it as a special entry and save into Graph
-				current.incorporate(curEntry);
+				current.incorporate(curEntry, options);
 				graph.add(current);
 				// we used the Current so need to create a new one
 				current = new TaxonomyVertex();
 			}
-		} else // check if node is synonym of existing one and copy EXISTING info to Current
-		{
+		} else {
+			// check if node is synonym of existing one and copy EXISTING info to Current
 			if (syn != null) {
 				curEntry.setTaxVertex(syn);
 			} else {
@@ -302,7 +298,7 @@ public class Taxonomy {
 		for (TaxonomyVertex q : v.neigh(false)) {
 			if (q.isValued(valueLabel) && q.getValue() == true) {
 				//			if(IfDefs. WARN_EXTRA_SUBSUMPTION) {
-				//				System.out.println("Taxonomy.isDirectParent()\nCTAX!!: Definition (implies '" + 
+				//				System.out.println("Taxonomy.isDirectParent()\nCTAX!!: Definition (implies '" +
 				//						curEntry.getName()
 				//						  + "','" +q.getPrimer().getName() + "') is extra because of definition (implies '"
 				//						  + curEntry.getName() + "','" + q.getPrimer().getName() + "')");
@@ -317,8 +313,8 @@ public class Taxonomy {
 		// do something before classification (tunable)
 		preClassificationActions();
 		++nEntries;
-		logger.print("\n\nTAX: start classifying entry ");
-		logger.print(curEntry.getName());
+		options.getLog().print("\n\nTAX: start classifying entry ");
+		options.getLog().print(curEntry.getName());
 		// if no classification needed -- nothing to do
 		if (immediatelyClassified()) {
 			return;
@@ -359,10 +355,10 @@ public class Taxonomy {
 
 	private void setNonRedundantCandidates() {
 		if (!curEntry.hasToldSubsumers()) {
-			logger.print("\nTAX: TOP");
+			options.getLog().print("\nTAX: TOP");
 		}
-		logger.print(" completely defines concept ");
-		logger.print(curEntry.getName());
+		options.getLog().print(" completely defines concept ");
+		options.getLog().print(curEntry.getName());
 		for (ClassifiableEntry p : ksStack.peek().s_begin()) {
 			TaxonomyVertex par = p.getTaxVertex();
 			if (par == null) {
@@ -387,12 +383,12 @@ public class Taxonomy {
 	private void setToldSubsumers() {
 		Collection<ClassifiableEntry> top = ksStack.peek().s_begin();
 		if (needLogging() && !top.isEmpty()) {
-			logger.print("\nTAX: told subsumers");
+			options.getLog().print("\nTAX: told subsumers");
 		}
 		for (ClassifiableEntry p : top) {
 			if (p.isClassified()) {
 				if (needLogging()) {
-					logger.print(Templates.TOLD_SUBSUMERS, p.getName());
+					options.getLog().printTemplate(Templates.TOLD_SUBSUMERS, p.getName());
 				}
 				propagateTrueUp(p.getTaxVertex());
 			}
@@ -499,14 +495,14 @@ public class Taxonomy {
 		assert !waitStack.isEmpty();
 		// load last concept
 		setCurrentEntry(waitStack.peek());
-		if (IfDefs.TMP_PRINT_TAXONOMY_INFO) {
-			logger.print("\nTrying classify"
-					+ (curEntry.isCompletelyDefined() ? " CD " : " ")
-					+ curEntry.getName() + "... ");
+		if (options.isTMP_PRINT_TAXONOMY_INFO()) {
+			options.getLog().print("\nTrying classify",
+					(curEntry.isCompletelyDefined() ? " CD " : " "), curEntry.getName(),
+					"... ");
 		}
 		performClassification();
-		if (IfDefs.TMP_PRINT_TAXONOMY_INFO) {
-			logger.print("done");
+		if (options.isTMP_PRINT_TAXONOMY_INFO()) {
+			options.getLog().print("done");
 		}
 		removeTop();
 	}

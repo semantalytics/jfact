@@ -3,7 +3,6 @@ package uk.ac.manchester.cs.jfact.split;
 import java.util.Collection;
 
 import uk.ac.manchester.cs.jfact.kernel.Ontology;
-import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptAnd;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataExactCardinality;
@@ -33,12 +32,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleName;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleTop;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataTop;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeRestriction;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMaxExclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMaxInclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMinExclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMinInclusive;
 import uk.ac.manchester.cs.jfact.kernel.dl.IndividualName;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleChain;
@@ -89,6 +82,8 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NamedEntity;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleArg;
 import uk.ac.manchester.cs.jfact.visitors.DLAxiomVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
+import datatypes.Datatype;
+import datatypes.Literal;
 
 /// update the signature by adding all signature elements from the expression
 class TExpressionSignatureUpdater implements DLExpressionVisitor {
@@ -264,11 +259,9 @@ class TExpressionSignatureUpdater implements DLExpressionVisitor {
 
 	public void visit(DataBottom expr) {}
 
-	public void visit(DataTypeName expr) {}
+	public void visit(Datatype<?> expr) {}
 
-	public void visit(DataTypeRestriction expr) {}
-
-	public void visit(DataValue expr) {}
+	public void visit(Literal<?> expr) {}
 
 	public void visit(DataNot expr) {}
 
@@ -277,15 +270,6 @@ class TExpressionSignatureUpdater implements DLExpressionVisitor {
 	public void visit(DataOr expr) {}
 
 	public void visit(DataOneOf expr) {}
-
-	// facets
-	public void visit(FacetMinInclusive expr) {}
-
-	public void visit(FacetMinExclusive expr) {}
-
-	public void visit(FacetMaxInclusive expr) {}
-
-	public void visit(FacetMaxExclusive expr) {}
 }
 
 /// update signature by adding the signature of a given axiom to it

@@ -6,7 +6,6 @@ package uk.ac.manchester.cs.jfact.kernel;
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.Helper.*;
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 import static uk.ac.manchester.cs.jfact.kernel.DagTag.*;
 
 import java.util.ArrayList;
@@ -15,14 +14,13 @@ import java.util.List;
 import java.util.Map;
 
 import uk.ac.manchester.cs.jfact.dep.DepSet;
-import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.ArrayIntMap;
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
-import uk.ac.manchester.cs.jfact.helpers.IfDefs;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
+import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.Reference;
+import uk.ac.manchester.cs.jfact.helpers.Templates;
+import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
 import uk.ac.manchester.cs.jfact.kernel.state.DLCompletionTreeSaveState;
 import uk.ac.manchester.cs.jfact.kernel.state.SaveList;
 
@@ -38,7 +36,7 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 		public UnBlock(DlCompletionTree q) {
 			p = q;
 			unblockBlocker = q.blocker;
-			dep = DepSetFactory.create(q.pDep);
+			dep = DepSet.create(q.pDep);
 			pBlocked = q.pBlocked;
 			dBlocked = q.dBlocked;
 		}
@@ -46,7 +44,7 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 		@Override
 		public void restore() {
 			p.setBlocker(unblockBlocker);
-			p.pDep = DepSetFactory.create(dep);
+			p.pDep = DepSet.create(dep);
 			p.pBlocked = pBlocked;
 			p.dBlocked = dBlocked;
 		}
@@ -109,7 +107,7 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 	/** blocker of a node */
 	protected DlCompletionTree blocker;
 	/** dep-set for Purge op */
-	protected DepSet pDep = DepSetFactory.create();
+	protected DepSet pDep = DepSet.create();
 	// save state information
 	protected int curLevel; // current level
 	/** is given node a data node */
@@ -127,6 +125,7 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 	private boolean affected = true;
 	/** level of a nominal node; 0 means blockable one */
 	private int nominalLevel;
+	private JFactReasonerConfiguration options;
 
 	/** check if B2 holds for given DL vertex with C=V */
 	private boolean B2(final DLVertex v, int C) {
@@ -158,7 +157,8 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 
 	/** log saving/restoring node */
 	private void logSRNode(final String action) {
-		logger.print(Templates.LOG_SR_NODE, action, id, neighbour.size(), curLevel);
+		options.getLog().printTemplate(Templates.LOG_SR_NODE, action, id,
+				neighbour.size(), curLevel);
 	}
 
 	/** get letter corresponding to the blocking mode */
@@ -180,14 +180,9 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 		return toReturn;
 	}
 
-	/** log if node became p-blocked */
-	private void logNodeBlocked() {
-		logger.print(Templates.LOG_NODE_BLOCKED, getBlockingStatusName(), id,
-				(blocker == null ? "" : ","), (blocker == null ? "" : blocker.id));
-	}
-
-	public DlCompletionTree(int newId) {
+	public DlCompletionTree(int newId, JFactReasonerConfiguration c) {
 		id = newId;
+		this.options = c;
 	}
 
 	/** add given arc P as a neighbour */
@@ -457,9 +452,9 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 		setBlocker(blocker);
 		pBlocked = permanently;
 		dBlocked = directly;
-		if (IfDefs.USE_LOGGING) {
-			logNodeBlocked();
-		}
+		options.getLog().printTemplate(Templates.LOG_NODE_BLOCKED,
+				getBlockingStatusName(), id, (blocker == null ? "" : ","),
+				(blocker == null ? "" : blocker.id));
 		return ret;
 	}
 
@@ -483,13 +478,13 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 		Restorer ret = new UnBlock(this);
 		setBlocker(blocker);
 		if (isNominalNode()) {
-			pDep = DepSetFactory.create(dep);
+			pDep = DepSet.create(dep);
 		}
 		pBlocked = true;
 		dBlocked = false;
-		if (IfDefs.USE_LOGGING) {
-			logNodeBlocked();
-		}
+		options.getLog().printTemplate(Templates.LOG_NODE_BLOCKED,
+				getBlockingStatusName(), id, (blocker == null ? "" : ","),
+				(blocker == null ? "" : blocker.id));
 		return ret;
 	}
 
@@ -516,7 +511,7 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 	 * label
 	 */
 	public boolean initIR(int level, final DepSet ds) {
-		Reference<DepSet> dummy = new Reference<DepSet>(DepSetFactory.create()); // we don't need a clash-set here
+		Reference<DepSet> dummy = new Reference<DepSet>(DepSet.create()); // we don't need a clash-set here
 		if (inIRwithC(level, ds, dummy)) {
 			return true;
 		}
@@ -572,9 +567,8 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 
 	// output
 	/** log node information (number, i/d blockers, cached) */
-	public void logNode() {
-		logger.print(id);
-		logger.print(logNodeBStatus());
+	public String logNode() {
+		return id + logNodeBStatus();
 	}
 
 	private boolean isCommonlyBlockedBy(DLDag dag, DlCompletionTree p) {
@@ -852,9 +846,7 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 		nss.setCurLevel(curLevel);
 		nss.setnNeighbours(neighbourSize);
 		label.save(nss.getLab());
-		if (IfDefs.USE_LOGGING) {
-			logSRNode("SaveNode");
-		}
+		logSRNode("SaveNode");
 	}
 
 	private void restore(DLCompletionTreeSaveState nss) {
@@ -869,12 +861,10 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 			cachedParent = null;
 		}
 		affected = true;
-		if (IfDefs.USE_LOGGING) {
-			logSRNode("RestNode");
-		}
+		logSRNode("RestNode");
 	}
 
-	public void printBody(LeveLogger.LogAdapter o) {
+	public void printBody(LogAdapter o) {
 		o.print(id);
 		if (isNominalNode()) {
 			o.print("o");
@@ -886,7 +876,7 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 		if (isDataNode()) {
 			o.print("d");
 		}
-		label.print(o);
+		o.print(label);
 		o.print(logNodeBStatus());
 	}
 

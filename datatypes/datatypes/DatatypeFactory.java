@@ -1,15 +1,16 @@
 package datatypes;
 
+import static datatypes.Facets.*;
+
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,74 +20,227 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
+import org.semanticweb.owlapi.vocab.XSDVocabulary;
 
-import datatypes.Datatype.Facet;
-import datatypes.Datatype.cardinality;
-import datatypes.Datatype.ordered;
 import datatypes.Facets.whitespace;
 
 public final class DatatypeFactory {
 	static final String namespace = "http://www.w3.org/2001/XMLSchema#";
-	static final List<Facet> FACETS2 = Utils.getFacets(Facets.length, Facets.minLength,
-			Facets.maxLength, Facets.pattern, Facets.enumeration, Facets.whiteSpace);
-	static final List<Facet> FACETS3 = Utils.getFacets(Facets.pattern, Facets.whiteSpace,
-			Facets.enumeration, Facets.totalDigits, Facets.fractionDigits,
-			Facets.maxInclusive, Facets.maxExclusive, Facets.minInclusive,
-			Facets.minExclusive);
-	static final List<Facet> FACETS4 = Utils.getFacets(Facets.pattern,
-			Facets.enumeration, Facets.whiteSpace, Facets.maxInclusive,
-			Facets.maxExclusive, Facets.minInclusive, Facets.minExclusive);
-	static final LITERAL_DATATYPE LITERAL = new LITERAL_DATATYPE();
-	static final ANYURI_DATATYPE ANYURI = new ANYURI_DATATYPE();
-	static final BASE64BINARY_DATATYPE BASE64BINARY = new BASE64BINARY_DATATYPE();
-	static final BOOLEAN_DATATYPE BOOLEAN = new BOOLEAN_DATATYPE();
-	static final DATETIME_DATATYPE DATETIME = new DATETIME_DATATYPE();
-	static final HEXBINARY_DATATYPE HEXBINARY = new HEXBINARY_DATATYPE();
-	static final STRING_DATATYPE STRING = new STRING_DATATYPE();
-	static final PLAINLITERAL_DATATYPE PLAINLITERAL = new PLAINLITERAL_DATATYPE();
-	static final REAL_DATATYPE REAL = new REAL_DATATYPE();
-	static final RATIONAL_DATATYPE RATIONAL = new RATIONAL_DATATYPE();
-	static final DATETIMESTAMP_DATATYPE DATETIMESTAMP = new DATETIMESTAMP_DATATYPE();
-	static final DECIMAL_DATATYPE DECIMAL = new DECIMAL_DATATYPE();
-	static final INTEGER_DATATYPE INTEGER = new INTEGER_DATATYPE();
-	static final DOUBLE_DATATYPE DOUBLE = new DOUBLE_DATATYPE();
-	static final FLOAT_DATATYPE FLOAT = new FLOAT_DATATYPE();
-	static final NONPOSITIVEINTEGER_DATATYPE NONPOSITIVEINTEGER = new NONPOSITIVEINTEGER_DATATYPE();
-	static final NEGATIVEINTEGER_DATATYPE NEGATIVEINTEGER = new NEGATIVEINTEGER_DATATYPE();
-	static final NONNEGATIVEINTEGER_DATATYPE NONNEGATIVEINTEGER = new NONNEGATIVEINTEGER_DATATYPE();
-	static final POSITIVEINTEGER_DATATYPE POSITIVEINTEGER = new POSITIVEINTEGER_DATATYPE();
-	static final LONG_DATATYPE LONG = new LONG_DATATYPE();
-	static final INT_DATATYPE INT = new INT_DATATYPE();
-	static final SHORT_DATATYPE SHORT = new SHORT_DATATYPE();
-	static final BYTE_DATATYPE BYTE = new BYTE_DATATYPE();
-	static final UNSIGNEDLONG_DATATYPE UNSIGNEDLONG = new UNSIGNEDLONG_DATATYPE();
-	static final UNSIGNEDINT_DATATYPE UNSIGNEDINT = new UNSIGNEDINT_DATATYPE();
-	static final UNSIGNEDSHORT_DATATYPE UNSIGNEDSHORT = new UNSIGNEDSHORT_DATATYPE();
-	static final UNSIGNEDBYTE_DATATYPE UNSIGNEDBYTE = new UNSIGNEDBYTE_DATATYPE();
-	static final NORMALIZEDSTRING_DATATYPE NORMALIZEDSTRING = new NORMALIZEDSTRING_DATATYPE();
-	static final TOKEN_DATATYPE TOKEN = new TOKEN_DATATYPE();
-	static final LANGUAGE_DATATYPE LANGUAGE = new LANGUAGE_DATATYPE();
-	static final NAME_DATATYPE NAME = new NAME_DATATYPE();
-	static final NCNAME_DATATYPE NCNAME = new NCNAME_DATATYPE();
-	static final NMTOKEN_DATATYPE NMTOKEN = new NMTOKEN_DATATYPE();
-	static final NMTOKENS_DATATYPE NMTOKENS = new NMTOKENS_DATATYPE();
-	static final XMLLITERAL_DATATYPE XMLLITERAL = new XMLLITERAL_DATATYPE();
-	private static final Datatype[] values = new Datatype[] { ANYURI, BASE64BINARY,
-			BOOLEAN, DATETIME, HEXBINARY, LITERAL, PLAINLITERAL, REAL, STRING,
-			DATETIMESTAMP, DECIMAL, DOUBLE, FLOAT, BYTE, INT, INTEGER, LONG,
-			NEGATIVEINTEGER, NONNEGATIVEINTEGER, NONPOSITIVEINTEGER, POSITIVEINTEGER,
-			SHORT, UNSIGNEDBYTE, UNSIGNEDINT, UNSIGNEDLONG, UNSIGNEDSHORT, RATIONAL,
-			LANGUAGE, NAME, NCNAME, NMTOKEN, NMTOKENS, NORMALIZEDSTRING, TOKEN,
-			XMLLITERAL };
-	private final Map<String, Datatype> knownDatatypes = new HashMap<String, Datatype>();
+	static final Facet[] minmax = new Facet[] { maxInclusive, maxExclusive, minInclusive,
+			minExclusive };
+	static final Facet[] pew = new Facet[] { pattern, enumeration, whiteSpace };
+	static final Facet[] len = new Facet[] { length, minLength, maxLength };
+	static final Facet[] digs = new Facet[] { totalDigits, fractionDigits };
+	static final Set<Facet> StringFacets = Utils.getFacets(pew, len);
+	static final Set<Facet> FACETS4 = Utils.getFacets(pew, minmax);
+	public static final Datatype<String> LITERAL = new LITERAL_DATATYPE();
+	public static final Datatype<String> ANYURI = new ANYURI_DATATYPE();
+	public static final Datatype<String> BASE64BINARY = new BASE64BINARY_DATATYPE();
+	public static final Datatype<Boolean> BOOLEAN = new BOOLEAN_DATATYPE();
+	public static final Datatype<Calendar> DATETIME = new DATETIME_DATATYPE();
+	public static final Datatype<String> HEXBINARY = new HEXBINARY_DATATYPE();
+	public static final Datatype<String> STRING = new STRING_DATATYPE();
+	public static final Datatype<String> PLAINLITERAL = new PLAINLITERAL_DATATYPE();
+	public static final Datatype<BigDecimal> REAL = new REAL_DATATYPE<BigDecimal>() {
+		public BigDecimal parseValue(String s) {
+			return new BigDecimal(s);
+		}
+	};
+	public static final Datatype<BigDecimal> RATIONAL = new RATIONAL_DATATYPE<BigDecimal>() {
+		public BigDecimal parseValue(String s) {
+			return new BigDecimal(s);
+		}
+	};
+	public static final Datatype<Calendar> DATETIMESTAMP = new DATETIMESTAMP_DATATYPE();
+	public static final Datatype<BigDecimal> DECIMAL = new DECIMAL_DATATYPE<BigDecimal>() {
+		public BigDecimal parseValue(String s) {
+			return new BigDecimal(s);
+		}
+	};
+	public static final Datatype<BigInteger> INTEGER = new INTEGER_DATATYPE<BigInteger>() {
+		public BigInteger parseValue(String s) {
+			return new BigInteger(s);
+		}
+	};
+	public static final Datatype<Double> DOUBLE = new DOUBLE_DATATYPE();
+	public static final Datatype<Float> FLOAT = new FLOAT_DATATYPE();
+	public static final Datatype<BigInteger> NONPOSITIVEINTEGER = new NONPOSITIVEINTEGER_DATATYPE<BigInteger>() {
+		public BigInteger parseValue(String s) {
+			final BigInteger parse = new BigInteger(s);
+			if (parse.compareTo(BigInteger.ZERO) > 0) {
+				throw new ArithmeticException(
+						"Non positive integer required, but found: " + s);
+			}
+			return parse;
+		}
+	};
+	public static final Datatype<BigInteger> NEGATIVEINTEGER = new NEGATIVEINTEGER_DATATYPE<BigInteger>() {
+		public BigInteger parseValue(String s) {
+			final BigInteger parse = new BigInteger(s);
+			if (parse.compareTo(new BigInteger("-1")) > 0) {
+				throw new ArithmeticException("Negative integer required, but found: "
+						+ s);
+			}
+			return parse;
+		}
+	};
+	public static final Datatype<BigInteger> NONNEGATIVEINTEGER = new NONNEGATIVEINTEGER_DATATYPE<BigInteger>() {
+		public BigInteger parseValue(String s) {
+			final BigInteger parseValue = new BigInteger(s);
+			if (parseValue.compareTo(BigInteger.ZERO) < 0) {
+				throw new ArithmeticException(
+						"Non negative integer required, but found: " + s);
+			}
+			return parseValue;
+		}
+	};
+	public static final Datatype<BigInteger> POSITIVEINTEGER = new POSITIVEINTEGER_DATATYPE<BigInteger>() {
+		public BigInteger parseValue(String s) {
+			final BigInteger parseValue = new BigInteger(s);
+			if (parseValue.compareTo(BigInteger.ZERO) <= 0) {
+				throw new ArithmeticException("Positive integer required, but found: "
+						+ s);
+			}
+			return parseValue;
+		}
+	};
+	public static final Datatype<Long> LONG = new LONG_DATATYPE<Long>() {
+		public Long parseValue(String s) {
+			return Long.parseLong(s);
+		}
+	};
+	public static final Datatype<Integer> INT = new INT_DATATYPE<Integer>() {
+		public Integer parseValue(String s) {
+			return Integer.parseInt(s);
+		}
+	};
+	public static final Datatype<Short> SHORT = new SHORT_DATATYPE<Short>() {
+		public Short parseValue(String s) {
+			return Short.parseShort(s);
+		}
+	};
+	public static final Datatype<Byte> BYTE = new BYTE_DATATYPE<Byte>() {
+		public Byte parseValue(String s) {
+			return Byte.parseByte(s);
+		}
+	};
+	public static final Datatype<BigInteger> UNSIGNEDLONG = new UNSIGNEDLONG_DATATYPE<BigInteger>() {
+		public BigInteger parseValue(String s) {
+			BigInteger b = new BigInteger(s);
+			if (b.compareTo(BigInteger.ZERO) < 0) {
+				throw new ArithmeticException("Unsigned long required, but found: " + s);
+			}
+			return b;
+		}
+	};
+	public static final Datatype<Long> UNSIGNEDINT = new UNSIGNEDINT_DATATYPE<Long>() {
+		public Long parseValue(String s) {
+			final Long parseInt = Long.parseLong(s);
+			if (parseInt < 0) {
+				throw new ArithmeticException("Unsigned int required, but found: " + s);
+			}
+			return parseInt;
+		}
+	};
+	public static final Datatype<Integer> UNSIGNEDSHORT = new UNSIGNEDSHORT_DATATYPE<Integer>() {
+		public Integer parseValue(String s) {
+			final Integer parseShort = Integer.parseInt(s);
+			if (parseShort < 0) {
+				throw new ArithmeticException("Unsigned short required, but found: " + s);
+			}
+			return parseShort;
+		}
+	};
+	public static final Datatype<Short> UNSIGNEDBYTE = new UNSIGNEDBYTE_DATATYPE<Short>() {
+		public Short parseValue(String s) {
+			final Short parseByte = Short.parseShort(s);
+			if (parseByte < 0) {
+				throw new ArithmeticException("Unsigned short required, but found: " + s);
+			}
+			return parseByte;
+		}
+	};
+	public static final Datatype<String> NORMALIZEDSTRING = new NORMALIZEDSTRING_DATATYPE();
+	public static final Datatype<String> TOKEN = new TOKEN_DATATYPE();
+	public static final Datatype<String> LANGUAGE = new LANGUAGE_DATATYPE();
+	public static final Datatype<String> NAME = new NAME_DATATYPE();
+	public static final Datatype<String> NCNAME = new NCNAME_DATATYPE();
+	public static final Datatype<String> NMTOKEN = new NMTOKEN_DATATYPE();
+	public static final Datatype<String> NMTOKENS = new NMTOKENS_DATATYPE();
+	public static final Datatype<String> XMLLITERAL = new XMLLITERAL_DATATYPE();
+	private static final List<Datatype<?>> values = getList();
+
+	private static final List<Datatype<?>> getList() {
+		List<Datatype<?>> toReturn = new ArrayList<Datatype<?>>();
+		toReturn.add(ANYURI);
+		toReturn.add(BASE64BINARY);
+		toReturn.add(BOOLEAN);
+		toReturn.add(DATETIME);
+		toReturn.add(HEXBINARY);
+		toReturn.add(LITERAL);
+		toReturn.add(PLAINLITERAL);
+		toReturn.add(REAL);
+		toReturn.add(STRING);
+		toReturn.add(DATETIMESTAMP);
+		toReturn.add(DECIMAL);
+		toReturn.add(DOUBLE);
+		toReturn.add(FLOAT);
+		toReturn.add(BYTE);
+		toReturn.add(INT);
+		toReturn.add(INTEGER);
+		toReturn.add(LONG);
+		toReturn.add(NEGATIVEINTEGER);
+		toReturn.add(NONNEGATIVEINTEGER);
+		toReturn.add(NONPOSITIVEINTEGER);
+		toReturn.add(POSITIVEINTEGER);
+		toReturn.add(SHORT);
+		toReturn.add(UNSIGNEDBYTE);
+		toReturn.add(UNSIGNEDINT);
+		toReturn.add(UNSIGNEDLONG);
+		toReturn.add(UNSIGNEDSHORT);
+		toReturn.add(RATIONAL);
+		toReturn.add(LANGUAGE);
+		toReturn.add(NAME);
+		toReturn.add(NCNAME);
+		toReturn.add(NMTOKEN);
+		toReturn.add(NMTOKENS);
+		toReturn.add(NORMALIZEDSTRING);
+		toReturn.add(TOKEN);
+		toReturn.add(XMLLITERAL);
+		return Collections.unmodifiableList(toReturn);
+	}
+
+	/**
+	 * @return the predefined datatypes, in an enumeration fashion - the list is
+	 *         unmodifiable.
+	 */
+	public static List<Datatype<?>> getValues() {
+		return values;
+	}
+
+	/**
+	 * @return the datatypes defined for this instance of DatatypeFactory; the
+	 *         returned list is modifiable but not backed by the
+	 *         DatatypeFactory, so changes will not be reflected back.
+	 */
+	public Collection<Datatype<?>> getKnownDatatypes() {
+		return new ArrayList<Datatype<?>>(knownDatatypes.values());
+	}
+
+	private final Map<String, Datatype<?>> knownDatatypes = new HashMap<String, Datatype<?>>();
+	private static int uri_index = 0;
+
+	static final int getIndex() {
+		return uri_index++;
+	}
 
 	private DatatypeFactory() {
-		for (Datatype d : values) {
+		for (Datatype<?> d : values) {
 			knownDatatypes.put(d.getDatatypeURI(), d);
 		}
 	}
 
-	public Datatype getKnownDatatype(String key) {
+	public Datatype<?> getKnownDatatype(String key) {
 		return knownDatatypes.get(key);
 	}
 
@@ -98,196 +252,334 @@ public final class DatatypeFactory {
 		return new DatatypeFactory();
 	}
 
-	public Datatype defineNewDatatype(final Datatype base, final String uri,
-			final Collection<Facet> facets, final Collection<Datatype> ancestors,
-			final Map<Facet, Object> knownFacets) {
-		return defineNewDatatype(base, uri, facets, ancestors, knownFacets,
-				base.getOrdered(), base.getNumeric(), base.getCardinality(),
-				base.getBounded());
+	//	public <O extends Comparable<O>> Datatype<O> defineNewDatatype(
+	//			final Datatype<O> base, final String uri, final Collection<Facet> facets,
+	//			final Collection<Datatype<?>> ancestors, final Map<Facet, Object> knownFacets) {
+	//		return defineNewDatatype(base, uri, facets, ancestors, knownFacets,
+	//				base.getOrdered(), base.getNumeric(), base.getCardinality(),
+	//				base.getBounded());
+	//	}
+	//
+	//	public <O extends Comparable<O>> Datatype<O> defineNewDatatype(
+	//			final Datatype<O> base, final String uri) {
+	//		return defineNewDatatype(base, uri, null, null, null, base.getOrdered(),
+	//				base.getNumeric(), base.getCardinality(), base.getBounded());
+	//	}
+	//
+	//	public Datatype<String> defineNewDatatype(final String uri) {
+	//		return defineNewDatatype(LITERAL, uri, null, null, null, LITERAL.getOrdered(),
+	//				LITERAL.getNumeric(), LITERAL.getCardinality(), LITERAL.getBounded());
+	//	}
+	//
+	//	public <R extends Comparable<R>> DatatypeExpression<R> defineNewDatatypeIntersection(
+	//			Collection<Datatype<R>> types) {
+	//		return new DatatypeIntersection<R>(getIndex(), types);
+	//	}
+	//
+	//	public <R extends Comparable<R>> DatatypeExpression<R> defineNewDatatypeUnion(
+	//			Collection<Datatype<R>> types) {
+	//		return new DatatypeUnion<R>(getIndex(), types);
+	//	}
+	//
+	//	public <O extends Comparable<O>> Datatype<O> defineNewDatatype(
+	//			final Datatype<O> base, final String uri, final Collection<Facet> facets,
+	//			final Collection<Datatype<?>> ancestors,
+	//			final Map<Facet, Object> knownFacets, final ordered ord,
+	//			final boolean numeric, final cardinality card, final boolean bound) {
+	//		if (knownDatatypes.containsKey(uri)) { throw new IllegalArgumentException(
+	//				"datatype definitions cannot be overridden: " + uri
+	//						+ " is already in the known types"); }
+	//		final Set<Facet> f = new HashSet<Facet>(base.getFacets());
+	//		if (facets != null) {
+	//			f.addAll(facets);
+	//		}
+	//		final Set<Datatype<?>> a = new HashSet<Datatype<?>>(base.getAncestors());
+	//		if (ancestors != null) {
+	//			a.addAll(ancestors);
+	//		}
+	//		a.add(base);
+	//		final Map<Facet, Object> known = new HashMap<Facet, Object>(
+	//				base.getKnownFacetValues());
+	//		if (knownFacets != null) {
+	//			known.putAll(knownFacets);
+	//		}
+	//		Datatype<O> toReturn = new ABSTRACT_DATATYPE<O>(uri, f) {
+	//			@Override
+	//			public ordered getOrdered() {
+	//				return ord;
+	//			}
+	//
+	//			@Override
+	//			public boolean getNumeric() {
+	//				return numeric;
+	//			}
+	//
+	//			@Override
+	//			public cardinality getCardinality() {
+	//				return card;
+	//			}
+	//
+	//			@Override
+	//			public boolean getBounded() {
+	//				return bound;
+	//			}
+	//
+	//			@Override
+	//			public boolean isInValueSpace(O l) {
+	//				return base.isInValueSpace(l);
+	//			}
+	//
+	//			@Override
+	//			public Collection<Literal<O>> listValues() {
+	//				return base.listValues();
+	//			}
+	//
+	//			public O parseValue(String s) {
+	//				return base.parseValue(s);
+	//			}
+	//
+	//			@Override
+	//			public Literal<O> buildLiteral(String s) {
+	//				return base.buildLiteral(s);
+	//			}
+	//		};
+	//		knownDatatypes.put(uri, toReturn);
+	//		return toReturn;
+	//	}
+	public static final boolean nonEmptyInterval(BigDecimal min, BigDecimal max,
+			int excluded) {
+		if (min == null) {
+			// unbound lower limit - value space cannot be empty
+			// even if the actual type used to represent the literal is bounded, the limit should explicitly be there.
+			return false;
+		}
+		if (max == null) {
+			// unbound upper limit - value space cannot be empty
+			// even if the actual type used to represent the literal is bounded, the limit should explicitly be there.
+			return false;
+		}
+		// min and max are both not null
+		int comparison = min.compareTo(max);
+		// comparison < 0: min is strictly smaller than max. Value space can still be empty:
+		// (1,2)^^integer has no values
+		// if excluded is 0, comparison <=0 is enough to return true; there would still be one element: [1,1]
+		if (excluded == 0) {
+			return comparison <= 0;
+		}
+		// if excluded is 1, then comparison <0 is required
+		if (excluded == 1) {
+			return comparison < 0;
+		}
+		// if excluded is 2, then min + 1 unit must be strictly smaller than max; this becomes type dependent since it depends on the representation
+		if (excluded == 2) {
+			return min.add(min.ulp()).compareTo(max) < 0;
+		}
+		return false;
 	}
 
-	public Datatype defineNewDatatype(final Datatype base, final String uri) {
-		return defineNewDatatype(base, uri, null, null, null, base.getOrdered(),
-				base.getNumeric(), base.getCardinality(), base.getBounded());
+	public static final <R extends Comparable<R>> DatatypeExpression<R> getDatatypeExpression(
+			final Datatype<R> base) {
+		return new DatatypeExpressionImpl<R>(base);
+	}
+	public static final <R extends Comparable<R>> DatatypeExpression<R> getNumericDatatypeExpression(
+			final NumericDatatype<R> base) {
+		return new DatatypeNumericExpressionImpl<R>(base);
+	}
+	public static final <R extends Comparable<R>> DatatypeExpression<R> getOrderedDatatypeExpression(
+			final Datatype<R> base) {
+		return new DatatypeOrderedExpressionImpl<R>(base);
 	}
 
-	public Datatype defineNewDatatype(final String uri) {
-		return defineNewDatatype(LITERAL, uri, null, null, null, LITERAL.getOrdered(),
-				LITERAL.getNumeric(), LITERAL.getCardinality(), LITERAL.getBounded());
-	}
 
-	public Datatype defineNewDatatype(final Datatype base, final String uri,
-			final Collection<Facet> facets, final Collection<Datatype> ancestors,
-			final Map<Facet, Object> knownFacets, final ordered ord,
-			final boolean numeric, final cardinality card, final boolean bound) {
-		if (knownDatatypes.containsKey(uri)) {
-			throw new IllegalArgumentException(
-					"datatype definitions cannot be overridden: " + uri
-							+ " is already in the known types");
-		}
-		if (base == null) {
-			return defineNewDatatype(LITERAL, uri, facets, ancestors, knownFacets, ord,
-					numeric, card, bound);
-		}
-		final List<Facet> f = new ArrayList<Facet>(base.getFacets());
-		if (facets != null) {
-			f.addAll(facets);
-		}
-		final Set<Datatype> a = new HashSet<Datatype>(base.getAncestors());
-		if (ancestors != null) {
-			a.addAll(ancestors);
-		}
-		a.add(base);
-		final Map<Facet, Object> known = new HashMap<Facet, Object>(
-				base.getKnownFacetValues());
-		if (knownFacets != null) {
-			known.putAll(knownFacets);
-		}
-		Datatype toReturn = new ABSTRACT_DATATYPE() {
-			public ordered getOrdered() {
-				return ord;
-			}
-
-			public boolean getNumeric() {
-				return numeric;
-			}
-
-			public String getDatatypeURI() {
-				return uri;
-			}
-
-			public cardinality getCardinality() {
-				return card;
-			}
-
-			public boolean getBounded() {
-				return bound;
-			}
-
-			public boolean isInValueSpace(Literal l) {
-				return base.isInValueSpace(l);
-			}
-
-			public Collection<Literal> listValues(LiteralFactory factory,
-					Datatype... datatypes) {
-				return base.listValues(factory, datatypes);
-			}
-
-			public Object parseValue(String s) {
-				return base.parseValue(s);
-			}
-		};
-		knownDatatypes.put(uri, toReturn);
-		return toReturn;
-	}
-
-	static abstract class ABSTRACT_DATATYPE implements Datatype {
-		protected List<Facet> facets;
-		protected Set<Datatype> ancestors;
-		protected Map<Facet, Object> knownFacetValues;
-
-		public ABSTRACT_DATATYPE() {}
-
-		public Collection<Datatype> getAncestors() {
-			return ancestors;
-		}
-
-		public Collection<Facet> getFacets() {
-			return facets;
-		}
-
-		public Map<? extends Facet, ? extends Object> getKnownFacetValues() {
-			return knownFacetValues;
-		}
-
-		public boolean isSubType(Datatype type) {
-			return ancestors.contains(type);
+	static abstract class ABSTRACT_NUMERIC_DATATYPE<R extends Comparable<R>> extends
+			ABSTRACT_DATATYPE<R> implements NumericDatatype<R> {
+		public ABSTRACT_NUMERIC_DATATYPE(String uri, Set<Facet> f) {
+			super(uri, f);
 		}
 
 		@Override
-		public String toString() {
-			return "Datatype[" + getDatatypeURI() + "]";
+		public boolean getNumeric() {
+			return true;
 		}
 
-		public boolean isCompatible(Datatype type) {
-			return type instanceof ANYURI_DATATYPE || type.isSubType(this)
-					|| this.isSubType(type);
+		@Override
+		public boolean isNumericDatatype() {
+			return true;
 		}
 
-		public boolean isCompatible(Literal l) {
-			if (!this.isCompatible(l.getDatatype())) {
+		@Override
+		public NumericDatatype<R> asNumericDatatype() {
+			return this;
+		}
+
+		@Override
+		public boolean isOrderedDatatype() {
+			return true;
+		}
+
+		@Override
+		public <O extends Comparable<O>> OrderedDatatype<O> asOrderedDatatype() {
+			return (OrderedDatatype<O>) this;
+		}
+
+		@Override
+		public ordered getOrdered() {
+			return ordered.PARTIAL;
+		}
+
+		@Override
+		public boolean isInValueSpace(R l) {
+			if (hasMinExclusive()) {
+				if (getMin().compareTo(minExclusive.parseNumber(l)) <= 0) {
+					return false;
+				}
+			}
+			if (hasMinInclusive()) {
+				if (getMin().compareTo(minInclusive.parseNumber(l)) < 0) {
+					return false;
+				}
+			}
+			if (hasMaxExclusive()) {
+				if (getMax().compareTo(maxExclusive.parseNumber(l)) >= 0) {
+					return false;
+				}
+			}
+			if (hasMaxInclusive()) {
+				if (getMax().compareTo(maxInclusive.parseNumber(l)) > 0) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		@Override
+		public boolean isCompatible(Datatype<?> type) {
+//			if (!super.isCompatible(type)) {
+//				return false;
+//			}
+			if(type.equals(LITERAL)) {
+				return true;
+			}
+//			if(isSubType(type)||type.isSubType(this)) {
+//				return true;
+//			}
+
+			if (type.getNumeric()) {
+				// specific cases: float and double have overlapping value spaces with all numerics but are not compatible with any
+				if(type.equals(FLOAT)||type.equals(DOUBLE)) {
+					return super.isCompatible(type);
+				}
+
+				NumericDatatype<?> wrapper;
+				if (type instanceof NumericDatatype) {
+					wrapper = (NumericDatatype<?>) type;
+				} else {
+					wrapper = wrap(type);
+				}
+				// then both types are numeric
+				// if both have no max or both have no min -> there is an overlap
+				// if one has no max, then min must be smaller than max of the other
+				// if one has no min, the max must be larger than min of the other
+				// if one has neither max nor min, they are compatible
+				if (!this.hasMax() && !this.hasMin()) {
+					return true;
+				}
+				if (!wrapper.hasMax() && !wrapper.hasMin()) {
+					return true;
+				}
+				if (!this.hasMax() && !wrapper.hasMax()) {
+					return true;
+				}
+				if (!this.hasMin() && !wrapper.hasMin()) {
+					return true;
+				}
+				if (!this.hasMin()) {
+					return overlapping(this, wrapper);
+				}
+				if (!this.hasMax()) {
+					return overlapping(wrapper, this);
+				}
+				if (!wrapper.hasMin()) {
+					return overlapping(wrapper, this);
+				}
+				if (!wrapper.hasMax()) {
+					return overlapping(this, wrapper);
+				}
+				// compare their range facets:
+				//disjoint if:
+				// exclusives:
+				// one minInclusive/exclusive is strictly larger than the other maxinclusive/exclusive
+				return overlapping(this, wrapper) || overlapping(wrapper, this);
+			} else {
 				return false;
 			}
-			// TODO check the value is in the value space
-			return isInValueSpace(l);
+		}
+
+		<O extends Comparable<O>> NumericDatatype<O> wrap(final Datatype<O> d) {
+			return new NumericDatatypeWrapper<O>(d);
+		}
+
+		public boolean hasMinExclusive() {
+			return knownFacetValues.containsKey(minExclusive);
+		}
+
+		public boolean hasMinInclusive() {
+			return knownFacetValues.containsKey(minInclusive);
+		}
+
+		public boolean hasMaxExclusive() {
+			return knownFacetValues.containsKey(maxExclusive);
+		}
+
+		public boolean hasMaxInclusive() {
+			return knownFacetValues.containsKey(maxInclusive);
+		}
+
+		public boolean hasMin() {
+			return hasMinInclusive() || hasMinExclusive();
+		}
+
+		public boolean hasMax() {
+			return hasMaxInclusive() || hasMaxExclusive();
+		}
+
+		public BigDecimal getMin() {
+			if (hasMinExclusive()) {
+				return minExclusive.parseNumber(knownFacetValues.get(minExclusive));
+			}
+			if (hasMinInclusive()) {
+				return minInclusive.parseNumber(knownFacetValues.get(minInclusive));
+			}
+			return null;
+		}
+
+		public BigDecimal getMax() {
+			if (hasMaxExclusive()) {
+				return maxExclusive.parseNumber(knownFacetValues.get(maxExclusive));
+			}
+			if (hasMaxInclusive()) {
+				return maxInclusive.parseNumber(knownFacetValues.get(maxInclusive));
+			}
+			return null;
 		}
 	}
 
-	static class ANYURI_DATATYPE extends ABSTRACT_DATATYPE implements Datatype {
-		//	  <xs:simpleType name="anyURI" id="anyURI">
-		//	    <xs:annotation>
-		//	      <xs:appinfo>
-		//	        <hfp:hasFacet name="length"/>
-		//	        <hfp:hasFacet name="minLength"/>
-		//	        <hfp:hasFacet name="maxLength"/>
-		//	        <hfp:hasFacet name="pattern"/>
-		//	        <hfp:hasFacet name="enumeration"/>
-		//	        <hfp:hasFacet name="whiteSpace"/>
-		//	        <hfp:hasProperty name="ordered" value="false"/>
-		//	        <hfp:hasProperty name="bounded" value="false"/>
-		//	        <hfp:hasProperty name="cardinality" value="countably infinite"/>
-		//	        <hfp:hasProperty name="numeric" value="false"/>
-		//	      </xs:appinfo>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#anyURI"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:anySimpleType">
-		//	      <xs:whiteSpace fixed="true" value="collapse" id="anyURI.whiteSpace"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
-		private static final String uri = namespace + "anyURI";
-
-		public String getDatatypeURI() {
-			return uri;
-		}
-
+	static class ANYURI_DATATYPE extends ABSTRACT_DATATYPE<String> {
 		ANYURI_DATATYPE() {
-			facets = FACETS2;
+			super(namespace + "anyURI", StringFacets);
 			ancestors = Utils.generateAncestors(LITERAL);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(LITERAL.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			knownFacetValues = Collections.unmodifiableMap(map);
+			knownFacetValues.putAll(LITERAL.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
 		}
 
-		public boolean getBounded() {
-			return false;
-		}
-
-		public cardinality getCardinality() {
-			return cardinality.COUNTABLYINFINITE;
-		}
-
-		public boolean getNumeric() {
-			return false;
-		}
-
-		public ordered getOrdered() {
-			return ordered.FALSE;
-		}
-
-		public Collection<Literal> listValues(LiteralFactory factory,
-				Datatype... datatypes) {
-			// cannot enumerate ANYURI values
-			return Collections.emptyList();
-		}
-
-		public Object parseValue(String s) {
+		public String parseValue(String s) {
 			return whitespace.collapse.normalize(s);
 		}
 
-		public boolean isInValueSpace(Literal l) {
+		@Override
+		public boolean isInValueSpace(String l) {
 			try {
-				URI.create(l.value());
+				URI.create(l);
 				return true;
 			} catch (IllegalArgumentException e) {
 				return false;
@@ -295,71 +587,21 @@ public final class DatatypeFactory {
 		}
 	}
 
-	static class BASE64BINARY_DATATYPE extends ABSTRACT_DATATYPE implements Datatype {
-		private static final String uri = namespace + "base64Binary";
-
-		public String getDatatypeURI() {
-			return uri;
-		}
-
-		//	  <xs:simpleType name="base64Binary" id="base64Binary">
-		//	    <xs:annotation>
-		//	      <xs:appinfo>
-		//	        <hfp:hasFacet name="length"/>
-		//	        <hfp:hasFacet name="minLength"/>
-		//	        <hfp:hasFacet name="maxLength"/>
-		//	        <hfp:hasFacet name="pattern"/>
-		//	        <hfp:hasFacet name="enumeration"/>
-		//	        <hfp:hasFacet name="whiteSpace"/>
-		//	        <hfp:hasProperty name="ordered" value="false"/>
-		//	        <hfp:hasProperty name="bounded" value="false"/>
-		//	        <hfp:hasProperty name="cardinality" value="countably infinite"/>
-		//	        <hfp:hasProperty name="numeric" value="false"/>
-		//	      </xs:appinfo>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#base64Binary"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:anySimpleType">
-		//	      <xs:whiteSpace fixed="true" value="collapse" id="base64Binary.whiteSpace"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static class BASE64BINARY_DATATYPE extends ABSTRACT_DATATYPE<String> {
 		BASE64BINARY_DATATYPE() {
-			facets = FACETS2;
+			super(namespace + "base64Binary", StringFacets);
 			ancestors = Utils.generateAncestors(LITERAL);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(LITERAL.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			knownFacetValues = Collections.unmodifiableMap(map);
+			knownFacetValues.putAll(LITERAL.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
 		}
 
-		public boolean getBounded() {
-			return false;
-		}
-
-		public cardinality getCardinality() {
-			return cardinality.COUNTABLYINFINITE;
-		}
-
-		public boolean getNumeric() {
-			return false;
-		}
-
-		public ordered getOrdered() {
-			return ordered.FALSE;
-		}
-
-		public Collection<Literal> listValues(LiteralFactory factory,
-				Datatype... datatypes) {
-			// cannot enumerate Base64 values
-			return Collections.emptyList();
-		}
-
-		public Object parseValue(String s) {
+		public String parseValue(String s) {
 			return whitespace.collapse.normalize(s);
 		}
 
-		public boolean isInValueSpace(Literal l) {
+		@Override
+		public boolean isInValueSpace(String s) {
 			// all characters are letters, numbers, or +/=
-			String s = l.value();
 			for (int i = 0; i < s.length(); i++) {
 				final char c = s.charAt(i);
 				if (!Character.isLetter(c) && !Character.isDigit(c)
@@ -371,236 +613,206 @@ public final class DatatypeFactory {
 		}
 	}
 
-	static class BOOLEAN_DATATYPE extends ABSTRACT_DATATYPE implements Datatype {
-		private static final String uri = namespace + "boolean";
-
-		//	 <xs:simpleType name="boolean" id="boolean">
-		//	    <xs:annotation>
-		//	      <xs:appinfo>
-		//	        <hfp:hasFacet name="pattern"/>
-		//	        <hfp:hasFacet name="whiteSpace"/>
-		//	        <hfp:hasProperty name="ordered" value="false"/>
-		//	        <hfp:hasProperty name="bounded" value="false"/>
-		//	        <hfp:hasProperty name="cardinality" value="finite"/>
-		//	        <hfp:hasProperty name="numeric" value="false"/>
-		//	      </xs:appinfo>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#boolean"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:anySimpleType">
-		//	      <xs:whiteSpace fixed="true" value="collapse" id="boolean.whiteSpace"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static class BOOLEAN_DATATYPE extends ABSTRACT_DATATYPE<Boolean> {
 		BOOLEAN_DATATYPE() {
-			facets = Utils.getFacets(Facets.pattern, Facets.whiteSpace);
+			super(namespace + "boolean", Utils.getFacets(pattern, whiteSpace));
 			ancestors = Utils.generateAncestors(LITERAL);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(LITERAL.getKnownFacetValues());
-			knownFacetValues = Collections.unmodifiableMap(map);
+			knownFacetValues.putAll(LITERAL.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
 		}
 
-		public boolean getBounded() {
-			//XXX note that the specs says unbounded - yeah right
-			return true;
-		}
-
+		@Override
 		public cardinality getCardinality() {
 			return cardinality.FINITE;
 		}
 
-		public boolean getNumeric() {
-			return false;
-		}
-
-		public ordered getOrdered() {
-			return ordered.FALSE;
-		}
-
-		public String getDatatypeURI() {
-			return uri;
-		}
-
-		public Collection<Literal> listValues(LiteralFactory factory,
-				Datatype... datatypes) {
-			for (Datatype d : datatypes) {
-				// if any of the datatypes is not compatible, there is no common intersection
-				if (!d.isCompatible(this)) {
-					return Collections.emptyList();
-				}
-			}
+		@Override
+		public Collection<Literal<Boolean>> listValues() {
 			// if all datatypes are compatible, the intersection is the two booleans minu any restriction
-			List<Literal> toReturn = new ArrayList<Literal>();
-			toReturn.add(factory.parse(this, Boolean.toString(true)));
-			toReturn.add(factory.parse(this, Boolean.toString(false)));
-			for (Datatype d : datatypes) {
-				for (int i = 0; i < toReturn.size();) {
-					if (!d.isCompatible(toReturn.get(i))) {
-						toReturn.remove(i);
-					} else {
-						i++;
-					}
-				}
-			}
+			List<Literal<Boolean>> toReturn = new ArrayList<Literal<Boolean>>(2);
+			toReturn.add(this.buildLiteral(Boolean.toString(true)));
+			toReturn.add(this.buildLiteral(Boolean.toString(false)));
 			return toReturn;
 		}
 
-		public Object parseValue(String s) {
-			return Boolean.parseBoolean(s);
-		}
-
-		public boolean isInValueSpace(Literal l) {
-			return l.typedValue() != null;
+		public Boolean parseValue(String s) {
+			whitespace facet = (whitespace) whiteSpace.parse(knownFacetValues
+					.get(whiteSpace));
+			return Boolean.parseBoolean(facet.normalize(s));
 		}
 	}
 
-	static class DATETIME_DATATYPE extends ABSTRACT_DATATYPE implements Datatype {
-		private static final String uri = namespace + "dateTime";
-
-		//	  <xs:simpleType name="dateTime" id="dateTime">
-		//	    <xs:annotation>
-		//	      <xs:appinfo>
-		//	        <hfp:hasFacet name="pattern"/>
-		//	        <hfp:hasFacet name="enumeration"/>
-		//	        <hfp:hasFacet name="whiteSpace"/>
-		//	        <hfp:hasFacet name="maxInclusive"/>
-		//	        <hfp:hasFacet name="maxExclusive"/>
-		//	        <hfp:hasFacet name="minInclusive"/>
-		//	        <hfp:hasFacet name="minExclusive"/>
-		//	        <hfp:hasProperty name="ordered" value="partial"/>
-		//	        <hfp:hasProperty name="bounded" value="false"/>
-		//	        <hfp:hasProperty name="cardinality" value="countably infinite"/>
-		//	        <hfp:hasProperty name="numeric" value="false"/>
-		//	      </xs:appinfo>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#dateTime"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:anySimpleType">
-		//	      <xs:whiteSpace fixed="true" value="collapse" id="dateTime.whiteSpace"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static class DATETIME_DATATYPE extends ABSTRACT_DATATYPE<Calendar> implements
+			OrderedDatatype<Calendar> {
 		DATETIME_DATATYPE() {
-			facets = Utils.getFacets(Facets.pattern, Facets.enumeration,
-					Facets.whiteSpace, Facets.maxInclusive, Facets.maxExclusive,
-					Facets.minInclusive, Facets.minExclusive);
+			this(namespace + "dateTime");
+		}
+
+		DATETIME_DATATYPE(String u) {
+			super(u, FACETS4);
 			ancestors = Utils.generateAncestors(LITERAL);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(LITERAL.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			knownFacetValues = Collections.unmodifiableMap(map);
+			knownFacetValues.putAll(LITERAL.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
 		}
 
-		public boolean getBounded() {
-			return false;
-		}
-
-		public cardinality getCardinality() {
-			return cardinality.COUNTABLYINFINITE;
-		}
-
-		public boolean getNumeric() {
-			return false;
-		}
-
+		@Override
 		public ordered getOrdered() {
 			return ordered.PARTIAL;
 		}
 
-		public String getDatatypeURI() {
-			return uri;
+		@Override
+		public boolean isOrderedDatatype() {
+			return true;
 		}
 
-		public Collection<Literal> listValues(LiteralFactory factory,
-				Datatype... datatypes) {
-			return Collections.emptyList();
+		@Override
+		public <O extends Comparable<O>> OrderedDatatype<O> asOrderedDatatype() {
+			return (OrderedDatatype<O>) this;
 		}
 
-		public Object parseValue(String s) {
+		public Calendar parseValue(String s) {
 			XMLGregorianCalendar cal;
 			try {
 				cal = javax.xml.datatype.DatatypeFactory.newInstance()
 						.newXMLGregorianCalendar(s);
-				return cal;
+				return cal.normalize().toGregorianCalendar();
 			} catch (DatatypeConfigurationException e) {
 				throw new ReasonerInternalException(e);
 			}
 		}
 
-		public boolean isInValueSpace(Literal l) {
-			try {
-				parseValue(l.value());
-			} catch (Throwable e) {
-				if (e instanceof Error) {
-					throw (Error) e;
+		@Override
+		public boolean isInValueSpace(Calendar l) {
+			if (hasMinExclusive()) {
+				if (getMin().compareTo(l) <= 0) {
+					return false;
 				}
-				return false;
+			}
+			if (hasMinInclusive()) {
+				if (getMin().compareTo(l) < 0) {
+					return false;
+				}
+			}
+			if (hasMaxExclusive()) {
+				if (getMax().compareTo(l) >= 0) {
+					return false;
+				}
+			}
+			if (hasMaxInclusive()) {
+				if (getMax().compareTo(l) > 0) {
+					return false;
+				}
 			}
 			return true;
 		}
+
+		@Override
+		public boolean isCompatible(Datatype<?> type) {
+			if (super.isCompatible(type)) {
+				return true;
+			}
+			if (type.isSubType(this)) {
+				// then its representation must be Calendars
+				OrderedDatatype<Calendar> wrapper = (OrderedDatatype<Calendar>) type;
+				// then both types are numeric
+				// if both have no max or both have no min -> there is an overlap
+				// if one has no max, then min must be smaller than max of the other
+				// if one has no min, the max must be larger than min of the other
+				// if one has neither max nor min, they are compatible
+				if (!this.hasMax() && !this.hasMin()) {
+					return true;
+				}
+				if (!wrapper.hasMax() && !wrapper.hasMin()) {
+					return true;
+				}
+				if (!this.hasMax() && !wrapper.hasMax()) {
+					return true;
+				}
+				if (!this.hasMin() && !wrapper.hasMin()) {
+					return true;
+				}
+				if (!this.hasMin()) {
+					return overlapping(this, wrapper);
+				}
+				if (!this.hasMax()) {
+					return overlapping(wrapper, this);
+				}
+				if (!wrapper.hasMin()) {
+					return overlapping(wrapper, this);
+				}
+				if (!wrapper.hasMax()) {
+					return overlapping(this, wrapper);
+				}
+				// compare their range facets:
+				//disjoint if:
+				// exclusives:
+				// one minInclusive/exclusive is strictly larger than the other maxinclusive/exclusive
+				return overlapping(this, wrapper) || overlapping(wrapper, this);
+			} else {
+				return false;
+			}
+		}
+
+		public boolean hasMinExclusive() {
+			return knownFacetValues.containsKey(minExclusive);
+		}
+
+		public boolean hasMinInclusive() {
+			return knownFacetValues.containsKey(minInclusive);
+		}
+
+		public boolean hasMaxExclusive() {
+			return knownFacetValues.containsKey(maxExclusive);
+		}
+
+		public boolean hasMaxInclusive() {
+			return knownFacetValues.containsKey(maxInclusive);
+		}
+
+		public boolean hasMin() {
+			return hasMinInclusive() || hasMinExclusive();
+		}
+
+		public boolean hasMax() {
+			return hasMaxInclusive() || hasMaxExclusive();
+		}
+
+		public Calendar getMin() {
+			if (hasMinExclusive()) {
+				return getFacetValue(minExclusive);
+			}
+			if (hasMinInclusive()) {
+				return getFacetValue(minInclusive);
+			}
+			return null;
+		}
+
+		public Calendar getMax() {
+			if (hasMaxExclusive()) {
+				return getFacetValue(maxExclusive);
+			}
+			if (hasMaxInclusive()) {
+				return getFacetValue(maxInclusive);
+			}
+			return null;
+		}
 	}
 
-	static class HEXBINARY_DATATYPE extends ABSTRACT_DATATYPE implements Datatype {
-		private static final String uri = namespace + "hexBinary";
-
-		//	  <xs:simpleType name="hexBinary" id="hexBinary">
-		//	    <xs:annotation>
-		//	      <xs:appinfo>
-		//	        <hfp:hasFacet name="length"/>
-		//	        <hfp:hasFacet name="minLength"/>
-		//	        <hfp:hasFacet name="maxLength"/>
-		//	        <hfp:hasFacet name="pattern"/>
-		//	        <hfp:hasFacet name="enumeration"/>
-		//	        <hfp:hasFacet name="whiteSpace"/>
-		//	        <hfp:hasProperty name="ordered" value="false"/>
-		//	        <hfp:hasProperty name="bounded" value="false"/>
-		//	        <hfp:hasProperty name="cardinality" value="countably infinite"/>
-		//	        <hfp:hasProperty name="numeric" value="false"/>
-		//	      </xs:appinfo>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#binary"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:anySimpleType">
-		//	      <xs:whiteSpace fixed="true" value="collapse" id="hexBinary.whiteSpace"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static class HEXBINARY_DATATYPE extends ABSTRACT_DATATYPE<String> {
 		HEXBINARY_DATATYPE() {
-			facets = FACETS2;
+			super(namespace + "hexBinary", StringFacets);
 			ancestors = Utils.generateAncestors(LITERAL);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(LITERAL.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			knownFacetValues = Collections.unmodifiableMap(map);
+			knownFacetValues.putAll(LITERAL.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
 		}
 
-		public boolean getBounded() {
-			return false;
-		}
-
-		public cardinality getCardinality() {
-			return cardinality.COUNTABLYINFINITE;
-		}
-
-		public boolean getNumeric() {
-			return false;
-		}
-
-		public ordered getOrdered() {
-			return ordered.FALSE;
-		}
-
-		public String getDatatypeURI() {
-			return uri;
-		}
-
-		public Collection<Literal> listValues(LiteralFactory factory,
-				Datatype... datatypes) {
-			// cannot enumerate hexbinary values
-			return Collections.emptyList();
-		}
-
-		public Object parseValue(String s) {
+		public String parseValue(String s) {
 			return whitespace.collapse.normalize(s);
 		}
 
-		public boolean isInValueSpace(Literal l) {
+		@Override
+		public boolean isInValueSpace(String s) {
 			// all characters are numbers, or ABCDEF
-			String s = l.value();
 			for (int i = 0; i < s.length(); i++) {
 				final char c = s.charAt(i);
 				if (!Character.isDigit(c) && "ABCDEF".indexOf(c) == -1) {
@@ -611,537 +823,266 @@ public final class DatatypeFactory {
 		}
 	}
 
-	static class LITERAL_DATATYPE extends ABSTRACT_DATATYPE implements Datatype {
+	static class LITERAL_DATATYPE extends ABSTRACT_DATATYPE<String> {
 		LITERAL_DATATYPE() {
+			super("http://www.w3.org/2000/01/rdf-schema#Literal", Collections
+					.<Facet> emptySet());
 			ancestors = Collections.emptySet();
-			facets = Collections.emptyList();
-			knownFacetValues = Collections.emptyMap();
 		}
 
-		public boolean getBounded() {
-			return false;
-		}
-
-		public cardinality getCardinality() {
-			return cardinality.COUNTABLYINFINITE;
-		}
-
-		public boolean getNumeric() {
-			return false;
-		}
-
-		public ordered getOrdered() {
-			return ordered.FALSE;
-		}
-
-		private static final String uri = "http://www.w3.org/2000/01/rdf-schema#Literal";
-
-		public String getDatatypeURI() {
-			return uri;
-		}
-
-		public Collection<Literal> listValues(LiteralFactory factory,
-				Datatype... datatypes) {
-			// cannot enumerate Literal values
-			return Collections.emptyList();
-		}
-
-		public Object parseValue(String s) {
+		public String parseValue(String s) {
 			return s;
-		}
-
-		public boolean isInValueSpace(Literal l) {
-			return true;
 		}
 	}
 
-	static class PLAINLITERAL_DATATYPE extends ABSTRACT_DATATYPE implements Datatype {
+	static class PLAINLITERAL_DATATYPE extends ABSTRACT_DATATYPE<String> {
 		PLAINLITERAL_DATATYPE() {
-			facets = Utils.getFacets(Facets.length, Facets.minLength, Facets.maxLength,
-					Facets.pattern, Facets.enumeration);
+			super("http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral", Utils
+					.getFacets(length, minLength, maxLength, pattern, enumeration));
 			ancestors = Utils.generateAncestors(LITERAL);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(LITERAL.getKnownFacetValues());
-			knownFacetValues = Collections.unmodifiableMap(map);
+			knownFacetValues.putAll(LITERAL.getKnownFacetValues());
 		}
 
-		public boolean getBounded() {
-			return false;
-		}
-
-		public cardinality getCardinality() {
-			return cardinality.COUNTABLYINFINITE;
-		}
-
-		public boolean getNumeric() {
-			return false;
-		}
-
-		public ordered getOrdered() {
-			return ordered.FALSE;
-		}
-
-		private static final String uri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral";
-
-		public String getDatatypeURI() {
-			return uri;
-		}
-
-		public Collection<Literal> listValues(LiteralFactory factory,
-				Datatype... datatypes) {
-			// cannot enumerate plainliteral values
-			return Collections.emptyList();
-		}
-
-		public boolean isInValueSpace(Literal l) {
-			return true;
-		}
-
-		public Object parseValue(String s) {
+		public String parseValue(String s) {
 			return s;
 		}
 	}
 
-	static class REAL_DATATYPE extends ABSTRACT_DATATYPE implements Datatype {
-		REAL_DATATYPE() {
-			facets = Utils.getFacets(Facets.maxInclusive, Facets.maxExclusive,
-					Facets.minInclusive, Facets.minExclusive);
+	abstract static class REAL_DATATYPE<R extends Comparable<R>> extends
+			ABSTRACT_NUMERIC_DATATYPE<R> {
+		public REAL_DATATYPE() {
+			this("http://www.w3.org/2002/07/owl#real");
+		}
+
+		REAL_DATATYPE(String uri) {
+			this(uri, Utils.getFacets(minmax));
+		}
+
+		REAL_DATATYPE(String uri, Set<Facet> f) {
+			super(uri, f);
 			ancestors = Utils.generateAncestors(LITERAL);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(LITERAL.getKnownFacetValues());
-			knownFacetValues = Collections.unmodifiableMap(map);
+			knownFacetValues.putAll(LITERAL.getKnownFacetValues());
 		}
 
-		public boolean getBounded() {
-			return false;
-		}
-
-		public cardinality getCardinality() {
-			return cardinality.COUNTABLYINFINITE;
-		}
-
-		public boolean getNumeric() {
-			return true;
-		}
-
-		public ordered getOrdered() {
-			return ordered.PARTIAL;
-		}
-
-		private static final String uri = "http://www.w3.org/2002/07/owl#real";
-
-		public String getDatatypeURI() {
-			return uri;
-		}
-
-		public Object parseValue(String s) {
-			return new BigDecimal(s);
-		}
-
-		public boolean isInValueSpace(Literal l) {
-			try {
-				parseValue(l.value());
-			} catch (NumberFormatException e) {
-				return false;
+		@Override
+		public boolean isInValueSpace(R l) {
+			if (knownFacetValues.containsKey(minExclusive)) {
+				BigDecimal v = getNumericFacetValue(minExclusive);
+				BigDecimal input = minExclusive.parseNumber(l);
+				if (input.compareTo(v) <= 0) {
+					return false;
+				}
+			}
+			if (knownFacetValues.containsKey(minInclusive)) {
+				BigDecimal v = getNumericFacetValue(minInclusive);
+				BigDecimal input = minInclusive.parseNumber(l);
+				if (input.compareTo(v) < 0) {
+					return false;
+				}
+			}
+			if (knownFacetValues.containsKey(maxInclusive)) {
+				BigDecimal v = getNumericFacetValue(maxInclusive);
+				BigDecimal input = maxInclusive.parseNumber(l);
+				if (input.compareTo(v) > 0) {
+					return false;
+				}
+			}
+			if (knownFacetValues.containsKey(maxExclusive)) {
+				BigDecimal v = getNumericFacetValue(maxExclusive);
+				BigDecimal input = maxExclusive.parseNumber(l);
+				if (input.compareTo(v) >= 0) {
+					return false;
+				}
 			}
 			return true;
 		}
-
-		public Collection<Literal> listValues(LiteralFactory factory,
-				Datatype... datatypes) {
-			return Collections.emptyList();
-		}
 	}
 
-	static class STRING_DATATYPE extends ABSTRACT_DATATYPE implements Datatype {
-		private static final String uri = namespace + "string";
+	static class STRING_DATATYPE extends ABSTRACT_DATATYPE<String> {
+		public STRING_DATATYPE() {
+			this(namespace + "string");
+		}
 
-		//	  <xs:simpleType name="string" id="string">
-		//	    <xs:annotation>
-		//	      <xs:appinfo>
-		//	        <hfp:hasFacet name="length"/>
-		//	        <hfp:hasFacet name="minLength"/>
-		//	        <hfp:hasFacet name="maxLength"/>
-		//	        <hfp:hasFacet name="pattern"/>
-		//	        <hfp:hasFacet name="enumeration"/>
-		//	        <hfp:hasFacet name="whiteSpace"/>
-		//	        <hfp:hasProperty name="ordered" value="false"/>
-		//	        <hfp:hasProperty name="bounded" value="false"/>
-		//	        <hfp:hasProperty name="cardinality" value="countably infinite"/>
-		//	        <hfp:hasProperty name="numeric" value="false"/>
-		//	      </xs:appinfo>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#string"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:anySimpleType">
-		//	      <xs:whiteSpace value="preserve" id="string.preserve"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
-		STRING_DATATYPE() {
-			facets = FACETS2;
+		STRING_DATATYPE(String uri) {
+			super(uri, StringFacets);
 			ancestors = Utils.generateAncestors(LITERAL);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(LITERAL.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.preserve);
-			knownFacetValues = Collections.unmodifiableMap(map);
+			knownFacetValues.putAll(LITERAL.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.preserve);
 		}
 
-		public boolean getBounded() {
-			return false;
-		}
-
-		public cardinality getCardinality() {
-			return cardinality.COUNTABLYINFINITE;
-		}
-
-		public boolean getNumeric() {
-			return false;
-		}
-
-		public ordered getOrdered() {
-			return ordered.FALSE;
-		}
-
-		public String getDatatypeURI() {
-			return uri;
-		}
-
-		public Collection<Literal> listValues(LiteralFactory factory,
-				Datatype... datatypes) {
-			// cannot enumerate String values
-			return Collections.emptyList();
-		}
-
-		public Object parseValue(String s) {
+		public String parseValue(String s) {
 			return s;
 		}
-
-		public boolean isInValueSpace(Literal l) {
-			return true;
-			//TODO override in subtypes to provide syntax validation
-		}
 	}
 
-	static class DATETIMESTAMP_DATATYPE extends DATETIME_DATATYPE implements Datatype {
+	static class DATETIMESTAMP_DATATYPE extends DATETIME_DATATYPE {
 		DATETIMESTAMP_DATATYPE() {
+			super(namespace + "dateTimeStamp");
 			ancestors = Utils.generateAncestors(DATETIME);
 			//TODO check what's required for this
 		}
-
-		private static final String uri = namespace + "dateTimeStamp";
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
-		}
 	}
 
-	static class DECIMAL_DATATYPE extends RATIONAL_DATATYPE implements Datatype {
-		private static final String uri = namespace + "decimal";
-
-		//	  <xs:simpleType name="decimal" id="decimal">
-		//	    <xs:annotation>
-		//	      <xs:appinfo>
-		//	        <hfp:hasFacet name="totalDigits"/>
-		//	        <hfp:hasFacet name="fractionDigits"/>
-		//	        <hfp:hasFacet name="pattern"/>
-		//	        <hfp:hasFacet name="whiteSpace"/>
-		//	        <hfp:hasFacet name="enumeration"/>
-		//	        <hfp:hasFacet name="maxInclusive"/>
-		//	        <hfp:hasFacet name="maxExclusive"/>
-		//	        <hfp:hasFacet name="minInclusive"/>
-		//	        <hfp:hasFacet name="minExclusive"/>
-		//	        <hfp:hasProperty name="ordered" value="total"/>
-		//	        <hfp:hasProperty name="bounded" value="false"/>
-		//	        <hfp:hasProperty name="cardinality" value="countably infinite"/>
-		//	        <hfp:hasProperty name="numeric" value="true"/>
-		//	      </xs:appinfo>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#decimal"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:anySimpleType">
-		//	      <xs:whiteSpace fixed="true" value="collapse" id="decimal.whiteSpace"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static abstract class DECIMAL_DATATYPE<R extends Comparable<R>> extends
+			RATIONAL_DATATYPE<R> {
 		DECIMAL_DATATYPE() {
-			facets = Utils.getFacets(Facets.totalDigits, Facets.fractionDigits,
-					Facets.pattern, Facets.whiteSpace, Facets.enumeration,
-					Facets.maxInclusive, Facets.maxExclusive, Facets.minInclusive,
-					Facets.minExclusive);
+			this(namespace + "decimal");
+		}
+
+		DECIMAL_DATATYPE(String uri) {
+			super(uri, Utils.getFacets(digs, pew, minmax));
 			ancestors = Utils.generateAncestors(RATIONAL);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			knownFacetValues = Collections.unmodifiableMap(map);
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
 		}
 
 		@Override
 		public ordered getOrdered() {
 			return ordered.TOTAL;
 		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
-		}
 	}
 
-	static class DOUBLE_DATATYPE extends ABSTRACT_DATATYPE implements Datatype {
-		private static final String uri = namespace + "double";
-
-		//	<xs:simpleType name="double" id="double">
-		//    <xs:annotation>
-		//      <xs:appinfo>
-		//        <hfp:hasFacet name="pattern"/>
-		//        <hfp:hasFacet name="enumeration"/>
-		//        <hfp:hasFacet name="whiteSpace"/>
-		//        <hfp:hasFacet name="maxInclusive"/>
-		//        <hfp:hasFacet name="maxExclusive"/>
-		//        <hfp:hasFacet name="minInclusive"/>
-		//        <hfp:hasFacet name="minExclusive"/>
-		//        <hfp:hasProperty name="ordered" value="partial"/>
-		//        <hfp:hasProperty name="bounded" value="true"/>
-		//        <hfp:hasProperty name="cardinality" value="finite"/>
-		//        <hfp:hasProperty name="numeric" value="true"/>
-		//      </xs:appinfo>
-		//      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#double"/>
-		//    </xs:annotation>
-		//    <xs:restriction base="xs:anySimpleType">
-		//    <xs:whiteSpace fixed="true" value="collapse" id="double.whiteSpace"/>
-		//  </xs:restriction>
-		//</xs:simpleType>
+	static class DOUBLE_DATATYPE extends ABSTRACT_NUMERIC_DATATYPE<Double> {
 		DOUBLE_DATATYPE() {
-			facets = Utils.getFacets(Facets.pattern, Facets.enumeration,
-					Facets.whiteSpace, Facets.maxInclusive, Facets.maxExclusive,
-					Facets.minInclusive, Facets.minExclusive);
+			super(namespace + "double", Utils.getFacets(pew, minmax));
 			ancestors = Utils.generateAncestors(LITERAL);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(LITERAL.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			knownFacetValues = Collections.unmodifiableMap(map);
+			knownFacetValues.putAll(LITERAL.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
 		}
 
+		@Override
 		public boolean getBounded() {
 			return true;
 		}
 
+		@Override
 		public cardinality getCardinality() {
 			return cardinality.FINITE;
 		}
 
+		@Override
 		public boolean getNumeric() {
 			return true;
 		}
 
-		public ordered getOrdered() {
-			//XXX really?
-			return ordered.PARTIAL;
-		}
-
-		public String getDatatypeURI() {
-			return uri;
-		}
-
-		public Object parseValue(String s) {
+		public Double parseValue(String s) {
 			return Double.parseDouble(s);
 		}
 
-		public boolean isInValueSpace(Literal l) {
-			try {
-				parseValue(l.value());
-			} catch (NumberFormatException e) {
-				return false;
-			}
-			return true;
-		}
+		@Override
+		public boolean isCompatible(Datatype<?> type) {
+			// implementation from ABSTRACT_DATATYPE
+			if(type.isExpression()) {
 
-		public Collection<Literal> listValues(LiteralFactory factory,
-				Datatype... datatypes) {
-			return Collections.emptyList();
+				type=type.asExpression().getHostType();
+			}
+			return type.equals(this)
+					|| type.equals(DatatypeFactory.LITERAL)
+					|| type.isSubType(this)
+					|| this.isSubType(type);
 		}
 	}
 
-	static class FLOAT_DATATYPE extends ABSTRACT_DATATYPE implements Datatype {
-		private static final String uri = namespace + "float";
-
-		//	 <xs:simpleType name="float" id="float">
-		//	    <xs:annotation>
-		//	      <xs:appinfo>
-		//	        <hfp:hasFacet name="pattern"/>
-		//	        <hfp:hasFacet name="enumeration"/>
-		//	        <hfp:hasFacet name="whiteSpace"/>
-		//	        <hfp:hasFacet name="maxInclusive"/>
-		//	        <hfp:hasFacet name="maxExclusive"/>
-		//	        <hfp:hasFacet name="minInclusive"/>
-		//	        <hfp:hasFacet name="minExclusive"/>
-		//	        <hfp:hasProperty name="ordered" value="partial"/>
-		//	        <hfp:hasProperty name="bounded" value="true"/>
-		//	        <hfp:hasProperty name="cardinality" value="finite"/>
-		//	        <hfp:hasProperty name="numeric" value="true"/>
-		//	      </xs:appinfo>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#float"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:anySimpleType">
-		//	      <xs:whiteSpace fixed="true" value="collapse" id="float.whiteSpace"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static class FLOAT_DATATYPE extends ABSTRACT_NUMERIC_DATATYPE<Float> {
 		FLOAT_DATATYPE() {
-			facets = FACETS4;
+			super(namespace + "float", FACETS4);
 			ancestors = Utils.generateAncestors(LITERAL);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(LITERAL.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			knownFacetValues = Collections.unmodifiableMap(map);
+			knownFacetValues.putAll(LITERAL.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
 		}
 
+		@Override
 		public boolean getBounded() {
 			return true;
 		}
 
+		@Override
 		public cardinality getCardinality() {
 			return cardinality.FINITE;
 		}
 
+		@Override
 		public boolean getNumeric() {
 			return true;
 		}
 
-		public ordered getOrdered() {
-			return ordered.PARTIAL;
-		}
-
-		public String getDatatypeURI() {
-			return uri;
-		}
-
-		public Object parseValue(String s) {
+		public Float parseValue(String s) {
 			return Float.parseFloat(s);
 		}
+		@Override
+		public boolean isCompatible(Datatype<?> type) {
+			// implementation from ABSTRACT_DATATYPE
+			if(type.isExpression()) {
 
-		public boolean isInValueSpace(Literal l) {
-			try {
-				parseValue(l.value());
-			} catch (NumberFormatException e) {
-				return false;
+				type=type.asExpression().getHostType();
 			}
-			return true;
+			return type.equals(this)
+					|| type.equals(DatatypeFactory.LITERAL)
+					|| type.isSubType(this)
+					|| this.isSubType(type);
 		}
 
-		public Collection<Literal> listValues(LiteralFactory factory,
-				Datatype... datatypes) {
-			return Collections.emptyList();
-		}
 	}
 
-	static class BYTE_DATATYPE extends SHORT_DATATYPE implements Datatype {
-		private static final String uri = namespace + "byte";
-
-		//	  <xs:simpleType name="byte" id="byte">
-		//	    <xs:annotation>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#byte"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:short">
-		//	      <xs:minInclusive value="-128" id="byte.minInclusive"/>
-		//	      <xs:maxInclusive value="127" id="byte.maxInclusive"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static abstract class BYTE_DATATYPE<R extends Comparable<R>> extends
+			SHORT_DATATYPE<R> {
 		BYTE_DATATYPE() {
+			super(namespace + "byte");
 			ancestors = Utils.generateAncestors(SHORT);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[\\-+]?[0-9]+");
-			map.put(Facets.minInclusive, -128);
-			map.put(Facets.maxInclusive, 127);
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[\\-+]?[0-9]+");
+			knownFacetValues.put(minInclusive, -128);
+			knownFacetValues.put(maxInclusive, 127);
 		}
 	}
 
-	static class INT_DATATYPE extends LONG_DATATYPE implements Datatype {
-		private static final String uri = namespace + "int";
-
-		//	  <xs:simpleType name="int" id="int">
-		//	    <xs:annotation>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#int"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:long">
-		//	      <xs:minInclusive value="-2147483648" id="int.minInclusive"/>
-		//	      <xs:maxInclusive value="2147483647" id="int.maxInclusive"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static abstract class INT_DATATYPE<R extends Comparable<R>> extends LONG_DATATYPE<R> {
 		INT_DATATYPE() {
+			this(namespace + "int");
+		}
+
+		INT_DATATYPE(String uri) {
+			super(uri);
 			ancestors = Utils.generateAncestors(LONG);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[\\-+]?[0-9]+");
-			map.put(Facets.minInclusive, -2147483648);
-			map.put(Facets.maxInclusive, 2147483647);
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[\\-+]?[0-9]+");
+			knownFacetValues.put(minInclusive, -2147483648);
+			knownFacetValues.put(maxInclusive, 2147483647);
 		}
 	}
 
-	static class INTEGER_DATATYPE extends DECIMAL_DATATYPE implements Datatype {
-		private static final String uri = namespace + "integer";
-
-		//	  <xs:simpleType name="integer" id="integer">
-		//	    <xs:annotation>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#integer"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:decimal">
-		//	      <xs:fractionDigits fixed="true" value="0" id="integer.fractionDigits"/>
-		//	      <xs:pattern value="[\-+]?[0-9]+"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static abstract class INTEGER_DATATYPE<R extends Comparable<R>> extends
+			DECIMAL_DATATYPE<R> {
 		INTEGER_DATATYPE() {
-			facets = FACETS3;
-			ancestors = Utils.generateAncestors(DECIMAL);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[\\-+]?[0-9]+");
-			knownFacetValues = Collections.unmodifiableMap(map);
+			this(namespace + "integer");
 		}
 
-		@Override
-		public String getDatatypeURI() {
-			return uri;
+		INTEGER_DATATYPE(String uri) {
+			super(uri);
+			ancestors = Utils.generateAncestors(DECIMAL);
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[\\-+]?[0-9]+");
+			knownFacetValues.put(fractionDigits, 0);
 		}
 	}
 
-	static class LONG_DATATYPE extends INTEGER_DATATYPE implements Datatype {
-		private static final String uri = namespace + "long";
-
-		//	  <xs:simpleType name="long" id="long">
-		//	    <xs:annotation>
-		//	      <xs:appinfo>
-		//	        <hfp:hasProperty name="bounded" value="true"/>
-		//	        <hfp:hasProperty name="cardinality" value="finite"/>
-		//	      </xs:appinfo>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#long"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:integer">
-		//	      <xs:minInclusive value="-9223372036854775808" id="long.minInclusive"/>
-		//	      <xs:maxInclusive  value="9223372036854775807" id="long.maxInclusive"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static abstract class LONG_DATATYPE<R extends Comparable<R>> extends
+			INTEGER_DATATYPE<R> {
 		LONG_DATATYPE() {
+			this(namespace + "long");
+		}
+
+		LONG_DATATYPE(String uri) {
+			super(uri);
 			ancestors = Utils.generateAncestors(INTEGER);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[\\-+]?[0-9]+");
-			map.put(Facets.minInclusive, -9223372036854775808L);
-			map.put(Facets.maxInclusive, 9223372036854775807L);
-			knownFacetValues = Collections.unmodifiableMap(map);
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[\\-+]?[0-9]+");
+			knownFacetValues.put(minInclusive, -9223372036854775808L);
+			knownFacetValues.put(maxInclusive, 9223372036854775807L);
 		}
 
 		@Override
@@ -1153,720 +1094,291 @@ public final class DatatypeFactory {
 		public cardinality getCardinality() {
 			return cardinality.FINITE;
 		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
-		}
 	}
 
-	static class NEGATIVEINTEGER_DATATYPE extends NONPOSITIVEINTEGER_DATATYPE implements
-			Datatype {
-		private static final String uri = namespace + "negativeInteger";
-
-		//	  <xs:simpleType name="negativeInteger" id="negativeInteger">
-		//	    <xs:annotation>
-		//	      <xs:documentation
-		//	           source="http://www.w3.org/TR/xmlschema-2/#negativeInteger"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:nonPositiveInteger">
-		//	      <xs:maxInclusive value="-1" id="negativeInteger.maxInclusive"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static abstract class NEGATIVEINTEGER_DATATYPE<R extends Comparable<R>> extends
+			NONPOSITIVEINTEGER_DATATYPE<R> {
 		NEGATIVEINTEGER_DATATYPE() {
+			super(namespace + "negativeInteger");
 			ancestors = Utils.generateAncestors(NONPOSITIVEINTEGER);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[\\-+]?[0-9]+");
-			map.put(Facets.maxInclusive, -1);
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[\\-+]?[0-9]+");
+			knownFacetValues.put(maxInclusive, -1);
 		}
 	}
 
-	static class NONNEGATIVEINTEGER_DATATYPE extends INTEGER_DATATYPE implements Datatype {
-		private static final String uri = namespace + "nonNegativeInteger";
-
-		//	  <xs:simpleType name="nonNegativeInteger" id="nonNegativeInteger">
-		//	    <xs:annotation>
-		//	      <xs:documentation
-		//	           source="http://www.w3.org/TR/xmlschema-2/#nonNegativeInteger"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:integer">
-		//	      <xs:minInclusive value="0" id="nonNegativeInteger.minInclusive"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static abstract class NONNEGATIVEINTEGER_DATATYPE<R extends Comparable<R>> extends
+			INTEGER_DATATYPE<R> {
 		NONNEGATIVEINTEGER_DATATYPE() {
-			ancestors = Utils.generateAncestors(INTEGER);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[\\-+]?[0-9]+");
-			map.put(Facets.minInclusive, 0);
-			knownFacetValues = Collections.unmodifiableMap(map);
+			this(namespace + "nonNegativeInteger");
 		}
 
-		@Override
-		public String getDatatypeURI() {
-			return uri;
+		NONNEGATIVEINTEGER_DATATYPE(String uri) {
+			super(uri);
+			ancestors = Utils.generateAncestors(INTEGER);
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[\\-+]?[0-9]+");
+			knownFacetValues.put(minInclusive, 0);
 		}
 	}
 
-	static class NONPOSITIVEINTEGER_DATATYPE extends INTEGER_DATATYPE implements Datatype {
-		private static final String uri = namespace + "nonPositiveInteger";
-
-		//	  <xs:simpleType name="nonPositiveInteger" id="nonPositiveInteger">
-		//	    <xs:annotation>
-		//	      <xs:documentation
-		//	           source="http://www.w3.org/TR/xmlschema-2/#nonPositiveInteger"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:integer">
-		//	      <xs:maxInclusive value="0" id="nonPositiveInteger.maxInclusive"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static abstract class NONPOSITIVEINTEGER_DATATYPE<R extends Comparable<R>> extends
+			INTEGER_DATATYPE<R> {
 		NONPOSITIVEINTEGER_DATATYPE() {
+			this(namespace + "nonPositiveInteger");
+		}
+
+		NONPOSITIVEINTEGER_DATATYPE(String uri) {
+			super(uri);
 			ancestors = Utils.generateAncestors(INTEGER);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[\\-+]?[0-9]+");
-			map.put(Facets.maxInclusive, 0);
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[\\-+]?[0-9]+");
+			knownFacetValues.put(maxInclusive, 0);
 		}
 	}
 
-	static class POSITIVEINTEGER_DATATYPE extends NONNEGATIVEINTEGER_DATATYPE implements
-			Datatype {
-		private static final String uri = namespace + "positiveInteger";
-
-		//	  <xs:simpleType name="positiveInteger" id="positiveInteger">
-		//	    <xs:annotation>
-		//	      <xs:documentation
-		//	           source="http://www.w3.org/TR/xmlschema-2/#positiveInteger"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:nonNegativeInteger">
-		//	      <xs:minInclusive value="1" id="positiveInteger.minInclusive"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static abstract class POSITIVEINTEGER_DATATYPE<R extends Comparable<R>> extends
+			NONNEGATIVEINTEGER_DATATYPE<R> {
 		POSITIVEINTEGER_DATATYPE() {
+			super(namespace + "positiveInteger");
 			ancestors = Utils.generateAncestors(NONNEGATIVEINTEGER);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[\\-+]?[0-9]+");
-			map.put(Facets.minInclusive, 1);
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[\\-+]?[0-9]+");
+			knownFacetValues.put(minInclusive, 1);
 		}
 	}
 
-	static class SHORT_DATATYPE extends INT_DATATYPE implements Datatype {
-		private static final String uri = namespace + "short";
-
-		//	  <xs:simpleType name="short" id="short">
-		//	    <xs:annotation>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#short"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:int">
-		//	      <xs:minInclusive value="-32768" id="short.minInclusive"/>
-		//	      <xs:maxInclusive value="32767" id="short.maxInclusive"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static abstract class SHORT_DATATYPE<R extends Comparable<R>> extends INT_DATATYPE<R> {
 		SHORT_DATATYPE() {
+			this(namespace + "short");
+		}
+
+		SHORT_DATATYPE(String uri) {
+			super(uri);
 			ancestors = Utils.generateAncestors(INT);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[\\-+]?[0-9]+");
-			map.put(Facets.minInclusive, -32768);
-			map.put(Facets.maxInclusive, 32767);
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[\\-+]?[0-9]+");
+			knownFacetValues.put(minInclusive, -32768);
+			knownFacetValues.put(maxInclusive, 32767);
 		}
 	}
 
-	static class UNSIGNEDBYTE_DATATYPE extends UNSIGNEDSHORT_DATATYPE implements Datatype {
-		private static final String uri = namespace + "unsignedByte";
-
-		//	  <xs:simpleType name="unsignedByte" id="unsignedByte">
-		//	    <xs:annotation>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#unsignedByte"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:unsignedShort">
-		//	      <xs:maxInclusive value="255" id="unsignedByte.maxInclusive"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static abstract class UNSIGNEDBYTE_DATATYPE<R extends Comparable<R>> extends
+			UNSIGNEDSHORT_DATATYPE<R> {
 		UNSIGNEDBYTE_DATATYPE() {
+			super(namespace + "unsignedByte");
 			ancestors = Utils.generateAncestors(UNSIGNEDSHORT);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[\\-+]?[0-9]+");
-			map.put(Facets.minInclusive, 0);
-			map.put(Facets.maxInclusive, 255);
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[\\-+]?[0-9]+");
+			knownFacetValues.put(minInclusive, 0);
+			knownFacetValues.put(maxInclusive, 255);
 		}
 	}
 
-	static class UNSIGNEDINT_DATATYPE extends UNSIGNEDLONG_DATATYPE implements Datatype {
-		private static final String uri = namespace + "unsignedInt";
-
-		//	  <xs:simpleType name="unsignedInt" id="unsignedInt">
-		//	    <xs:annotation>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#unsignedInt"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:unsignedLong">
-		//	      <xs:maxInclusive value="4294967295" id="unsignedInt.maxInclusive"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static abstract class UNSIGNEDINT_DATATYPE<R extends Comparable<R>> extends
+			UNSIGNEDLONG_DATATYPE<R> {
 		UNSIGNEDINT_DATATYPE() {
+			this(namespace + "unsignedInt");
+		}
+
+		UNSIGNEDINT_DATATYPE(String uri) {
+			super(uri);
 			ancestors = Utils.generateAncestors(UNSIGNEDLONG);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[\\-+]?[0-9]+");
-			map.put(Facets.minInclusive, 0);
-			map.put(Facets.maxInclusive, 4294967295L);
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[\\-+]?[0-9]+");
+			knownFacetValues.put(minInclusive, 0);
+			knownFacetValues.put(maxInclusive, 4294967295L);
 		}
 	}
 
-	static class UNSIGNEDLONG_DATATYPE extends NONNEGATIVEINTEGER_DATATYPE implements
-			Datatype {
-		private static final String uri = namespace + "unsignedLong";
-
-		//	  <xs:simpleType name="unsignedLong" id="unsignedLong">
-		//	    <xs:annotation>
-		//	      <xs:appinfo>
-		//	        <hfp:hasProperty name="bounded" value="true"/>
-		//	        <hfp:hasProperty name="cardinality" value="finite"/>
-		//	      </xs:appinfo>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#unsignedLong"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:nonNegativeInteger">
-		//	      <xs:maxInclusive value="18446744073709551615"
-		//	                       id="unsignedLong.maxInclusive"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
+	static abstract class UNSIGNEDLONG_DATATYPE<R extends Comparable<R>> extends
+			NONNEGATIVEINTEGER_DATATYPE<R> {
 		UNSIGNEDLONG_DATATYPE() {
+			this(namespace + "unsignedLong");
+		}
+
+		UNSIGNEDLONG_DATATYPE(String uri) {
+			super(uri);
 			ancestors = Utils.generateAncestors(NONNEGATIVEINTEGER);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[\\-+]?[0-9]+");
-			map.put(Facets.minInclusive, 0);
-			map.put(Facets.maxInclusive, new BigInteger("18446744073709551615"));
-			knownFacetValues = Collections.unmodifiableMap(map);
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[\\-+]?[0-9]+");
+			knownFacetValues.put(minInclusive, 0);
+			knownFacetValues.put(maxInclusive, new BigInteger("18446744073709551615"));
 		}
 
 		@Override
-		public String getDatatypeURI() {
-			return uri;
-		}
-	}
-
-	static class UNSIGNEDSHORT_DATATYPE extends UNSIGNEDINT_DATATYPE implements Datatype {
-		private static final String uri = namespace + "unsignedShort";
-
-		//	  <xs:simpleType name="unsignedShort" id="unsignedShort">
-		//	    <xs:annotation>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#unsignedShort"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:unsignedInt">
-		//	      <xs:maxInclusive value="65535" id="unsignedShort.maxInclusive"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
-		UNSIGNEDSHORT_DATATYPE() {
-			ancestors = Utils.generateAncestors(UNSIGNEDINT);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[\\-+]?[0-9]+");
-			map.put(Facets.minInclusive, 0);
-			map.put(Facets.maxInclusive, 65535);
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
-		}
-	}
-
-	static class RATIONAL_DATATYPE extends REAL_DATATYPE implements Datatype {
-		RATIONAL_DATATYPE() {
-			ancestors = Utils.generateAncestors(REAL);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		private static final String uri = "http://www.w3.org/2002/07/owl#rational";
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
-		}
-
-		@Override
-		public Object parseValue(String s) {
-			int i = s.indexOf('/');
-			if (i == -1) {
-				throw new IllegalArgumentException(
-						"invalid string used: no '/' character separating longs: " + s);
-			}
-			double n = Long.parseLong(s.substring(0, i));
-			double d = Long.parseLong(s.substring(i + 1));
-			BigDecimal b = new BigDecimal(n / d);
-			return b;
-		}
-	}
-
-	static class LANGUAGE_DATATYPE extends TOKEN_DATATYPE implements Datatype {
-		private static final String uri = namespace + "language";
-
-		//	  <xs:simpleType name="language" id="language">
-		//	    <xs:annotation>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#language"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:token">
-		//	      <xs:pattern value="[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*"
-		//	                  id="language.pattern">
-		//	        <xs:annotation>
-		//	          <xs:documentation source="http://www.ietf.org/rfc/rfc3066.txt">
-		//	            pattern specifies the content of section 2.12 of XML 1.0e2
-		//	            and RFC 3066 (Revised version of RFC 1766).
-		//	          </xs:documentation>
-		//	        </xs:annotation>
-		//	      </xs:pattern>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
-		LANGUAGE_DATATYPE() {
-			ancestors = Utils.generateAncestors(TOKEN);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*");
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
-		}
-	}
-
-	static class NAME_DATATYPE extends TOKEN_DATATYPE implements Datatype {
-		private static final String uri = namespace + "Name";
-
-		//	  <xs:simpleType name="Name" id="Name">
-		//	    <xs:annotation>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#Name"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:token">
-		//	      <xs:pattern value="\i\c*" id="Name.pattern">
-		//	        <xs:annotation>
-		//	          <xs:documentation source="http://www.w3.org/TR/REC-xml#NT-Name">
-		//	            pattern matches production 5 from the XML spec
-		//	          </xs:documentation>
-		//	        </xs:annotation>
-		//	      </xs:pattern>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
-		NAME_DATATYPE() {
-			ancestors = Utils.generateAncestors(TOKEN);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "\\i\\c*");
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
-		}
-	}
-
-	static class NCNAME_DATATYPE extends NAME_DATATYPE implements Datatype {
-		private static final String uri = namespace + "NCName";
-
-		//	  <xs:simpleType name="NCName" id="NCName">
-		//	    <xs:annotation>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#NCName"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:Name">
-		//	      <xs:pattern value="[\i-[:]][\c-[:]]*" id="NCName.pattern">
-		//	        <xs:annotation>
-		//	          <xs:documentation
-		//	               source="http://www.w3.org/TR/REC-xml-names/#NT-NCName">
-		//	            pattern matches production 4 from the Namespaces in XML spec
-		//	          </xs:documentation>
-		//	        </xs:annotation>
-		//	      </xs:pattern>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
-		NCNAME_DATATYPE() {
-			ancestors = Utils.generateAncestors(NAME);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "[\\i-[:]][\\c-[:]]*");
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
-		}
-	}
-
-	static class NMTOKEN_DATATYPE extends TOKEN_DATATYPE implements Datatype {
-		private static final String uri = namespace + "NMTOKEN";
-
-		//	  <xs:simpleType name="NMTOKEN" id="NMTOKEN">
-		//	    <xs:annotation>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#NMTOKEN"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:token">
-		//	      <xs:pattern value="\c+" id="NMTOKEN.pattern">
-		//	        <xs:annotation>
-		//	          <xs:documentation source="http://www.w3.org/TR/REC-xml#NT-Nmtoken">
-		//	            pattern matches production 7 from the XML spec
-		//	          </xs:documentation>
-		//	        </xs:annotation>
-		//	      </xs:pattern>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
-		NMTOKEN_DATATYPE() {
-			ancestors = Utils.generateAncestors(TOKEN);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.pattern, "\\c+");
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
-		}
-	}
-
-	static class NMTOKENS_DATATYPE extends NMTOKEN_DATATYPE implements Datatype {
-		private static final String uri = namespace + "NMTOKENS";
-
-		//	  <xs:simpleType name="NMTOKENS" id="NMTOKENS">
-		//	    <xs:annotation>
-		//	      <xs:appinfo>
-		//	        <hfp:hasFacet name="length"/>
-		//	        <hfp:hasFacet name="minLength"/>
-		//	        <hfp:hasFacet name="maxLength"/>
-		//	        <hfp:hasFacet name="enumeration"/>
-		//	        <hfp:hasFacet name="whiteSpace"/>
-		//	        <hfp:hasFacet name="pattern"/>
-		//	        <hfp:hasProperty name="ordered" value="false"/>
-		//	        <hfp:hasProperty name="bounded" value="false"/>
-		//	        <hfp:hasProperty name="cardinality" value="countably infinite"/>
-		//	        <hfp:hasProperty name="numeric" value="false"/>
-		//	      </xs:appinfo>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#NMTOKENS"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction>
-		//	      <xs:simpleType>
-		//	        <xs:list itemType="xs:NMTOKEN"/>
-		//	      </xs:simpleType>
-		//	      <xs:minLength value="1" id="NMTOKENS.minLength"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
-		NMTOKENS_DATATYPE() {
-			ancestors = Utils.generateAncestors(NMTOKEN);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			map.put(Facets.minLength, 1);
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
-		}
-	}
-
-	static class NORMALIZEDSTRING_DATATYPE extends STRING_DATATYPE implements Datatype {
-		private static final String uri = namespace + "normalizedString";
-
-		//	  <xs:simpleType name="normalizedString" id="normalizedString">
-		//	    <xs:annotation>
-		//	      <xs:documentation
-		//	           source="http://www.w3.org/TR/xmlschema-2/#normalizedString"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:string">
-		//	      <xs:whiteSpace value="replace" id="normalizedString.whiteSpace"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
-		NORMALIZEDSTRING_DATATYPE() {
-			ancestors = Utils.generateAncestors(STRING);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.replace);
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
-		}
-	}
-
-	static class TOKEN_DATATYPE extends NORMALIZEDSTRING_DATATYPE implements Datatype {
-		private static final String uri = namespace + "token";
-
-		//	  <xs:simpleType name="token" id="token">
-		//	    <xs:annotation>
-		//	      <xs:documentation source="http://www.w3.org/TR/xmlschema-2/#token"/>
-		//	    </xs:annotation>
-		//	    <xs:restriction base="xs:normalizedString">
-		//	      <xs:whiteSpace value="collapse" id="token.whiteSpace"/>
-		//	    </xs:restriction>
-		//	  </xs:simpleType>
-		TOKEN_DATATYPE() {
-			ancestors = Utils.generateAncestors(NORMALIZEDSTRING);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(super.getKnownFacetValues());
-			map.put(Facets.whiteSpace, whitespace.collapse);
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
-		@Override
-		public String getDatatypeURI() {
-			return uri;
-		}
-	}
-
-	static class XMLLITERAL_DATATYPE extends ABSTRACT_DATATYPE implements Datatype {
-		XMLLITERAL_DATATYPE() {
-			facets = Collections.emptyList();
-			ancestors = Utils.generateAncestors(LITERAL);
-			Map<Facet, Object> map = new HashMap<Datatype.Facet, Object>();
-			map.putAll(LITERAL.getKnownFacetValues());
-			knownFacetValues = Collections.unmodifiableMap(map);
-		}
-
 		public boolean getBounded() {
-			return false;
+			return true;
 		}
 
+		@Override
 		public cardinality getCardinality() {
-			return cardinality.COUNTABLYINFINITE;
+			return cardinality.FINITE;
+		}
+	}
+
+	static abstract class UNSIGNEDSHORT_DATATYPE<R extends Comparable<R>> extends
+			UNSIGNEDINT_DATATYPE<R> {
+		UNSIGNEDSHORT_DATATYPE() {
+			this(namespace + "unsignedShort");
 		}
 
-		public boolean getNumeric() {
-			return false;
+		UNSIGNEDSHORT_DATATYPE(String uri) {
+			super(uri);
+			ancestors = Utils.generateAncestors(UNSIGNEDINT);
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[\\-+]?[0-9]+");
+			knownFacetValues.put(minInclusive, 0);
+			knownFacetValues.put(maxInclusive, 65535);
+		}
+	}
+
+	static abstract class RATIONAL_DATATYPE<R extends Comparable<R>> extends
+			REAL_DATATYPE<R> {
+		RATIONAL_DATATYPE(String uri, Set<Facet> f) {
+			super(uri, f);
+			ancestors = Utils.generateAncestors(REAL);
+			knownFacetValues.putAll(super.getKnownFacetValues());
 		}
 
-		public ordered getOrdered() {
-			return ordered.FALSE;
+		public RATIONAL_DATATYPE() {
+			this("http://www.w3.org/2002/07/owl#rational");
 		}
 
-		private static final String uri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral";
+		RATIONAL_DATATYPE(String uri) {
+			super(uri);
+			ancestors = Utils.generateAncestors(REAL);
+			knownFacetValues.putAll(super.getKnownFacetValues());
+		}
+	}
 
+	static class LANGUAGE_DATATYPE extends TOKEN_DATATYPE {
+		LANGUAGE_DATATYPE() {
+			super(namespace + "language");
+			ancestors = Utils.generateAncestors(TOKEN);
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*");
+		}
+	}
+
+	static class NAME_DATATYPE extends TOKEN_DATATYPE {
+		public NAME_DATATYPE() {
+			this(namespace + "Name");
+		}
+
+		NAME_DATATYPE(String uri) {
+			super(uri);
+			ancestors = Utils.generateAncestors(TOKEN);
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "\\i\\c*");
+		}
+	}
+
+	static class NCNAME_DATATYPE extends NAME_DATATYPE {
+		NCNAME_DATATYPE() {
+			super(namespace + "NCName");
+			ancestors = Utils.generateAncestors(NAME);
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "[\\i-[:]][\\c-[:]]*");
+		}
+
+		@Override
 		public String getDatatypeURI() {
 			return uri;
 		}
+	}
 
-		public Collection<Literal> listValues(LiteralFactory factory,
-				Datatype... datatypes) {
-			// cannot enumerate xml literal values
-			return Collections.emptyList();
+	static class NMTOKEN_DATATYPE extends TOKEN_DATATYPE {
+		NMTOKEN_DATATYPE() {
+			this(namespace + "NMTOKEN");
 		}
 
-		public Object parseValue(String s) {
-			// XXX sort of arbitrary decision; the specs say it depends on the XML datatype whitespace normalization policy, but that's not clear. Some W3C tests assume that the policy is collapse
+		NMTOKEN_DATATYPE(String uri) {
+			super(uri);
+			ancestors = Utils.generateAncestors(TOKEN);
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(pattern, "\\c+");
+		}
+
+		@Override
+		public String getDatatypeURI() {
+			return uri;
+		}
+	}
+
+	static class NMTOKENS_DATATYPE extends NMTOKEN_DATATYPE {
+		NMTOKENS_DATATYPE() {
+			super(namespace + "NMTOKENS");
+			ancestors = Utils.generateAncestors(NMTOKEN);
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+			knownFacetValues.put(minLength, 1);
+		}
+	}
+
+	static class NORMALIZEDSTRING_DATATYPE extends STRING_DATATYPE {
+		public NORMALIZEDSTRING_DATATYPE() {
+			this(namespace + "normalizedString");
+		}
+
+		NORMALIZEDSTRING_DATATYPE(String uri) {
+			super(uri);
+			ancestors = Utils.generateAncestors(STRING);
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.replace);
+		}
+	}
+
+	static class TOKEN_DATATYPE extends NORMALIZEDSTRING_DATATYPE {
+		TOKEN_DATATYPE() {
+			this(namespace + "token");
+		}
+
+		TOKEN_DATATYPE(String uri) {
+			super(uri);
+			ancestors = Utils.generateAncestors(NORMALIZEDSTRING);
+			knownFacetValues.putAll(super.getKnownFacetValues());
+			knownFacetValues.put(whiteSpace, whitespace.collapse);
+		}
+	}
+
+	static class XMLLITERAL_DATATYPE extends ABSTRACT_DATATYPE<String> {
+		XMLLITERAL_DATATYPE() {
+			super("http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral", Collections
+					.<Facet> emptySet());
+			ancestors = Utils.generateAncestors(LITERAL);
+			knownFacetValues.putAll(LITERAL.getKnownFacetValues());
+		}
+
+		public String parseValue(String s) {
+
+			// XXX sort of arbitrary decision; the specs say it depends on the XML datatype whitespace normalization policy, but that's not clear. Some W3C tests assume that text elements are irrelevant
+
 			return whitespace.collapse.normalize(s);
 		}
 
-		public boolean isInValueSpace(Literal l) {
+		@Override
+		public boolean isInValueSpace(String l) {
 			try {
 				DocumentBuilderFactory.newInstance().newDocumentBuilder()
-						.parse(new ByteArrayInputStream(l.value().getBytes()));
+						.parse(new ByteArrayInputStream(l.getBytes()));
 			} catch (Exception e) {
 				return false;
 			}
 			return true;
 		}
-	}
-
-	public static Datatype ANYURI() {
-		return ANYURI;
-	}
-
-	public static Datatype BASE64BINARY() {
-		return BASE64BINARY;
-	}
-
-	public static Datatype BOOLEAN() {
-		return BOOLEAN;
-	}
-
-	public static Datatype DATETIME() {
-		return DATETIME;
-	}
-
-	public static Datatype HEXBINARY() {
-		return HEXBINARY;
-	}
-
-	public static Datatype LITERAL() {
-		return LITERAL;
-	}
-
-	public static Datatype PLAINLITERAL() {
-		return PLAINLITERAL;
-	}
-
-	public static Datatype REAL() {
-		return REAL;
-	}
-
-	public static Datatype STRING() {
-		return STRING;
-	}
-
-	public static Datatype DATETIMESTAMP() {
-		return DATETIMESTAMP;
-	}
-
-	public static Datatype DECIMAL() {
-		return DECIMAL;
-	}
-
-	public static Datatype DOUBLE() {
-		return DOUBLE;
-	}
-
-	public static Datatype FLOAT() {
-		return FLOAT;
-	}
-
-	public static Datatype BYTE() {
-		return BYTE;
-	}
-
-	public static Datatype INT() {
-		return INT;
-	}
-
-	public static Datatype INTEGER() {
-		return INTEGER;
-	}
-
-	public static Datatype LONG() {
-		return LONG;
-	}
-
-	public static Datatype NEGATIVEINTEGER() {
-		return NEGATIVEINTEGER;
-	}
-
-	public static Datatype NONNEGATIVEINTEGER() {
-		return NONNEGATIVEINTEGER;
-	}
-
-	public static Datatype NONPOSITIVEINTEGER() {
-		return NONPOSITIVEINTEGER;
-	}
-
-	public static Datatype POSITIVEINTEGER() {
-		return POSITIVEINTEGER;
-	}
-
-	public static Datatype SHORT() {
-		return SHORT;
-	}
-
-	public static Datatype UNSIGNEDBYTE() {
-		return UNSIGNEDBYTE;
-	}
-
-	public static Datatype UNSIGNEDINT() {
-		return UNSIGNEDINT;
-	}
-
-	public static Datatype UNSIGNEDLONG() {
-		return UNSIGNEDLONG;
-	}
-
-	public static Datatype UNSIGNEDSHORT() {
-		return UNSIGNEDSHORT;
-	}
-
-	public static Datatype RATIONAL() {
-		return RATIONAL;
-	}
-
-	public static Datatype LANGUAGE() {
-		return LANGUAGE;
-	}
-
-	public static Datatype NAME() {
-		return NAME;
-	}
-
-	public static Datatype NCNAME() {
-		return NCNAME;
-	}
-
-	public static Datatype NMTOKEN() {
-		return NMTOKEN;
-	}
-
-	public static Datatype NMTOKENS() {
-		return NMTOKENS;
-	}
-
-	public static Datatype NORMALIZEDSTRING() {
-		return NORMALIZEDSTRING;
-	}
-
-	public static Datatype TOKEN() {
-		return TOKEN;
-	}
-
-	public static Datatype XMLLITERAL() {
-		return XMLLITERAL;
-	}
-
-	public static Datatype[] getValues() {
-		return Arrays.copyOf(values, values.length);
 	}
 }

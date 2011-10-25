@@ -1,32 +1,30 @@
 package datatypes;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import datatypes.Datatype.Facet;
-
 public class Utils {
-	public static List<Facet> getFacets(Facet... facets) {
-		List<Facet> toReturn = new ArrayList<Facet>();
+	public static Set<Facet> getFacets(Facet... facets) {
+		Set<Facet> toReturn = new HashSet<Facet>();
 		for (Facet f : facets) {
 			toReturn.add(f);
 		}
-		return Collections.unmodifiableList(toReturn);
+		return toReturn;
 	}
 
-	public static Set<Datatype> generateAncestors(Datatype d) {
-		Set<Datatype> toReturn = new HashSet<Datatype>(d.getAncestors());
-		toReturn.add(d);
-		return Collections.unmodifiableSet(toReturn);
+	public static Set<Facet> getFacets(Facet[]... facets) {
+		Set<Facet> toReturn = new HashSet<Facet>();
+		for (Facet[] fac : facets) {
+			for (Facet f : fac) {
+				toReturn.add(f);
+			}
+		}
+		return toReturn;
 	}
-	//	public static Set<Datatype> getAncestors(Datatype... datatypes) {
-	//		Set<Datatype> toReturn = new HashSet<Datatype>();
-	//		for (Datatype d : datatypes) {
-	//			toReturn.add(d);
-	//		}
-	//		return Collections.unmodifiableSet(toReturn);
-	//	}
+
+	public static Set<Datatype<?>> generateAncestors(Datatype<?> d) {
+		Set<Datatype<?>> toReturn = new HashSet<Datatype<?>>(d.getAncestors());
+		toReturn.add(d);
+		return toReturn;
+	}
 }

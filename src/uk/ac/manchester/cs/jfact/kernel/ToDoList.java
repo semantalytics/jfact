@@ -5,7 +5,6 @@ package uk.ac.manchester.cs.jfact.kernel;
  This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 import static uk.ac.manchester.cs.jfact.kernel.ToDoPriorMatrix.*;
 
 import java.util.ArrayList;
@@ -14,11 +13,9 @@ import java.util.List;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
-import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
+import uk.ac.manchester.cs.jfact.dep.DepSet;
 import uk.ac.manchester.cs.jfact.helpers.FastSetSimple;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
-import uk.ac.manchester.cs.jfact.helpers.IfDefs;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.SaveStack;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 
@@ -56,13 +53,7 @@ public final class ToDoList {
 		@Override
 		public String toString() {
 			return "Node(" + node.getId() + "), offset("
-					+ new ConceptWDep(concept, DepSetFactory.create(delegate)) + ")";
-		}
-
-		public void print(LogAdapter l) {
-			l.print("Node(" + node.getId() + "), offset(");
-			new ConceptWDep(concept, DepSetFactory.create(delegate)).print(l);
-			l.print(")");
+					+ new ConceptWDep(concept, DepSet.create(delegate)) + ")";
 		}
 	}
 
@@ -76,7 +67,7 @@ public final class ToDoList {
 		/** add entry to a queue */
 		public void add(DlCompletionTree node, ConceptWDep offset) {
 			Wait.add(new ToDoEntry(node, offset));
-			//System.out.println("ToDoList.ArrayQueue.add() "+Wait.size());
+
 		}
 
 		/** clear queue */
@@ -112,13 +103,18 @@ public final class ToDoList {
 			Helper.resize(Wait, ep);
 		}
 
-		public void print(LogAdapter l) {
-			l.print("ArrayQueue{" + sPointer + ",");
+		@Override
+		public String toString() {
+			StringBuilder l = new StringBuilder();
+			l.append("ArrayQueue{");
+			l.append(sPointer);
+			l.append(",");
 			for (ToDoEntry t : Wait) {
-				t.print(l);
-				l.print(" ");
+				l.append(t);
+				l.append(" ");
 			}
-			l.print("}");
+			l.append("}");
+			return l.toString();
 		}
 	}
 
@@ -248,63 +244,63 @@ public final class ToDoList {
 	}
 
 	public final TODOListSaveState getInstance() {
-		if (nextState == limit) {
-			nextState = 0;
-		}
-		TODOListSaveState toReturn = states[nextState];
-		if (toReturn != null) {
-			states[nextState++] = null;
-			change = true;
-			return toReturn;
-		} else {
-			//	System.err.println("ToDoList.SaveState.getInstance() STILL waiting...");
-			if (!isSaveStateGenerationStarted()) {
-				startSaveStateGeneration();
-			}
-			return new TODOListSaveState();
-		}
+		return new TODOListSaveState();
+		//		if (nextState == limit) {
+		//			nextState = 0;
+		//		}
+		//		TODOListSaveState toReturn = states[nextState];
+		//		if (toReturn != null) {
+		//			states[nextState++] = null;
+		//			change = true;
+		//			return toReturn;
+		//		} else {
+		//			//	System.err.println("ToDoList.SaveState.getInstance() STILL waiting...");
+		//			if (!isSaveStateGenerationStarted()) {
+		//				startSaveStateGeneration();
+		//			}
+		//			return new TODOListSaveState();
+		//		}
 	}
 
-	private boolean saveStateGenerationStarted = false;
-
-	public final boolean isSaveStateGenerationStarted() {
-		return saveStateGenerationStarted;
-	}
-
-	public void startSaveStateGeneration() {
-		saveStateGenerationStarted = true;
-		Thread stateFiller = new Thread() {
-			@Override
-			public void run() {
-				long last = System.currentTimeMillis();
-				// timeout at one minute from last operation
-				while (System.currentTimeMillis() - last < 60000) {
-					for (int wait = 0; wait < 10000; wait++) {
-						if (change) {
-							for (int i = 0; i < limit; i++) {
-								if (states[i] == null) {
-									states[i] = new TODOListSaveState();
-								}
-							}
-							change = false;
-							last = System.currentTimeMillis();
-						}
-						try {
-							Thread.sleep(5);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-				}
-				// after timeout elapses, reset the flag - new requests will reactivate the thread
-				saveStateGenerationStarted = false;
-			}
-		};
-		stateFiller.setPriority(Thread.MIN_PRIORITY);
-		stateFiller.setDaemon(true);
-		stateFiller.start();
-	}
-
+	//	private boolean saveStateGenerationStarted = false;
+	//
+	//	public final boolean isSaveStateGenerationStarted() {
+	//		return saveStateGenerationStarted;
+	//	}
+	//
+	//	public void startSaveStateGeneration() {
+	//		saveStateGenerationStarted = true;
+	//		Thread stateFiller = new Thread() {
+	//			@Override
+	//			public void run() {
+	//				long last = System.currentTimeMillis();
+	//				// timeout at one minute from last operation
+	//				while (System.currentTimeMillis() - last < 60000) {
+	//					for (int wait = 0; wait < 10000; wait++) {
+	//						if (change) {
+	//							for (int i = 0; i < limit; i++) {
+	//								if (states[i] == null) {
+	//									states[i] = new TODOListSaveState();
+	//								}
+	//							}
+	//							change = false;
+	//							last = System.currentTimeMillis();
+	//						}
+	//						try {
+	//							Thread.sleep(5);
+	//						} catch (InterruptedException e) {
+	//							e.printStackTrace();
+	//						}
+	//					}
+	//				}
+	//				// after timeout elapses, reset the flag - new requests will reactivate the thread
+	//				saveStateGenerationStarted = false;
+	//			}
+	//		};
+	//		stateFiller.setPriority(Thread.MIN_PRIORITY);
+	//		stateFiller.setDaemon(true);
+	//		stateFiller.start();
+	//	}
 	/** waiting ops queue for IDs */
 	private ArrayQueue queueID = new ArrayQueue();
 	/** waiting ops queue for <= ops in nominal nodes */
@@ -348,8 +344,8 @@ public final class ToDoList {
 	}
 
 	/** init priorities via Options */
-	public void initPriorities(final IFOptionSet Options, final String optionName) {
-		matrix.initPriorities(Options.getText(optionName), optionName);
+	public void initPriorities(final String Options) {
+		matrix.initPriorities(Options, "IAOEFLG");
 	}
 
 	/** clear Todo table */
@@ -425,17 +421,19 @@ public final class ToDoList {
 		return null;
 	}
 
-	public void print(LogAdapter lL) {
-		lL.print("Todolist{");
-		lL.println();
-		queueID.print(lL);
-		lL.println();
+	@Override
+	public String toString() {
+		StringBuilder l = new StringBuilder("Todolist{");
+		l.append("\n");
+		l.append(queueID);
+		l.append("\n");
 		for (int i = 0; i < nRegularOptions; ++i) {
-			waitQueue.get(i).print(lL);
-			lL.println();
+			l.append(waitQueue.get(i));
+			l.append("\n");
 		}
-		lL.println();
-		lL.print("}");
+		l.append("\n");
+		l.append("}");
+		return l.toString();
 	}
 }
 
@@ -479,11 +477,6 @@ class ToDoPriorMatrix {
 				|| indexExists >= nRegularOptions || indexForall >= nRegularOptions
 				|| indexGE >= nRegularOptions || indexLE >= nRegularOptions) {
 			throw new ReasonerInternalException("ToDo List option out of range");
-		}
-		// inform about used rules order
-		if (IfDefs.USE_LOGGING) {
-			logger.print(String.format("\nInit %s = %s%s%s%s%s%s", optionName, indexAnd,
-					indexOr, indexExists, indexForall, indexLE, indexGE));
 		}
 	}
 

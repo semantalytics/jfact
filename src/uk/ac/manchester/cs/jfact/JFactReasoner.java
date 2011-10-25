@@ -52,7 +52,7 @@ import org.semanticweb.owlapi.reasoner.impl.OWLDataPropertyNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
 import org.semanticweb.owlapi.util.Version;
 
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
+import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
 import uk.ac.manchester.cs.jfact.kernel.ExpressionManager;
 import uk.ac.manchester.cs.jfact.kernel.NamedEntry;
 import uk.ac.manchester.cs.jfact.kernel.ReasonerFreshEntityException;
@@ -65,14 +65,16 @@ import uk.ac.manchester.cs.jfact.kernel.actors.TaxonomyActor;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ConceptExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataRoleExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.IndividualExpression;
+import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
 import uk.ac.manchester.cs.jfact.kernel.voc.Vocabulary;
+import datatypes.DatatypeFactory;
 
 /**
  * Synchronization policy: all methods for OWLReasoner are synchronized, except
  * the methods which do not touch the kernel or only affect threadsafe data
  * structures. inner private classes are not synchronized since methods from
  * those classes cannot be invoked from outsize synchronized methods.
- * 
+ *
  */
 public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListener {
 	private static final String REASONER_NAME = "JFact";
@@ -89,23 +91,27 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	private final BufferingMode bufferingMode;
 	private final List<OWLOntologyChange> rawChanges = new ArrayList<OWLOntologyChange>();
 	private final List<OWLAxiom> reasonerAxioms = new ArrayList<OWLAxiom>();
-	private final long timeOut;
-	private final OWLReasonerConfiguration configuration;
+	private final JFactReasonerConfiguration configuration;
 	private final OWLDataFactory df;
 	private TranslationMachinery translationMachinery;
 	//holds the consistency status: true for consistent, false for inconsistent, null for not verified (or changes received)
 	private Boolean consistencyVerified = null;
 	private final Set<OWLEntity> knownEntities = new HashSet<OWLEntity>();
+	private final DatatypeFactory datatypeFactory;
 
-	public JFactReasoner(OWLOntology rootOntology,
-			OWLReasonerConfiguration configuration, BufferingMode bufferingMode) {
+	public JFactReasoner(OWLOntology o, OWLReasonerConfiguration c, BufferingMode b) {
+		this(o, c instanceof JFactReasonerConfiguration?(JFactReasonerConfiguration)c: new JFactReasonerConfiguration(c), b);
+	}
+
+	public JFactReasoner(OWLOntology rootOntology, JFactReasonerConfiguration config,
+			BufferingMode bufferingMode) {
+		this.configuration = config;
 		this.rootOntology = rootOntology;
 		df = this.rootOntology.getOWLOntologyManager().getOWLDataFactory();
-		kernel = new ReasoningKernel(configuration.getTimeOut());
+		this.datatypeFactory = DatatypeFactory.getInstance();
+		kernel = new ReasoningKernel(configuration, datatypeFactory);
 		em = kernel.getExpressionManager();
 		this.bufferingMode = bufferingMode;
-		this.configuration = configuration;
-		timeOut = configuration.getTimeOut();
 		manager = rootOntology.getOWLOntologyManager();
 		knownEntities.add(df.getOWLThing());
 		knownEntities.add(df.getOWLNothing());
@@ -124,13 +130,12 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		kernel.setTopBottomRoleNames(Vocabulary.TOP_OBJECT_PROPERTY,
 				Vocabulary.BOTTOM_OBJECT_PROPERTY, Vocabulary.TOP_DATA_PROPERTY,
 				Vocabulary.BOTTOM_DATA_PROPERTY);
-		kernel.setProgressMonitor(configuration.getProgressMonitor());
 		kernel.setInterruptedSwitch(interrupted);
 		configuration.getProgressMonitor().reasonerTaskStarted(
 				ReasonerProgressMonitor.LOADING);
 		configuration.getProgressMonitor().reasonerTaskBusy();
 		kernel.clearKB();
-		translationMachinery = new TranslationMachinery(kernel, df);
+		translationMachinery = new TranslationMachinery(kernel, df, datatypeFactory);
 		translationMachinery.loadAxioms(reasonerAxioms);
 		configuration.getProgressMonitor().reasonerTaskStopped();
 	}
@@ -151,6 +156,10 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 				pointers);
 	}
 
+	public DatatypeFactory getDatatypeFactory() {
+		return datatypeFactory;
+	}
+
 	private boolean isFreshName(OWLClassExpression ce) {
 		if (ce.isAnonymous()) {
 			return false;
@@ -168,7 +177,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	}
 
 	public long getTimeOut() {
-		return timeOut;
+		return configuration.getTimeOut();
 	}
 
 	public OWLOntology getRootOntology() {
@@ -180,7 +189,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 * then the changes will be stored in a buffer. If the reasoner is a
 	 * non-buffering reasoner then the changes will be automatically flushed
 	 * through to the change filter and passed on to the reasoner.
-	 * 
+	 *
 	 * @param changes
 	 *            The list of raw changes.
 	 */
@@ -248,7 +257,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 * removed from the list of pending changes. Note that even if the list of
 	 * pending changes is non-empty then there may be no changes for the
 	 * reasoner to deal with.
-	 * 
+	 *
 	 * @param added
 	 *            The logical axioms that have been added to the imports closure
 	 *            of the reasoner root ontology
@@ -288,7 +297,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 * Asks the reasoner implementation to handle axiom additions and removals
 	 * from the imports closure of the root ontology. The changes will not
 	 * include annotation axiom additions and removals.
-	 * 
+	 *
 	 * @param addAxioms
 	 *            The axioms to be added to the reasoner.
 	 * @param removeAxioms
@@ -709,7 +718,8 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 			for (int i = 0; i < depth; i++) {
 				pw.print("    ");
 			}
-			pw.println(node.toString());
+			pw.print(node);
+			pw.println();
 			for (Node<OWLClass> sub : getSubClasses(node.getRepresentativeElement(), true)) {
 				dumpSubClasses(sub, pw, depth + 1, includeBottomNode);
 			}
@@ -721,5 +731,9 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		TaxonomyActor actor = new TaxonomyActor(em, new ClassPolicy());
 		kernel.getSupConcepts(arg, direct, actor);
 		return actor.getClassElements();
+	}
+
+	public void writeReasoningResult(LogAdapter o, long time) {
+		kernel.writeReasoningResult(o, time);
 	}
 }

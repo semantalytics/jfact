@@ -5,17 +5,17 @@ package uk.ac.manchester.cs.jfact.kernel;
  This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 import static uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry.resolveSynonym;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import uk.ac.manchester.cs.jfact.dep.DepSet;
-import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.helpers.Pair;
+import uk.ac.manchester.cs.jfact.helpers.Templates;
+import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
+import datatypes.DatatypeFactory;
 
 public final class NominalReasoner extends DlSatTester {
 	/** all nominals defined in TBox */
@@ -38,7 +38,7 @@ public final class NominalReasoner extends DlSatTester {
 		DlCompletionTree node = cGraph.getNewNode();
 		node.setNominalLevel();
 		nom.setNode(node); // init nominal with associated node
-		return initNewNode(node, DepSetFactory.create(), nom.getpName()); // ABox is inconsistent
+		return initNewNode(node, DepSet.create(), nom.getpName()); // ABox is inconsistent
 	}
 
 	/** use classification information for the nominal P */
@@ -54,8 +54,9 @@ public final class NominalReasoner extends DlSatTester {
 		}
 	}
 
-	public NominalReasoner(TBox tbox, IFOptionSet Options) {
-		super(tbox, Options);
+	public NominalReasoner(TBox tbox, JFactReasonerConfiguration Options,
+			DatatypeFactory datatypeFactory) {
+		super(tbox, Options, datatypeFactory);
 		for (Individual pi : tBox.i_begin()) {
 			if (!pi.isSynonym()) {
 				nominals.add(pi);
@@ -66,7 +67,7 @@ public final class NominalReasoner extends DlSatTester {
 	/** prerpare Nominal Reasoner to a new job */
 	@Override
 	protected void prepareReasoner() {
-		logger.print("\nInitNominalReasoner:");
+		options.getLog().print("\nInitNominalReasoner:");
 		restore(1);
 		// check whether branching op is not a barrier...
 		if (!(bContext instanceof BCBarrier)) { // replace it with a barrier
@@ -81,29 +82,30 @@ public final class NominalReasoner extends DlSatTester {
 
 	/** check whether ontology with nominals is consistent */
 	public boolean consistentNominalCloud() {
-		logger.print("\n\nChecking consistency of an ontology with individuals:\n");
+		options.getLog().print(
+				"\n\nChecking consistency of an ontology with individuals:\n");
 		boolean result = false;
-		if (initNewNode(cGraph.getRoot(), DepSetFactory.create(), Helper.bpTOP)
+		if (initNewNode(cGraph.getRoot(), DepSet.create(), Helper.bpTOP)
 				|| initNominalCloud()) {
-			logger.print("\ninit done\n");
+			options.getLog().print("\ninit done\n");
 			result = false;
 		} else {
-			logger.print("\nrunning sat...");
+			options.getLog().print("\nrunning sat...");
 			result = runSat();
-			logger.print(" done: ");
-			logger.print(result);
-			logger.print("\n");
+			options.getLog().print(" done: ");
+			options.getLog().print(result);
+			options.getLog().print("\n");
 		}
 		if (result && noBranchingOps()) {
-			logger.print("InitNominalReasoner[");
+			options.getLog().print("InitNominalReasoner[");
 			curNode = null;
 			createBCBarrier();
 			save();
 			nonDetShift = 1;
-			logger.print("]");
+			options.getLog().print("]");
 		}
-		logger.print(Templates.CONSISTENT_NOMINAL, (result ? "consistent"
-				: "INCONSISTENT"));
+		options.getLog().printTemplate(Templates.CONSISTENT_NOMINAL,
+				(result ? "consistent" : "INCONSISTENT"));
 		if (!result) {
 			return false;
 		}
@@ -127,7 +129,7 @@ public final class NominalReasoner extends DlSatTester {
 		if (tBox.getDifferent().isEmpty()) {
 			return false;
 		}
-		DepSet dummy = DepSetFactory.create();
+		DepSet dummy = DepSet.create();
 		for (List<Individual> r : tBox.getDifferent()) {
 			cGraph.initIR();
 			for (Individual p : r) {
@@ -154,7 +156,7 @@ public final class NominalReasoner extends DlSatTester {
 			DlCompletionTree suspect = p.getArcEnd();
 			if (p.isPredEdge() && suspect.isBlockableNode() && p.isNeighbour(r)
 					&& suspect.isLabelledBy(C)) {
-				logger.print(Templates.NN, suspect.getId());
+				options.getLog().printTemplate(Templates.NN, suspect.getId());
 				return true;
 			}
 		}
@@ -165,7 +167,7 @@ public final class NominalReasoner extends DlSatTester {
 		DlCompletionTree from = resolveSynonym(rel.getA()).getNode();
 		DlCompletionTree to = resolveSynonym(rel.getB()).getNode();
 		Role R = resolveSynonym(rel.getRole());
-		DepSet dep = DepSetFactory.create();
+		DepSet dep = DepSet.create();
 		if (R.isDisjoint() && checkDisjointRoleClash(from, to, R, dep)) {
 			return true;
 		}

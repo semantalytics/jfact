@@ -10,7 +10,6 @@ import java.util.Map;
 
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 
 public final class DataTypeCenter {
 	/**

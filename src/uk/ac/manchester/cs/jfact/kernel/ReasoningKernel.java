@@ -16,17 +16,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.semanticweb.owlapi.model.OWLRuntimeException;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
-import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
-import uk.ac.manchester.cs.jfact.helpers.IfDefs;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
+import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 import uk.ac.manchester.cs.jfact.kernel.actors.Actor;
 import uk.ac.manchester.cs.jfact.kernel.actors.RIActor;
 import uk.ac.manchester.cs.jfact.kernel.actors.SupConceptActor;
-import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptName;
 import uk.ac.manchester.cs.jfact.kernel.dl.axioms.AxiomConceptInclusion;
 import uk.ac.manchester.cs.jfact.kernel.dl.axioms.AxiomDRoleDomain;
@@ -69,11 +66,15 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.IndividualExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleComplexExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.RoleExpression;
+import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
 import uk.ac.manchester.cs.jfact.split.TAxiomSplitter;
+import datatypes.DatatypeFactory;
+import datatypes.Literal;
+import datatypes.LiteralEntry;
 
 public final class ReasoningKernel {
 	/** options for the kernel and all related substructures */
-	private final IFOptionSet kernelOptions = new IFOptionSet();
+	private final JFactReasonerConfiguration kernelOptions;
 	/** local TBox (to be created) */
 	private TBox pTBox;
 	/** set of axioms */
@@ -90,8 +91,6 @@ public final class ReasoningKernel {
 	/** bottom data role name */
 	private String botDRoleName;
 	// values to propagate to the new KB in case of clearance
-	/** progress monitor (if any) */
-	private ReasonerProgressMonitor pMonitor;
 	private AtomicBoolean interrupted;
 	/// whether EL polynomial reasoner should be used
 	private boolean useELReasoner;
@@ -100,10 +99,6 @@ public final class ReasoningKernel {
 		interrupted = b;
 	}
 
-	/** timeout value */
-	private final long opTimeout;
-	/** tell reasoner to use verbose output */
-	private boolean verboseOutput;
 	// reasoning cache
 	/** cache level */
 	private CacheStatus cacheLevel;
@@ -120,6 +115,7 @@ public final class ReasoningKernel {
 	private final List<Axiom> traceVec = new ArrayList<Axiom>();
 	/** flag to gather trace information for the next reasoner's call */
 	private boolean needTracing;
+	private final DatatypeFactory datatypeFactory;
 
 	/** get status of the KB */
 	private KBStatus getStatus() {
@@ -141,7 +137,9 @@ public final class ReasoningKernel {
 	/// get fresh filled depending of a type of R
 	private DLTree getFreshFiller(DLTree R) {
 		if (Role.resolveRole(R).isDataRole()) {
-			return getTBox().getDataTypeCenter().getFreshDataType();
+			final LiteralEntry t = new LiteralEntry("freshliteral");
+			t.setLiteral(DatatypeFactory.LITERAL.buildLiteral("freshliteral"));
+			return DLTreeFactory.wrap(t);
 		} else {
 			return getTBox().getFreshConcept();
 		}
@@ -297,7 +295,7 @@ public final class ReasoningKernel {
 		return R.getTaxVertex();
 	}
 
-	private IFOptionSet getOptions() {
+	private JFactReasonerConfiguration getOptions() {
 		return kernelOptions;
 	}
 
@@ -314,22 +312,6 @@ public final class ReasoningKernel {
 	/** return realistion status of KB */
 	public boolean isKBRealised() {
 		return getStatus().ordinal() >= kbRealised.ordinal();
-	}
-
-	/** set Progress monitor to control the classification process */
-	public void setProgressMonitor(ReasonerProgressMonitor pMon) {
-		pMonitor = pMon;
-		if (pTBox != null) {
-			pTBox.setProgressMonitor(pMon);
-		}
-	}
-
-	/** set verbose output (ie, concept and role taxonomies) wrt given VALUE */
-	public void setVerboseOutput(boolean value) {
-		verboseOutput = value;
-		if (pTBox != null) {
-			pTBox.setVerboseOutput(value);
-		}
 	}
 
 	/** set top/bottom role names to use them in the related output */
@@ -424,10 +406,8 @@ public final class ReasoningKernel {
 		if (pTBox != null) {
 			return true;
 		}
-		pTBox = new TBox(getOptions(), topORoleName, botORoleName, topDRoleName,
-				botDRoleName, interrupted, opTimeout);
-		pTBox.setProgressMonitor(pMonitor);
-		pTBox.setVerboseOutput(verboseOutput);
+		pTBox = new TBox(datatypeFactory, getOptions(), topORoleName, botORoleName,
+				topDRoleName, botDRoleName, interrupted);
 		pET = new ExpressionTranslator(pTBox);
 		initCacheAndFlags();
 		return false;
@@ -586,12 +566,12 @@ public final class ReasoningKernel {
 	}
 
 	/** axiom (value I A V) */
-	public Axiom valueOf(IndividualExpression I, DataRoleExpression A, DataValue V) {
+	public Axiom valueOf(IndividualExpression I, DataRoleExpression A, Literal<?> V) {
 		return ontology.add(new AxiomValueOf(I, A, V));
 	}
 
 	/** axiom <I,V>:\neg A */
-	public Axiom valueOfNot(IndividualExpression I, DataRoleExpression A, DataValue V) {
+	public Axiom valueOfNot(IndividualExpression I, DataRoleExpression A, Literal<?> V) {
 		return ontology.add(new AxiomValueOfNot(I, A, V));
 	}
 
@@ -1014,17 +994,13 @@ public final class ReasoningKernel {
 		return isSubsumedBy(getExpressionManager().oneOf(I), C);
 	}
 
-	public ReasoningKernel(long timeOut) {
+	public ReasoningKernel(JFactReasonerConfiguration conf, DatatypeFactory factory) {
+		this.kernelOptions = conf;
+		this.datatypeFactory = factory;
 		pTBox = null;
 		pET = null;
-		pMonitor = null;
-		opTimeout = timeOut;
-		verboseOutput = false;
 		cachedQuery = null;
 		initCacheAndFlags();
-		if (initOptions()) {
-			throw new ReasonerInternalException("FaCT++ kernel: Cannot init options");
-		}
 		useELReasoner = false;
 	}
 
@@ -1043,9 +1019,8 @@ public final class ReasoningKernel {
 	private void forceReload() {
 		clearTBox();
 		newKB();
-		pMonitor = null;
 		// split ontological axioms
-		if (IfDefs.splits) {
+		if (kernelOptions.isSplits()) {
 			TAxiomSplitter AxiomSplitter = new TAxiomSplitter(ontology);
 			AxiomSplitter.buildSplit();
 		}
@@ -1339,116 +1314,6 @@ public final class ReasoningKernel {
 			if (j.equals(p)) {
 				return true;
 			}
-		}
-		return false;
-	}
-
-	private boolean initOptions() {
-		if (kernelOptions
-				.registerOption(
-						"useRelevantOnly",
-						"Option 'useRelevantOnly' is used when creating internal DAG representation for externally given TBox. "
-								+ "If true, DAG contains only concepts, relevant to query. It is safe to leave this option false.",
-						IFOption.IOType.iotBool, "false")) {
-			return true;
-		}
-		if (kernelOptions
-				.registerOption(
-						"dumpQuery",
-						"Option 'dumpQuery' dumps sub-TBox relevant to given satisfiability/subsumption query.",
-						IFOption.IOType.iotBool, "false")) {
-			return true;
-		}
-		if (kernelOptions
-				.registerOption(
-						"absorptionFlags",
-						"Option 'absorptionFlags' sets up absorption process for general axioms. "
-								+ "It text field of arbitrary length; every symbol means the absorption action: "
-								+ "(B)ottom Absorption), (T)op absorption, (E)quivalent concepts replacement, (C)oncept absorption, "
-								+ "(N)egated concept absorption, (F)orall expression replacement, (R)ole absorption, (S)plit",
-						IFOption.IOType.iotText, "BTECFSR")) {
-			return true;
-		}
-		if (kernelOptions
-				.registerOption(
-						"alwaysPreferEquals",
-						"Option 'alwaysPreferEquals' allows user to enforce usage of C=D definition instead of C[=D "
-								+ "during absorption, even if implication appeares earlier in stream of axioms.",
-						IFOption.IOType.iotBool, "true")) {
-			return true;
-		}
-		if (kernelOptions
-				.registerOption(
-						"orSortSub",
-						"Option 'orSortSub' define the sorting order of OR vertices in the DAG used in subsumption tests. "
-								+ "Option has form of string 'Mop', where 'M' is a sort field (could be 'D' for depth, 'S' for size, 'F' "
-								+ "for frequency, and '0' for no sorting), 'o' is a order field (could be 'a' for ascending and 'd' "
-								+ "for descending mode), and 'p' is a preference field (could be 'p' for preferencing non-generating "
-								+ "rules and 'n' for not doing so).",
-						IFOption.IOType.iotText, "0")) {
-			return true;
-		}
-		if (kernelOptions
-				.registerOption(
-						"orSortSat",
-						"Option 'orSortSat' define the sorting order of OR vertices in the DAG used in satisfiability tests "
-								+ "(used mostly in caching). Option has form of string 'Mop', see orSortSub for details.",
-						IFOption.IOType.iotText, "0")) {
-			return true;
-		}
-		if (kernelOptions
-				.registerOption(
-						"IAOEFLG",
-						"Option 'IAOEFLG' define the priorities of different operations in TODO list. Possible values are "
-								+ "7-digit strings with ony possible digit are 0-6. The digits on the places 1, 2, ..., 7 are for "
-								+ "priority of Id, And, Or, Exists, Forall, LE and GE operations respectively. The smaller number means "
-								+ "the higher priority. All other constructions (TOP, BOTTOM, etc) has priority 0.",
-						IFOption.IOType.iotText, "1263005")) {
-			return true;
-		}
-		if (kernelOptions
-				.registerOption(
-						"useSemanticBranching",
-						"Option 'useSemanticBranching' switch semantic branching on and off. The usage of semantic branching "
-								+ "usually leads to faster reasoning, but sometime could give small overhead.",
-						IFOption.IOType.iotBool, "true")) {
-			return true;
-		}
-		if (kernelOptions.registerOption("useBackjumping",
-				"Option 'useBackjumping' switch backjumping on and off. The usage of backjumping "
-						+ "usually leads to much faster reasoning.",
-				IFOption.IOType.iotBool, "true")) {
-			return true;
-		}
-		if (kernelOptions
-				.registerOption(
-						"testTimeout",
-						"Option 'testTimeout' sets timeout for a single reasoning test in milliseconds.",
-						IFOption.IOType.iotInt, "0")) {
-			return true;
-		}
-		if (kernelOptions
-				.registerOption(
-						"useLazyBlocking",
-						"Option 'useLazyBlocking' makes checking of blocking status as small as possible. This greatly "
-								+ "increase speed of reasoning.",
-						IFOption.IOType.iotBool, "true")) {
-			return true;
-		}
-		if (kernelOptions
-				.registerOption(
-						"useAnywhereBlocking",
-						"Option 'useAnywhereBlocking' allow user to choose between Anywhere and Ancestor blocking.",
-						IFOption.IOType.iotBool, "true")) {
-			return true;
-		}
-		if (kernelOptions
-				.registerOption(
-						"useCompletelyDefined",
-						"Option 'useCompletelyDefined' leads to simpler Taxonomy creation if TBox contains no non-primitive "
-								+ "concepts. Unfortunately, it is quite rare case.",
-						IFOption.IOType.iotBool, "true")) {
-			return true;
 		}
 		return false;
 	}

@@ -5,18 +5,12 @@ package uk.ac.manchester.cs.jfact.kernel;
  This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
-
-import uk.ac.manchester.cs.jfact.helpers.IfDefs;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
+import uk.ac.manchester.cs.jfact.helpers.Templates;
 import uk.ac.manchester.cs.jfact.kernel.Concept.CTTag;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheInterface;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheState;
@@ -79,8 +73,6 @@ public final class DLConceptTaxonomy extends Taxonomy {
 	private long nCachedNegative;
 	/** number of non-subsumptions detected by a sorted reasoning */
 	private long nSortedNegative;
-	/** indicator of taxonomy creation progress */
-	private ReasonerProgressMonitor pTaxProgress;
 	// flags
 	/** flag to use Bottom-Up search */
 	private boolean flagNeedBottomUp;
@@ -139,9 +131,8 @@ public final class DLConceptTaxonomy extends Taxonomy {
 	@Override
 	public void preClassificationActions() {
 		++nConcepts;
-		if (pTaxProgress != null) {
-			pTaxProgress.reasonerTaskProgressChanged((int) nConcepts, tBox.getNItems());
-		}
+		tBox.getOptions().getProgressMonitor()
+				.reasonerTaskProgressChanged((int) nConcepts, tBox.getNItems());
 	}
 
 	/** check if it is necessary to log taxonomy action */
@@ -152,7 +143,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 
 	/** the only c'tor */
 	public DLConceptTaxonomy(final Concept pTop, final Concept pBottom, TBox kb) {
-		super(pTop, pBottom);
+		super(pTop, pBottom, kb.getOptions());
 		tBox = kb;
 		nConcepts = 0;
 		nTries = 0;
@@ -164,7 +155,6 @@ public final class DLConceptTaxonomy extends Taxonomy {
 		nCachedPositive = 0;
 		nCachedNegative = 0;
 		nSortedNegative = 0;
-		pTaxProgress = null;
 		//	flagNeedBottomUp = GCIs.isGCI() || GCIs.isReflexive() && GCIs.isRnD();
 		inSplitCheck = false;
 	}
@@ -189,11 +179,6 @@ public final class DLConceptTaxonomy extends Taxonomy {
 	/// set bottom-up flag
 	public void setBottomUp(KBFlags GCIs) {
 		flagNeedBottomUp = GCIs.isGCI() || GCIs.isReflexive() && GCIs.isRnD();
-	}
-
-	/** set progress indicator */
-	public void setProgressIndicator(ReasonerProgressMonitor pMon) {
-		pTaxProgress = pMon;
 	}
 
 	private boolean isUnsatisfiable() {
@@ -246,23 +231,24 @@ public final class DLConceptTaxonomy extends Taxonomy {
 			}
 			return testSubTBox(p, q);
 		}
-		logger.print(Templates.TAX_TRYING, p.getName(), q.getName());
+		tBox.getOptions().getLog()
+				.printTemplate(Templates.TAX_TRYING, p.getName(), q.getName());
 		if (tBox.testSortedNonSubsumption(p, q)) {
-			logger.print("NOT holds (sorted result)");
+			tBox.getOptions().getLog().print("NOT holds (sorted result)");
 			++nSortedNegative;
 			return false;
 		}
 		switch (tBox.testCachedNonSubsumption(p, q)) {
 			case csValid:
-				logger.print("NOT holds (cached result)");
+				tBox.getOptions().getLog().print("NOT holds (cached result)");
 				++nCachedNegative;
 				return false;
 			case csInvalid:
-				logger.print("holds (cached result)");
+				tBox.getOptions().getLog().print("holds (cached result)");
 				++nCachedPositive;
 				return true;
 			default:
-				logger.print("wasted cache test");
+				tBox.getOptions().getLog().print("wasted cache test");
 				break;
 		}
 		return testSubTBox(p, q);
@@ -282,8 +268,10 @@ public final class DLConceptTaxonomy extends Taxonomy {
 	}
 
 	@Override
-	public void print(LogAdapter o) {
-		o.print(Templates.DLCONCEPTTAXONOMY,
+	public String toString() {
+		StringBuilder o = new StringBuilder();
+		o.append(String.format(
+				Templates.DLCONCEPTTAXONOMY.getTemplate(),
 				nTries,
 				nPositives,
 				nPositives * 100 / Math.max(1, nTries),
@@ -292,8 +280,9 @@ public final class DLConceptTaxonomy extends Taxonomy {
 				(nSortedNegative > 0 ? String.format(
 						"Sorted reasoning deals with %s non-subsumptions\n",
 						nSortedNegative) : ""), nSearchCalls, nSubCalls,
-				nNonTrivialSubCalls, nEntries * (nEntries - 1) / Math.max(1, nTries));
-		super.print(o);
+				nNonTrivialSubCalls, nEntries * (nEntries - 1) / Math.max(1, nTries)));
+		o.append(super.toString());
+		return o.toString();
 	}
 
 	private void searchBaader(boolean upDirection, TaxonomyVertex cur) {
@@ -338,7 +327,7 @@ public final class DLConceptTaxonomy extends Taxonomy {
 		if (upDirection && !cur.isCommon()) {
 			return false;
 		}
-		if (IfDefs.splits) {
+		if (tBox.getOptions().isSplits()) {
 			if (!inSplitCheck && !upDirection && !possibleSub(cur)) {
 				return false;
 			}
@@ -449,10 +438,12 @@ public final class DLConceptTaxonomy extends Taxonomy {
 				if (tBox.isBlockingDet(curI)) { // deterministic merge => curI = syn
 					insertCurrent(syn.getTaxVertex());
 					return true;
-				} else // non-det merge: check whether it is the same
-				{
-					logger.print("\nTAX: trying '" + curI.getName() + "' = '"
-							+ syn.getName() + "'... ");
+				} else {
+					// non-det merge: check whether it is the same
+					tBox.getOptions()
+							.getLog()
+							.print("\nTAX: trying '", curI.getName(), "' = '",
+									syn.getName(), "'... ");
 					if (testSubTBox(curI, syn)) // they are actually the same
 					{
 						insertCurrent(syn.getTaxVertex());

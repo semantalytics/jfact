@@ -2,11 +2,9 @@ package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
  Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
- This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -15,10 +13,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import uk.ac.manchester.cs.jfact.helpers.Helper;
-import uk.ac.manchester.cs.jfact.helpers.IfDefs;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
+import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
+import uk.ac.manchester.cs.jfact.helpers.Templates;
+import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
 
 public final class TaxonomyVertex {
 	//TODO check if they need to be list
@@ -176,13 +173,6 @@ public final class TaxonomyVertex {
 		neigh(upDirection).clear();
 	}
 
-	public void print(LogAdapter o) {
-		printSynonyms(o);
-		printNeighbours(o, true);
-		printNeighbours(o, false);
-		o.println();
-	}
-
 	public boolean removeLink(boolean upDirection, TaxonomyVertex p) {
 		List<TaxonomyVertex> begin = neigh(upDirection);
 		int index = begin.indexOf(p);
@@ -195,7 +185,7 @@ public final class TaxonomyVertex {
 	}
 
 	//TODO does not work with synonyms
-	public void incorporate(ClassifiableEntry entry) {
+	public void incorporate(ClassifiableEntry entry, JFactReasonerConfiguration c) {
 		// setup sample
 		setSample(entry);
 		// setup links
@@ -213,22 +203,23 @@ public final class TaxonomyVertex {
 		for (TaxonomyVertex u : truelist) {
 			u.addNeighbour(false, this);
 		}
-		if (IfDefs.USE_LOGGING) {
-			logger.print(Templates.INCORPORATE, sample.getName());
+		if (c.isLoggingActive()) {
+			final LogAdapter logAdapter = c.getLog();
+			logAdapter.printTemplate(Templates.INCORPORATE, sample.getName());
 			for (int i = 0; i < truelist.size(); i++) {
 				if (i > 0) {
-					logger.print(",");
+					logAdapter.print(",");
 				}
-				logger.print(truelist.get(i).sample.getName());
+				logAdapter.print(truelist.get(i).sample.getName());
 			}
-			logger.print("} and down = {");
+			logAdapter.print("} and down = {");
 			for (int i = 0; i < falselist.size(); i++) {
 				if (i > 0) {
-					logger.print(",");
+					logAdapter.print(",");
 				}
-				logger.print(falselist.get(i).sample.getName());
+				logAdapter.print(falselist.get(i).sample.getName());
 			}
-			logger.print("}");
+			logAdapter.print("}");
 		}
 	}
 
@@ -258,23 +249,30 @@ public final class TaxonomyVertex {
 		}
 	}
 
-	public void printSynonyms(LogAdapter o) {
+	public String printSynonyms() {
 		assert sample != null;
+		StringBuilder o = new StringBuilder();
 		if (synonyms.isEmpty()) {
-			o.print(String.format("\"%s\"", sample.getName()));
+			o.append("\"");
+			o.append(sample.getName());
+			o.append("\"");
 		} else {
-			o.print("(\"");
-			o.print(sample.getName());
+			o.append("(\"");
+			o.append(sample.getName());
 			for (ClassifiableEntry q : begin_syn()) {
-				o.print("\"=\"");
-				o.print(q.getName());
+				o.append("\"=\"");
+				o.append(q.getName());
 			}
-			o.print("\")");
+			o.append("\")");
 		}
+		return o.toString();
 	}
 
-	public void printNeighbours(LogAdapter o, boolean upDirection) {
-		o.print(String.format(" {%s:", neigh(upDirection).size()));
+	public String printNeighbours(boolean upDirection) {
+		StringBuilder o = new StringBuilder();
+		o.append(" {");
+		o.append(neigh(upDirection).size());
+		o.append(":");
 		TreeSet<TaxonomyVertex> sorted = new TreeSet<TaxonomyVertex>(
 				new Comparator<TaxonomyVertex>() {
 					public int compare(TaxonomyVertex o1, TaxonomyVertex o2) {
@@ -284,15 +282,21 @@ public final class TaxonomyVertex {
 				});
 		sorted.addAll(neigh(upDirection));
 		for (TaxonomyVertex p : sorted) {
-			o.print(String.format(" \"%s\"", p.sample.getName()));
+			o.append(" \"");
+			o.append(p.sample.getName());
+			o.append("\"");
 		}
-		o.print("}");
+		o.append("}");
+		return o.toString();
 	}
 
 	@Override
 	public String toString() {
-		LogAdapter l = new LeveLogger.LogAdapterStringBuilder();
-		print(l);
-		return l.toString();
+		StringBuilder b = new StringBuilder();
+		b.append(printSynonyms());
+		b.append(printNeighbours(true));
+		b.append(printNeighbours(false));
+		b.append("\n");
+		return b.toString();
 	}
 }

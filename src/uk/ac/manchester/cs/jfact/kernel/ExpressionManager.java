@@ -2,16 +2,14 @@ package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
  Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
- This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptAnd;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataExactCardinality;
@@ -41,12 +39,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleName;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleTop;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataTop;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeRestriction;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMaxExclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMaxInclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMinExclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMinInclusive;
 import uk.ac.manchester.cs.jfact.kernel.dl.IndividualName;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleChain;
@@ -58,13 +50,12 @@ import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleTop;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ConceptExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataRoleExpression;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataTypeExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Expression;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.FacetExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.IndividualExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleComplexExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.kernel.voc.Vocabulary;
+import datatypes.Literal;
 
 public final class ExpressionManager {
 	/** Cache for the inverse roles */
@@ -95,7 +86,7 @@ public final class ExpressionManager {
 		}
 
 		public ObjectRoleExpression build(ObjectRoleExpression tail) {
-			return record(new ObjectRoleInverse(tail));
+			return new ObjectRoleInverse(tail);
 		}
 	}
 
@@ -154,16 +145,8 @@ public final class ExpressionManager {
 	private final DataTop dataTop = new DataTop();
 	/** BOTTOM data element */
 	private final DataBottom dataBottom = new DataBottom();
-	/** record all the references */
-	private final List<Expression> referenceRecorder = new ArrayList<Expression>();
 	/** cache for the role inverses */
 	private final InverseRoleCache inverseRoleCache = new InverseRoleCache();
-
-	/** record the reference; @return the argument */
-	protected <T extends Expression> T record(T arg) {
-		referenceRecorder.add(arg);
-		return arg;
-	}
 
 	/// set Top/Bot properties
 	public void setTopBottomRoles(String topORoleName, String botORoleName,
@@ -232,7 +215,7 @@ public final class ExpressionManager {
 
 	/** get negation of a concept C */
 	public ConceptExpression not(final ConceptExpression C) {
-		return record(new ConceptNot(C));
+		return new ConceptNot(C);
 	}
 
 	/**
@@ -240,7 +223,7 @@ public final class ExpressionManager {
 	 * argument list
 	 */
 	public ConceptExpression and(List<Expression> l) {
-		return record(new ConceptAnd(l));
+		return new ConceptAnd(l);
 	}
 
 	/** @return C and D */
@@ -258,7 +241,7 @@ public final class ExpressionManager {
 	 * argument list
 	 */
 	public ConceptExpression or(List<Expression> l) {
-		return record(new ConceptOr(l));
+		return new ConceptOr(l);
 	}
 
 	/**
@@ -266,7 +249,7 @@ public final class ExpressionManager {
 	 * list
 	 */
 	public ConceptExpression oneOf(List<Expression> l) {
-		return record(new ConceptOneOf(l));
+		return new ConceptOneOf(l);
 	}
 
 	public ObjectRoleExpression inverse(ObjectRoleExpression R) {
@@ -280,25 +263,25 @@ public final class ExpressionManager {
 
 	/** get self-reference restriction of an object role R */
 	public ConceptExpression selfReference(final ObjectRoleExpression R) {
-		return record(new ConceptObjectSelf(R));
+		return new ConceptObjectSelf(R);
 	}
 
 	/** get value restriction wrt an object role R and an individual I */
 	public ConceptExpression value(final ObjectRoleExpression R,
 			final IndividualExpression I) {
-		return record(new ConceptObjectValue(R, I));
+		return new ConceptObjectValue(R, I);
 	}
 
 	/** get existential restriction wrt an object role R and a concept C */
 	public ConceptExpression exists(final ObjectRoleExpression R,
 			final ConceptExpression C) {
-		return record(new ConceptObjectExists(R, C));
+		return new ConceptObjectExists(R, C);
 	}
 
 	/** get universal restriction wrt an object role R and a concept C */
 	public ConceptExpression forall(final ObjectRoleExpression R,
 			final ConceptExpression C) {
-		return record(new ConceptObjectForall(R, C));
+		return new ConceptObjectForall(R, C);
 	}
 
 	/**
@@ -307,7 +290,7 @@ public final class ExpressionManager {
 	 */
 	public ConceptExpression minCardinality(int n, final ObjectRoleExpression R,
 			final ConceptExpression C) {
-		return record(new ConceptObjectMinCardinality(n, R, C));
+		return new ConceptObjectMinCardinality(n, R, C);
 	}
 
 	/**
@@ -316,7 +299,7 @@ public final class ExpressionManager {
 	 */
 	public ConceptExpression maxCardinality(int n, final ObjectRoleExpression R,
 			final ConceptExpression C) {
-		return record(new ConceptObjectMaxCardinality(n, R, C));
+		return new ConceptObjectMaxCardinality(n, R, C);
 	}
 
 	/**
@@ -325,22 +308,22 @@ public final class ExpressionManager {
 	 */
 	public ConceptExpression cardinality(int n, final ObjectRoleExpression R,
 			final ConceptExpression C) {
-		return record(new ConceptObjectExactCardinality(n, R, C));
+		return new ConceptObjectExactCardinality(n, R, C);
 	}
 
 	/** get value restriction wrt a data role R and a data value V */
-	public ConceptExpression value(final DataRoleExpression R, final DataValue V) {
-		return record(new ConceptDataValue(R, V));
+	public ConceptExpression value(final DataRoleExpression R, final Literal<?> V) {
+		return new ConceptDataValue(R, V);
 	}
 
 	/** get existential restriction wrt a data role R and a data expression E */
 	public ConceptExpression exists(final DataRoleExpression R, final DataExpression E) {
-		return record(new ConceptDataExists(R, E));
+		return new ConceptDataExists(R, E);
 	}
 
 	/** get universal restriction wrt a data role R and a data expression E */
 	public ConceptExpression forall(final DataRoleExpression R, final DataExpression E) {
-		return record(new ConceptDataForall(R, E));
+		return new ConceptDataForall(R, E);
 	}
 
 	/**
@@ -349,7 +332,7 @@ public final class ExpressionManager {
 	 */
 	public ConceptExpression minCardinality(int n, final DataRoleExpression R,
 			final DataExpression E) {
-		return record(new ConceptDataMinCardinality(n, R, E));
+		return new ConceptDataMinCardinality(n, R, E);
 	}
 
 	/**
@@ -358,7 +341,7 @@ public final class ExpressionManager {
 	 */
 	public ConceptExpression maxCardinality(int n, final DataRoleExpression R,
 			final DataExpression E) {
-		return record(new ConceptDataMaxCardinality(n, R, E));
+		return new ConceptDataMaxCardinality(n, R, E);
 	}
 
 	/**
@@ -367,7 +350,7 @@ public final class ExpressionManager {
 	 */
 	public ConceptExpression cardinality(int n, final DataRoleExpression R,
 			final DataExpression E) {
-		return record(new ConceptDataExactCardinality(n, R, E));
+		return new ConceptDataExactCardinality(n, R, E);
 	}
 
 	// individuals
@@ -397,19 +380,19 @@ public final class ExpressionManager {
 	 * the last argument list
 	 */
 	public ObjectRoleComplexExpression compose(List<Expression> l) {
-		return record(new ObjectRoleChain(l));
+		return new ObjectRoleChain(l);
 	}
 
 	/** get a expression corresponding to R projected from C */
 	public ObjectRoleComplexExpression projectFrom(final ObjectRoleExpression R,
 			final ConceptExpression C) {
-		return record(new ObjectRoleProjectionFrom(R, C));
+		return new ObjectRoleProjectionFrom(R, C);
 	}
 
 	/** get a expression corresponding to R projected into C */
 	public ObjectRoleComplexExpression projectInto(final ObjectRoleExpression R,
 			final ConceptExpression C) {
-		return record(new ObjectRoleProjectionInto(R, C));
+		return new ObjectRoleProjectionInto(R, C);
 	}
 
 	// data roles
@@ -445,74 +428,30 @@ public final class ExpressionManager {
 		return Vocabulary.LITERAL;
 	}
 
-	/** get basic boolean data type */
-	public DataTypeRestriction restrictedType(DataTypeExpression type,
-			final FacetExpression facet) {
-		DataTypeRestriction ret = null;
-		if (type instanceof DataTypeRestriction) {
-			ret = (DataTypeRestriction) type;
-		} else {
-			// get a type and build an appropriate restriction of it
-			DataTypeName hostType = (DataTypeName) type;
-			assert hostType != null;
-			ret = record(new DataTypeRestriction(hostType));
-		}
-		ret.add(facet);
-		return ret;
-	}
-
-	/** get data value with given VALUE and TYPE; */
-	public final DataValue dataValue(final String value, DataTypeExpression type) {
-		return getBasicDataType(type).getValue(value);
-	}
-
 	/** get negation of a data expression E */
 	public DataExpression dataNot(final DataExpression E) {
-		return record(new DataNot(E));
+		return new DataNot(E);
 	}
 
 	/**
-	 * get an n-ary data conjunction expression; take the arguments from the
-	 * last argument list
+	 * get an n-ary data conjunction expression
 	 */
 	public DataExpression dataAnd(List<Expression> l) {
-		return record(new DataAnd(l));
+		return new DataAnd(l);
 	}
 
 	/**
-	 * get an n-ary data disjunction expression; take the arguments from the
-	 * last argument list
+	 * get an n-ary data disjunction expression
 	 */
 	public DataExpression dataOr(List<Expression> l) {
-		return record(new DataOr(l));
+		return new DataOr(l);
 	}
 
 	/**
-	 * get an n-ary data one-of expression; take the arguments from the last
-	 * argument list
+	 * get an n-ary data one-of expression
 	 */
 	public DataExpression dataOneOf(List<Expression> l) {
-		return record(new DataOneOf(l));
-	}
-
-	/** get minInclusive facet with a given VALUE */
-	public final FacetExpression facetMinInclusive(final DataValue V) {
-		return record(new FacetMinInclusive(V));
-	}
-
-	/** get minExclusive facet with a given VALUE */
-	public final FacetExpression facetMinExclusive(final DataValue V) {
-		return record(new FacetMinExclusive(V));
-	}
-
-	/** get maxInclusive facet with a given VALUE */
-	public final FacetExpression facetMaxInclusive(final DataValue V) {
-		return record(new FacetMaxInclusive(V));
-	}
-
-	/** get maxExclusive facet with a given VALUE */
-	public final FacetExpression facetMaxExclusive(final DataValue V) {
-		return record(new FacetMaxExclusive(V));
+		return new DataOneOf(l);
 	}
 
 	public void clear() {
@@ -521,14 +460,5 @@ public final class ExpressionManager {
 		objectRoleNameset.clear();
 		dataRoleNameset.clear();
 		inverseRoleCache.clear();
-		referenceRecorder.clear();
-	}
-
-	private static DataTypeName getBasicDataType(DataTypeExpression type) {
-		if (type instanceof DataTypeName) {
-			return (DataTypeName) type;
-		}
-		DataTypeRestriction hostType = (DataTypeRestriction) type;
-		return hostType.getExpr();
 	}
 }

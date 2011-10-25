@@ -8,8 +8,8 @@ package uk.ac.manchester.cs.jfact.helpers;
 import java.util.ArrayList;
 import java.util.List;
 
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 import uk.ac.manchester.cs.jfact.kernel.DlCompletionGraph;
+import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
 
 public final class Stats {
 	public AccumulatedStatistic build(List<AccumulatedStatistic> list) {
@@ -93,8 +93,9 @@ public final class Stats {
 		}
 	}
 
-	public void logStatisticData(LogAdapter o, boolean needLocal, DlCompletionGraph CGraph) {
-		if (IfDefs.USE_REASONING_STATISTICS) {
+	public void logStatisticData(LogAdapter o, boolean needLocal,
+			DlCompletionGraph CGraph, JFactReasonerConfiguration options) {
+		if (options.isUSE_REASONING_STATISTICS()) {
 			nTacticCalls.print(o, needLocal, "\nThere were made ",
 					" tactic operations, of which:");
 			nIdCalls.print(o, needLocal, "\n    CN   operations: ", "");
@@ -126,7 +127,7 @@ public final class Stats {
 			nNodeRestores.print(o, needLocal, "\nThere were made ",
 					" restore(s) of tree state");
 			nLookups.print(o, needLocal, "\nThere were made ", " concept lookups");
-			if (IfDefs.RKG_USE_FAIRNESS) {
+			if (options.isRKG_USE_FAIRNESS()) {
 				nFairnessViolations.print(o, needLocal, "\nThere were ",
 						" fairness constraints violation");
 			}
@@ -144,8 +145,7 @@ public final class Stats {
 					" cached unsatisfiable nodes");
 		}
 		if (!needLocal) {
-			o.print(String.format("\nThe maximal graph size is %s nodes",
-					CGraph.maxSize()));
+			o.print("\nThe maximal graph size is ", CGraph.maxSize(), " nodes");
 		}
 	}
 

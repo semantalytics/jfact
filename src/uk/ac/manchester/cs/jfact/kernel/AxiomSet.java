@@ -5,7 +5,6 @@ package uk.ac.manchester.cs.jfact.kernel;
  This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.*;
 import static uk.ac.manchester.cs.jfact.kernel.InAx.*;
 
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ import java.util.List;
 
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
+import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
 
 public final class AxiomSet {
 	/** host TBox that holds all concepts/etc */
@@ -30,10 +29,8 @@ public final class AxiomSet {
 
 	/** add already built GCI p */
 	private void insertGCI(Axiom p) {
-		if (LeveLogger.isAbsorptionActive()) {
-			logger_absorption.print("\n new axiom (" + accumulator.size() + "):");
-			p.dump(logger_absorption);
-		}
+		tboxHost.getOptions().getAbsorptionLog()
+				.print("\n new axiom (", accumulator.size(), "):", p);
 		accumulator.add(p);
 	}
 
@@ -92,7 +89,7 @@ public final class AxiomSet {
 
 	/** split given axiom */
 	protected boolean split(Axiom p) {
-		List<Axiom> splitted = p.split();
+		List<Axiom> splitted = p.split(tboxHost);
 		if (splitted.isEmpty()) {
 			// nothing to split
 			return false;
@@ -116,19 +113,16 @@ public final class AxiomSet {
 		// we will change Accum (via split rule), so indexing and compare with size
 		for (int i = 0; i < accumulator.size(); i++) {
 			Axiom ax = accumulator.get(i);
-			if (LeveLogger.isAbsorptionActive()) {
-				logger_absorption.print("\nProcessing (" + i++ + "):");
-			}
+			tboxHost.getOptions().getAbsorptionLog()
+					.print("\nProcessing (", i, "):");
 			if (!absorbGCI(ax)) {
 				GCIs.add(ax);
 			}
 		}
 		// clear absorbed and remove them from Accum
 		accumulator = GCIs;
-		if (LeveLogger.isAbsorptionActive()) {
-			logger_absorption.print("\nAbsorption done with " + accumulator.size()
-					+ " GCIs left\n");
-		}
+		tboxHost.getOptions().getAbsorptionLog()
+				.print("\nAbsorption done with ", accumulator.size(), " GCIs left\n");
 		printStatistics();
 		return size();
 	}
@@ -140,9 +134,7 @@ public final class AxiomSet {
 				return true;
 			}
 		}
-		if (LeveLogger.isAbsorptionActive()) {
-			logger_absorption.print(" keep as GCI");
-		}
+		tboxHost.getOptions().getAbsorptionLog().print(" keep as GCI");
 		return false;
 	}
 
@@ -153,7 +145,7 @@ public final class AxiomSet {
 				case 'B':
 					actions.add(new Abs() {
 						public boolean absMethod(Axiom ax) {
-							return ax.absorbIntoBottom();
+							return ax.absorbIntoBottom(tboxHost);
 						}
 					});
 					break;
@@ -167,7 +159,7 @@ public final class AxiomSet {
 				case 'E':
 					actions.add(new Abs() {
 						public boolean absMethod(Axiom ax) {
-							return processNewAxiom(ax.simplifyCN());
+							return processNewAxiom(ax.simplifyCN(tboxHost));
 						}
 					});
 					break;
@@ -195,7 +187,7 @@ public final class AxiomSet {
 				case 'R':
 					actions.add(new Abs() {
 						public boolean absMethod(Axiom ax) {
-							return ax.absorbIntoDomain();
+							return ax.absorbIntoDomain(tboxHost);
 						}
 					});
 					break;
@@ -210,8 +202,8 @@ public final class AxiomSet {
 					return true;
 			}
 		}
-		logger.print("Init absorption order as ");
-		logger.println(flags);
+		tboxHost.getOptions().getAbsorptionLog()
+				.print("Init absorption order as ", flags, "\n");
 		return false;
 	}
 
@@ -219,38 +211,39 @@ public final class AxiomSet {
 		if (!created.containsKey("SAbsAction")) {
 			return;
 		}
-		logger.print("\nAbsorption dealt with " + get("SAbsInput")
-				+ " input axioms\nThere were made " + get("SAbsAction")
-				+ " absorption actions, of which:");
+		final LogAdapter log = tboxHost.getOptions().getAbsorptionLog();
+		log.print("\nAbsorption dealt with ", get("SAbsInput"),
+				" input axioms\nThere were made ", get("SAbsAction"),
+				" absorption actions, of which:");
 		if (get("SAbsRepCN") > 0) {
-			logger.print("\n\t" + get("SAbsRepCN") + " concept name replacements");
+			log.print("\n\t", get("SAbsRepCN"), " concept name replacements");
 		}
 		if (get("SAbsRepForall") > 0) {
-			logger.print("\n\t" + get("SAbsRepForall") + " universals replacements");
+			log.print("\n\t", get("SAbsRepForall"), " universals replacements");
 		}
 		if (get("SAbsSplit") > 0) {
-			logger.print("\n\t" + get("SAbsSplit") + " conjunction splits");
+			log.print("\n\t", get("SAbsSplit"), " conjunction splits");
 		}
 		if (get("SAbsBApply") > 0) {
-			logger.print("\n\t" + get("SAbsBApply") + " BOTTOM absorptions");
+			log.print("\n\t", get("SAbsBApply"), " BOTTOM absorptions");
 		}
 		if (get("SAbsTApply") > 0) {
-			logger.print("\n\t" + get("SAbsTApply") + " TOP absorptions");
+			log.print("\n\t", get("SAbsTApply"), " TOP absorptions");
 		}
 		if (get("SAbsCApply") > 0) {
-			logger.print("\n\t" + get("SAbsCApply") + " concept absorption with "
-					+ get("SAbsCAttempt") + " possibilities");
+			log.print("\n\t", get("SAbsCApply"), " concept absorption with ",
+					get("SAbsCAttempt"), " possibilities");
 		}
 		if (get("SAbsNApply") > 0) {
-			logger.print("\n\t" + get("SAbsNApply") + " negated concept absorption with "
-					+ get("SAbsNAttempt") + " possibilities");
+			log.print("\n\t", get("SAbsNApply"), " negated concept absorption with ",
+					get("SAbsNAttempt"), " possibilities");
 		}
 		if (get("SAbsRApply") > 0) {
-			logger.print("\n\t" + get("SAbsRApply") + " role domain absorption with "
-					+ get("SAbsRAttempt") + " possibilities");
+			log.print("\n\t", get("SAbsRApply"), " role domain absorption with ",
+					get("SAbsRAttempt"), " possibilities");
 		}
 		if (!accumulator.isEmpty()) {
-			logger.print("\nThere are " + accumulator.size() + " GCIs left");
+			log.print("\nThere are ", accumulator.size(), " GCIs left");
 		}
 	}
 }

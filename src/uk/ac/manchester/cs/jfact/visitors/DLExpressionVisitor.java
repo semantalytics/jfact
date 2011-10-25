@@ -2,10 +2,9 @@ package uk.ac.manchester.cs.jfact.visitors;
 
 /* This file is part of the JFact DL reasoner
  Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
- This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptAnd;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataExactCardinality;
@@ -35,12 +34,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleName;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleTop;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataTop;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeRestriction;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMaxExclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMaxInclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMinExclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMinInclusive;
 import uk.ac.manchester.cs.jfact.kernel.dl.IndividualName;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleChain;
@@ -49,6 +42,8 @@ import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleName;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionFrom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionInto;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleTop;
+import datatypes.Datatype;
+import datatypes.Literal;
 
 public interface DLExpressionVisitor {
 	// concept expressions
@@ -122,11 +117,9 @@ public interface DLExpressionVisitor {
 
 	public void visit(DataBottom expr);
 
-	public void visit(DataTypeName expr);
+	public void visit(Literal<?> expr);
 
-	public void visit(DataTypeRestriction expr);
-
-	public void visit(DataValue expr);
+	public void visit(Datatype<?> expr);
 
 	public void visit(DataNot expr);
 
@@ -135,13 +128,4 @@ public interface DLExpressionVisitor {
 	public void visit(DataOr expr);
 
 	public void visit(DataOneOf expr);
-
-	// facets
-	public void visit(FacetMinInclusive expr);
-
-	public void visit(FacetMinExclusive expr);
-
-	public void visit(FacetMaxInclusive expr);
-
-	public void visit(FacetMaxExclusive expr);
 }

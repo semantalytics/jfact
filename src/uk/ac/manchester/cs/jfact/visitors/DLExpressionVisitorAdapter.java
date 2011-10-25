@@ -1,6 +1,5 @@
 package uk.ac.manchester.cs.jfact.visitors;
 
-import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptAnd;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataExactCardinality;
@@ -30,12 +29,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleName;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleTop;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataTop;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeRestriction;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMaxExclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMaxInclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMinExclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMinInclusive;
 import uk.ac.manchester.cs.jfact.kernel.dl.IndividualName;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleChain;
@@ -44,9 +37,11 @@ import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleName;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionFrom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionInto;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleTop;
+import datatypes.Datatype;
+import datatypes.Literal;
 
 @SuppressWarnings("unused")
-public class DLExpressionVisitorAdapter implements DLExpressionVisitor {
+public abstract class DLExpressionVisitorAdapter implements DLExpressionVisitor {
 	public void visit(ConceptTop expr) {}
 
 	public void visit(ConceptBottom expr) {}
@@ -113,11 +108,9 @@ public class DLExpressionVisitorAdapter implements DLExpressionVisitor {
 
 	public void visit(DataBottom expr) {}
 
-	public void visit(DataTypeName expr) {}
+	public void visit(Datatype<?> expr) {}
 
-	public void visit(DataTypeRestriction expr) {}
-
-	public void visit(DataValue expr) {}
+	public void visit(Literal<?> expr) {}
 
 	public void visit(DataNot expr) {}
 
@@ -126,12 +119,4 @@ public class DLExpressionVisitorAdapter implements DLExpressionVisitor {
 	public void visit(DataOr expr) {}
 
 	public void visit(DataOneOf expr) {}
-
-	public void visit(FacetMinInclusive expr) {}
-
-	public void visit(FacetMinExclusive expr) {}
-
-	public void visit(FacetMaxInclusive expr) {}
-
-	public void visit(FacetMaxExclusive expr) {}
 }

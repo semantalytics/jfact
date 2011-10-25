@@ -2,7 +2,7 @@ package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
  Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
- This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.kernel.Token.*;
@@ -14,7 +14,6 @@ import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
-import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptAnd;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataExactCardinality;
@@ -44,12 +43,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleName;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleTop;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataTop;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeRestriction;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMaxExclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMaxInclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMinExclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMinInclusive;
 import uk.ac.manchester.cs.jfact.kernel.dl.IndividualName;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleChain;
@@ -63,6 +56,10 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NAryExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NamedEntity;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
+import datatypes.Datatype;
+import datatypes.DatatypeEntry;
+import datatypes.Literal;
+import datatypes.LiteralEntry;
 
 public final class ExpressionTranslator implements DLExpressionVisitorEx<DLTree> {
 	/** TBox to get access to the named entities */
@@ -272,17 +269,17 @@ public final class ExpressionTranslator implements DLExpressionVisitorEx<DLTree>
 		return DLTreeFactory.createBottom();
 	}
 
-	public DLTree visit(final DataTypeName expr) {
-		return DLTreeFactory.wrap(expr);
+	public DLTree visit(final Datatype<?> expr) {
+		DatatypeEntry entry = new DatatypeEntry(expr);
+
+		return DLTreeFactory.wrap(entry);
 	}
 
-	public DLTree visit(final DataTypeRestriction expr) {
-		return DLTreeFactory.createSNFAnd(visitArgs(expr));
-	}
-
-	public DLTree visit(final DataValue expr) {
+	public DLTree visit(final Literal<?> expr) {
 		// process type
-		return tbox.getDataTypeCenter().getDataValue(expr.getName(), expr.getExpr());
+		LiteralEntry entry = new LiteralEntry(expr.value());
+		entry.setLiteral(expr);
+		return DLTreeFactory.wrap(entry);// tbox.getDataTypeCenter().getDataValue(expr.getName(), expr.getExpr());
 	}
 
 	public DLTree visit(final DataNot expr) {
@@ -299,26 +296,5 @@ public final class ExpressionTranslator implements DLExpressionVisitorEx<DLTree>
 
 	public DLTree visit(final DataOneOf expr) {
 		return DLTreeFactory.createSNFOr(visitArgs(expr));
-	}
-
-	// facets
-	public DLTree visit(final FacetMinInclusive expr) {
-		return tbox.getDataTypeCenter().getIntervalFacetExpr(expr.getExpr().accept(this),
-				true, false);
-	}
-
-	public DLTree visit(final FacetMinExclusive expr) {
-		return tbox.getDataTypeCenter().getIntervalFacetExpr(expr.getExpr().accept(this),
-				true, true);
-	}
-
-	public DLTree visit(final FacetMaxInclusive expr) {
-		return tbox.getDataTypeCenter().getIntervalFacetExpr(expr.getExpr().accept(this),
-				false, false);
-	}
-
-	public DLTree visit(final FacetMaxExclusive expr) {
-		return tbox.getDataTypeCenter().getIntervalFacetExpr(expr.getExpr().accept(this),
-				false, true);
 	}
 }

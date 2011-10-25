@@ -88,7 +88,6 @@ import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLObjectSomeValuesFrom;
 import org.semanticweb.owlapi.model.OWLObjectUnionOf;
 import org.semanticweb.owlapi.model.OWLReflexiveObjectPropertyAxiom;
-import org.semanticweb.owlapi.model.OWLRuntimeException;
 import org.semanticweb.owlapi.model.OWLSameIndividualAxiom;
 import org.semanticweb.owlapi.model.OWLSubAnnotationPropertyOfAxiom;
 import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
@@ -114,25 +113,24 @@ import org.semanticweb.owlapi.reasoner.impl.OWLNamedIndividualNode;
 import org.semanticweb.owlapi.reasoner.impl.OWLNamedIndividualNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNode;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
-import org.semanticweb.owlapi.vocab.OWLFacet;
 
 import uk.ac.manchester.cs.jfact.kernel.ExpressionManager;
 import uk.ac.manchester.cs.jfact.kernel.ReasoningKernel;
-import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
-import uk.ac.manchester.cs.jfact.kernel.datatype.Datatypes;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ConceptExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataRoleExpression;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataTypeExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Entity;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Expression;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.FacetExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.IndividualExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleComplexExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.kernel.voc.Vocabulary;
+import datatypes.Datatype;
+import datatypes.DatatypeExpression;
+import datatypes.DatatypeFactory;
+import datatypes.Facets;
+import datatypes.Literal;
 
 public final class TranslationMachinery {
 	private volatile AxiomTranslator axiomTranslator;
@@ -147,9 +145,12 @@ public final class TranslationMachinery {
 	protected final ReasoningKernel kernel;
 	protected final ExpressionManager em;
 	protected final OWLDataFactory df;
+	final DatatypeFactory datatypefactory;
 
-	public TranslationMachinery(ReasoningKernel kernel, OWLDataFactory df) {
+	public TranslationMachinery(ReasoningKernel kernel, OWLDataFactory df,
+			DatatypeFactory factory) {
 		this.kernel = kernel;
+		this.datatypefactory = factory;
 		em = kernel.getExpressionManager();
 		this.df = df;
 		axiomTranslator = new AxiomTranslator();
@@ -159,10 +160,6 @@ public final class TranslationMachinery {
 		dataPropertyTranslator = new DataPropertyTranslator();
 		individualTranslator = new IndividualTranslator();
 		entailmentChecker = new EntailmentChecker();
-	}
-
-	public DataTypeName getBuiltInDataType(String DTName) {
-		return new DataTypeName(Datatypes.getBuiltInDataType(DTName));
 	}
 
 	public ObjectRoleExpression getTopObjectProperty() {
@@ -238,19 +235,21 @@ public final class TranslationMachinery {
 		}
 	}
 
-	protected synchronized DataTypeExpression toDataTypePointer(OWLDatatype datatype) {
+	protected synchronized Datatype<?> toDataTypePointer(OWLDatatype datatype) {
 		if (datatype == null) {
 			throw new IllegalArgumentException("datatype cannot be null");
 		}
-		return getBuiltInDataType(datatype.toStringID());
+		return datatypefactory.getKnownDatatype(datatype.getIRI().toString());
 	}
 
-	protected synchronized DataValue toDataValuePointer(OWLLiteral literal) {
+	protected synchronized Literal<?> toDataValuePointer(OWLLiteral literal) {
 		String value = literal.getLiteral();
 		if (literal.isRDFPlainLiteral()) {
 			value = value + "@" + literal.getLang();
 		}
-		return em.dataValue(value, toDataTypePointer(literal.getDatatype()));
+		return datatypefactory
+				.getKnownDatatype(literal.getDatatype().getIRI().toString())
+				.buildLiteral(value);
 	}
 
 	protected NodeSet<OWLNamedIndividual> translateIndividualPointersToNodeSet(
@@ -1191,11 +1190,11 @@ public final class TranslationMachinery {
 
 		@Override
 		protected DataExpression createPointerForEntity(OWLDatatype entity) {
-			return getBuiltInDataType(entity.toStringID());
+			return datatypefactory.getKnownDatatype(entity.getIRI().toString());
 		}
 
-		public DataTypeExpression visit(OWLDatatype node) {
-			return getBuiltInDataType(node.toStringID());
+		public Datatype<?> visit(OWLDatatype node) {
+			return datatypefactory.getKnownDatatype(node.getIRI().toString());
 		}
 
 		public DataExpression visit(OWLDataOneOf node) {
@@ -1227,49 +1226,26 @@ public final class TranslationMachinery {
 		}
 
 		public DataExpression visit(OWLDatatypeRestriction node) {
-			DataTypeExpression dte = (DataTypeExpression) node.getDatatype().accept(this);
-			for (OWLFacetRestriction restriction : node.getFacetRestrictions()) {
-				DataValue dv = toDataValuePointer(restriction.getFacetValue());
-				FacetExpression facet;
-				if (restriction.getFacet().equals(OWLFacet.MIN_INCLUSIVE)) {
-					facet = em.facetMinInclusive(dv);
-				} else if (restriction.getFacet().equals(OWLFacet.MAX_INCLUSIVE)) {
-					facet = em.facetMaxInclusive(dv);
-				} else if (restriction.getFacet().equals(OWLFacet.MIN_EXCLUSIVE)) {
-					facet = em.facetMinExclusive(dv);
-				} else if (restriction.getFacet().equals(OWLFacet.MAX_EXCLUSIVE)) {
-					facet = em.facetMaxExclusive(dv);
-				} else if (restriction.getFacet().equals(OWLFacet.LENGTH)) {
-					//facet = kernel.getLength(dv);
-					throw new ReasonerInternalException(
-							"JFact Kernel: unsupported facet 'getLength'");
-				} else if (restriction.getFacet().equals(OWLFacet.MIN_LENGTH)) {
-					//facet = kernel.getMinLength(dv);
-					throw new ReasonerInternalException(
-							"JFact Kernel: unsupported facet 'getMinLength'");
-				} else if (restriction.getFacet().equals(OWLFacet.MAX_LENGTH)) {
-					//facet = kernel.getMaxLength(dv);
-					throw new ReasonerInternalException(
-							"JFact Kernel: unsupported facet 'getMaxLength'");
-				} else if (restriction.getFacet().equals(OWLFacet.FRACTION_DIGITS)) {
-					//facet = kernel.getFractionDigitsFacet(dv);
-					throw new ReasonerInternalException(
-							"JFact Kernel: unsupported facet 'getFractionDigitsFacet'");
-				} else if (restriction.getFacet().equals(OWLFacet.PATTERN)) {
-					//facet = kernel.getPattern(dv);
-					throw new ReasonerInternalException(
-							"JFact Kernel: unsupported facet 'getPattern'");
-				} else if (restriction.getFacet().equals(OWLFacet.TOTAL_DIGITS)) {
-					//facet = kernel.getTotalDigitsFacet(dv);
-					throw new ReasonerInternalException(
-							"JFact Kernel: unsupported facet 'getTotalDigitsFacet'");
-				} else {
-					throw new OWLRuntimeException("Unsupported facet: "
-							+ restriction.getFacet());
-				}
-				dte = em.restrictedType(dte, facet);
+			DatatypeExpression<?> toReturn=null;
+			Datatype<?> type = datatypefactory.getKnownDatatype(node.getDatatype()
+					.getIRI().toString());
+			final Set<OWLFacetRestriction> facetRestrictions = node.getFacetRestrictions();
+			if(facetRestrictions.isEmpty()) {
+				return type;
 			}
-			return dte;
+			if(type.isNumericDatatype()) {
+			toReturn = datatypefactory.getNumericDatatypeExpression(type.asNumericDatatype());}
+			else if(type.isOrderedDatatype()) {
+				toReturn=datatypefactory.getOrderedDatatypeExpression(type);
+			}else {
+				toReturn=datatypefactory.getDatatypeExpression(type);
+			}
+
+			for (OWLFacetRestriction restriction : facetRestrictions) {
+				Literal<?> dv = toDataValuePointer(restriction.getFacetValue());
+				toReturn=toReturn.addFacet(Facets.parse(restriction.getFacet()), dv);
+			}
+			return toReturn;
 		}
 	}
 

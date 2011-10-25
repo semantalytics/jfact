@@ -42,16 +42,13 @@ public class WebOnt_cardinality_004 extends TestCase {
 				+ "    <owl:Ontology/>\n"
 				+ "    <owl:Class rdf:ID=\"c\">\n"
 				+ "      <rdfs:subClassOf>\n"
-				+ "          <owl:Class>\n"
-				+ "             <owl:intersectionOf rdf:parseType=\"Collection\">\n"
 				+ "                <owl:Restriction>\n"
 				+ "                   <owl:onProperty rdf:resource=\"#p\"/>\n"
 				+ "                   <owl:cardinality\n"
 				+ " rdf:datatype=\"http://www.w3.org/2001/XMLSchema#nonNegativeInteger\"\n"
 				+ "                   >2</owl:cardinality>\n"
 				+ "                </owl:Restriction>\n"
-				+ "              </owl:intersectionOf>\n"
-				+ "           </owl:Class>\n" + "       </rdfs:subClassOf>\n"
+				+ "       </rdfs:subClassOf>\n"
 				+ "     </owl:Class>\n"
 				+ "     <owl:ObjectProperty rdf:ID=\"p\"/>\n" + "</rdf:RDF>";
 		String id = "WebOnt_cardinality_004";

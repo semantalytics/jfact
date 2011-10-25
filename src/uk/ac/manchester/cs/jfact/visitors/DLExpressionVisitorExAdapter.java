@@ -1,6 +1,5 @@
 package uk.ac.manchester.cs.jfact.visitors;
 
-import uk.ac.manchester.cs.jfact.kernel.datatype.DataValue;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptAnd;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataExactCardinality;
@@ -30,12 +29,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleName;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataRoleTop;
 import uk.ac.manchester.cs.jfact.kernel.dl.DataTop;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeName;
-import uk.ac.manchester.cs.jfact.kernel.dl.DataTypeRestriction;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMaxExclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMaxInclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMinExclusive;
-import uk.ac.manchester.cs.jfact.kernel.dl.FacetMinInclusive;
 import uk.ac.manchester.cs.jfact.kernel.dl.IndividualName;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleChain;
@@ -44,6 +37,8 @@ import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleName;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionFrom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionInto;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleTop;
+import datatypes.Datatype;
+import datatypes.Literal;
 
 @SuppressWarnings("unused")
 public abstract class DLExpressionVisitorExAdapter<A> implements DLExpressionVisitorEx<A> {
@@ -179,15 +174,11 @@ public abstract class DLExpressionVisitorExAdapter<A> implements DLExpressionVis
 		return null;
 	}
 
-	public A visit(DataTypeName expr) {
+	public A visit(Datatype<?> expr) {
 		return null;
 	}
 
-	public A visit(DataTypeRestriction expr) {
-		return null;
-	}
-
-	public A visit(DataValue expr) {
+	public A visit(Literal<?> expr) {
 		return null;
 	}
 
@@ -204,22 +195,6 @@ public abstract class DLExpressionVisitorExAdapter<A> implements DLExpressionVis
 	}
 
 	public A visit(DataOneOf expr) {
-		return null;
-	}
-
-	public A visit(FacetMinInclusive expr) {
-		return null;
-	}
-
-	public A visit(FacetMinExclusive expr) {
-		return null;
-	}
-
-	public A visit(FacetMaxInclusive expr) {
-		return null;
-	}
-
-	public A visit(FacetMaxExclusive expr) {
 		return null;
 	}
 }

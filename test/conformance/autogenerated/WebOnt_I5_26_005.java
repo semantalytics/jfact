@@ -7,12 +7,16 @@ import conformance.TestClasses;
 
 public class WebOnt_I5_26_005 extends TestCase {
 	public void testWebOnt_I5_26_005() {
+		//TODO not specs compliant
 		String premise = "<rdf:RDF\n"
 				+ "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
 				+ "    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n"
 				+ "    xml:base=\"http://www.w3.org/2002/03owlt/I5.26/consistent005\" >\n"
 				+ "   <owl:Ontology/>\n" + "   <owl:Class rdf:nodeID=\"B\">\n"
 				+ "      <owl:intersectionOf rdf:parseType=\"Collection\">\n"
+				//TODO added
+				+ "        <owl:Class rdf:ID=\"A\"/>\n"
+				//TODO end added
 				+ "        <owl:Class rdf:ID=\"B\"/>\n"
 				+ "      </owl:intersectionOf>\n"
 				+ "      <owl:disjointWith>\n"

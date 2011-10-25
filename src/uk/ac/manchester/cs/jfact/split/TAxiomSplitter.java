@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import uk.ac.manchester.cs.jfact.helpers.IfDefs;
 import uk.ac.manchester.cs.jfact.kernel.Ontology;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptName;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptTop;
@@ -91,13 +90,8 @@ public class TAxiomSplitter {
 		rec.newAxiom.accept(Updater);
 		mod.extract(O, sig, ModuleType.M_STAR, rec.Module); // build a module/signature for the axiom
 		rec.newAxSig = mod.getSignature(); // FIXME!! check that SIG wouldn't change after some axiom retractions
-		if (IfDefs.FPP_DEBUG_SPLIT_MODULES) {
-			System.out.print("Module for " + rec.oldName.getName() + ":\n");
-			for (Axiom z : rec.Module) {
-				System.out.println(z);
-			}
-			System.out.print(" with module size " + rec.Module.size() + "\n");
-		}
+
+
 	}
 
 	/// add axiom CI in a form C [= D for D != TOP

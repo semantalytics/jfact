@@ -6,7 +6,6 @@ package uk.ac.manchester.cs.jfact.kernel;
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.Helper.InitBranchingLevelValue;
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -16,12 +15,10 @@ import uk.ac.manchester.cs.jfact.dep.DepSet;
 import uk.ac.manchester.cs.jfact.helpers.FastSet;
 import uk.ac.manchester.cs.jfact.helpers.FastSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
-import uk.ac.manchester.cs.jfact.helpers.IfDefs;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
+import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.Reference;
 import uk.ac.manchester.cs.jfact.helpers.SaveStack;
+import uk.ac.manchester.cs.jfact.helpers.Templates;
 import uk.ac.manchester.cs.jfact.kernel.state.DLCompletionGraphSaveState;
 
 public final class DlCompletionGraph {
@@ -72,7 +69,7 @@ public final class DlCompletionGraph {
 	/** init vector [B,E) with new objects T */
 	private void initNodeArray(List<DlCompletionTree> l, int b, int e) {
 		for (int p = b; p < e; ++p) {
-			l.set(p, new DlCompletionTree(nodeId++));
+			l.set(p, new DlCompletionTree(nodeId++, pReasoner.getOptions()));
 		}
 	}
 
@@ -342,7 +339,7 @@ public final class DlCompletionGraph {
 			final Role r, // name of role (arc label)
 			final DepSet dep) // dep-set of the arc label
 	{
-		if (IfDefs.RKG_IMPROVE_SAVE_RESTORE_DEPSET) {
+		if (pReasoner.getOptions().isRKG_IMPROVE_SAVE_RESTORE_DEPSET()) {
 			assert branchingLevel == dep.level() + 1;
 		}
 		return createEdge(from, getNewNode(), isPredEdge, r, dep);
@@ -393,8 +390,11 @@ public final class DlCompletionGraph {
 		} else {
 			ret = node.isBlockedBy_SH(blocker);
 		}
-		if (IfDefs.USE_BLOCKING_STATISTICS && !ret && IfDefs.USE_LOGGING) {
-			logger.print(Templates.IS_BLOCKED_FAILURE_BY, node.getId(), blocker.getId());
+		if (pReasoner.getOptions().isUSE_BLOCKING_STATISTICS() && !ret) {
+			pReasoner
+					.getOptions()
+					.getLog()
+					.printTemplate(Templates.IS_BLOCKED_FAILURE_BY, node.getId(), blocker.getId());
 		}
 		return ret;
 	}
@@ -494,10 +494,14 @@ public final class DlCompletionGraph {
 		saveNode(to, branchingLevel);
 		from.addNeighbour(forward);
 		to.addNeighbour(backward);
-		if (IfDefs.USE_LOGGING) {
-			logger.print(Templates.CREATE_EDGE, (isPredEdge ? to.getId() : from.getId()),
-					(isPredEdge ? "<-" : "->"), (isPredEdge ? from.getId() : to.getId()),
-					roleName.getName());
+		if (pReasoner.getOptions().isLoggingActive()) {
+			pReasoner
+					.getOptions()
+					.getLog()
+					.printTemplate(Templates.CREATE_EDGE,
+							(isPredEdge ? to.getId() : from.getId()),
+							(isPredEdge ? "<-" : "->"),
+							(isPredEdge ? from.getId() : to.getId()), roleName.getName());
 		}
 		return forward;
 	}
@@ -606,7 +610,7 @@ public final class DlCompletionGraph {
 		Helper.resize(ctEdgeHeap, s.getnEdges());
 	}
 
-	public void print(LeveLogger.LogAdapter o) {
+	public void print(LogAdapter o) {
 		cgpIndent = 0;
 		cgpFlag.clear();
 		List<DlCompletionTree> l = nodeBase;

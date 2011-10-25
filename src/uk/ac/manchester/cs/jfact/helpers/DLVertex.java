@@ -15,8 +15,6 @@ import java.util.List;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
 import uk.ac.manchester.cs.jfact.kernel.DLDag;
 import uk.ac.manchester.cs.jfact.kernel.DagTag;
 import uk.ac.manchester.cs.jfact.kernel.MergableLabel;
@@ -124,6 +122,8 @@ public final class DLVertex extends DLVertexTagDFS {
 	private final int n;
 	/** maximal depth, size and frequency of reference of the expression */
 	private final MergableLabel sort = new MergableLabel();
+
+	public static final boolean printExtendedStats=false;
 
 	/** get RW access to the label */
 	public MergableLabel getSort() {
@@ -269,9 +269,33 @@ public final class DLVertex extends DLVertexTagDFS {
 		child.setSorter(dag);
 	}
 
-	public void print(LeveLogger.LogAdapter o) {
-		o.print(Templates.DLVERTEXPrint, stat[0], stat[1], stat[2], stat[3], stat[4],
-				stat[5], stat[6], stat[7], stat[8], stat[9], op.getName());
+	@Override
+	public String toString() {
+		StringBuilder o = new StringBuilder();
+		if(printExtendedStats) {
+		o.append("[d(");
+		o.append(stat[0]);
+		o.append("/");
+		o.append(stat[1]);
+		o.append("),s(");
+		o.append(stat[2]);
+		o.append("/");
+		o.append(stat[3]);
+		o.append("),b(");
+		o.append(stat[4]);
+		o.append("/");
+		o.append(stat[5]);
+		o.append("),g(");
+		o.append(stat[6]);
+		o.append("/");
+		o.append(stat[7]);
+		o.append("),f(");
+		o.append(stat[8]);
+		o.append("/");
+		o.append(stat[9]);
+		o.append(")] ");
+		}
+		o.append(op.getName());
 		switch (op) {
 			case dtAnd:
 			case dtCollection:
@@ -280,52 +304,53 @@ public final class DLVertex extends DLVertexTagDFS {
 			case dtTop:
 			case dtUAll:
 			case dtNN:
-				return;
+				return o.toString();
 			case dtDataExpr:
-				o.print(Templates.SPACE, concept.toString());
-				return;
+				o.append(" ");
+				o.append(concept);
+				return o.toString();
 			case dtDataValue:
 			case dtDataType:
 			case dtPConcept:
 			case dtNConcept:
 			case dtPSingleton:
 			case dtNSingleton:
-				o.print(Templates.DLVERTEXPrint2, concept.getName(),
-						(op.isNNameTag() ? "=" : "[="), conceptIndex);
-				return;
+				o.append(String.format(Templates.DLVERTEXPrint2.getTemplate(),
+						concept.getName(), (op.isNNameTag() ? "=" : "[="), conceptIndex));
+				return o.toString();
 			case dtLE:
-				o.print(Templates.SPACE, n);
-				o.print(Templates.SPACE, role.getName());
-				o.print(Templates.SPACE, conceptIndex);
-				return;
+				o.append(" ");
+				o.append(n);
+				o.append(" ");
+				o.append(role.getName());
+				o.append(" ");
+				o.append(conceptIndex);
+				return o.toString();
 			case dtForall:
-				o.print(Templates.DLVERTEXPrint3, role.getName(), n, conceptIndex);
-				return;
+				o.append(String.format(Templates.DLVERTEXPrint3.getTemplate(),
+						role.getName(), n, conceptIndex));
+				return o.toString();
 			case dtIrr:
-				o.print(Templates.SPACE, role.getName());
-				return;
+				o.append(" ");
+				o.append(role.getName());
+				return o.toString();
 			case dtProj:
-				o.print(Templates.DLVERTEXPrint4, role.getName(), conceptIndex,
-						projRole.getName());
-				return;
+				o.append(String.format(Templates.DLVERTEXPrint4.getTemplate(),
+						role.getName(), conceptIndex, projRole.getName()));
+				return o.toString();
 			case dtChoose:
-				o.print(" ");
-				o.print(getConceptIndex());
-				return;
+				o.append(" ");
+				o.append(getConceptIndex());
+				return o.toString();
 			default:
 				throw new ReasonerInternalException(String.format(
 						"Error printing vertex of type %s(%s)", op.getName(), op));
 		}
 		for (int q : child.sorted()) {
-			o.print(Templates.SPACE, q);
+			o.append(" ");
+			o.append(q);
 		}
-	}
-
-	@Override
-	public String toString() {
-		LogAdapter l = new LeveLogger.LogAdapterStringBuilder();
-		print(l);
-		return l.toString();
+		return o.toString();
 	}
 
 	/** maximal depth, size and frequency of reference of the expression */

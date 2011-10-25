@@ -20,7 +20,6 @@ import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
 import uk.ac.manchester.cs.jfact.helpers.FastSet;
 import uk.ac.manchester.cs.jfact.helpers.FastSetFactory;
-import uk.ac.manchester.cs.jfact.helpers.IfDefs;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 
 public class Concept extends ClassifiableEntry {
@@ -197,10 +196,6 @@ public class Concept extends ClassifiableEntry {
 
 	@Override
 	public String toString() {
-		if (IfDefs.RKG_DEBUG_ABSORPTION || IfDefs.USE_LOGGING) {
-			String frag = extName.substring(extName.lastIndexOf("/") + 1);
-			return frag.substring(frag.lastIndexOf("#") + 1);
-		}
 		return extName;
 	}
 

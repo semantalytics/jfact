@@ -8,9 +8,33 @@ package uk.ac.manchester.cs.jfact.dep;
 import java.util.NoSuchElementException;
 
 import uk.ac.manchester.cs.jfact.helpers.FastSetSimple;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
 
 public final class DepSet {
+	public final static DepSet create() {
+		return new DepSet();
+	}
+
+	public final static DepSet create(int i) {
+		return new DepSet(i);
+	}
+
+	public final static DepSet create(DepSet dep) {
+		DepSet toReturn = new DepSet();
+		toReturn.add(dep);
+		return toReturn;
+	}
+
+	public final static DepSet plus(final DepSet ds1, final DepSet ds2) {
+		DepSet toReturn = new DepSet();
+		toReturn.add(ds1);
+		toReturn.add(ds2);
+		return toReturn;
+	}
+
+	public final static DepSet create(FastSetSimple delegate) {
+		return new DepSet(delegate);
+	}
+
 	private FastSetSimple delegate = null;// = FastSet.Factory.create();
 
 	public DepSet() {}
@@ -47,10 +71,6 @@ public final class DepSet {
 
 	public boolean contains(int level) {
 		return delegate != null && delegate.contains(level);
-	}
-
-	public void print(LogAdapter o) {
-		o.print(toString());
 	}
 
 	@Override

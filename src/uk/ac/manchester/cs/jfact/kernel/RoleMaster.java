@@ -2,7 +2,7 @@ package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
  Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
- This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.kernel.Token.*;
@@ -16,7 +16,8 @@ import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
+import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
+import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
 
 public final class RoleMaster {
 	protected static final class RoleCreator implements NameCreator<Role> {
@@ -82,7 +83,8 @@ public final class RoleMaster {
 		return roles.size() / 2 - 1;
 	}
 
-	public RoleMaster(boolean d, final String TopRoleName, final String BotRoleName) {
+	public RoleMaster(boolean d, final String TopRoleName, final String BotRoleName,
+			JFactReasonerConfiguration c) {
 		newRoleId = 1;
 		emptyRole = new Role(BotRoleName.equals("") ? "emptyRole" : BotRoleName);
 		universalRole = new Role(TopRoleName.equals("") ? "universalRole" : TopRoleName);
@@ -108,7 +110,7 @@ public final class RoleMaster {
 		universalRole.setBPDomain(Helper.bpTOP);
 		universalRole.setTop();
 		// create roles taxonomy
-		pTax = new Taxonomy(universalRole, emptyRole);
+		pTax = new Taxonomy(universalRole, emptyRole, c);
 	}
 
 	/** create role entry with given name */
@@ -185,7 +187,7 @@ public final class RoleMaster {
 		if (size() == 0) {
 			return;
 		}
-		o.print(String.format("%s Roles (%s):\n", type, size()));
+		o.print(type, " Roles (", size(), "):\n");
 		for (int i = firstRoleIndex; i < roles.size(); i++) {
 			Role p = roles.get(i);
 			p.print(o);

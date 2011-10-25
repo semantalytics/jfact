@@ -6,7 +6,7 @@ import conformance.JUnitRunner;
 import conformance.TestClasses;
 
 public class WebOnt_I5_21_002 extends TestCase {
-	public void testWebOnt_I5_21_002() {
+	public void testWebOnt_I5_21_002() throws Exception{
 		String premise = "<rdf:RDF\n"
 				+ "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
 				+ "    xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n"
@@ -215,6 +215,9 @@ public class WebOnt_I5_21_002 extends TestCase {
 				+ "    </owl:Class>\n" + "\n"
 				+ "    <owl:Class rdf:about=\"premises002#Loxocemidae\">\n"
 				+ "    </owl:Class>\n" + "\n" + "</rdf:RDF>";
+
+
+
 		String id = "WebOnt_I5_21_002";
 		TestClasses tc = TestClasses.valueOf("POSITIVE_IMPL");
 		String d = "The construct used here shows how to express mutual disjointness between classes with  O(N) triples.";

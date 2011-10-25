@@ -6,9 +6,8 @@ package uk.ac.manchester.cs.jfact.kernel;
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import uk.ac.manchester.cs.jfact.dep.DepSet;
-import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
+import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
+import uk.ac.manchester.cs.jfact.helpers.Templates;
 
 public final class DlCompletionTreeArc {
 	/** pointer to "to" node */
@@ -50,12 +49,12 @@ public final class DlCompletionTreeArc {
 
 		public EdgeDepRestorer(DlCompletionTreeArc q) {
 			arc = q;
-			dep = DepSetFactory.create(q.getDep());
+			dep = DepSet.create(q.getDep());
 		}
 
 		@Override
 		public void restore() {
-			arc.depSet = DepSetFactory.create(dep);
+			arc.depSet = DepSet.create(dep);
 		}
 	}
 
@@ -67,7 +66,7 @@ public final class DlCompletionTreeArc {
 
 	public DlCompletionTreeArc(final Role r, final DepSet dep, DlCompletionTree n) {
 		role = r;
-		depSet = DepSetFactory.create(dep);
+		depSet = DepSet.create(dep);
 		node = n;
 		reverse = null;
 	}
@@ -155,7 +154,7 @@ public final class DlCompletionTreeArc {
 
 	/** print current arc */
 	public void print(LogAdapter o) {
-		o.print(Templates.DLCOMPLETIONTREEARC, (isIBlocked() ? "-" : role.getName()),
+		o.printTemplate(Templates.DLCOMPLETIONTREEARC, (isIBlocked() ? "-" : role.getName()),
 				depSet);
 	}
 }

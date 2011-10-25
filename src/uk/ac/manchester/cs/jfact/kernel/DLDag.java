@@ -2,11 +2,10 @@ package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
  Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
- This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.Helper.*;
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -20,14 +19,14 @@ import uk.ac.manchester.cs.jfact.helpers.DLVertex;
 import uk.ac.manchester.cs.jfact.helpers.FastSet;
 import uk.ac.manchester.cs.jfact.helpers.FastSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
-import uk.ac.manchester.cs.jfact.helpers.IfDefs;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
+import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.StatIndex;
+import uk.ac.manchester.cs.jfact.helpers.Templates;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
-import uk.ac.manchester.cs.jfact.kernel.datatype.DataEntry;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheInterface;
+import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
+import datatypes.DatatypeEntry;
+import datatypes.LiteralEntry;
 
 public final class DLDag {
 	/** body of DAG */
@@ -45,8 +44,8 @@ public final class DLDag {
 	 * sort strings: option[0] for SAT/cache tests, option[1] for SUB/classify
 	 * tests
 	 */
-	private String orSortSat;
-	private String orSortSub;
+	//	private String orSortSat;
+	//	private String orSortSub;
 	/** sort index (if necessary). Possible values are Size, Depth, Freq */
 	private int iSort;
 	/** whether or not sorting order is ascending */
@@ -55,6 +54,7 @@ public final class DLDag {
 	private boolean preferNonGen;
 	/** flag whether cache should be used */
 	private boolean useDLVCache;
+	private final JFactReasonerConfiguration options;
 
 	/// replace existing vertex at index I with a vertex V
 	public void replaceVertex(int i, DLVertex v, NamedEntry C) {
@@ -116,6 +116,11 @@ public final class DLDag {
 
 	/** add vertex to the end of DAG and calculate it's statistic if necessary */
 	public int directAdd(DLVertex v) {
+		int index=index(v.getConcept());
+		if(index!=bpINVALID) {
+			return index;
+		}
+
 		heap.add(v);
 		// return an index of just added entry
 		return heap.size() - 1;
@@ -162,12 +167,12 @@ public final class DLDag {
 
 	/** use SUB options to OR ordering */
 	public void setSubOrder() {
-		setOrderOptions(orSortSub);
+		setOrderOptions(options.getORSortSub());
 	}
 
 	/** use SAT options to OR ordering; */
 	public void setSatOrder() {
-		setOrderOptions(orSortSat);
+		setOrderOptions(options.getORSortSat());
 	}
 
 	/** get cache for given BiPointer (may return null if no cache defined) */
@@ -190,7 +195,7 @@ public final class DLDag {
 
 	/** check if two BPs are of the same sort */
 	public boolean haveSameSort(int p, int q) {
-		if (IfDefs.RKG_USE_SORTED_REASONING) {
+		if (options.isRKG_USE_SORTED_REASONING()) {
 			assert p > 0 && q > 0; // sanity check
 			// everything has the same label as TOP
 			if (p == 1 || q == 1) {
@@ -210,29 +215,23 @@ public final class DLDag {
 	// output interface
 	/** print DAG size and number of cache hits, together with DAG usage */
 	public void printStat(LogAdapter o) {
-		o.print(Templates.PRINT_STAT, heap.size(), nCacheHits);
-		if (IfDefs.RKG_PRINT_DAG_USAGE) {
+		o.printTemplate(Templates.PRINT_STAT, heap.size(), nCacheHits);
+		if (options.isRKG_PRINT_DAG_USAGE()) {
 			printDAGUsage(o);
 		}
 	}
 
-	/** print the whole DAG */
-	public void print(LogAdapter o) {
-		o.print("\nDag structure");
-		for (int i = 1; i < size(); ++i) {
-			o.print("\n");
-			o.print(i);
-			o.print(" ");
-			get(i).print(o);
-		}
-		o.print("\n");
-	}
-
 	@Override
 	public String toString() {
-		LogAdapter l = new LeveLogger.LogAdapterStringBuilder();
-		print(l);
-		return l.toString();
+		StringBuilder o = new StringBuilder("\nDag structure");
+		for (int i = 1; i < size(); ++i) {
+			o.append("\n");
+			o.append(i);
+			o.append(" ");
+			o.append(get(i));
+		}
+		o.append("\n");
+		return o.toString();
 	}
 
 	// save/load interface; implementation is in SaveLoad.cpp
@@ -247,7 +246,8 @@ public final class DLDag {
 		return ret;
 	}
 
-	public DLDag(final IFOptionSet Options) {
+	public DLDag(final JFactReasonerConfiguration Options) {
+		this.options = Options;
 		/** hash-table for verteces (and, all, LE) fast search */
 		DLVTable indexAnd = new DLVTable(this);
 		DLVTable indexAll = new DLVTable(this);
@@ -262,40 +262,38 @@ public final class DLDag {
 		useDLVCache = true;
 		heap.add(new DLVertex(DagTag.dtBad));
 		heap.add(new DLVertex(DagTag.dtTop));
-		readConfig(Options);
+		if (!isCorrectOption(options.getORSortSat())
+				|| !isCorrectOption(options.getORSortSub())) {
+			throw new OWLRuntimeException("DAG: wrong OR sorting options");
+		}
 	}
 
 	public void removeAfter(int n) {
 		assert n < size();
 		for (int i = n; i < heap.size(); i++) {
 			DLVertex v = heap.get(i);
-			if (v.getConcept() != null && v.getConcept() instanceof DataEntry) {
-				((DataEntry<?>) v.getConcept()).setBP(bpINVALID);
+			if (v.getConcept() != null
+					&& ((v.getConcept() instanceof DatatypeEntry) || (v.getConcept() instanceof LiteralEntry))) {
+				((NamedEntry) v.getConcept()).setIndex(bpINVALID);
 			}
 		}
 		Helper.resize(heap, n);
 	}
 
-	public void readConfig(final IFOptionSet Options) {
-		assert Options != null;
-		orSortSat = Options.getText("orSortSat");
-		orSortSub = Options.getText("orSortSub");
-		if (!isCorrectOption(orSortSat) || !isCorrectOption(orSortSub)) {
-			throw new OWLRuntimeException("DAG: wrong OR sorting options");
-		}
-	}
-
 	public void setOrderDefaults(final String defSat, final String defSub) {
 		assert isCorrectOption(defSat) && isCorrectOption(defSub);
-		logger.print(Templates.SET_ORDER_DEFAULTS1, orSortSat, defSat);
+		final String orSortSat = options.getORSortSat();
+		options.getLog().printTemplate(Templates.SET_ORDER_DEFAULTS1, orSortSat, defSat);
 		if (orSortSat.charAt(0) == '0') {
-			orSortSat = defSat;
+			options.setorSortSat(defSat);
 		}
-		logger.print(Templates.SET_ORDER_DEFAULTS2, orSortSat, orSortSub, defSub);
+		final String orSortSub = options.getORSortSub();
+		options.getLog().printTemplate(Templates.SET_ORDER_DEFAULTS2, orSortSat,
+				orSortSub, defSub);
 		if (orSortSub.charAt(0) == '0') {
-			orSortSub = defSub;
+			options.setorSortSub(defSub);
 		}
-		logger.print(Templates.SET_ORDER_DEFAULTS3, orSortSub);
+		options.getLog().printTemplate(Templates.SET_ORDER_DEFAULTS3, orSortSub);
 	}
 
 	public void setOrderOptions(final String opt) {
@@ -356,6 +354,7 @@ public final class DLDag {
 				}
 				break;
 			default: // nothing to do
+
 				break;
 		}
 		v.setProcessed(pos);
@@ -402,6 +401,7 @@ public final class DLDag {
 				}
 				break;
 			default:
+
 				break;
 		}
 		v.updateStatValues(d, s, b, g, pos);
@@ -456,7 +456,8 @@ public final class DLDag {
 			}
 		}
 		// if necessary -- gather frequency
-		if (orSortSat.charAt(0) != 'F' && orSortSub.charAt(0) != 'F') {
+		if (options.getORSortSat().charAt(0) != 'F'
+				&& options.getORSortSub().charAt(0) != 'F') {
 			return;
 		}
 		clearDFS();
@@ -498,7 +499,7 @@ public final class DLDag {
 				++n;
 			}
 		}
-		o.print(Templates.PRINTDAGUSAGE, n, n * 100 / total, total);
+		o.printTemplate(Templates.PRINTDAGUSAGE, n, n * 100 / total, total);
 	}
 
 	/** build the sort system for given TBox */
@@ -550,7 +551,7 @@ public final class DLDag {
 		if (sum > 0) {
 			sum--;
 		}
-		logger.print(Templates.DETERMINE_SORTS, (sum > 0 ? sum : "no"));
+		options.getLog().printTemplate(Templates.DETERMINE_SORTS, (sum > 0 ? sum : "no"));
 	}
 
 	/** merge sorts for a given role */
@@ -600,6 +601,7 @@ public final class DLDag {
 			case dtDataValue:
 			case dtDataExpr:
 			case dtNN:
+
 				break;
 			case dtTop:
 			default:

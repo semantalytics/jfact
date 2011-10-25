@@ -5,7 +5,6 @@ package uk.ac.manchester.cs.jfact.kernel.modelcaches;
  This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 import static uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheState.*;
 import static uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheType.mctIan;
 
@@ -15,7 +14,7 @@ import java.util.List;
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
 import uk.ac.manchester.cs.jfact.helpers.FastSet;
 import uk.ac.manchester.cs.jfact.helpers.FastSetFactory;
-import uk.ac.manchester.cs.jfact.helpers.IfDefs;
+import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 import uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry;
 import uk.ac.manchester.cs.jfact.kernel.ConceptWDep;
@@ -50,6 +49,7 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	public ModelCacheState curState;
 	public final int nC;
 	public final int nR;
+	private boolean simpleRules;
 
 	/** process CT label in given interval; set Deterministic accordingly */
 	private void processLabelInterval(final DLDag DLHeap, List<ConceptWDep> start) {
@@ -68,18 +68,19 @@ public final class ModelCacheIan extends ModelCacheInterface {
 
 	/** Create cache model of given CompletionTree using given HEAP */
 	public ModelCacheIan(final DLDag heap, final DlCompletionTree p,
-			boolean flagNominals, int nC, int nR) {
-		super(flagNominals);
+			boolean flagNominals, int nC, int nR, boolean simpleRules) {
+		this(flagNominals, nC, nR, simpleRules);
+
 		initCacheByLabel(heap, p);
 		initRolesFromArcs(p);
-		this.nC = nC;
-		this.nR = nR;
+
 	}
 
 	/** empty c'tor */
-	public ModelCacheIan(boolean flagNominals, int nC, int nR) {
+	public ModelCacheIan(boolean flagNominals, int nC, int nR, boolean simpleRules) {
 		super(flagNominals);
 		curState = csValid;
+		this.simpleRules = simpleRules;
 		this.nC = nC;
 		this.nR = nR;
 	}
@@ -135,7 +136,7 @@ public final class ModelCacheIan extends ModelCacheInterface {
 		posNConcepts.clear();
 		negDConcepts.clear();
 		negNConcepts.clear();
-		if (IfDefs.RKG_USE_SIMPLE_RULES) {
+		if (simpleRules) {
 			extraDConcepts.clear();
 			extraNConcepts.clear();
 		}
@@ -158,7 +159,7 @@ public final class ModelCacheIan extends ModelCacheInterface {
 			case dtPConcept:
 			case dtNSingleton:
 			case dtPSingleton:
-				int toAdd = ((ClassifiableEntry) cur.getConcept()).index();
+				int toAdd = ((ClassifiableEntry) cur.getConcept()).getIndex();
 				(det ? getDConcepts(pos) : getNConcepts(pos)).set(toAdd);
 				break;
 			case dtIrr: // for \neg \ER.Self: add R to AR-set
@@ -166,17 +167,19 @@ public final class ModelCacheIan extends ModelCacheInterface {
 			case dtLE: // for <= n R: add R to forallRoles
 				if (cur.getRole().isTop()) {
 					(pos ? forallRoles : existsRoles).completeSet(nR);
-				} else if (pos) // no need to deal with existentials here: they would be created through edges
+				} else if (pos)
 				{
+					// no need to deal with existentials here: they would be created through edges
 					if (cur.getRole().isSimple()) {
-						forallRoles.add(cur.getRole().index());
+						forallRoles.add(cur.getRole().getIndex());
 					} else {
 						processAutomaton(cur);
 					}
 				}
 				break;
 			default: // all other -- nothing to do
-				break;
+
+	break;
 		}
 	}
 
@@ -188,16 +191,16 @@ public final class ModelCacheIan extends ModelCacheInterface {
 		List<RATransition> begin = RST.begin();
 		for (int i = 0; i < begin.size(); i++) {
 			for (Role r : begin.get(i).begin()) {
-				forallRoles.add(r.index());
+				forallRoles.add(r.getIndex());
 			}
 		}
 	}
 
 	/** adds role to exists- and func-role if necessary */
 	private void addRoleToCache(Role R) {
-		existsRoles.add(R.index());
+		existsRoles.add(R.getIndex());
 		if (R.isTopFunc()) {
-			funcRoles.add(R.index());
+			funcRoles.add(R.getIndex());
 		}
 	}
 
@@ -267,10 +270,10 @@ public final class ModelCacheIan extends ModelCacheInterface {
 		) {
 			return csFailed;
 		} else {
-			if (IfDefs.RKG_USE_SIMPLE_RULES && getExtra(true).intersect(q.getExtra(true))) {
+			if (simpleRules && getExtra(true).intersect(q.getExtra(true))) {
 				return csInvalid;
 			}
-			if (IfDefs.RKG_USE_SIMPLE_RULES
+			if (simpleRules
 					&& (getExtra(true).intersect(q.getExtra(false))
 							|| getExtra(false).intersect(q.getExtra(true)) || getExtra(
 								false).intersect(q.getExtra(false)))) {
@@ -324,7 +327,7 @@ public final class ModelCacheIan extends ModelCacheInterface {
 		posNConcepts.or(p.posNConcepts);
 		negDConcepts.or(p.negDConcepts);
 		negNConcepts.or(p.negNConcepts);
-		if (IfDefs.RKG_USE_SIMPLE_RULES) {
+		if (simpleRules) {
 			extraDConcepts.addAll(p.extraDConcepts);
 			extraNConcepts.addAll(p.extraNConcepts);
 		}
@@ -334,27 +337,11 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	}
 
 	@Override
-	public void logCacheEntry(int level) {
-		logger.print("\nIan cache: posDConcepts = ");
-		logCacheSet(posDConcepts.toString());
-		logger.print(", posNConcepts = ");
-		logCacheSet(posNConcepts.toString());
-		logger.print(", negDConcepts = ");
-		logCacheSet(negDConcepts.toString());
-		logger.print(", negNConcepts = ");
-		logCacheSet(negNConcepts.toString());
-		logger.print(", existsRoles = ");
-		logCacheSet(existsRoles.toString());
-		logger.print(", forallRoles = ");
-		logCacheSet(forallRoles.toString());
-		logger.print(", funcRoles = ");
-		logCacheSet(funcRoles.toString());
-	}
-
-	private void logCacheSet(String s) {
-		logger.print("{");
-		logger.print(s);
-		logger.print("}");
+	public void logCacheEntry(int level, LogAdapter l) {
+		l.print("\nIan cache: posDConcepts = {", posDConcepts, "}, posNConcepts = {",
+				posNConcepts, "}, negDConcepts = {", negDConcepts, "}, negNConcepts = {",
+				negNConcepts, "}, existsRoles = {", existsRoles, "}, forallRoles = {",
+				forallRoles, "}, funcRoles = {", funcRoles, "}");
 	}
 
 	private ModelCacheState mergeStatus(ModelCacheState s1, ModelCacheState s2) {

@@ -5,15 +5,11 @@ package uk.ac.manchester.cs.jfact.kernel;
  This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
-import static uk.ac.manchester.cs.jfact.helpers.LeveLogger.logger;
 import static uk.ac.manchester.cs.jfact.kernel.DagTag.*;
 import static uk.ac.manchester.cs.jfact.kernel.Redo.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,24 +22,20 @@ import java.util.Set;
 import org.semanticweb.owlapi.reasoner.TimeOutException;
 
 import uk.ac.manchester.cs.jfact.dep.DepSet;
-import uk.ac.manchester.cs.jfact.dep.DepSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
 import uk.ac.manchester.cs.jfact.helpers.FastSet;
 import uk.ac.manchester.cs.jfact.helpers.FastSetFactory;
 import uk.ac.manchester.cs.jfact.helpers.FastSetSimple;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
-import uk.ac.manchester.cs.jfact.helpers.IfDefs;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.Templates;
+import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.Reference;
 import uk.ac.manchester.cs.jfact.helpers.SaveStack;
 import uk.ac.manchester.cs.jfact.helpers.Stats;
+import uk.ac.manchester.cs.jfact.helpers.Templates;
 import uk.ac.manchester.cs.jfact.helpers.Timer;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 import uk.ac.manchester.cs.jfact.kernel.TBox.SimpleRule;
 import uk.ac.manchester.cs.jfact.kernel.ToDoList.ToDoEntry;
-import uk.ac.manchester.cs.jfact.kernel.datatype.DataTypeReasoner;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptName;
 import uk.ac.manchester.cs.jfact.kernel.dl.axioms.AxiomConceptInclusion;
 import uk.ac.manchester.cs.jfact.kernel.dl.axioms.AxiomEquivalentConcepts;
@@ -53,10 +45,13 @@ import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheConst;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheIan;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheInterface;
 import uk.ac.manchester.cs.jfact.kernel.modelcaches.ModelCacheState;
+import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
 import uk.ac.manchester.cs.jfact.split.ModuleType;
 import uk.ac.manchester.cs.jfact.split.TModularizer;
 import uk.ac.manchester.cs.jfact.split.TSignature;
 import uk.ac.manchester.cs.jfact.split.TSplitVar;
+import datatypes.DataTypeReasoner;
+import datatypes.DatatypeFactory;
 
 public class DlSatTester {
 	private final class LocalFastSet implements FastSet {
@@ -142,7 +137,7 @@ public class DlSatTester {
 		/** currently processed concept */
 		protected ConceptWDep concept = null;
 		/** dependences for branching clashes */
-		protected DepSet branchDep = DepSetFactory.create();
+		protected DepSet branchDep = DepSet.create();
 		/// size of a session GCIs vector
 		int SGsize;
 
@@ -662,15 +657,9 @@ public class DlSatTester {
 		}
 	}
 
-	/// try to add a concept to a label given by TAG; ~C can't appear in the label
-	boolean findConcept(CWDArray lab, ConceptWDep C) {
-		return findConcept(lab, C.getConcept());
-	}
 
-	/// try to add a concept to a label given by TAG; ~C can't appear in the label; setup clash-set if found
-	boolean findConceptClash(CWDArray lab, ConceptWDep C) {
-		return findConceptClash(lab, C.getConcept(), C.getDep());
-	}
+
+
 
 	/** host TBox */
 	protected final TBox tBox;
@@ -682,8 +671,6 @@ public class DlSatTester {
 	protected final DlCompletionGraph cGraph;
 	/** Todo list */
 	private final ToDoList TODO = new ToDoList();
-	/** reasoning subsystem for the datatypes */
-	private final DataTypeReasoner datatypeReasoner;
 	private final FastSet used = new LocalFastSet();//FastSetFactory.create FastSetFactory.create();
 	/** GCI-related KB flags */
 	private final KBFlags gcis;
@@ -695,8 +682,6 @@ public class DlSatTester {
 	private final Timer subTimer = new Timer();
 	/** timer for a single test; use it as a timeout checker */
 	private Timer testTimer = new Timer();
-	/** SAT test timeout in seconds (if non-zero) */
-	private long testTimeout;
 	// save/restore option
 	/** stack for the local reasoner's state */
 	protected final BCStack stack = new BCStack();
@@ -721,15 +706,16 @@ public class DlSatTester {
 	/** temporary array used in <= operations */
 	private List<DlCompletionTreeArc> edgesToMerge = new ArrayList<DlCompletionTreeArc>();
 	/** contains clash set if clash is encountered in a node label */
-	private DepSet clashSet = DepSetFactory.create();
-	/** flag for switching semantic branching */
-	private boolean useSemanticBranching;
-	/** flag for switching backjumping */
-	private boolean useBackjumping;
-	/** whether or not check blocking status as late as possible */
-	private boolean useLazyBlocking;
-	/** flag for switching between Anywhere and Ancestor blockings */
-	private boolean useAnywhereBlocking;
+	private DepSet clashSet = DepSet.create();
+	protected final JFactReasonerConfiguration options;
+	///** flag for switching semantic branching */
+	//	private boolean useSemanticBranching;
+	//	/** flag for switching backjumping */
+	//	private boolean useBackjumping;
+	//	/** whether or not check blocking status as late as possible */
+	//	private boolean useLazyBlocking;
+	//	/** flag for switching between Anywhere and Ancestor blockings */
+	//	private boolean useAnywhereBlocking;
 	// session status flags:
 	/** true if nominal-related expansion rule was fired during reasoning */
 	private boolean encounterNominal;
@@ -740,6 +726,7 @@ public class DlSatTester {
 	/** auxilliary cache that is built from the edges of newly created node */
 	ModelCacheIan newNodeEdges;
 	Stats stats = new Stats();
+	protected final DatatypeFactory datatypeFactory;
 
 	/**
 	 * Adds ToDo entry which already exists in label of NODE. There is no need
@@ -750,9 +737,7 @@ public class DlSatTester {
 			final String reason /* = null */) {
 		int bp = C.getConcept();
 		TODO.addEntry(node, dlHeap.get(bp).getType(), C);
-		if (IfDefs.USE_LOGGING) {
-			logEntry(node, C.getConcept(), C.getDep(), reason);
-		}
+		logNCEntry(node, C.getConcept(), C.getDep(), "+", reason);
 	}
 
 	/** add all elements from NODE label into Todo list */
@@ -779,7 +764,8 @@ public class DlSatTester {
 	//--		internal cache support
 	/** return cache of given completion tree (implementation) */
 	protected final ModelCacheInterface createModelCache(final DlCompletionTree p) {
-		return new ModelCacheIan(dlHeap, p, encounterNominal, tBox.nC, tBox.nR);
+		return new ModelCacheIan(dlHeap, p, encounterNominal, tBox.nC, tBox.nR,
+				options.isRKG_USE_SIMPLE_RULES());
 	}
 
 	/** check whether node may be (un)cached; save node if something is changed */
@@ -823,8 +809,8 @@ public class DlSatTester {
 			return false;
 		}
 		final DlCompletionTree where = curNode.isSomeApplicable(R, C);
-		if (where != null && IfDefs.USE_LOGGING) {
-			logger.print(Templates.E, R.getName(), where.getId(), C);
+		if (where != null) {
+			options.getLog().printTemplate(Templates.E, R.getName(), where.getId(), C);
 		}
 		return where != null;
 	}
@@ -845,7 +831,7 @@ public class DlSatTester {
 		// save reasoning context
 		c.node = curNode;
 		c.concept = new ConceptWDep(curConceptConcept, curConceptDepSet);
-		c.branchDep = DepSetFactory.create(curConceptDepSet);
+		c.branchDep = DepSet.create(curConceptDepSet);
 		//TODO check why these commented lines do not appear
 		//		bContext.pUsedIndex = pUsed.size();
 		//		bContext.nUsedIndex = nUsed.size();
@@ -855,14 +841,6 @@ public class DlSatTester {
 	/** create BC for Or rule */
 	private void createBCOr() {
 		bContext = stack.pushOr();
-		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.println("s.push(" + bContext + ")");
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			PrintStream p = new PrintStream(out);
-			new Exception().printStackTrace(p);
-			p.flush();
-			LeveLogger.logger_absorption.print(out.toString());
-		}
 	}
 
 	/** create BC for NN-rule */
@@ -925,7 +903,7 @@ public class DlSatTester {
 
 	/**
 	 * aux method that fills the dep-set for either C or ~C found in the label;
-	 * 
+	 *
 	 * @param d
 	 *            depset to be changed if a clash is found
 	 * @return whether C was found
@@ -979,40 +957,21 @@ public class DlSatTester {
 		return true;
 	}
 
-	/**
-	 * @return utClash iff given data node contains inconsistent data
-	 *         constraints
-	 */
-	private boolean checkDataClash(final DlCompletionTree node) {
-		if (hasDataClash(node)) {
-			setClashSet(datatypeReasoner.getClashSet());
-			return true;
-		} else {
-			return false;
-		}
-	}
+
 
 	/** log the result of processing ACTION with entry (N,C{DEP})/REASON */
 	private void logNCEntry(final DlCompletionTree n, int bp, DepSet dep,
 			final String action, final String reason) {
-		logger.print(Templates.SPACE, action);
-		logger.print("(");
-		n.logNode();
-		logger.print(String.format(",%s%s)", bp, dep));
-		if (reason != null) {
-			logger.print(reason);
+		if (options.isLoggingActive()) {
+			final LogAdapter logAdapter = options.getLog();
+			logAdapter.print(" ", action);
+			logAdapter.print("(");
+			logAdapter.print(n.logNode());
+			logAdapter.print(",", bp, dep, ")");
+			if (reason != null) {
+				logAdapter.print(reason);
+			}
 		}
-	}
-
-	/** log addition of the entry to ToDo list */
-	private void logEntry(final DlCompletionTree n, int bp, DepSet dep,
-			final String reason) {
-		logNCEntry(n, bp, dep, "+", reason);
-	}
-
-	/** log clash happened during node processing */
-	private void logClash(final DlCompletionTree n, int bp, DepSet dep) {
-		logNCEntry(n, bp, dep, "x", dlHeap.get(bp).getType().getName());
 	}
 
 	/** use this method in ALL dependency stuff (never use tryLevel directly) */
@@ -1036,7 +995,7 @@ public class DlSatTester {
 	/** Get save/restore level based on either current- or DS level */
 	private int getSaveRestoreLevel(final DepSet ds) {
 		// FIXME!!! see more precise it later
-		if (IfDefs.RKG_IMPROVE_SAVE_RESTORE_DEPSET) {
+		if (options.isRKG_IMPROVE_SAVE_RESTORE_DEPSET()) {
 			return ds.level() + 1;
 		} else {
 			return getCurLevel();
@@ -1065,7 +1024,7 @@ public class DlSatTester {
 	}
 
 	private void setClashSet(final List<DepSet> d) {
-		DepSet dep = DepSetFactory.create();
+		DepSet dep = DepSet.create();
 		for (int i = 0; i < d.size(); i++) {
 			dep.add(d.get(i));
 		}
@@ -1079,7 +1038,7 @@ public class DlSatTester {
 
 	/** get dep-set wrt current level */
 	private DepSet getCurDepSet() {
-		return DepSetFactory.create(getCurLevel() - 1);
+		return DepSet.create(getCurLevel() - 1);
 	}
 
 	/** get RW access to current branching dep-set */
@@ -1126,19 +1085,16 @@ public class DlSatTester {
 	}
 
 	/** init Todo list priority for classification */
-	public void initToDoPriorities(final IFOptionSet OptionSet) {
-		assert OptionSet != null;
-		TODO.initPriorities(OptionSet, "IAOEFLG");
+	public void initToDoPriorities() {
+		final String iaoeflg = options.getIAOEFLG();
+		// inform about used rules order
+		options.getLog().print("\nInit IAOEFLG = ", iaoeflg);
+		TODO.initPriorities(iaoeflg);
 	}
 
 	/** set blocking method for a session */
 	public void setBlockingMethod(boolean hasInverse, boolean hasQCR) {
 		cGraph.setBlockingMethod(hasInverse, hasQCR);
-	}
-
-	/** set SAT test timeout in milliseconds */
-	public void setTestTimeout(long ms) {
-		testTimeout = ms;
 	}
 
 	/// set the in-classification flag
@@ -1157,9 +1113,9 @@ public class DlSatTester {
 	}
 
 	public void writeTotalStatistic(LogAdapter o) {
-		if (IfDefs.USE_REASONING_STATISTICS) {
+		if (options.isUSE_REASONING_STATISTICS()) {
 			stats.accumulate(); // ensure that the last reasoning results are in
-			stats.logStatisticData(o, false, cGraph);
+			stats.logStatisticData(o, false, cGraph, options);
 		}
 		o.print("\n");
 	}
@@ -1231,15 +1187,15 @@ public class DlSatTester {
 	}
 
 	private final ModelCacheInterface buildCache(int p) {
-		if (IfDefs.USE_LOGGING) {
-			logger.print("\nChecking satisfiability of DAG entry ");
-			logger.print(p);
-			tBox.printDagEntry(logger, p);
+		final LogAdapter logAdapter = options.getLog();
+		if (options.isLoggingActive()) {
+			logAdapter.print("\nChecking satisfiability of DAG entry ", p);
+			tBox.printDagEntry(logAdapter, p);
+			logAdapter.print(":\n");
 		}
-		logger.print(":\n");
 		boolean sat = runSat(p, Helper.bpTOP);
-		if (!sat && IfDefs.USE_LOGGING) {
-			logger.print(Templates.BUILD_CACHE_UNSAT, p);
+		if (!sat) {
+			logAdapter.printTemplate(Templates.BUILD_CACHE_UNSAT, p);
 		}
 		return buildCacheByCGraph(sat);
 	}
@@ -1283,8 +1239,8 @@ public class DlSatTester {
 	public boolean runSat(int p, int q) {
 		prepareReasoner();
 		// use general method to init node with P and add Q then
-		if (initNewNode(cGraph.getRoot(), DepSetFactory.create(), p)
-				|| addToDoEntry(cGraph.getRoot(), q, DepSetFactory.create(), null)) {
+		if (initNewNode(cGraph.getRoot(), DepSet.create(), p)
+				|| addToDoEntry(cGraph.getRoot(), q, DepSet.create(), null)) {
 			return false; // concept[s] unsatisfiable
 		}
 		// check satisfiability explicitly
@@ -1298,7 +1254,7 @@ public class DlSatTester {
 	public boolean checkDisjointRoles(final Role R, final Role S) {
 		prepareReasoner();
 		// use general method to init node...
-		DepSet dummy = DepSetFactory.create();
+		DepSet dummy = DepSet.create();
 		if (initNewNode(cGraph.getRoot(), dummy, Helper.bpTOP)) {
 			return true;
 		}
@@ -1322,7 +1278,7 @@ public class DlSatTester {
 	public boolean checkIrreflexivity(Role R) {
 		prepareReasoner();
 		// use general method to init node...
-		DepSet dummy = DepSetFactory.create();
+		DepSet dummy = DepSet.create();
 		if (initNewNode(cGraph.getRoot(), dummy, Helper.bpTOP)) {
 			return true;
 		}
@@ -1361,7 +1317,7 @@ public class DlSatTester {
 	}
 
 	private boolean tunedRestore() {
-		if (useBackjumping) {
+		if (options.getuseBackjumping()) {
 			return backJumpedRestore();
 		} else {
 			return straightforwardRestore();
@@ -1399,28 +1355,33 @@ public class DlSatTester {
 		return false;
 	}
 
-	protected DlSatTester(TBox tbox, final IFOptionSet Options) {
+	protected DlSatTester(TBox tbox, final JFactReasonerConfiguration Options,
+			DatatypeFactory datatypeFactory) {
+		this.options = Options;
+		this.datatypeFactory = datatypeFactory;
 		tBox = tbox;
 		dlHeap = tbox.getDLHeap();
 		cGraph = new DlCompletionGraph(1, this);
-		datatypeReasoner = new DataTypeReasoner(tbox.getDLHeap());
-		newNodeCache = new ModelCacheIan(true, tbox.nC, tbox.nR);
-		newNodeEdges = new ModelCacheIan(false, tbox.nC, tbox.nR);
+		newNodeCache = new ModelCacheIan(true, tbox.nC, tbox.nR,
+				options.isRKG_USE_SIMPLE_RULES());
+		newNodeEdges = new ModelCacheIan(false, tbox.nC, tbox.nR,
+				options.isRKG_USE_SIMPLE_RULES());
 		gcis = tbox.getGCIs();
-		testTimeout = 0;
 		bContext = null;
 		tryLevel = Helper.InitBranchingLevelValue;
 		nonDetShift = 0;
 		curNode = null;
 		dagSize = 0;
 		duringClassification = false;
-		readConfig(Options);
-		if (tBox.hasFC() && useAnywhereBlocking) {
-			useAnywhereBlocking = false;
-			logger.print("Fairness constraints: set useAnywhereBlocking = false\n");
+		options.getLog().printTemplate(Templates.READCONFIG,
+				options.getuseSemanticBranching(), options.getuseBackjumping(),
+				options.getuseLazyBlocking(), options.getuseAnywhereBlocking());
+		if (tBox.hasFC() && options.getuseAnywhereBlocking()) {
+			options.setuseAnywhereBlocking(false);
+			options.getLog().print(
+					"Fairness constraints: set useAnywhereBlocking = false\n");
 		}
-		cGraph.initContext(useLazyBlocking, useAnywhereBlocking);
-		tBox.getDataTypeCenter().initDataTypeReasoner(datatypeReasoner);
+		cGraph.initContext(options.getuseLazyBlocking(), options.getuseAnywhereBlocking());
 		tbox.getORM().fillReflexiveRoles(reflexiveRoles);
 		useActiveSignature = !tBox.getSplits().empty();
 		if (useActiveSignature) {
@@ -1442,23 +1403,17 @@ public class DlSatTester {
 		resetSessionFlags();
 	}
 
-	private void readConfig(final IFOptionSet Options) {
-		assert Options != null;
-		useSemanticBranching = Options.getBool("useSemanticBranching");
-		useBackjumping = Options.getBool("useBackjumping");
-		useLazyBlocking = Options.getBool("useLazyBlocking");
-		useAnywhereBlocking = Options.getBool("useAnywhereBlocking");
-		logger.print(Templates.READCONFIG, useSemanticBranching, useBackjumping,
-				useLazyBlocking, useAnywhereBlocking);
+	public JFactReasonerConfiguration getOptions() {
+		return options;
 	}
 
 	protected void prepareReasoner() {
 		cGraph.clear();
 		stack.clear();
 		TODO.clear();
-		if (!TODO.isSaveStateGenerationStarted()) {
-			TODO.startSaveStateGeneration();
-		}
+		//		if (!TODO.isSaveStateGenerationStarted()) {
+		//			TODO.startSaveStateGeneration();
+		//		}
 		used.clear();
 		SessionGCIs.clear();
 		ActiveSplits.clear();
@@ -1470,6 +1425,7 @@ public class DlSatTester {
 		resetSessionFlags();
 	}
 
+	/// try to add a concept to a label given by TAG; ~C can't appear in the label
 	public boolean findConcept(CWDArray lab, int p) {
 		assert Helper.isCorrect(p); // sanity checking
 		// constants are not allowed here
@@ -1492,17 +1448,18 @@ public class DlSatTester {
 		int inv_p = -p;
 		DepSet depset = lab.get(inv_p);
 		if (depset != null) {
-			clashSet = DepSetFactory.plus(depset, dep);
+			clashSet = DepSet.plus(depset, dep);
 			return AddConceptResult.acrClash;
 		}
 		return AddConceptResult.acrDone;
 	}
-
+	/// try to add a concept to a label given by TAG; ~C can't appear in the label; setup clash-set if found
 	private boolean findConceptClash(final CWDArray lab, int bp, DepSet dep) {
 		stats.getnLookups().inc();
+
 		DepSet depset = lab.get(bp);
 		if (depset != null) {
-			clashSet = DepSetFactory.plus(depset, dep);
+			clashSet = DepSet.plus(depset, dep);
 			return true;
 		}
 		return false;
@@ -1536,9 +1493,7 @@ public class DlSatTester {
 		}
 		if (bp == Helper.bpBOTTOM) {
 			setClashSet(dep);
-			if (IfDefs.USE_LOGGING) {
-				logClash(n, bp, dep);
-			}
+			logNCEntry(n, bp, dep, "x", dlHeap.get(bp).getType().getName());
 			return true;
 		}
 		final DLVertex v = dlHeap.get(bp);
@@ -1553,18 +1508,16 @@ public class DlSatTester {
 			FastSetSimple oldConceptDepSetDelegate = curConceptDepSet.getDelegate();
 			curNode = n;
 			curConceptConcept = bp;
-			curConceptDepSet = DepSetFactory.create(curConceptDepSet);
+			curConceptDepSet = DepSet.create(curConceptDepSet);
 			boolean ret = commonTacticBodyAnd(v);
 			curNode = oldNode;
 			curConceptConcept = oldConceptConcept;
-			curConceptDepSet = DepSetFactory.create(oldConceptDepSetDelegate);
+			curConceptDepSet = DepSet.create(oldConceptDepSetDelegate);
 			return ret;
 		}
 		switch (tryAddConcept(n.label().getLabel(tag), bp, dep)) {
 			case acrClash:
-				if (IfDefs.USE_LOGGING) {
-					logClash(n, bp, dep);
-				}
+				logNCEntry(n, bp, dep, "x", dlHeap.get(bp).getType().getName());
 				return true;
 			case acrExist:
 				return false;
@@ -1591,11 +1544,9 @@ public class DlSatTester {
 		}
 		TODO.addEntry(n, tag, p);
 		if (n.isDataNode()) {
-			return checkDataNode ? checkDataClash(n) : false;
+			return checkDataNode ? hasDataClash(n) : false;
 		}
-		if (IfDefs.USE_LOGGING) {
-			logEntry(n, bp, dep, reason);
-		}
+		logNCEntry(n, bp, dep, "+", reason);
 		return false;
 	}
 
@@ -1611,9 +1562,7 @@ public class DlSatTester {
 			ConceptWDep p = list.get(i);
 			if (dlHeap.getCache(p.getConcept()) == null) {
 				stats.getnCacheFailedNoCache().inc();
-				if (IfDefs.USE_LOGGING) {
-					logger.print(Templates.CAN_BE_CACHED, p.getConcept());
-				}
+				options.getLog().printTemplate(Templates.CAN_BE_CACHED, p.getConcept());
 				return false;
 			}
 			shallow &= dlHeap.getCache(p.getConcept()).shallowCache();
@@ -1624,9 +1573,7 @@ public class DlSatTester {
 			ConceptWDep p = list.get(i);
 			if (dlHeap.getCache(p.getConcept()) == null) {
 				stats.getnCacheFailedNoCache().inc();
-				if (IfDefs.USE_LOGGING) {
-					logger.print(Templates.CAN_BE_CACHED, p.getConcept());
-				}
+				options.getLog().printTemplate(Templates.CAN_BE_CACHED, p.getConcept());
 				return false;
 			}
 			shallow &= dlHeap.getCache(p.getConcept()).shallowCache();
@@ -1634,7 +1581,7 @@ public class DlSatTester {
 		}
 		if (shallow && size != 0) {
 			stats.getnCacheFailedShallow().inc();
-			logger.print(" cf(s)");
+			options.getLog().print(" cf(s)");
 			return false;
 		}
 		return true;
@@ -1683,9 +1630,7 @@ public class DlSatTester {
 		switch (status) {
 			case csValid:
 				stats.getnCachedSat().inc();
-				if (IfDefs.USE_LOGGING) {
-					logger.print(Templates.REPORT1, node.getId());
-				}
+				options.getLog().printTemplate(Templates.REPORT1, node.getId());
 				break;
 			case csInvalid:
 				stats.getnCachedUnsat().inc();
@@ -1693,7 +1638,7 @@ public class DlSatTester {
 			case csFailed:
 			case csUnknown:
 				stats.getnCacheFailed().inc();
-				logger.print(" cf(c)");
+				options.getLog().print(" cf(c)");
 				status = ModelCacheState.csFailed;
 				break;
 			default:
@@ -1713,32 +1658,41 @@ public class DlSatTester {
 
 	private boolean hasDataClash(final DlCompletionTree node) {
 		assert node != null && node.isDataNode();
-		datatypeReasoner.clear();
-		List<ConceptWDep> beginl_sc = node.beginl_sc();
-		final int size = beginl_sc.size();
+		DataTypeReasoner datatypeReasoner = new DataTypeReasoner(options);
+		List<ConceptWDep> concepts = node.beginl_sc();
+		final int size = concepts.size();
+//		System.out.println("\nDlSatTester.hasDataClash() "+concepts);
+//		for(ConceptWDep r:concepts) {
+//			System.out.println(r.getConcept()+(r.getConcept()>0?"\t+ ":"\t- ")+dlHeap.get(r.getConcept()));
+//		}
 		for (int i = 0; i < size; i++) {
-			ConceptWDep r = beginl_sc.get(i);
-			//tBox.writeReasoningResult(logger, 0);
-			if (datatypeReasoner.addDataEntry(r.getConcept(), r.getDep())) {
+			ConceptWDep r = concepts.get(i);
+
+			final DLVertex v = dlHeap.get(r.getConcept());
+			NamedEntry dataEntry = dlHeap.get(r.getConcept()).getConcept();
+			boolean positive = r.getConcept() > 0;
+			if (datatypeReasoner.addDataEntry(positive, v, dataEntry, r.getDep())) {
+				setClashSet(datatypeReasoner.getClashSet());
 				return true;
 			}
 		}
-		return datatypeReasoner.checkClash();
+		final boolean checkClash = datatypeReasoner.checkClash();
+		if (checkClash) {
+			setClashSet(datatypeReasoner.getClashSet());
+		}
+		return checkClash;
 	}
 
 	protected boolean runSat() {
 		testTimer.start();
 		boolean result = checkSatisfiability();
 		testTimer.stop();
-		if (IfDefs.USE_LOGGING) {
-			logger.print("\nChecking time was ");
-			logger.print(testTimer.getResultTime());
-			logger.print(" milliseconds");
-		}
+		options.getLog().print("\nChecking time was ", testTimer.getResultTime(),
+				" milliseconds");
 		testTimer.reset();
 		finaliseStatistic();
-		if (result && IfDefs.USE_LOGGING) {
-			cGraph.print(logger);
+		if (result) {
+			cGraph.print(options.getLog());
 		}
 		return result;
 	}
@@ -1762,15 +1716,13 @@ public class DlSatTester {
 		for (;;) {
 			if (curNode == null) {
 				if (TODO.isEmpty()) {
-					if (IfDefs.USE_LOGGING) {
+					if (options.isLoggingActive()) {
 						logIndentation();
 						//CGraph.Print(LL);
-						logger.print("[*ub:");
+						options.getLog().print("[*ub:");
 					}
 					cGraph.retestCGBlockedStatus();
-					if (IfDefs.USE_LOGGING) {
-						logger.print("]");
-					}
+					options.getLog().print("]");
 					if (TODO.isEmpty()) {
 						return true;
 					}
@@ -1779,14 +1731,14 @@ public class DlSatTester {
 				assert curTDE != null;
 				curNode = curTDE.getNode();
 				curConceptConcept = curTDE.getOffsetConcept();
-				curConceptDepSet = DepSetFactory.create(curTDE.getOffsetDepSet());
+				curConceptDepSet = DepSet.create(curTDE.getOffsetDepSet());
 			}
 			if (++loop == 50) {
 				loop = 0;
 				if (tBox.isCancelled().get()) {
 					return false;
 				}
-				if (testTimer.calcDelta() >= testTimeout) {
+				if (testTimer.calcDelta() >= options.getTimeOut()) {
 					throw new TimeOutException();
 				}
 			}
@@ -1804,10 +1756,10 @@ public class DlSatTester {
 		curNode = bContext.node;
 		if (bContext.concept == null) {
 			curConceptConcept = Helper.bpINVALID;
-			curConceptDepSet = DepSetFactory.create();
+			curConceptDepSet = DepSet.create();
 		} else {
 			curConceptConcept = bContext.concept.getConcept();
-			curConceptDepSet = DepSetFactory.create(bContext.concept.getDep());
+			curConceptDepSet = DepSet.create(bContext.concept.getDep());
 		}
 		if (!SessionGCIs.isEmpty()) {
 			Helper.resize(SessionGCIs, bContext.SGsize);
@@ -1822,12 +1774,10 @@ public class DlSatTester {
 		++tryLevel;
 		bContext = null;
 		stats.getnStateSaves().inc();
-		if (IfDefs.USE_LOGGING) {
-			logger.print(Templates.SAVE, (getCurLevel() - 1));
-		}
-		if (IfDefs.DEBUG_SAVE_RESTORE) {
-			cGraph.print(logger);
-			TODO.print(logger);
+		options.getLog().printTemplate(Templates.SAVE, (getCurLevel() - 1));
+		if (options.isDEBUG_SAVE_RESTORE()) {
+			cGraph.print(options.getLog());
+			options.getLog().print(TODO);
 		}
 	}
 
@@ -1840,76 +1790,76 @@ public class DlSatTester {
 		cGraph.restore(getCurLevel());
 		TODO.restore(getCurLevel());
 		stats.getnStateRestores().inc();
-		if (IfDefs.USE_LOGGING) {
-			logger.print(Templates.RESTORE, getCurLevel());
-		}
-		if (IfDefs.DEBUG_SAVE_RESTORE) {
-			cGraph.print(logger);
-			TODO.print(logger);
+		options.getLog().printTemplate(Templates.RESTORE, getCurLevel());
+		if (options.isDEBUG_SAVE_RESTORE()) {
+			cGraph.print(options.getLog());
+			options.getLog().print(TODO);
 		}
 	}
 
 	private void logIndentation() {
-		char[] bytes = new char[getCurLevel()];
-		Arrays.fill(bytes, ' ');
-		bytes[0] = '\n';
-		logger.print(new String(bytes));
+		final LogAdapter logAdapter = options.getLog();
+		logAdapter.print("\n");
+		for (int i = 1; i < getCurLevel(); i++) {
+			logAdapter.print(' ');
+		}
 	}
 
 	private void logStartEntry() {
-		logIndentation();
-		logger.print("[*(");
-		curNode.logNode();
-		logger.print(",");
-		logger.print(curConceptConcept);
-		if (curConceptDepSet != null) {
-			curConceptDepSet.print(logger);
+		if (options.isLoggingActive()) {
+			logIndentation();
+			final LogAdapter logAdapter = options.getLog();
+			logAdapter.print("[*(");
+			logAdapter.print(curNode.logNode());
+			logAdapter.print(",");
+			logAdapter.print(curConceptConcept);
+			if (curConceptDepSet != null) {
+				logAdapter.print(curConceptDepSet);
+			}
+			logAdapter.print("){");
+			if (curConceptConcept < 0) {
+				logAdapter.print("~");
+			}
+			logAdapter.print(dlHeap.get(curConceptConcept).getType().getName());
+			logAdapter.print("}:");
 		}
-		logger.print("){");
-		if (curConceptConcept < 0) {
-			logger.print("~");
-		}
-		logger.print(dlHeap.get(curConceptConcept).getType().getName());
-		logger.print("}:");
 	}
 
 	private void logFinishEntry(boolean res) {
-		logger.print("]");
-		if (res) {
-			logger.print(Templates.LOG_FINISH_ENTRY, clashSet);
+		if (options.isLoggingActive()) {
+			options.getLog().print("]");
+			if (res) {
+				options.getLog().printTemplate(Templates.LOG_FINISH_ENTRY, clashSet);
+			}
 		}
 	}
 
 	public float printReasoningTime(LogAdapter o) {
-		o.print(String.format("\n     SAT takes %s seconds\n     SUB takes %s seconds",
-				satTimer, subTimer));
+		o.print("\n     SAT takes ", satTimer, " seconds\n     SUB takes ", subTimer,
+				" seconds");
 		return satTimer.calcDelta() + subTimer.calcDelta();
 	}
 
 	/**
 	 * Tactics section;
-	 * 
+	 *
 	 * Each Tactic should have a (small) Usability function <name> and a Real
 	 * tactic function <name>Body
-	 * 
+	 *
 	 * Each tactic returns: - true - if expansion of CUR lead to clash - false -
 	 * overwise
-	 * 
+	 *
 	 */
 	private boolean commonTactic() {
 		if (curNode.isCached() || curNode.isPBlocked()) {
 			return false;
 		}
-		if (IfDefs.USE_LOGGING) {
-			logStartEntry();
-		}
+		logStartEntry();
 		boolean ret = false;
 		if (!isIBlocked()) {
 			ret = commonTacticBody(dlHeap.get(curConceptConcept));
 		}
-		if (IfDefs.USE_LOGGING) {
-			logFinishEntry(ret);
-		}
+		logFinishEntry(ret);
 		return ret;
 	}
 
@@ -1976,7 +1926,7 @@ public class DlSatTester {
 	private boolean commonTacticBodyId(final DLVertex cur) {
 		assert cur.getType().isCNameTag(); // safety check
 		stats.getnIdCalls().inc();
-		if (IfDefs.RKG_USE_SIMPLE_RULES) {
+		if (options.isRKG_USE_SIMPLE_RULES()) {
 			// check if we have some simple rules
 			if (curConceptConcept > 0 && applyExtraRulesIf((Concept) cur.getConcept())) {
 				return true;
@@ -2007,7 +1957,7 @@ public class DlSatTester {
 
 	protected boolean applicable(final SimpleRule rule) {
 		final CWDArray lab = curNode.label().getLabel(DagTag.dtPConcept);
-		DepSet loc = DepSetFactory.create(curConceptDepSet);
+		DepSet loc = DepSet.create(curConceptDepSet);
 		for (Concept p : rule.getBody()) {
 			if (p.getpName() != curConceptConcept) {
 				if (findConceptClash(lab, p.getpName(), loc)) {
@@ -2044,7 +1994,7 @@ public class DlSatTester {
 		encounterNominal = true;
 		final Individual C = (Individual) cur.getConcept();
 		assert C.getNode() != null;
-		DepSet dep = DepSetFactory.create(curConceptDepSet);
+		DepSet dep = DepSet.create(curConceptDepSet);
 		DlCompletionTree realNode = C.getNode().resolvePBlocker(dep);
 		if (!realNode.equals(curNode)) {
 			return merge(curNode, realNode, dep);
@@ -2077,9 +2027,9 @@ public class DlSatTester {
 		assert curConceptConcept < 0 && cur.getType() == dtAnd; // safety check
 		stats.getnOrCalls().inc();
 		if (isFirstBranchCall()) {
-			Reference<DepSet> dep = new Reference<DepSet>(DepSetFactory.create());
+			Reference<DepSet> dep = new Reference<DepSet>(DepSet.create());
 			if (planOrProcessing(cur, dep)) {
-				logger.print(Templates.COMMON_TACTIC_BODY_OR,
+				options.getLog().printTemplate(Templates.COMMON_TACTIC_BODY_OR,
 						orConceptsToTest.get(orConceptsToTest.size() - 1));
 				return false;
 			}
@@ -2093,7 +2043,7 @@ public class DlSatTester {
 						dlHeap.get(C.getConcept()).getType(), "bcp");
 			}
 			createBCOr();
-			bContext.branchDep = DepSetFactory.create(dep.getReference());
+			bContext.branchDep = DepSet.create(dep.getReference());
 			orConceptsToTest = ((BCOr) bContext).setApplicableOrEntries(orConceptsToTest);
 		}
 		return processOrEntry();
@@ -2101,7 +2051,7 @@ public class DlSatTester {
 
 	private boolean planOrProcessing(final DLVertex cur, Reference<DepSet> dep) {
 		orConceptsToTest.clear();
-		dep.setReference(DepSetFactory.create(curConceptDepSet));
+		dep.setReference(DepSet.create(curConceptDepSet));
 		// check all OR components for the clash
 		CGLabel lab = curNode.label();
 		for (int q : cur.begin()) {
@@ -2145,19 +2095,16 @@ public class DlSatTester {
 			stats.getnOrBrCalls().inc();
 		}
 		// if semantic branching is in use -- add previous entries to the label
-		if (useSemanticBranching) {
+		if (options.getuseSemanticBranching()) {
 			for (int i : bcOr.getApplicableOrEntriesConcepts()) {
-				//			for (int i = 0; i < bcOr.getBranchIndex(); i++) {
-				//				int concept = -bcOr.getApplicableOrEntries().get(i).getConcept();
-				//if (addToDoEntry(curNode, concept, dep, "sb")) {
 				if (addToDoEntry(curNode, -i, dep, "sb")) {
-					throw new UnreachableSituationException();
+					throw new UnreachableSituationException(curNode.toString());
 					// Both Exists and Clash are errors
 				}
 			}
 		}
 		// add new entry to current node; we know the result would be DONE
-		if (IfDefs.RKG_USE_DYNAMIC_BACKJUMPING) {
+		if (options.isRKG_USE_DYNAMIC_BACKJUMPING()) {
 			return addToDoEntry(curNode, bcOr.orCur().getConcept(), dep, reason);
 		} else {
 			return insertToDoEntry(curNode, bcOr.orCur().getConcept(), dep,
@@ -2196,7 +2143,7 @@ public class DlSatTester {
 			DlCompletionTreeArc p = list.get(i);
 			if (RST.recognise(p.getRole())) {
 				if (applyTransitions(p, RST, C,
-						DepSetFactory.plus(curConceptDepSet, p.getDep()), null)) {
+						DepSet.plus(curConceptDepSet, p.getDep()), null)) {
 					return true;
 				}
 			}
@@ -2216,7 +2163,7 @@ public class DlSatTester {
 			DlCompletionTreeArc p = neighbour.get(i);
 			if (RST.recognise(p.getRole())) {
 				if (addToDoEntry(p.getArcEnd(), C,
-						DepSetFactory.plus(curConceptDepSet, p.getDep()), null)) {
+						DepSet.plus(curConceptDepSet, p.getDep()), null)) {
 					return true;
 				}
 			}
@@ -2258,7 +2205,7 @@ public class DlSatTester {
 			return false;
 		}
 		Role R = arcSample.getRole();
-		DepSet dep = DepSetFactory.plus(dep_, arcSample.getDep());
+		DepSet dep = DepSet.plus(dep_, arcSample.getDep());
 		List<ConceptWDep> base = Node.beginl_cc();
 		final int size = base.size();
 		for (int i = 0; i < size; i++) {
@@ -2293,13 +2240,13 @@ public class DlSatTester {
 					if (vR.isSimple()) {
 						// R is recognised so just add the final state!
 						if (addToDoEntry(arcSample.getArcEnd(), v.getConceptIndex(),
-								DepSetFactory.plus(dep, p.getDep()), "ae")) {
+								DepSet.plus(dep, p.getDep()), "ae")) {
 							return true;
 						}
 					} else {
 						if (applyTransitions(arcSample, RST,
 								p.getConcept() - v.getState(),
-								DepSetFactory.plus(dep, p.getDep()), "ae")) {
+								DepSet.plus(dep, p.getDep()), "ae")) {
 							return true;
 						}
 					}
@@ -2315,6 +2262,7 @@ public class DlSatTester {
 					}
 					break;
 				default:
+
 					break;
 			}
 		}
@@ -2361,7 +2309,8 @@ public class DlSatTester {
 								curConceptDepSet);
 						cGraph.addConceptToNode(curNode, rFuncRestriction1, DagTag.dtLE);
 						used.add(rFuncRestriction1.getConcept());
-						logger.print(Templates.COMMON_TACTIC_BODY_SOME, rFuncRestriction1);
+						options.getLog().printTemplate(Templates.COMMON_TACTIC_BODY_SOME,
+								rFuncRestriction1);
 					}
 						break;
 					case acrExist:
@@ -2389,7 +2338,7 @@ public class DlSatTester {
 		}
 		if (rFunc) {
 			DlCompletionTreeArc functionalArc = null;
-			DepSet newDep = DepSetFactory.create();
+			DepSet newDep = DepSet.create();
 			for (int i = 0; i < curNode.getNeighbour().size() && functionalArc == null; i++) {
 				DlCompletionTreeArc pr = curNode.getNeighbour().get(i);
 				if (pr.isNeighbour(RF, newDep)) {
@@ -2397,7 +2346,8 @@ public class DlSatTester {
 				}
 			}
 			if (functionalArc != null) {
-				logger.print(Templates.COMMON_TACTIC_BODY_SOME2, rFuncRestriction);
+				options.getLog().printTemplate(Templates.COMMON_TACTIC_BODY_SOME2,
+						rFuncRestriction);
 				DlCompletionTree succ = functionalArc.getArcEnd();
 				newDep.add(curConceptDepSet);
 				if (R.isDisjoint() && checkDisjointRoleClash(curNode, succ, R, newDep)) {
@@ -2445,7 +2395,7 @@ public class DlSatTester {
 	}
 
 	private boolean commonTacticBodyValue(final Role R, final Individual nom) {
-		DepSet dep = DepSetFactory.create(curConceptDepSet);
+		DepSet dep = DepSet.create(curConceptDepSet);
 		if (isCurNodeBlocked()) {
 			return false;
 		}
@@ -2507,20 +2457,17 @@ public class DlSatTester {
 			node.setNominalLevel(level);
 		}
 		if (R.isDataRole()) {
-			//			System.out.println("DlSatTester.createOneNeighbour() "+R);
-			//			System.out.println("DlSatTester.createOneNeighbour() "+node);
+
 			node.setDataNode();
 		}
-		if (IfDefs.USE_LOGGING) {
-			logger.print((R.isDataRole() ? Templates.DN : Templates.CN), node.getId(),
-					dep);
-		}
+		options.getLog().printTemplate((R.isDataRole() ? Templates.DN : Templates.CN),
+				node.getId(), dep);
 		return pA;
 	}
 
 	/// check whether current node is blocked
 	private boolean isCurNodeBlocked() {
-		if (!useLazyBlocking) {
+		if (!options.getuseLazyBlocking()) {
 			return curNode.isBlocked();
 		}
 		if (!curNode.isBlocked() && curNode.isAffected()) {
@@ -2565,7 +2512,7 @@ public class DlSatTester {
 		} else {
 			if (child.isDataNode()) {
 				checkDataNode = true;
-				if (checkDataClash(child)) {
+				if (hasDataClash(child)) {
 					return true;
 				}
 			} else {
@@ -2596,7 +2543,7 @@ public class DlSatTester {
 		if (addToDoEntry(node, R.getBPDomain(), dep, reason)) {
 			return true;
 		}
-		if (!IfDefs.RKG_UPDATE_RND_FROM_SUPERROLES) {
+		if (!options.isRKG_UPDATE_RND_FROM_SUPERROLES()) {
 			List<Role> list = R.getAncestor();
 			for (int i = 0; i < list.size(); i++) {
 				Role q = list.get(i);
@@ -2623,12 +2570,12 @@ public class DlSatTester {
 		}
 		DlCompletionTreeArc q = edgesToMerge.get(0);
 		DlCompletionTree sample = q.getArcEnd();
-		DepSet depF = DepSetFactory.create(curConceptDepSet);
+		DepSet depF = DepSet.create(curConceptDepSet);
 		depF.add(q.getDep());
 		for (int i = 1; i < edgesToMerge.size(); i++) {
 			q = edgesToMerge.get(i);
 			if (!q.getArcEnd().isPBlocked()) {
-				if (merge(q.getArcEnd(), sample, DepSetFactory.plus(depF, q.getDep()))) {
+				if (merge(q.getArcEnd(), sample, DepSet.plus(depF, q.getDep()))) {
 					return true;
 				}
 			}
@@ -2660,7 +2607,7 @@ public class DlSatTester {
 		// we need to repeat merge until there will be necessary amount of edges
 		while (true) {
 			if (isFirstBranchCall()) {
-				DepSet dep = DepSetFactory.create();
+				DepSet dep = DepSet.create();
 				// check the amount of neighbours we have
 				findNeighbours(R, C, dep);
 				// if the number of R-neighbours satisfies condition -- nothing to do
@@ -2692,7 +2639,7 @@ public class DlSatTester {
 					// get from- and to-arcs using corresponding indexes in Edges
 					from = bcLE.getFrom();
 					to = bcLE.getTo();
-					Reference<DepSet> dep = new Reference<DepSet>(DepSetFactory.create()); // empty dep-set
+					Reference<DepSet> dep = new Reference<DepSet>(DepSet.create()); // empty dep-set
 					// fast check for from.end() and to.end() are in \neq
 					if (cGraph.nonMergable(from.getArcEnd(), to.getArcEnd(), dep)) {
 						if (C == Helper.bpTOP) {
@@ -2706,8 +2653,7 @@ public class DlSatTester {
 							test = findConceptClash(from.getArcEnd().label()
 									.getLabel(tag), C, dep.getReference());
 							assert test;
-							dep.setReference(DepSetFactory.plus(dep.getReference(),
-									clashSet));
+							dep.setReference(DepSet.plus(dep.getReference(), clashSet));
 							// save new dep-set
 							test = findConceptClash(to.getArcEnd().label().getLabel(tag),
 									C, dep.getReference());
@@ -2769,8 +2715,7 @@ public class DlSatTester {
 							// get from- and to-arcs using corresponding indexes in Edges
 							from = bcLE.getFrom();
 							to = bcLE.getTo();
-							Reference<DepSet> dep = new Reference<DepSet>(
-									DepSetFactory.create()); // empty dep-set
+							Reference<DepSet> dep = new Reference<DepSet>(DepSet.create()); // empty dep-set
 							// fast check for from.end() and to.end() are in \neq
 							if (cGraph.nonMergable(from.getArcEnd(), to.getArcEnd(), dep)) {
 								if (C == Helper.bpTOP) {
@@ -2784,8 +2729,8 @@ public class DlSatTester {
 									test = findConceptClash(from.getArcEnd().label()
 											.getLabel(tag), C, dep.getReference());
 									assert test;
-									dep.setReference(DepSetFactory.plus(
-											dep.getReference(), clashSet)); // save new dep-set
+									dep.setReference(DepSet.plus(dep.getReference(),
+											clashSet)); // save new dep-set
 									test = findConceptClash(to.getArcEnd().label()
 											.getLabel(tag), C, dep.getReference());
 									assert test;
@@ -2812,7 +2757,7 @@ public class DlSatTester {
 						}
 					}
 					if (isFirstBranchCall()) {
-						DepSet dep = DepSetFactory.create();
+						DepSet dep = DepSet.create();
 						// check the amount of neighbours we have
 						findNeighbours(R, C, dep);
 						// if the number of R-neighbours satisfies condition -- nothing to do
@@ -2881,16 +2826,15 @@ public class DlSatTester {
 		if (!checkNRclash(atleast, atmost)) {
 			return false;
 		}
-		setClashSet(DepSetFactory.plus(curConceptDepSet, reason.getDep()));
-		if (IfDefs.USE_LOGGING) {
-			logClash(curNode, reason.getConcept(), reason.getDep());
-		}
+		setClashSet(DepSet.plus(curConceptDepSet, reason.getDep()));
+		logNCEntry(curNode, reason.getConcept(), reason.getDep(), "x",
+				dlHeap.get(reason.getConcept()).getType().getName());
 		return true;
 	}
 
 	private boolean checkMergeClash(final CGLabel from, final CGLabel to,
 			final DepSet dep, int nodeId) {
-		DepSet clashDep = DepSetFactory.create(dep);
+		DepSet clashDep = DepSet.create(dep);
 		boolean clash = false;
 		List<ConceptWDep> list = from.get_sc();
 		final int size = list.size();
@@ -2901,8 +2845,8 @@ public class DlSatTester {
 					&& findConceptClash(to.getLabel(dtPConcept), inverse, p.getDep())) {
 				clash = true;
 				clashDep.add(clashSet);
-				logger.print(Templates.CHECK_MERGE_CLASH, nodeId, p.getConcept(),
-						DepSetFactory.plus(clashSet, dep));
+				options.getLog().printTemplate(Templates.CHECK_MERGE_CLASH, nodeId,
+						p.getConcept(), DepSet.plus(clashSet, dep));
 			}
 		}
 		list = from.get_cc();
@@ -2914,8 +2858,8 @@ public class DlSatTester {
 					&& findConceptClash(to.getLabel(dtForall), inverse, p.getDep())) {
 				clash = true;
 				clashDep.add(clashSet);
-				logger.print(Templates.CHECK_MERGE_CLASH, nodeId, p.getConcept(),
-						DepSetFactory.plus(clashSet, dep));
+				options.getLog().printTemplate(Templates.CHECK_MERGE_CLASH, nodeId,
+						p.getConcept(), DepSet.plus(clashSet, dep));
 			}
 		}
 		if (clash) {
@@ -2943,8 +2887,8 @@ public class DlSatTester {
 					cGraph.saveRareCond(sc.updateDepSet(index, p.getDep()));
 				}
 			} else {
-				if (insertToDoEntry(to, bp, DepSetFactory.plus(dep, p.getDep()), dlHeap
-						.get(bp).getType(), "M")) {
+				if (insertToDoEntry(to, bp, DepSet.plus(dep, p.getDep()), dlHeap.get(bp)
+						.getType(), "M")) {
 					return true;
 				}
 			}
@@ -2960,8 +2904,8 @@ public class DlSatTester {
 					cGraph.saveRareCond(cc.updateDepSet(index, p.getDep()));
 				}
 			} else {
-				if (insertToDoEntry(to, bp, DepSetFactory.plus(dep, p.getDep()), dlHeap
-						.get(bp).getType(), "M")) {
+				if (insertToDoEntry(to, bp, DepSet.plus(dep, p.getDep()), dlHeap.get(bp)
+						.getType(), "M")) {
 					return true;
 				}
 			}
@@ -2973,9 +2917,9 @@ public class DlSatTester {
 		assert !from.isPBlocked();
 		assert !from.equals(to);
 		assert to.getNominalLevel() <= from.getNominalLevel();
-		logger.print(Templates.MERGE, from.getId(), to.getId());
+		options.getLog().printTemplate(Templates.MERGE, from.getId(), to.getId());
 		stats.getnMergeCalls().inc();
-		DepSet dep = DepSetFactory.create(depF);
+		DepSet dep = DepSet.create(depF);
 		Reference<DepSet> ref = new Reference<DepSet>(dep);
 		if (cGraph.nonMergable(from, to, ref)) {
 			setClashSet(ref.getReference());
@@ -3003,7 +2947,7 @@ public class DlSatTester {
 			}
 		}
 		if (to.isDataNode()) {
-			return checkDataClash(to);
+			return hasDataClash(to);
 		}
 		for (DlCompletionTreeArc q : edges) {
 			if (applyUniversalNR(to, q, depF, redoForall.getValue() | redoFunc.getValue()
@@ -3073,7 +3017,7 @@ public class DlSatTester {
 			return addToDoEntry(node, -C, getCurDepSet(), "cr0");
 		} else {
 			prepareBranchDep();
-			DepSet dep = DepSetFactory.create(getBranchDep());
+			DepSet dep = DepSet.create(getBranchDep());
 			determiniseBranchingOp();
 			return addToDoEntry(node, C, dep, "cr1");
 		}
@@ -3094,8 +3038,8 @@ public class DlSatTester {
 		// new (just branched) dep-set
 		DepSet curDep = getCurDepSet();
 		// make a stopper to mark that NN-rule is applied
-		if (addToDoEntry(curNode, curConceptConcept + cur.getNumberLE(),
-				DepSetFactory.create(), "NNs")) {
+		if (addToDoEntry(curNode, curConceptConcept + cur.getNumberLE(), DepSet.create(),
+				"NNs")) {
 			return true;
 		}
 		// create curNN new different edges
@@ -3123,11 +3067,7 @@ public class DlSatTester {
 			// if there is an edge that require to run the rule, then we need it
 			if (p.isPredEdge() && suspect.isBlockableNode() && p.isNeighbour(r)
 					&& suspect.isLabelledBy(C)) {
-				if (IfDefs.USE_LOGGING) {
-					LeveLogger.logger.print(" NN(");
-				}
-				LeveLogger.logger.print(suspect.getId());
-				LeveLogger.logger.print(")");
+				options.getLog().print(" NN(", suspect.getId(), ")");
 				return true;
 			}
 		}
@@ -3143,7 +3083,7 @@ public class DlSatTester {
 				return false;
 			}
 		}
-		final DepSet dep = DepSetFactory.create(curConceptDepSet);
+		final DepSet dep = DepSet.create(curConceptDepSet);
 		DlCompletionTreeArc pA = cGraph.createLoop(curNode, R, dep);
 		return setupEdge(pA, dep, redoForall.getValue() | redoFunc.getValue()
 				| redoAtMost.getValue() | redoIrr.getValue());
@@ -3179,7 +3119,7 @@ public class DlSatTester {
 		if (curNode.isLabelledBy(-C)) {
 			return false;
 		}
-		DepSet dep = DepSetFactory.create(curConceptDepSet);
+		DepSet dep = DepSet.create(curConceptDepSet);
 		dep.add(pA.getDep());
 		if (!curNode.isLabelledBy(C)) {
 			if (isFirstBranchCall()) {

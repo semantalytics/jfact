@@ -14,6 +14,7 @@ public class WebOnt_I5_26_001 extends TestCase {
 				+ "    <owl:Ontology/>\n"
 				+ "    <owl:Class rdf:nodeID=\"B\">\n"
 				+ "      <owl:intersectionOf rdf:parseType=\"Collection\">\n"
+				+ "        <owl:Class rdf:ID=\"A\"/>\n"
 				+ "        <owl:Class rdf:ID=\"B\"/>\n"
 				+ "      </owl:intersectionOf>\n" + "    </owl:Class>\n"
 				+ "    <rdf:Description>\n"

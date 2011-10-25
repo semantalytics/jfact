@@ -1,6 +1,6 @@
 <project default="distribution">
 
-	<!--Ant script to build JFact 
+	<!--Ant script to build JFact
     This file is part of the JFact DL reasoner
     Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
     This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
@@ -8,11 +8,11 @@
     You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
     -->
 
-	<!-- The version of the API being built - this is used to name
+	<!-- The version being built - this is used to name
           the zip file produced by the build.  For release builds this
           should be of the format <major>.<minor>.<revision>.  Note that the svn
             revision number will automatically be appended to this build number! -->
-	<property name="version" value="0.4" />
+	<property name="version" value="0.9.1" />
 
 	<!-- The directory that contains the jar file dependencies for
          the class path and building a release -->
@@ -90,7 +90,7 @@
 		</jar>
 	</target>
 
-	<!-- Creates a zip file containing the jar file containing the 
+	<!-- Creates a zip file containing the jar file containing the
          class files, a jar file containing the source, a lib directory containing
          the dependencies for the distribution. -->
 	<target name="distribution" depends="clean, binjar, srcjar">

@@ -2,7 +2,7 @@ package uk.ac.manchester.cs.jfact.kernel;
 
 /* This file is part of the JFact DL reasoner
  Copyright 2011 by Ignazio Palmisano, Dmitry Tsarkov, University of Manchester
- This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version. 
+ This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import static uk.ac.manchester.cs.jfact.helpers.DLTree.equalTrees;
@@ -24,7 +24,7 @@ import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
 import uk.ac.manchester.cs.jfact.helpers.FastSet;
 import uk.ac.manchester.cs.jfact.helpers.FastSetFactory;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
+import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
 import uk.ac.manchester.cs.jfact.kernel.actors.AddRoleActor;
 
 public final class Role extends ClassifiableEntry {
@@ -690,14 +690,12 @@ public final class Role extends ClassifiableEntry {
 		return extName + " " + extId;
 	}
 
-	@Override
 	public void print(LogAdapter o) {
-		o.print(String.format("Role \"%s\"(%s)%s%s%s%s%s", getName(), getId(),
-				(isTransitive() ? "T" : ""), (isReflexive() ? "R" : ""),
-				(isTopFunc() ? "t" : ""), (isFunctional() ? "F" : ""),
-				(isDataRole() ? "D" : "")));
+		o.print("Role \"", getName(), "\"(", getId(), ")", (isTransitive() ? "T" : ""),
+				(isReflexive() ? "R" : ""), (isTopFunc() ? "t" : ""),
+				(isFunctional() ? "F" : ""), (isDataRole() ? "D" : ""));
 		if (isSynonym()) {
-			o.print(String.format(" = \"%s\"\n", getSynonym().getName()));
+			o.print(" = \"", getSynonym().getName(), "\"\n");
 			return;
 		}
 		if (!toldSubsumers.isEmpty()) {
@@ -723,13 +721,13 @@ public final class Role extends ClassifiableEntry {
 			o.print("\"}");
 		}
 		if (pDomain != null) {
-			o.print(String.format(" Domain=(%s)=%s", bpDomain, pDomain));
+			o.print(" Domain=(", bpDomain, ")=", pDomain);
 		}
 		if (getTRange() != null) {
-			o.print(String.format(" Range=(%s)=%s", getBPRange(), getTRange()));
+			o.print(" Range=(", getBPRange(), ")=", getTRange());
 		}
-		o.print(String.format("\nAutomaton (size %s): %s%s", automaton.size(),
-				(automaton.isISafe() ? "I" : "i"), (automaton.isOSafe() ? "O" : "o")));
+		o.print("\nAutomaton (size ", automaton.size(), "): ", (automaton.isISafe() ? "I"
+				: "i"), (automaton.isOSafe() ? "O" : "o"));
 		automaton.print(o);
 		o.print("\n");
 	}

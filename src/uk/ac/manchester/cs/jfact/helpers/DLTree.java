@@ -112,10 +112,10 @@ public abstract class DLTree {
 		if (getChildren().size() > 0) {
 			StringBuilder b = new StringBuilder();
 			b.append("(");
-			b.append(elem.toString());
+			b.append(elem);
 			for (DLTree d : getChildren()) {
 				b.append(' ');
-				b.append(d.toString());
+				b.append(d);
 			}
 			b.append(")");
 			return b.toString();

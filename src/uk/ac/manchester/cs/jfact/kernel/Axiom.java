@@ -14,9 +14,8 @@ import java.util.List;
 
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
-import uk.ac.manchester.cs.jfact.helpers.IfDefs;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger;
-import uk.ac.manchester.cs.jfact.helpers.LeveLogger.LogAdapter;
+import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
+import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
 
 public final class Axiom {
 	// NS for different DLTree matchers for trees in axiom
@@ -45,16 +44,17 @@ public final class Axiom {
 		}
 		// normal concept absorption
 		Concept = InAx.getConcept(bestConcept.getChild());
-		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.print(" N-Absorb GCI to concept "
-					+ Concept.getName());
+		JFactReasonerConfiguration options = KB.getOptions();
+		if (options.isAbsorptionLoggingActive()) {
+			final LogAdapter logAbsorptionAdapter = options.getAbsorptionLog();
+			logAbsorptionAdapter.print(" N-Absorb GCI to concept ", Concept.getName());
 			if (Cons.size() > 1) {
-				LeveLogger.logger_absorption.print(" (other options are");
+				logAbsorptionAdapter.print(" (other options are");
 				for (int j = 1; j < Cons.size(); ++j) {
-					LeveLogger.logger_absorption.print(" "
-							+ InAx.getConcept(Cons.get(j).getChild()).getName());
+					logAbsorptionAdapter.print(" ",
+							InAx.getConcept(Cons.get(j).getChild()).getName());
 				}
-				LeveLogger.logger_absorption.print(")");
+				logAbsorptionAdapter.print(")");
 			}
 		}
 		// replace ~C [= D with C=~notC, notC [= D:
@@ -80,26 +80,23 @@ public final class Axiom {
 	}
 
 	/** simplify (OR C ...) for a non-primitive C in a given position */
-	private Axiom simplifyPosNP(DLTree pos) {
+	private Axiom simplifyPosNP(DLTree pos, TBox KB) {
 		SAbsRepCN();
 		Axiom ret = copy(pos);
 		ret.add(DLTreeFactory.createSNFNot(InAx.getConcept(pos.getChild())
 				.getDescription().copy()));
-		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.print(" simplify CN expression for "
-					+ pos.getChild());
-		}
+		KB.getOptions().getAbsorptionLog()
+				.print(" simplify CN expression for ", pos.getChild());
 		return ret;
 	}
 
 	/** simplify (OR ~C ...) for a non-primitive C in a given position */
-	private Axiom simplifyNegNP(DLTree pos) {
+	private Axiom simplifyNegNP(DLTree pos, TBox KB) {
 		SAbsRepCN();
 		Axiom ret = copy(pos);
 		ret.add(InAx.getConcept(pos).getDescription().copy());
-		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.print(" simplify ~CN expression for " + pos);
-		}
+		KB.getOptions().getAbsorptionLog()
+				.print(" simplify ~CN expression for ", pos);
 		return ret;
 	}
 
@@ -121,15 +118,13 @@ public final class Axiom {
 	}
 
 	/** split an axiom; @return new axiom and/or NULL */
-	public List<Axiom> split() {
+	public List<Axiom> split(TBox KB) {
 		List<Axiom> acc = new ArrayList<Axiom>();
 		for (DLTree p : disjuncts) {
 			if (InAx.isAnd(p)) {
 				SAbsSplit();
-				if (LeveLogger.isAbsorptionActive()) {
-					LeveLogger.logger_absorption.print(" split AND espression "
-							+ p.getChild());
-				}
+				KB.getOptions().getAbsorptionLog()
+						.print(" split AND espression ", p.getChild());
 				acc = split(acc, p, p.getChildren().iterator().next());
 				// no need to split more than once:
 				// every extra splits would be together with unsplitted parts
@@ -167,21 +162,23 @@ public final class Axiom {
 	}
 
 	/** dump GCI for debug purposes */
-	public void dump(LogAdapter o) {
-		o.print(" (neg-and");
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder(" (neg-and");
 		for (DLTree p : disjuncts) {
-			o.print(p.toString());
+			b.append(p);
 		}
-		o.print(")");
+		b.append(")");
+		return b.toString();
 	}
 
 	/// replace a defined concept with its description
-	public Axiom simplifyCN() {
+	public Axiom simplifyCN(TBox tbox) {
 		for (DLTree p : disjuncts) {
 			if (InAx.isPosNP(p)) {
-				return simplifyPosNP(p);
+				return simplifyPosNP(p, tbox);
 			} else if (InAx.isNegNP(p)) {
-				return simplifyNegNP(p);
+				return simplifyNegNP(p, tbox);
 			}
 		}
 		return null;
@@ -200,9 +197,7 @@ public final class Axiom {
 	private Axiom simplifyForall(DLTree pos, TBox KB) {
 		SAbsRepForall();
 		DLTree pAll = pos.getChild(); // (all R ~C)
-		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.print(" simplify ALL expression" + pAll);
-		}
+		KB.getOptions().getAbsorptionLog().print(" simplify ALL expression", pAll);
 		Axiom ret = copy(pos);
 		ret.add(KB.getTree(KB.replaceForall(pAll.copy())));
 		return ret;
@@ -222,15 +217,14 @@ public final class Axiom {
 	}
 
 	/// absorb into BOTTOM; @return true if absorption is performed
-	public boolean absorbIntoBottom() {
+	public boolean absorbIntoBottom(TBox KB) {
 		List<DLTree> Pos = new ArrayList<DLTree>(), Neg = new ArrayList<DLTree>();
 		for (DLTree p : disjuncts) {
 			switch (p.token()) {
 				case BOTTOM: // axiom in the form T [= T or ...; nothing to do
 					SAbsBApply();
-					if (IfDefs.RKG_DEBUG_ABSORPTION) {
-						LeveLogger.logger_absorption.print(" Absorb into BOTTOM");
-					}
+					KB.getOptions().getAbsorptionLog()
+							.print(" Absorb into BOTTOM");
 					return true;
 				case TOP: // skip it here
 					break;
@@ -247,11 +241,8 @@ public final class Axiom {
 			for (DLTree s : Pos) {
 				if (q.equals(s)) {
 					SAbsBApply();
-					if (IfDefs.RKG_DEBUG_ABSORPTION) {
-						LeveLogger.logger_absorption
-								.print(" Absorb into BOTTOM due to (not" + q + ") and"
-										+ s);
-					}
+					KB.getOptions().getAbsorptionLog()
+							.print(" Absorb into BOTTOM due to (not", q, ") and", s);
 					return true;
 				}
 			}
@@ -280,16 +271,17 @@ public final class Axiom {
 		}
 		// normal concept absorption
 		Concept Concept = InAx.getConcept(bestConcept);
-		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.print(" C-Absorb GCI to concept "
-					+ Concept.getName());
+		if (KB.getOptions().isAbsorptionLoggingActive()) {
+			final LogAdapter logAbsorptionAdapter = KB.getOptions()
+					.getAbsorptionLog();
+			logAbsorptionAdapter.print(" C-Absorb GCI to concept ", Concept.getName());
 			if (Cons.size() > 1) {
-				LeveLogger.logger_absorption.print(" (other options are");
+				logAbsorptionAdapter.print(" (other options are");
 				for (int j = 1; j < Cons.size(); ++j) {
-					LeveLogger.logger_absorption.print(" "
-							+ InAx.getConcept(Cons.get(j)).getName());
+					logAbsorptionAdapter.print(" ", InAx.getConcept(Cons.get(j))
+							.getName());
 				}
-				LeveLogger.logger_absorption.print(")");
+				logAbsorptionAdapter.print(")");
 			}
 		}
 		Concept.addDesc(createAnAxiom(bestConcept));
@@ -300,7 +292,7 @@ public final class Axiom {
 		return true;
 	}
 
-	public boolean absorbIntoDomain() {
+	public boolean absorbIntoDomain(TBox KB) {
 		List<DLTree> Cons = new ArrayList<DLTree>();
 		DLTree bestSome = null;
 		for (DLTree p : disjuncts) {
@@ -324,17 +316,18 @@ public final class Axiom {
 		} else {
 			role = Role.resolveRole(Cons.get(0).getChild().getLeft());
 		}
-		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption.print(" R-Absorb GCI to the domain of role "
-					+ role.getName());
+		if (KB.getOptions().isAbsorptionLoggingActive()) {
+			final LogAdapter logAbsorptionAdapter = KB.getOptions()
+					.getAbsorptionLog();
+			logAbsorptionAdapter.print(" R-Absorb GCI to the domain of role ",
+					role.getName());
 			if (Cons.size() > 1) {
-				LeveLogger.logger_absorption.print(" (other options are");
+				logAbsorptionAdapter.print(" (other options are");
 				for (int j = 1; j < Cons.size(); ++j) {
-					LeveLogger.logger_absorption.print(" "
-							+ Role.resolveRole(Cons.get(j).getChild().getLeft())
-									.getName());
+					logAbsorptionAdapter.print(" ",
+							Role.resolveRole(Cons.get(j).getChild().getLeft()).getName());
 				}
-				LeveLogger.logger_absorption.print(")");
+				logAbsorptionAdapter.print(")");
 			}
 		}
 		role.setDomain(createAnAxiom(bestSome));
@@ -367,13 +360,14 @@ public final class Axiom {
 		SAbsTApply();
 		// make an absorption
 		DLTree desc = KB.makeNonPrimitive(C, DLTreeFactory.createTop());
-		if (LeveLogger.isAbsorptionActive()) {
-			LeveLogger.logger_absorption
-					.println("TAxiom.absorbIntoTop() T-Absorb GCI to axiom");
+		if (KB.getOptions().isAbsorptionLoggingActive()) {
+			final LogAdapter logAbsorptionAdapter = KB.getOptions()
+					.getAbsorptionLog();
+			logAbsorptionAdapter.print("TAxiom.absorbIntoTop() T-Absorb GCI to axiom\n");
 			if (desc != null) {
-				LeveLogger.logger_absorption.println("s *TOP* [=" + desc + " and");
+				logAbsorptionAdapter.print("s *TOP* [=", desc, " and\n");
 			}
-			LeveLogger.logger.println(" " + C.getName() + " = *TOP*");
+			logAbsorptionAdapter.print(" ", C.getName(), " = *TOP*\n");
 		}
 		if (desc != null) {
 			KB.addSubsumeAxiom(DLTreeFactory.createTop(), desc);
