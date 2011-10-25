@@ -1,1 +1,1 @@
-OWLAPI revision 1786 (post 3.2.2 release)
+svn 1875 (post 3.2.4)
