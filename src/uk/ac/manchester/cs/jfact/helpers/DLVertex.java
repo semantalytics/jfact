@@ -302,7 +302,6 @@ public final class DLVertex extends DLVertexTagDFS {
 			case dtSplitConcept:
 				break;
 			case dtTop:
-			case dtUAll:
 			case dtNN:
 				return o.toString();
 			case dtDataExpr:
