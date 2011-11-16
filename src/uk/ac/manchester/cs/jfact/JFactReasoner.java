@@ -164,7 +164,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		if (ce.isAnonymous()) {
 			return false;
 		}
-		return !knownEntities.contains(ce);
+		return !knownEntities.contains(ce.asOWLClass());
 	}
 
 	public void ontologiesChanged(List<? extends OWLOntologyChange> changes)
@@ -733,7 +733,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 		return actor.getClassElements();
 	}
 
-	public void writeReasoningResult(LogAdapter o, long time) {
+	public synchronized void writeReasoningResult(LogAdapter o, long time) {
 		kernel.writeReasoningResult(o, time);
 	}
 }
