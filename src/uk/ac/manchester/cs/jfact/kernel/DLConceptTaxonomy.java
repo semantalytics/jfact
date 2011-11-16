@@ -500,8 +500,6 @@ public final class DLConceptTaxonomy extends Taxonomy {
 			removeNode(v);
 		}
 		checkExtraParents();
-		v = current;
 		insertCurrent(null);
-		//		v->print(std::cout);
 	}
 }
