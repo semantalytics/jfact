@@ -1,1 +1,1 @@
-FaCT++ revision to which this code refers: 1178
+FaCT++ revision to which this code refers: 1269
