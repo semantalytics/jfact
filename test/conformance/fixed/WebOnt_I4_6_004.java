@@ -1,4 +1,4 @@
-package conformance.badlyfixed;
+package conformance.fixed;
 
 import junit.framework.TestCase;
 import conformance.Factory;
@@ -6,7 +6,7 @@ import conformance.JUnitRunner;
 import conformance.TestClasses;
 
 public class WebOnt_I4_6_004 extends TestCase {
-	public void testWebOnt_I4_6_004() {
+	public void testWebOnt_I4_6_004() throws Exception{
 		String premise = "<rdf:RDF\n"
 				+ "    xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n"
 				+ "    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n"
@@ -32,5 +32,8 @@ public class WebOnt_I4_6_004 extends TestCase {
 		JUnitRunner r = new JUnitRunner(premise, conclusion, id, tc, d);
 		r.setReasonerFactory(Factory.factory());
 		r.run();
+
+
+
 	}
 }

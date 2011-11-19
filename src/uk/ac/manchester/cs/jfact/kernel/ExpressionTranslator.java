@@ -271,7 +271,6 @@ public final class ExpressionTranslator implements DLExpressionVisitorEx<DLTree>
 
 	public DLTree visit(final Datatype<?> expr) {
 		DatatypeEntry entry = new DatatypeEntry(expr);
-
 		return DLTreeFactory.wrap(entry);
 	}
 

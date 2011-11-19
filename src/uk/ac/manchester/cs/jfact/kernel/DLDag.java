@@ -54,6 +54,7 @@ public final class DLDag {
 	private boolean preferNonGen;
 	/** flag whether cache should be used */
 	private boolean useDLVCache;
+	private int finalDagSize;
 	private final JFactReasonerConfiguration options;
 
 	/// replace existing vertex at index I with a vertex V
@@ -116,11 +117,10 @@ public final class DLDag {
 
 	/** add vertex to the end of DAG and calculate it's statistic if necessary */
 	public int directAdd(DLVertex v) {
-		int index=index(v.getConcept());
-		if(index!=bpINVALID) {
+		int index = index(v.getConcept());
+		if (index != bpINVALID) {
 			return index;
 		}
-
 		heap.add(v);
 		// return an index of just added entry
 		return heap.size() - 1;
@@ -247,7 +247,7 @@ public final class DLDag {
 	}
 
 	public DLDag(final JFactReasonerConfiguration Options) {
-		this.options = Options;
+		options = Options;
 		/** hash-table for verteces (and, all, LE) fast search */
 		DLVTable indexAnd = new DLVTable(this);
 		DLVTable indexAll = new DLVTable(this);
@@ -255,11 +255,11 @@ public final class DLDag {
 		indexes.put(DagTag.dtCollection, indexAnd);
 		indexes.put(DagTag.dtAnd, indexAnd);
 		indexes.put(DagTag.dtIrr, indexAll);
-		indexes.put(DagTag.dtUAll, indexAll);
 		indexes.put(DagTag.dtForall, indexAll);
 		indexes.put(DagTag.dtLE, indexLE);
 		nCacheHits = 0;
 		useDLVCache = true;
+		finalDagSize = 0;
 		heap.add(new DLVertex(DagTag.dtBad));
 		heap.add(new DLVertex(DagTag.dtTop));
 		if (!isCorrectOption(options.getORSortSat())
@@ -268,32 +268,52 @@ public final class DLDag {
 		}
 	}
 
-	public void removeAfter(int n) {
-		assert n < size();
-		for (int i = n; i < heap.size(); i++) {
+
+
+	/// set the final DAG size
+	public void setFinalSize() {
+		finalDagSize = size();
+		setExpressionCache(false);
+	}
+
+	public void removeQuery(NamedEntryCollection<Concept> Concepts) {
+		for (int i = size() - 1; i >= finalDagSize; --i) {
 			DLVertex v = heap.get(i);
-			if (v.getConcept() != null
-					&& ((v.getConcept() instanceof DatatypeEntry) || (v.getConcept() instanceof LiteralEntry))) {
-				((NamedEntry) v.getConcept()).setIndex(bpINVALID);
+			switch (v.getType()) {
+				case dtDataType:
+				case dtDataExpr:
+					((DatatypeEntry) v.getConcept()).setIndex(bpINVALID);
+					break;
+				case dtDataValue:
+					((LiteralEntry) v.getConcept()).setIndex(bpINVALID);
+					break;
+				case dtPConcept:
+				case dtNConcept:
+					if (Concepts.remove((Concept) v.getConcept())) {
+						throw new UnreachableSituationException(); // can't remove non-last concept
+					}
+					break;
+				default:
+					break;
 			}
 		}
-		Helper.resize(heap, n);
+		Helper.resize(heap, finalDagSize);
 	}
 
 	public void setOrderDefaults(final String defSat, final String defSub) {
 		assert isCorrectOption(defSat) && isCorrectOption(defSub);
-		final String orSortSat = options.getORSortSat();
-		options.getLog().printTemplate(Templates.SET_ORDER_DEFAULTS1, orSortSat, defSat);
-		if (orSortSat.charAt(0) == '0') {
+		options.getLog().print("orSortSat: initial=", options.getORSortSat(),
+				", default=", defSat);
+		if (options.getORSortSat().charAt(0) == '0') {
 			options.setorSortSat(defSat);
 		}
-		final String orSortSub = options.getORSortSub();
-		options.getLog().printTemplate(Templates.SET_ORDER_DEFAULTS2, orSortSat,
-				orSortSub, defSub);
-		if (orSortSub.charAt(0) == '0') {
+		options.getLog().print(", used=", options.getORSortSat(), "\n");
+		options.getLog().print("orSortSub: initial=", options.getORSortSub(),
+				", default=", defSub);
+		if (options.getORSortSub().charAt(0) == '0') {
 			options.setorSortSub(defSub);
 		}
-		options.getLog().printTemplate(Templates.SET_ORDER_DEFAULTS3, orSortSub);
+		options.getLog().print(", used=", options.getORSortSub(), "\n");
 	}
 
 	public void setOrderOptions(final String opt) {
@@ -343,7 +363,6 @@ public final class DLDag {
 			case dtPSingleton:
 			case dtNSingleton:
 			case dtForall:
-			case dtUAll:
 			case dtChoose:
 			case dtLE: // check a single referenced concept
 				int index = createBiPointer(v.getConceptIndex(), pos);
@@ -354,7 +373,6 @@ public final class DLDag {
 				}
 				break;
 			default: // nothing to do
-
 				break;
 		}
 		v.setProcessed(pos);
@@ -401,7 +419,6 @@ public final class DLDag {
 				}
 				break;
 			default:
-
 				break;
 		}
 		v.updateStatValues(d, s, b, g, pos);
@@ -551,7 +568,7 @@ public final class DLDag {
 		if (sum > 0) {
 			sum--;
 		}
-		options.getLog().printTemplate(Templates.DETERMINE_SORTS, (sum > 0 ? sum : "no"));
+		options.getLog().printTemplate(Templates.DETERMINE_SORTS, sum > 0 ? sum : "no");
 	}
 
 	/** merge sorts for a given role */
@@ -601,7 +618,6 @@ public final class DLDag {
 			case dtDataValue:
 			case dtDataExpr:
 			case dtNN:
-
 				break;
 			case dtTop:
 			default:

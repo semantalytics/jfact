@@ -13,7 +13,6 @@ import java.util.Set;
 
 import uk.ac.manchester.cs.jfact.dep.DepSet;
 import uk.ac.manchester.cs.jfact.helpers.FastSetSimple;
-import uk.ac.manchester.cs.jfact.helpers.Reference;
 
 public final class DataTypeSituation<R extends Comparable<R>> {
 	/** positive type appearance */
@@ -45,10 +44,8 @@ public final class DataTypeSituation<R extends Comparable<R>> {
 	 */
 	private boolean addUpdatedInterval(DepInterval<R> i, Datatype<R> interval,
 			DepSet localDep) {
-
 		if (!i.consistent(interval)) {
-
-	localDep.add(i.locDep);
+			localDep.add(i.locDep);
 			reasoner.reportClash(localDep, "C-IT");
 			return true;
 		}
@@ -70,31 +67,6 @@ public final class DataTypeSituation<R extends Comparable<R>> {
 		return type;
 	}
 
-	/** clear the appearance flags */
-	//	public void clear() {
-	//		pType = null;
-	//		nType = null;
-	//		constraints.clear();
-	//		accDep.clear();
-	//	}
-	// presence interface
-	/** check if type is present positively in the node */
-	public boolean hasPType() {
-		return pType != null;
-	}
-
-	/** check if type is present negatively in the node */
-	public boolean hasNType() {
-		return nType != null;
-	}
-
-	/** set the precense of the PType */
-	protected void setPType(final DepSet type) {
-		if (pType == null) {
-			pType = type;
-		}
-	}
-
 	/**
 	 * add restrictions [POS]INT to intervals
 	 *
@@ -105,23 +77,17 @@ public final class DataTypeSituation<R extends Comparable<R>> {
 			literals.addAll(interval.listValues());
 		}
 		Datatype<R> realInterval = pos ? interval : new DatatypeNegation<R>(interval);
-
-	Set<DepInterval<R>> c = constraints;
+		Set<DepInterval<R>> c = constraints;
 		constraints = new HashSet<DepInterval<R>>();
 		if (!c.isEmpty()) {
-			System.out.println("\nDataTypeSituation.addInterval() c: "+c);
 			for (DepInterval<R> d : c) {
 				if (addUpdatedInterval(d, realInterval, DepSet.create(dep))) {
-					System.out.println("\nDataTypeSituation.addInterval() true c: "+c);
 					return true;
 				}
 			}
 		}
-		System.out.println("\nDataTypeSituation.addInterval() constraints: "+constraints);
-
 		if (constraints.isEmpty()) {
 			reasoner.reportClash(accDep, "C-MM");
-
 			return true;
 		}
 		return false;
@@ -144,28 +110,16 @@ public final class DataTypeSituation<R extends Comparable<R>> {
 		return false;
 	}
 
-	public void setNType(DepSet t) {
-		nType = t;
-	}
-
-	public DepSet getPType() {
-		return pType;
-	}
-
-	public DepSet getNType() {
-		return nType;
-	}
-
 	private boolean emptyConstraints() {
-		return constraints.isEmpty()||constraints.iterator().next().e==null;
+		return constraints.isEmpty() || constraints.iterator().next().e == null;
 	}
 
 	public boolean checkCompatibleValue(DataTypeSituation<?> other) {
 		if (!type.isCompatible(other.type)) {
-			System.out.println("DataTypeSituation.checkCompatibleValue() "+type+"\t"+other.type+ type.isCompatible(other.type));
+			System.out.println("DataTypeSituation.checkCompatibleValue() " + type + "\t"
+					+ other.type + type.isCompatible(other.type));
 			return false;
 		}
-
 		if (this.emptyConstraints() || other.emptyConstraints()) {
 			return true;
 		}
@@ -233,7 +187,6 @@ public final class DataTypeSituation<R extends Comparable<R>> {
 
 		/** check if the interval is consistent wrt given type */
 		public boolean consistent(Datatype<R> type) {
-			System.out.println("\nDataTypeSituation.DepInterval.consistent() "+e+"\t"+type);
 			return e == null || e.isCompatible(type);
 		}
 
@@ -262,6 +215,34 @@ public final class DataTypeSituation<R extends Comparable<R>> {
 			return (e == null ? 0 : e.hashCode())
 					+ (locDep == null ? 0 : locDep.hashCode());
 		}
+	}
+
+	// presence interface
+	/** check if type is present positively in the node */
+	public boolean hasPType() {
+		return pType != null;
+	}
+
+	/** check if type is present negatively in the node */
+	public boolean hasNType() {
+		return nType != null;
+	}
+
+	/** set the precense of the PType */
+	public void setPType(final DepSet type) {
+		pType = type;
+	}
+
+	public void setNType(DepSet t) {
+		nType = t;
+	}
+
+	public DepSet getPType() {
+		return pType;
+	}
+
+	public DepSet getNType() {
+		return nType;
 	}
 
 	@Override

@@ -122,8 +122,7 @@ public final class DLVertex extends DLVertexTagDFS {
 	private final int n;
 	/** maximal depth, size and frequency of reference of the expression */
 	private final MergableLabel sort = new MergableLabel();
-
-	public static final boolean printExtendedStats=false;
+	public static final boolean printExtendedStats = false;
 
 	/** get RW access to the label */
 	public MergableLabel getSort() {
@@ -272,28 +271,28 @@ public final class DLVertex extends DLVertexTagDFS {
 	@Override
 	public String toString() {
 		StringBuilder o = new StringBuilder();
-		if(printExtendedStats) {
-		o.append("[d(");
-		o.append(stat[0]);
-		o.append("/");
-		o.append(stat[1]);
-		o.append("),s(");
-		o.append(stat[2]);
-		o.append("/");
-		o.append(stat[3]);
-		o.append("),b(");
-		o.append(stat[4]);
-		o.append("/");
-		o.append(stat[5]);
-		o.append("),g(");
-		o.append(stat[6]);
-		o.append("/");
-		o.append(stat[7]);
-		o.append("),f(");
-		o.append(stat[8]);
-		o.append("/");
-		o.append(stat[9]);
-		o.append(")] ");
+		if (printExtendedStats) {
+			o.append("[d(");
+			o.append(stat[0]);
+			o.append("/");
+			o.append(stat[1]);
+			o.append("),s(");
+			o.append(stat[2]);
+			o.append("/");
+			o.append(stat[3]);
+			o.append("),b(");
+			o.append(stat[4]);
+			o.append("/");
+			o.append(stat[5]);
+			o.append("),g(");
+			o.append(stat[6]);
+			o.append("/");
+			o.append(stat[7]);
+			o.append("),f(");
+			o.append(stat[8]);
+			o.append("/");
+			o.append(stat[9]);
+			o.append(")] ");
 		}
 		o.append(op.getName());
 		switch (op) {
@@ -315,7 +314,7 @@ public final class DLVertex extends DLVertexTagDFS {
 			case dtPSingleton:
 			case dtNSingleton:
 				o.append(String.format(Templates.DLVERTEXPrint2.getTemplate(),
-						concept.getName(), (op.isNNameTag() ? "=" : "[="), conceptIndex));
+						concept.getName(), op.isNNameTag() ? "=" : "[=", conceptIndex));
 				return o.toString();
 			case dtLE:
 				o.append(" ");

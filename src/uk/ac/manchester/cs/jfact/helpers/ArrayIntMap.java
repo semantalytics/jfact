@@ -117,8 +117,7 @@ public final class ArrayIntMap {
 	}
 
 	public boolean containsAll(ArrayIntMap c) {
-
-if (c.size == 0) {
+		if (c.size == 0) {
 			return true;
 		}
 		if (size == 0) {

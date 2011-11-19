@@ -105,7 +105,7 @@ public final class NominalReasoner extends DlSatTester {
 			options.getLog().print("]");
 		}
 		options.getLog().printTemplate(Templates.CONSISTENT_NOMINAL,
-				(result ? "consistent" : "INCONSISTENT"));
+				result ? "consistent" : "INCONSISTENT");
 		if (!result) {
 			return false;
 		}

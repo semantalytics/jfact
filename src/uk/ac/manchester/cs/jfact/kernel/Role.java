@@ -691,9 +691,9 @@ public final class Role extends ClassifiableEntry {
 	}
 
 	public void print(LogAdapter o) {
-		o.print("Role \"", getName(), "\"(", getId(), ")", (isTransitive() ? "T" : ""),
-				(isReflexive() ? "R" : ""), (isTopFunc() ? "t" : ""),
-				(isFunctional() ? "F" : ""), (isDataRole() ? "D" : ""));
+		o.print("Role \"", getName(), "\"(", getId(), ")", isTransitive() ? "T" : "",
+				isReflexive() ? "R" : "", isTopFunc() ? "t" : "", isFunctional() ? "F"
+						: "", isDataRole() ? "D" : "");
 		if (isSynonym()) {
 			o.print(" = \"", getSynonym().getName(), "\"\n");
 			return;
@@ -726,8 +726,8 @@ public final class Role extends ClassifiableEntry {
 		if (getTRange() != null) {
 			o.print(" Range=(", getBPRange(), ")=", getTRange());
 		}
-		o.print("\nAutomaton (size ", automaton.size(), "): ", (automaton.isISafe() ? "I"
-				: "i"), (automaton.isOSafe() ? "O" : "o"));
+		o.print("\nAutomaton (size ", automaton.size(), "): ", automaton.isISafe() ? "I"
+				: "i", automaton.isOSafe() ? "O" : "o");
 		automaton.print(o);
 		o.print("\n");
 	}

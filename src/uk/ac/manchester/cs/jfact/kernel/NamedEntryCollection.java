@@ -8,7 +8,10 @@ package uk.ac.manchester.cs.jfact.kernel;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.semanticweb.owlapi.reasoner.FreshEntityPolicy;
+
 import uk.ac.manchester.cs.jfact.helpers.Helper;
+import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
 
 /**
  * class for collect TNamedEntry'es together. Template parameter should be
@@ -24,6 +27,7 @@ public class NamedEntryCollection<T extends NamedEntry> {
 	private final String typeName;
 	/** flag to lock the nameset (ie, prohibit to add new names there) */
 	private boolean locked;
+	private final JFactReasonerConfiguration options;
 
 	/** abstract method for additional tuning of newly created element */
 	public void registerNew(T p) {}
@@ -37,11 +41,13 @@ public class NamedEntryCollection<T extends NamedEntry> {
 	}
 
 	/** c'tor: clear 0-th element */
-	public NamedEntryCollection(final String name, NameCreator<T> creator) {
+	public NamedEntryCollection(final String name, NameCreator<T> creator,
+			JFactReasonerConfiguration options) {
 		typeName = name;
 		locked = false;
 		base.add(null);
 		nameset = new NameSet<T>(creator);
+		this.options = options;
 	}
 
 	/** check if collection is locked */
@@ -70,13 +76,23 @@ public class NamedEntryCollection<T extends NamedEntry> {
 			return p;
 		}
 		// check if it is possible to insert name
-		if (isLocked()) {
-			// TODO add check to the fresh entity policy in the OWLReasoner interface
+		if (isLocked() && !options.isUseUndefinedNames()
+				&& options.getFreshEntityPolicy() == FreshEntityPolicy.DISALLOW) {
 			throw new ReasonerFreshEntityException("Unable to register '" + name
 					+ "' as a " + typeName, name);
 		}
-		// name in name set, and it
-		return registerElem(nameset.add(name));
+		// create name in name set, and register it
+		p = registerElem(nameset.add(name));
+		// if fresh entity -- mark it System
+		if (isLocked()) {
+			p.setSystem();
+			if (p instanceof ClassifiableEntry) {
+				((ClassifiableEntry) p).setNonClassifiable();
+			}
+		}
+		return p;
+		//		// name in name set, and it
+		//		return registerElem(nameset.add(name));
 	}
 
 	/**
@@ -84,14 +100,14 @@ public class NamedEntryCollection<T extends NamedEntry> {
 	 * last entry.
 	 */
 	public boolean remove(T p) {
-		if (!isRegistered(p.getName())) {
-			return true;
+		if (!isRegistered(p.getName())) // not in a name-set: just delete it
+		{
+			return false;
 		}
-		// check if the entry is the last entry
-		if (base.size() - p.getId() != 1) {
-			return true;
+		// we might delete vars in order (6,7), so the resize should be done to 6
+		if (p.getId() > 0 && base.size() > p.getId()) {
+			Helper.resize(base, p.getId());
 		}
-		Helper.resize(base, p.getId());
 		nameset.remove(p.getName());
 		return false;
 	}

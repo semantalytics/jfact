@@ -1,15 +1,7 @@
 package datatypes;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
-import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
 
 public class DatatypeNumericEnumeration<R extends Comparable<R>> extends  DatatypeEnumeration<R> implements NumericDatatype<R>{
 

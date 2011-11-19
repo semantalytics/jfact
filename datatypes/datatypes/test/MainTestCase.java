@@ -4,14 +4,11 @@ import static datatypes.Facets.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import junit.framework.TestCase;
 import datatypes.Datatype;
 import datatypes.DatatypeFactory;
-import datatypes.DatatypeIntersection;
 import datatypes.Facet;
 import datatypes.Literal;
 

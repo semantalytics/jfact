@@ -12,11 +12,11 @@ public class StringOption implements Option {
 
 	public StringOption(final String name, String defVal) {
 		optionName = name;
-		this.value = defVal;
+		value = defVal;
 	}
 
 	public String getOptionName() {
-		return this.optionName;
+		return optionName;
 	}
 
 	public <O> O getValue() {

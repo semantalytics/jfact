@@ -1,19 +1,14 @@
 package datatypes.test;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
-
 import datatypes.Datatype;
-import datatypes.DatatypeEntry;
-import datatypes.DatatypeEnumeration;
 import datatypes.DatatypeExpression;
 import datatypes.DatatypeFactory;
 import datatypes.DatatypeIntersection;
-import datatypes.DatatypeNegation;
 import datatypes.DatatypeNumericEnumeration;
 import datatypes.Facets;
 import datatypes.NumericDatatype;

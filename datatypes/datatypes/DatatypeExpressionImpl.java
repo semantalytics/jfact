@@ -149,4 +149,9 @@ class DatatypeExpressionImpl<O extends Comparable<O>> extends ABSTRACT_DATATYPE<
 
 		return false;
 	}
+	@Override
+	public int hashCode() {
+
+		return host.hashCode()+knownFacetValues.hashCode();
+	}
 }

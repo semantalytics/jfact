@@ -98,10 +98,21 @@ public class JFactReasonerConfiguration implements OWLReasonerConfiguration {
 	 */
 	private static final Option useCompletelyDefined = getOption("useCompletelyDefined",
 			true);
+	/**
+	 * Option 'useSpecialDomains' (development) controls the special processing
+	 * of R&D for non-simple roles. Should always be set to true.
+	 */
+	private static final Option useSpecialDomains = getOption("useSpecialDomains", true);
+	/**
+	 * Internal use only. Option 'skipBeforeBlock' allow user to skip given
+	 * number of nodes before make a block.
+	 */
+	private static final Option skipBeforeBlock = getOption("skipBeforeBlock", 0);
 	private static final List<Option> defaults = new ArrayList<Option>(Arrays.asList(
 			absorptionFlags, alwaysPreferEquals, dumpQuery, IAOEFLG, orSortSat,
 			orSortSub, verboseOutput, useAnywhereBlocking, useBackjumping,
-			useCompletelyDefined, useLazyBlocking, useRelevantOnly, useSemanticBranching));
+			useCompletelyDefined, useLazyBlocking, useRelevantOnly, useSemanticBranching,
+			useSpecialDomains, skipBeforeBlock));
 	/** set of all avaliable (given) options */
 	private final Map<String, Option> base = new HashMap<String, Option>();
 
@@ -202,10 +213,10 @@ public class JFactReasonerConfiguration implements OWLReasonerConfiguration {
 
 	public JFactReasonerConfiguration(OWLReasonerConfiguration source) {
 		this();
-		this.progressMonitor = source.getProgressMonitor();
-		this.freshEntityPolicy = source.getFreshEntityPolicy();
-		this.individualNodeSetPolicy = source.getIndividualNodeSetPolicy();
-		this.timeOut = source.getTimeOut();
+		progressMonitor = source.getProgressMonitor();
+		freshEntityPolicy = source.getFreshEntityPolicy();
+		individualNodeSetPolicy = source.getIndividualNodeSetPolicy();
+		timeOut = source.getTimeOut();
 	}
 
 	public FreshEntityPolicy getFreshEntityPolicy() {
@@ -243,121 +254,126 @@ public class JFactReasonerConfiguration implements OWLReasonerConfiguration {
 	boolean RKG_USE_FAIRNESS = false;
 	boolean FPP_DEBUG_SPLIT_MODULES = false;
 	boolean splits = false;
+	/// whether EL polynomial reasoner should be used
+	boolean useELReasoner = false;
+	/// allow reasoner to use undefined names in queries
+	boolean useUndefinedNames = true;
+	boolean useAxiomSplitting = false;
 
 	public boolean isLoggingActive() {
-		return this.USE_LOGGING;
+		return USE_LOGGING;
 	}
 
 	public void setLoggingActive(boolean b) {
-		this.USE_LOGGING = b;
+		USE_LOGGING = b;
 	}
 
 	public boolean isAbsorptionLoggingActive() {
-		return this.RKG_DEBUG_ABSORPTION;
+		return RKG_DEBUG_ABSORPTION;
 	}
 
 	public void setAbsorptionLoggingActive(boolean b) {
-		this.RKG_DEBUG_ABSORPTION = b;
+		RKG_DEBUG_ABSORPTION = b;
 	}
 
 	public boolean isRKG_IMPROVE_SAVE_RESTORE_DEPSET() {
-		return this.RKG_IMPROVE_SAVE_RESTORE_DEPSET;
+		return RKG_IMPROVE_SAVE_RESTORE_DEPSET;
 	}
 
 	public void setRKG_IMPROVE_SAVE_RESTORE_DEPSET(boolean b) {
-		this.RKG_IMPROVE_SAVE_RESTORE_DEPSET = b;
+		RKG_IMPROVE_SAVE_RESTORE_DEPSET = b;
 	}
 
 	public boolean isRKG_PRINT_DAG_USAGE() {
-		return this.RKG_PRINT_DAG_USAGE;
+		return RKG_PRINT_DAG_USAGE;
 	}
 
 	public void setRKG_PRINT_DAG_USAGE(boolean b) {
-		this.RKG_PRINT_DAG_USAGE = b;
+		RKG_PRINT_DAG_USAGE = b;
 	}
 
 	public boolean isRKG_USE_SIMPLE_RULES() {
-		return this.RKG_USE_SIMPLE_RULES;
+		return RKG_USE_SIMPLE_RULES;
 	}
 
 	public void setRKG_USE_SIMPLE_RULES(boolean b) {
-		this.RKG_USE_SIMPLE_RULES = b;
+		RKG_USE_SIMPLE_RULES = b;
 	}
 
 	public boolean isRKG_USE_SORTED_REASONING() {
-		return this.RKG_USE_SORTED_REASONING;
+		return RKG_USE_SORTED_REASONING;
 	}
 
 	public void setRKG_USE_SORTED_REASONING(boolean b) {
-		this.RKG_USE_SORTED_REASONING = b;
+		RKG_USE_SORTED_REASONING = b;
 	}
 
 	public boolean isUSE_REASONING_STATISTICS() {
-		return this.USE_REASONING_STATISTICS;
+		return USE_REASONING_STATISTICS;
 	}
 
 	public void setUSE_REASONING_STATISTICS(boolean b) {
-		this.USE_REASONING_STATISTICS = b;
+		USE_REASONING_STATISTICS = b;
 	}
 
 	public boolean isRKG_UPDATE_RND_FROM_SUPERROLES() {
-		return this.RKG_UPDATE_RND_FROM_SUPERROLES;
+		return RKG_UPDATE_RND_FROM_SUPERROLES;
 	}
 
 	public void setRKG_UPDATE_RND_FROM_SUPERROLES(boolean b) {
-		this.RKG_UPDATE_RND_FROM_SUPERROLES = b;
+		RKG_UPDATE_RND_FROM_SUPERROLES = b;
 	}
 
 	public boolean isUSE_BLOCKING_STATISTICS() {
-		return this.USE_BLOCKING_STATISTICS;
+		return USE_BLOCKING_STATISTICS;
 	}
 
 	public void setUSE_BLOCKING_STATISTICS(boolean b) {
-		this.USE_BLOCKING_STATISTICS = b;
+		USE_BLOCKING_STATISTICS = b;
 	}
 
 	public boolean isRKG_USE_DYNAMIC_BACKJUMPING() {
-		return this.RKG_USE_DYNAMIC_BACKJUMPING;
+		return RKG_USE_DYNAMIC_BACKJUMPING;
 	}
 
 	public void setRKG_USE_DYNAMIC_BACKJUMPING(boolean b) {
-		this.RKG_USE_DYNAMIC_BACKJUMPING = b;
+		RKG_USE_DYNAMIC_BACKJUMPING = b;
 	}
 
 	public boolean isTMP_PRINT_TAXONOMY_INFO() {
-		return this.TMP_PRINT_TAXONOMY_INFO;
+		return TMP_PRINT_TAXONOMY_INFO;
 	}
 
 	public void setTMP_PRINT_TAXONOMY_INFO(boolean b) {
-		this.TMP_PRINT_TAXONOMY_INFO = b;
+		TMP_PRINT_TAXONOMY_INFO = b;
 	}
 
 	public boolean isDEBUG_SAVE_RESTORE() {
-		return this.DEBUG_SAVE_RESTORE;
+		return DEBUG_SAVE_RESTORE;
 	}
 
 	public void setDEBUG_SAVE_RESTORE(boolean b) {
-		this.DEBUG_SAVE_RESTORE = b;
+		DEBUG_SAVE_RESTORE = b;
 	}
 
 	public boolean isRKG_USE_FAIRNESS() {
-		return this.RKG_USE_FAIRNESS;
+		return RKG_USE_FAIRNESS;
 	}
 
 	public void setRKG_USE_FAIRNESS(boolean b) {
-		this.RKG_USE_FAIRNESS = b;
+		RKG_USE_FAIRNESS = b;
 	}
 
 	public boolean isFPP_DEBUG_SPLIT_MODULES() {
-		return this.FPP_DEBUG_SPLIT_MODULES;
+		return FPP_DEBUG_SPLIT_MODULES;
 	}
 
 	public void setFPP_DEBUG_SPLIT_MODULES(boolean b) {
-		this.FPP_DEBUG_SPLIT_MODULES = b;
+		FPP_DEBUG_SPLIT_MODULES = b;
 	}
 
 	public boolean isSplits() {
-		return this.splits;
+		return splits;
 	}
 
 	public void setSplits(boolean splits) {
@@ -410,13 +426,9 @@ public class JFactReasonerConfiguration implements OWLReasonerConfiguration {
 			print(String.format(t.getTemplate(), strings));
 		}
 
-
-
 		public void print(int i) {
 			print(Integer.toString(i));
 		}
-
-
 
 		public void print(double i) {
 			try {
@@ -426,7 +438,6 @@ public class JFactReasonerConfiguration implements OWLReasonerConfiguration {
 			}
 		}
 
-
 		public void print(float i) {
 			try {
 				out.write(Float.toString(i).getBytes());
@@ -434,8 +445,6 @@ public class JFactReasonerConfiguration implements OWLReasonerConfiguration {
 				e.printStackTrace();
 			}
 		}
-
-
 
 		public void print(boolean i) {
 			try {
@@ -445,25 +454,17 @@ public class JFactReasonerConfiguration implements OWLReasonerConfiguration {
 			}
 		}
 
-
-
 		public void print(byte i) {
 			print(Byte.toString(i));
 		}
-
-
 
 		public void print(char i) {
 			print(Character.toString(i));
 		}
 
-
-
 		public void print(short i) {
 			print(Short.toString(i));
 		}
-
-
 
 		public void print(String i) {
 			try {
@@ -474,8 +475,6 @@ public class JFactReasonerConfiguration implements OWLReasonerConfiguration {
 			}
 		}
 
-
-
 		public void println() {
 			print('\n');
 		}
@@ -483,8 +482,6 @@ public class JFactReasonerConfiguration implements OWLReasonerConfiguration {
 		public void print(Object s) {
 			print(s == null ? "null" : s.toString());
 		}
-
-
 
 		public void print(Object... s) {
 			for (Object o : s) {
@@ -523,49 +520,27 @@ public class JFactReasonerConfiguration implements OWLReasonerConfiguration {
 	static final class LogAdapterImpl implements LogAdapter {
 		public void printTemplate(Templates t, Object... strings) {}
 
-
-
 		public void print(int i) {}
-
-
 
 		public void print(double d) {}
 
-
-
 		public void print(float f) {}
-
-
 
 		public void print(boolean b) {}
 
-
-
 		public void print(byte b) {}
-
-
 
 		public void print(char c) {}
 
-
-
 		public void print(short s) {}
 
-
-
 		public void print(String s) {}
-
-
 
 		public void println() {}
 
 		public void print(Object s) {}
 
-
-
 		public void print(Object... s) {}
-
-
 
 		public void print(Object s1, Object s2) {}
 
@@ -574,5 +549,29 @@ public class JFactReasonerConfiguration implements OWLReasonerConfiguration {
 		public void print(Object s1, Object s2, Object s3, Object s4) {}
 
 		public void print(Object s1, Object s2, Object s3, Object s4, Object s5) {}
+	}
+
+	public boolean isUseELReasoner() {
+		return useELReasoner;
+	}
+
+	public void setUseELReasoner(boolean useELReasoner) {
+		this.useELReasoner = useELReasoner;
+	}
+
+	public boolean isUseUndefinedNames() {
+		return useUndefinedNames;
+	}
+
+	public void setUseUndefinedNames(boolean useUndefinedNames) {
+		this.useUndefinedNames = useUndefinedNames;
+	}
+
+	public boolean isUseAxiomSplitting() {
+		return useAxiomSplitting;
+	}
+
+	public void setUseAxiomSplitting(boolean useAxiomSplitting) {
+		this.useAxiomSplitting = useAxiomSplitting;
 	}
 }

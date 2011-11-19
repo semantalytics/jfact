@@ -6,14 +6,44 @@ package uk.ac.manchester.cs.jfact.kernel.dl.axioms;
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom;
+import uk.ac.manchester.cs.jfact.split.TSignature;
+import uk.ac.manchester.cs.jfact.split.TSignatureUpdater;
 
 abstract class AxiomImpl implements Axiom {
 	/** id of the axiom */
 	private int id;
+	/// signature (built lazily on demand)
+	TSignature sig = null;
+	/// flag to show whether or not the axiom is in the search space for the optimised modularization algorithm
+	boolean inSearchSpace = false;
 	/// flag to show whether or not the axiom is in the module
 	boolean inModule;
 	/** flag to show whether it is used (to support retraction) */
 	private boolean used;
+
+	/// set the isSearchSpace flag
+	public void setInSS(boolean flag) {
+		inSearchSpace = flag;
+	}
+
+	/// get the value of the isSearchSpace flag
+	public boolean isInSS() {
+		return inSearchSpace;
+	}
+
+	// signature access
+	public TSignature getSignature() {
+		if (sig == null) {
+			buildSignature();
+		}
+		return sig;
+	}
+
+	void buildSignature() {
+		sig = new TSignature();
+		TSignatureUpdater Updater = new TSignatureUpdater(sig);
+		accept(Updater);
+	}
 
 	public AxiomImpl() {
 		used = true;

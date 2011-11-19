@@ -1,4 +1,4 @@
-package conformance.broken;
+package conformance.newfeatures;
 
 import junit.framework.TestCase;
 import conformance.Factory;

@@ -51,7 +51,7 @@ public final class ModelCacheConst extends ModelCacheInterface {
 	/** log this cache entry (with given level) */
 	@Override
 	public void logCacheEntry(int level, LogAdapter l) {
-		l.printTemplate(Templates.LOGCACHEENTRY, (isTop ? "TOP" : "BOTTOM"));
+		l.printTemplate(Templates.LOGCACHEENTRY, isTop ? "TOP" : "BOTTOM");
 	}
 
 	/** create const cache by BP; BP should be either bpTOP or bpBOTTOM */

@@ -12,11 +12,11 @@ public class LongOption implements Option {
 
 	public LongOption(final String name, Long defVal) {
 		optionName = name;
-		this.value = defVal;
+		value = defVal;
 	}
 
 	public String getOptionName() {
-		return this.optionName;
+		return optionName;
 	}
 
 	public <O> O getValue() {

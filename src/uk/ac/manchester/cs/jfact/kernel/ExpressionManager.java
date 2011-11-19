@@ -383,6 +383,10 @@ public final class ExpressionManager {
 		return new ObjectRoleChain(l);
 	}
 
+	public ObjectRoleComplexExpression compose(Expression e1, Expression e2) {
+		return new ObjectRoleChain(Arrays.asList(e1, e2));
+	}
+
 	/** get a expression corresponding to R projected from C */
 	public ObjectRoleComplexExpression projectFrom(final ObjectRoleExpression R,
 			final ConceptExpression C) {

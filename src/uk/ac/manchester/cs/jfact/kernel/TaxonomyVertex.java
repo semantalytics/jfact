@@ -38,9 +38,11 @@ public final class TaxonomyVertex {
 	private boolean checkValue;
 
 	/** set sample to ENTRY */
-	public void setSample(ClassifiableEntry entry) {
+	public void setSample(ClassifiableEntry entry, boolean linkBack) {
 		sample = entry;
-		entry.setTaxVertex(this);
+		if (linkBack) {
+			entry.setTaxVertex(this);
+		}
 	}
 
 	/** indirect RW access to Links */
@@ -113,7 +115,7 @@ public final class TaxonomyVertex {
 	/** init c'tor; use it only for Top/Bot initialisations */
 	public TaxonomyVertex(final ClassifiableEntry p) {
 		initFlags();
-		setSample(p);
+		setSample(p, true);
 	}
 
 	/** add P as a synonym to curent vertex */
@@ -187,7 +189,7 @@ public final class TaxonomyVertex {
 	//TODO does not work with synonyms
 	public void incorporate(ClassifiableEntry entry, JFactReasonerConfiguration c) {
 		// setup sample
-		setSample(entry);
+		setSample(entry, true);
 		// setup links
 		//TODO doublecheck
 		List<TaxonomyVertex> falselist = new ArrayList<TaxonomyVertex>(neigh(false));

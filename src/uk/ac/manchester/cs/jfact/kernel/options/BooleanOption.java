@@ -12,11 +12,11 @@ public class BooleanOption implements Option {
 
 	public BooleanOption(final String name, Boolean defVal) {
 		optionName = name;
-		this.value = defVal;
+		value = defVal;
 	}
 
 	public String getOptionName() {
-		return this.optionName;
+		return optionName;
 	}
 
 	public <O> O getValue() {

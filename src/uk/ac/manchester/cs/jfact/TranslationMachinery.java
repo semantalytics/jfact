@@ -150,7 +150,7 @@ public final class TranslationMachinery {
 	public TranslationMachinery(ReasoningKernel kernel, OWLDataFactory df,
 			DatatypeFactory factory) {
 		this.kernel = kernel;
-		this.datatypefactory = factory;
+		datatypefactory = factory;
 		em = kernel.getExpressionManager();
 		this.df = df;
 		axiomTranslator = new AxiomTranslator();
@@ -1226,24 +1226,25 @@ public final class TranslationMachinery {
 		}
 
 		public DataExpression visit(OWLDatatypeRestriction node) {
-			DatatypeExpression<?> toReturn=null;
+			DatatypeExpression<?> toReturn = null;
 			Datatype<?> type = datatypefactory.getKnownDatatype(node.getDatatype()
 					.getIRI().toString());
-			final Set<OWLFacetRestriction> facetRestrictions = node.getFacetRestrictions();
-			if(facetRestrictions.isEmpty()) {
+			final Set<OWLFacetRestriction> facetRestrictions = node
+					.getFacetRestrictions();
+			if (facetRestrictions.isEmpty()) {
 				return type;
 			}
-			if(type.isNumericDatatype()) {
-			toReturn = datatypefactory.getNumericDatatypeExpression(type.asNumericDatatype());}
-			else if(type.isOrderedDatatype()) {
-				toReturn=datatypefactory.getOrderedDatatypeExpression(type);
-			}else {
-				toReturn=datatypefactory.getDatatypeExpression(type);
+			if (type.isNumericDatatype()) {
+				toReturn = DatatypeFactory.getNumericDatatypeExpression(type
+						.asNumericDatatype());
+			} else if (type.isOrderedDatatype()) {
+				toReturn = DatatypeFactory.getOrderedDatatypeExpression(type);
+			} else {
+				toReturn = DatatypeFactory.getDatatypeExpression(type);
 			}
-
 			for (OWLFacetRestriction restriction : facetRestrictions) {
 				Literal<?> dv = toDataValuePointer(restriction.getFacetValue());
-				toReturn=toReturn.addFacet(Facets.parse(restriction.getFacet()), dv);
+				toReturn = toReturn.addFacet(Facets.parse(restriction.getFacet()), dv);
 			}
 			return toReturn;
 		}

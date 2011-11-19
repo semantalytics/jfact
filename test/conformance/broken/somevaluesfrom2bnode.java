@@ -1,5 +1,7 @@
 package conformance.broken;
 
+import junit.framework.TestCase;
+
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -10,10 +12,7 @@ import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.OWLReasoner;
 
-import junit.framework.TestCase;
 import conformance.Factory;
-import conformance.JUnitRunner;
-import conformance.TestClasses;
 
 public class somevaluesfrom2bnode extends TestCase {
 	public void testsomevaluesfrom2bnode() throws Exception{

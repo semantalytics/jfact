@@ -2,12 +2,12 @@ package datatypes.test;
 
 import java.math.BigInteger;
 
+import junit.framework.TestCase;
 import datatypes.Datatype;
 import datatypes.DatatypeFactory;
 import datatypes.DatatypeNegation;
 import datatypes.DatatypeNumericEnumeration;
 import datatypes.NumericDatatype;
-import junit.framework.TestCase;
 
 public class CheckNegation extends TestCase {
 	public void testNegations() {

@@ -14,7 +14,7 @@ public enum DagTag {
 	// operations
 	dtTop("*TOP*"), dtAnd("and"), dtCollection("collection"), dtForall("all"), dtLE(
 			"at-most"),
-			//dtUAll("all U"), // \dall U.C
+	//dtUAll("all U"), // \dall U.C
 	dtIrr("irreflexive"), // \neg\exists R.Self
 	dtProj("projection"), // aux vertex with Projection FROM the current node
 	dtNN("NN-stopper"), // NN-rule was applied
@@ -70,8 +70,7 @@ public enum DagTag {
 	}
 
 	private static final EnumSet<DagTag> complexConceptsEnumSet = EnumSet.of(
-			DagTag.dtForall, DagTag.dtLE, DagTag.dtIrr, DagTag.dtNN,
-			DagTag.dtChoose);
+			DagTag.dtForall, DagTag.dtLE, DagTag.dtIrr, DagTag.dtNN, DagTag.dtChoose);
 
 	/** @return true iff TAG represents complex concept */
 	public boolean isComplexConcept() {

@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.TreeSet;
 
-import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
-
 import uk.ac.manchester.cs.jfact.helpers.Templates;
 import uk.ac.manchester.cs.jfact.kernel.actors.Actor;
 import uk.ac.manchester.cs.jfact.kernel.actors.SupConceptActor;
@@ -29,6 +27,8 @@ public class Taxonomy {
 	List<ClassifiableEntry> Syns = new ArrayList<ClassifiableEntry>();
 	/** aux. vertex to be included to taxonomy */
 	protected TaxonomyVertex current;
+	/// vertex with parent Top and child Bot, represents the fresh entity
+	TaxonomyVertex FreshNode = new TaxonomyVertex();
 	/** pointer to currently classified entry */
 	protected ClassifiableEntry curEntry;
 	/** number of tested entryes */
@@ -190,7 +190,7 @@ public class Taxonomy {
 
 	public Taxonomy(final ClassifiableEntry pTop, final ClassifiableEntry pBottom,
 			JFactReasonerConfiguration c) {
-		this.options = c;
+		options = c;
 		current = new TaxonomyVertex();
 		curEntry = null;
 		nEntries = 0;
@@ -199,6 +199,9 @@ public class Taxonomy {
 		willInsertIntoTaxonomy = true;
 		graph.add(new TaxonomyVertex(pBottom)); // bottom
 		graph.add(new TaxonomyVertex(pTop)); // top
+		// set up fresh node
+		FreshNode.addNeighbour( /* upDirection= */true, getTopVertex());
+		FreshNode.addNeighbour( /* upDirection= */false, getBottomVertex());
 	}
 
 	/** special access to TOP of taxonomy */
@@ -209,6 +212,12 @@ public class Taxonomy {
 	/** special access to BOTTOM of taxonomy */
 	public TaxonomyVertex getBottomVertex() {
 		return graph.get(0);
+	}
+
+	/// get node for fresh entity E
+	TaxonomyVertex getFreshVertex(ClassifiableEntry e) {
+		FreshNode.setSample(e, false);
+		return FreshNode;
 	}
 
 	//--	classification interface
@@ -269,8 +278,8 @@ public class Taxonomy {
 			// check if current concept is synonym to someone
 			if (syn != null) {
 				syn.addSynonym(curEntry);
-				options.getLog().print("\nTAX:set ", curEntry.getName(),
-						" equal ", syn.getPrimer().getName());
+				options.getLog().print("\nTAX:set ", curEntry.getName(), " equal ",
+						syn.getPrimer().getName());
 			} else {
 				// just incorporate it as a special entry and save into Graph
 				current.incorporate(curEntry, options);
@@ -283,7 +292,7 @@ public class Taxonomy {
 			if (syn != null) {
 				curEntry.setTaxVertex(syn);
 			} else {
-				current.setSample(curEntry);
+				current.setSample(curEntry, true);
 			}
 		}
 	}
@@ -472,32 +481,31 @@ public class Taxonomy {
 		//		}
 	}
 
-	private boolean checkToldSubsumers() {
-		assert !waitStack.isEmpty();
-		boolean ret = true;
-		for (ClassifiableEntry r : ksStack.peek().s_begin()) {
-			assert r != null;
-			if (!r.isClassified()) {
-				if (waitStack.contains(r)) {
-					addTop(r);
-					ret = false;
-					break;
-				}
-				addTop(r);
-				ret = checkToldSubsumers();
-				break;
-			}
-		}
-		return ret;
-	}
-
+	//	private boolean checkToldSubsumers() {
+	//		assert !waitStack.isEmpty();
+	//		boolean ret = true;
+	//		for (ClassifiableEntry r : ksStack.peek().s_begin()) {
+	//			assert r != null;
+	//			if (!r.isClassified()) {
+	//				if (waitStack.contains(r)) {
+	//					addTop(r);
+	//					ret = false;
+	//					break;
+	//				}
+	//				addTop(r);
+	//				ret = checkToldSubsumers();
+	//				break;
+	//			}
+	//		}
+	//		return ret;
+	//	}
 	private void classifyTop() {
 		assert !waitStack.isEmpty();
 		// load last concept
 		setCurrentEntry(waitStack.peek());
 		if (options.isTMP_PRINT_TAXONOMY_INFO()) {
 			options.getLog().print("\nTrying classify",
-					(curEntry.isCompletelyDefined() ? " CD " : " "), curEntry.getName(),
+					curEntry.isCompletelyDefined() ? " CD " : " ", curEntry.getName(),
 					"... ");
 		}
 		performClassification();
@@ -507,23 +515,22 @@ public class Taxonomy {
 		removeTop();
 	}
 
-	private void classifyCycle() {
-		assert !waitStack.isEmpty();
-		ClassifiableEntry p = waitStack.peek();
-		classifyTop();
-		StringBuilder b = new StringBuilder("\n* Concept definitions cycle found: ");
-		b.append(p.getName());
-		b.append('\n');
-		while (!waitStack.isEmpty()) {
-			b.append(", ");
-			b.append(waitStack.peek().getName());
-			b.append('\n');
-			waitStack.peek().setTaxVertex(p.getTaxVertex());
-			removeTop();
-		}
-		throw new ReasonerInternalException(b.toString());
-	}
-
+	//	private void classifyCycle() {
+	//		assert !waitStack.isEmpty();
+	//		ClassifiableEntry p = waitStack.peek();
+	//		classifyTop();
+	//		StringBuilder b = new StringBuilder("\n* Concept definitions cycle found: ");
+	//		b.append(p.getName());
+	//		b.append('\n');
+	//		while (!waitStack.isEmpty()) {
+	//			b.append(", ");
+	//			b.append(waitStack.peek().getName());
+	//			b.append('\n');
+	//			waitStack.peek().setTaxVertex(p.getTaxVertex());
+	//			removeTop();
+	//		}
+	//		throw new ReasonerInternalException(b.toString());
+	//	}
 	protected void propagateTrueUp(TaxonomyVertex node) {
 		// if taxonomy class already checked -- do nothing
 		if (node.isValued(valueLabel)) {

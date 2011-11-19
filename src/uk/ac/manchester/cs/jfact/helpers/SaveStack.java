@@ -31,8 +31,6 @@ public class SaveStack<T> {
 
 	public T pop() {
 		assert !list.isEmpty();
-
-
 		T pop = list.pop();
 		return pop;
 	}

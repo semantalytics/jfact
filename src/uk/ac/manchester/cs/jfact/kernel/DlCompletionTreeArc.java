@@ -154,7 +154,7 @@ public final class DlCompletionTreeArc {
 
 	/** print current arc */
 	public void print(LogAdapter o) {
-		o.printTemplate(Templates.DLCOMPLETIONTREEARC, (isIBlocked() ? "-" : role.getName()),
-				depSet);
+		o.printTemplate(Templates.DLCOMPLETIONTREEARC,
+				isIBlocked() ? "-" : role.getName(), depSet);
 	}
 }

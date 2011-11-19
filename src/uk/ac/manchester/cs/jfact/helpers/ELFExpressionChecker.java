@@ -1,4 +1,4 @@
-package uk.ac.manchester.cs.jfact.split;
+package uk.ac.manchester.cs.jfact.helpers;
 
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptAnd;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptBottom;
@@ -37,200 +37,196 @@ import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleName;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionFrom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionInto;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleTop;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ConceptArg;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataRoleArg;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Expression;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.IndividualExpression;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NAryExpression;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NamedEntity;
-import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleArg;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import datatypes.Datatype;
 import datatypes.Literal;
 
-/// update the signature by adding all signature elements from the expression
-class TExpressionSignatureUpdater implements DLExpressionVisitor {
-	/// Signature to be filled
-	TSignature sig;
+class ELFExpressionChecker implements DLExpressionVisitor {
+	boolean value;
 
-	/// helper for concept arguments
-	void vC(ConceptArg expr) {
-		expr.getConcept().accept(this);
-	}
-
-	/// helper for individual arguments
-	void vI(IndividualExpression expr) {
-		// should no longer be needed: IndividualNames are NamedEntities themselves
-		if (expr instanceof NamedEntity) {
-			sig.add((NamedEntity) expr);
-		}
-	}
-
-	/// helper for object role arguments
-	void vOR(ObjectRoleArg expr) {
-		expr.getOR().accept(this);
-	}
-
-	/// helper for object role arguments
-	void vDR(DataRoleArg expr) {
-		expr.getDataRoleExpression().accept(this);
-	}
-
-	/// helper for the named entity
-	void vE(NamedEntity e) {
-		sig.add(e);
-	}
-
-	/// array helper
-	void processArray(NAryExpression<? extends Expression> expr) {
-		for (Expression p : expr.getArguments()) {
-			p.accept(this);
-		}
-	}
-
-	//TODO check whether it must copy or change
-	public TExpressionSignatureUpdater(TSignature s) {
-		sig = new TSignature(s);
+	/// get DLTree corresponding to an expression EXPR
+	boolean v(Expression expr) {
+		expr.accept(this);
+		return value;
 	}
 
 	// concept expressions
-	public void visit(ConceptTop expr) {}
+	public void visit(ConceptTop expr) {
+		value = true;
+	}
 
-	public void visit(ConceptBottom expr) {}
+	public void visit(ConceptBottom expr) {
+		value = true;
+	}
 
 	public void visit(ConceptName expr) {
-		vE(expr);
+		value = true;
 	}
 
 	public void visit(ConceptNot expr) {
-		vC(expr);
+		value = false;
 	}
 
 	public void visit(ConceptAnd expr) {
-		processArray(expr);
+		value = false;
+		for (Expression p : expr.getArguments()) {
+			if (!v(p)) {
+				return;
+			}
+		}
+		value = true;
 	}
 
 	public void visit(ConceptOr expr) {
-		processArray(expr);
+		value = false;
 	}
 
 	public void visit(ConceptOneOf expr) {
-		processArray(expr);
+		value = false;
 	}
 
 	public void visit(ConceptObjectSelf expr) {
-		vOR(expr);
+		value = false;
 	}
 
 	public void visit(ConceptObjectValue expr) {
-		vOR(expr);
-		vI(expr.getI());
+		value = false;
 	}
 
 	public void visit(ConceptObjectExists expr) {
-		vOR(expr);
-		vC(expr);
+		value = false;
+		// check role
+		if (!v(expr.getOR())) {
+			return;
+		}
+		// check concept
+		v(expr.getConcept());
 	}
 
 	public void visit(ConceptObjectForall expr) {
-		vOR(expr);
-		vC(expr);
+		value = false;
 	}
 
 	public void visit(ConceptObjectMinCardinality expr) {
-		vOR(expr);
-		vC(expr);
+		value = false;
 	}
 
 	public void visit(ConceptObjectMaxCardinality expr) {
-		vOR(expr);
-		vC(expr);
+		value = false;
 	}
 
 	public void visit(ConceptObjectExactCardinality expr) {
-		vOR(expr);
-		vC(expr);
+		value = false;
 	}
 
 	public void visit(ConceptDataValue expr) {
-		vDR(expr);
+		value = false;
 	}
 
 	public void visit(ConceptDataExists expr) {
-		vDR(expr);
+		value = false;
 	}
 
 	public void visit(ConceptDataForall expr) {
-		vDR(expr);
+		value = false;
 	}
 
 	public void visit(ConceptDataMinCardinality expr) {
-		vDR(expr);
+		value = false;
 	}
 
 	public void visit(ConceptDataMaxCardinality expr) {
-		vDR(expr);
+		value = false;
 	}
 
 	public void visit(ConceptDataExactCardinality expr) {
-		vDR(expr);
+		value = false;
 	}
 
 	// individual expressions
 	public void visit(IndividualName expr) {
-		vE(expr);
+		value = false;
 	}
 
 	// object role expressions
-	public void visit(ObjectRoleTop expr) {}
+	public void visit(ObjectRoleTop expr) {
+		value = false;
+	}
 
-	public void visit(ObjectRoleBottom expr) {}
+	public void visit(ObjectRoleBottom expr) {
+		value = false;
+	}
 
 	public void visit(ObjectRoleName expr) {
-		vE(expr);
+		value = true;
 	}
 
 	public void visit(ObjectRoleInverse expr) {
-		vOR(expr);
+		value = false;
 	}
 
 	public void visit(ObjectRoleChain expr) {
-		processArray(expr);
+		value = false;
+		for (Expression p : expr.getArguments()) {
+			if (!v(p)) {
+				return;
+			}
+		}
+		value = true;
 	}
 
 	public void visit(ObjectRoleProjectionFrom expr) {
-		vOR(expr);
-		vC(expr);
+		value = false;
 	}
 
 	public void visit(ObjectRoleProjectionInto expr) {
-		vOR(expr);
-		vC(expr);
+		value = false;
 	}
 
 	// data role expressions
-	public void visit(DataRoleTop expr) {}
+	public void visit(DataRoleTop expr) {
+		value = false;
+	}
 
-	public void visit(DataRoleBottom expr) {}
+	public void visit(DataRoleBottom expr) {
+		value = false;
+	}
 
 	public void visit(DataRoleName expr) {
-		vE(expr);
+		value = false;
 	}
 
 	// data expressions
-	public void visit(DataTop expr) {}
+	public void visit(DataTop expr) {
+		value = false;
+	}
 
-	public void visit(DataBottom expr) {}
+	public void visit(DataBottom expr) {
+		value = false;
+	}
 
-	public void visit(Datatype<?> expr) {}
+	public void visit(DataNot expr) {
+		value = false;
+	}
 
-	public void visit(Literal<?> expr) {}
+	public void visit(DataAnd expr) {
+		value = false;
+	}
 
-	public void visit(DataNot expr) {}
+	public void visit(DataOr expr) {
+		value = false;
+	}
 
-	public void visit(DataAnd expr) {}
+	public void visit(DataOneOf expr) {
+		value = false;
+	}
 
-	public void visit(DataOr expr) {}
+	public void visit(Literal<?> expr) {
+		value = false;
+	}
 
-	public void visit(DataOneOf expr) {}
+	public void visit(Datatype<?> expr) {
+		value = false;
+	}
 }

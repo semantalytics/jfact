@@ -70,10 +70,8 @@ public final class ModelCacheIan extends ModelCacheInterface {
 	public ModelCacheIan(final DLDag heap, final DlCompletionTree p,
 			boolean flagNominals, int nC, int nR, boolean simpleRules) {
 		this(flagNominals, nC, nR, simpleRules);
-
 		initCacheByLabel(heap, p);
 		initRolesFromArcs(p);
-
 	}
 
 	/** empty c'tor */
@@ -167,8 +165,7 @@ public final class ModelCacheIan extends ModelCacheInterface {
 			case dtLE: // for <= n R: add R to forallRoles
 				if (cur.getRole().isTop()) {
 					(pos ? forallRoles : existsRoles).completeSet(nR);
-				} else if (pos)
-				{
+				} else if (pos) {
 					// no need to deal with existentials here: they would be created through edges
 					if (cur.getRole().isSimple()) {
 						forallRoles.add(cur.getRole().getIndex());
@@ -178,8 +175,7 @@ public final class ModelCacheIan extends ModelCacheInterface {
 				}
 				break;
 			default: // all other -- nothing to do
-
-	break;
+				break;
 		}
 	}
 

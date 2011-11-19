@@ -1,7 +1,6 @@
 package datatypes;
 
 import java.math.BigDecimal;
-import java.util.Collection;
 
 import datatypes.DatatypeFactory.ABSTRACT_NUMERIC_DATATYPE;
 
@@ -95,7 +94,7 @@ class DatatypeNumericExpressionImpl<O extends Comparable<O>> extends
 
 	@Override
 	public NumericDatatype<O> asNumericDatatype() {
-		return (NumericDatatype<O>) this;
+		return this;
 	}
 
 	@Override

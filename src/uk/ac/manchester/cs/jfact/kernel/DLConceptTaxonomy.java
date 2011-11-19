@@ -277,9 +277,9 @@ public final class DLConceptTaxonomy extends Taxonomy {
 				nPositives * 100 / Math.max(1, nTries),
 				nCachedPositive,
 				nCachedNegative,
-				(nSortedNegative > 0 ? String.format(
+				nSortedNegative > 0 ? String.format(
 						"Sorted reasoning deals with %s non-subsumptions\n",
-						nSortedNegative) : ""), nSearchCalls, nSubCalls,
+						nSortedNegative) : "", nSearchCalls, nSubCalls,
 				nNonTrivialSubCalls, nEntries * (nEntries - 1) / Math.max(1, nTries)));
 		o.append(super.toString());
 		return o.toString();

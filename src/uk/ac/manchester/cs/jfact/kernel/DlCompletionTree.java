@@ -182,7 +182,7 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 
 	public DlCompletionTree(int newId, JFactReasonerConfiguration c) {
 		id = newId;
-		this.options = c;
+		options = c;
 	}
 
 	/** add given arc P as a neighbour */
@@ -435,12 +435,16 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 		if (blocker.isLabelledBy(c)) {
 			return true;
 		}
+		int n = 1; // Blocker is the 1st node in the loop
 		for (DlCompletionTree p = getParentNode(); p.hasParent() && p != blocker; p = p
 				.getParentNode()) {
 			if (p.isLabelledBy(c)) {
 				return true;
+			} else {
+				++n;
 			}
 		}
+		options.getLog().print(" loop(", n, ")");
 		return false;
 	}
 
@@ -453,8 +457,8 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 		pBlocked = permanently;
 		dBlocked = directly;
 		options.getLog().printTemplate(Templates.LOG_NODE_BLOCKED,
-				getBlockingStatusName(), id, (blocker == null ? "" : ","),
-				(blocker == null ? "" : blocker.id));
+				getBlockingStatusName(), id, blocker == null ? "" : ",",
+				blocker == null ? "" : blocker.id);
 		return ret;
 	}
 
@@ -483,8 +487,8 @@ public final class DlCompletionTree implements Comparable<DlCompletionTree> {
 		pBlocked = true;
 		dBlocked = false;
 		options.getLog().printTemplate(Templates.LOG_NODE_BLOCKED,
-				getBlockingStatusName(), id, (blocker == null ? "" : ","),
-				(blocker == null ? "" : blocker.id));
+				getBlockingStatusName(), id, blocker == null ? "" : ",",
+				blocker == null ? "" : blocker.id);
 		return ret;
 	}
 

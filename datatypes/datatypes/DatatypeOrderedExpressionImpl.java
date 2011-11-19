@@ -1,7 +1,8 @@
 package datatypes;
 
-import java.math.BigDecimal;
 import static datatypes.Facets.*;
+
+import java.math.BigDecimal;
 import java.util.Collection;
 
 class DatatypeOrderedExpressionImpl<O extends Comparable<O>> extends ABSTRACT_DATATYPE<O>

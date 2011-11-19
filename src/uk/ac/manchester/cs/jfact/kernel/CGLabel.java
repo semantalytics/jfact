@@ -60,7 +60,6 @@ public final class CGLabel {
 		clearMyCache();
 	}
 
-
 	protected final void clearMyCache() {
 		lesserEquals.clear();
 	}
@@ -84,21 +83,17 @@ public final class CGLabel {
 	private final Set<CGLabel> lesserEquals = Collections
 			.newSetFromMap(new IdentityHashMap<CGLabel, Boolean>());
 
-
 	public boolean lesserequal(final CGLabel label) {
 		if (this == label) {
 			return true;
 		}
 		if (lesserEquals.contains(label)) {
-
-	return true;
+			return true;
 		}
-
 		boolean toReturn = scLabel.lesserequal(label.scLabel)
 				&& ccLabel.lesserequal(label.ccLabel);
 		if (toReturn) {
 			lesserEquals.add(label);
-
 		}
 		return toReturn;
 	}
@@ -140,7 +135,6 @@ public final class CGLabel {
 	}
 
 	public final void init() {
-
 		clearOthersCache();
 		clearMyCache();
 		scLabel.init();

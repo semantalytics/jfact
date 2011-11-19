@@ -20,7 +20,7 @@ import uk.ac.manchester.cs.jfact.helpers.SaveStack;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 
 public final class ToDoList {
-	final static int limit = 1000;
+	final static int limit = 5000;
 	protected final TODOListSaveState[] states = new TODOListSaveState[limit];
 	protected int nextState = 0;
 	volatile boolean change = true;
@@ -67,7 +67,6 @@ public final class ToDoList {
 		/** add entry to a queue */
 		public void add(DlCompletionTree node, ConceptWDep offset) {
 			Wait.add(new ToDoEntry(node, offset));
-
 		}
 
 		/** clear queue */
@@ -244,63 +243,63 @@ public final class ToDoList {
 	}
 
 	public final TODOListSaveState getInstance() {
-		return new TODOListSaveState();
-		//		if (nextState == limit) {
-		//			nextState = 0;
-		//		}
-		//		TODOListSaveState toReturn = states[nextState];
-		//		if (toReturn != null) {
-		//			states[nextState++] = null;
-		//			change = true;
-		//			return toReturn;
-		//		} else {
-		//			//	System.err.println("ToDoList.SaveState.getInstance() STILL waiting...");
-		//			if (!isSaveStateGenerationStarted()) {
-		//				startSaveStateGeneration();
-		//			}
-		//			return new TODOListSaveState();
-		//		}
+		//return new TODOListSaveState();
+				if (nextState == limit) {
+					nextState = 0;
+				}
+				TODOListSaveState toReturn = states[nextState];
+				if (toReturn != null) {
+					states[nextState++] = null;
+					change = true;
+					return toReturn;
+				} else {
+					//	System.err.println("ToDoList.SaveState.getInstance() STILL waiting...");
+					if (!isSaveStateGenerationStarted()) {
+						startSaveStateGeneration();
+					}
+					return new TODOListSaveState();
+				}
 	}
 
-	//	private boolean saveStateGenerationStarted = false;
-	//
-	//	public final boolean isSaveStateGenerationStarted() {
-	//		return saveStateGenerationStarted;
-	//	}
-	//
-	//	public void startSaveStateGeneration() {
-	//		saveStateGenerationStarted = true;
-	//		Thread stateFiller = new Thread() {
-	//			@Override
-	//			public void run() {
-	//				long last = System.currentTimeMillis();
-	//				// timeout at one minute from last operation
-	//				while (System.currentTimeMillis() - last < 60000) {
-	//					for (int wait = 0; wait < 10000; wait++) {
-	//						if (change) {
-	//							for (int i = 0; i < limit; i++) {
-	//								if (states[i] == null) {
-	//									states[i] = new TODOListSaveState();
-	//								}
-	//							}
-	//							change = false;
-	//							last = System.currentTimeMillis();
-	//						}
-	//						try {
-	//							Thread.sleep(5);
-	//						} catch (InterruptedException e) {
-	//							e.printStackTrace();
-	//						}
-	//					}
-	//				}
-	//				// after timeout elapses, reset the flag - new requests will reactivate the thread
-	//				saveStateGenerationStarted = false;
-	//			}
-	//		};
-	//		stateFiller.setPriority(Thread.MIN_PRIORITY);
-	//		stateFiller.setDaemon(true);
-	//		stateFiller.start();
-	//	}
+		private boolean saveStateGenerationStarted = false;
+
+		public final boolean isSaveStateGenerationStarted() {
+			return saveStateGenerationStarted;
+		}
+
+		public void startSaveStateGeneration() {
+			saveStateGenerationStarted = true;
+			Thread stateFiller = new Thread() {
+				@Override
+				public void run() {
+					long last = System.currentTimeMillis();
+					// timeout at one minute from last operation
+					while (System.currentTimeMillis() - last < 60000) {
+						for (int wait = 0; wait < 10000; wait++) {
+							if (change) {
+								for (int i = 0; i < limit; i++) {
+									if (states[i] == null) {
+										states[i] = new TODOListSaveState();
+									}
+								}
+								change = false;
+								last = System.currentTimeMillis();
+							}
+							try {
+								Thread.sleep(5);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+					// after timeout elapses, reset the flag - new requests will reactivate the thread
+					saveStateGenerationStarted = false;
+				}
+			};
+			stateFiller.setPriority(Thread.MIN_PRIORITY);
+			stateFiller.setDaemon(true);
+			stateFiller.start();
+		}
 	/** waiting ops queue for IDs */
 	private ArrayQueue queueID = new ArrayQueue();
 	/** waiting ops queue for <= ops in nominal nodes */
@@ -487,15 +486,13 @@ class ToDoPriorMatrix {
 			case dtSplitConcept:
 				return indexAnd;
 			case dtForall:
-			case dtUAll:
 			case dtIrr: // process local (ir-)reflexivity as a FORALL
 				return Sign ? indexForall : indexExists;
 			case dtProj: // it should be the lowest priority but now just OR's one
 			case dtChoose:
 				return indexOr;
 			case dtLE:
-				return Sign ? (NominalNode ? priorityIndexNominalNode : indexLE)
-						: indexGE;
+				return Sign ? NominalNode ? priorityIndexNominalNode : indexLE : indexGE;
 			case dtDataType:
 			case dtDataValue:
 			case dtDataExpr:

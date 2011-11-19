@@ -16,7 +16,7 @@ public class DatatypeNegation<R extends Comparable<R>> implements Datatype<R>,
 	private final String uri;
 
 	public DatatypeNegation(Datatype<R> d) {
-		this.uri = "negation#a" + DatatypeFactory.getIndex();
+		this.uri = "neg#" + DatatypeFactory.getIndex();
 		host = d;
 	}
 
@@ -25,7 +25,7 @@ public class DatatypeNegation<R extends Comparable<R>> implements Datatype<R>,
 	}
 
 	public DatatypeExpression<R> asExpression() {
-		return (DatatypeExpression<R>) this;
+		return this;
 	}
 
 	public Collection<Datatype<?>> getAncestors() {

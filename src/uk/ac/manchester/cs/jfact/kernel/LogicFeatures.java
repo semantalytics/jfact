@@ -165,12 +165,12 @@ public final class LogicFeatures {
 	public void writeState(LogAdapter l) {
 		String NO = "NO ";
 		String Q = "qualified ";
-		l.printTemplate(Templates.WRITE_STATE, (hasInverseRole() ? "" : NO),
-				(hasRoleHierarchy() ? "" : NO), (hasTransitiveRole() ? "" : NO),
-				(hasTopRole() ? "" : NO), (hasSomeAll() ? "" : NO),
-				(hasFunctionalRestriction() ? "" : NO),
-				(hasNumberRestriction() ? (hasQNumberRestriction() ? Q : "") : NO),
-				(hasSingletons() ? "" : NO));
+		l.printTemplate(Templates.WRITE_STATE, hasInverseRole() ? "" : NO,
+				hasRoleHierarchy() ? "" : NO, hasTransitiveRole() ? "" : NO,
+				hasTopRole() ? "" : NO, hasSomeAll() ? "" : NO,
+				hasFunctionalRestriction() ? "" : NO,
+				hasNumberRestriction() ? hasQNumberRestriction() ? Q : "" : NO,
+				hasSingletons() ? "" : NO);
 	}
 
 	//private static final int lfInvalid = 0;

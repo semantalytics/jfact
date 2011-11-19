@@ -62,8 +62,10 @@ public final class DataTypeReasoner {
 		switch (v.getType()) {
 			case dtDataType: {
 				Datatype<?> t = ((DatatypeEntry) entry).getDatatype();
+				if(options.isLoggingActive()) {
 				options.getLog().printTemplate(Templates.INTERVAL,
 						(positive ? "+" : "-"), entry.getName(), "", "", "");
+				}
 				if (positive) {
 					getType(t).setPType(dep);
 				} else {

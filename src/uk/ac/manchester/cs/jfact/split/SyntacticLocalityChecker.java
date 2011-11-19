@@ -102,7 +102,7 @@ class SigAccessor extends DLExpressionVisitorAdapter {
 /// check whether class expressions are equivalent to bottom wrt given locality class
 class BotEquivalenceEvaluator extends SigAccessor implements DLExpressionVisitor {
 	/// corresponding top evaluator
-	TopEquivalenceEvaluator TopEval;
+	TopEquivalenceEvaluator TopEval = null;
 	/// keep the value here
 	boolean isBotEq;
 
@@ -256,8 +256,8 @@ class BotEquivalenceEvaluator extends SigAccessor implements DLExpressionVisitor
 	@Override
 	public void visit(ConceptDataExactCardinality expr) {
 		isBotEq = isREquivalent(expr.getDataRoleExpression())
-				&& (sig.topRLocal() ? (expr.getCardinality() == 0 ? isTopOrBuiltInDT(expr
-						.getExpr()) : isTopOrBuiltInInfDT(expr.getExpr())) : expr
+				&& (sig.topRLocal() ? expr.getCardinality() == 0 ? isTopOrBuiltInDT(expr
+						.getExpr()) : isTopOrBuiltInInfDT(expr.getExpr()) : expr
 						.getCardinality() > 0);
 	}
 
@@ -312,7 +312,7 @@ class BotEquivalenceEvaluator extends SigAccessor implements DLExpressionVisitor
 /// check whether class expressions are equivalent to top wrt given locality class
 class TopEquivalenceEvaluator extends SigAccessor implements DLExpressionVisitor {
 	/// corresponding bottom evaluator
-	BotEquivalenceEvaluator BotEval;
+	BotEquivalenceEvaluator BotEval = null;
 	/// keep the value here
 	boolean isTopEq;
 

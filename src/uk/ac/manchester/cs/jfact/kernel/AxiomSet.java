@@ -113,8 +113,7 @@ public final class AxiomSet {
 		// we will change Accum (via split rule), so indexing and compare with size
 		for (int i = 0; i < accumulator.size(); i++) {
 			Axiom ax = accumulator.get(i);
-			tboxHost.getOptions().getAbsorptionLog()
-					.print("\nProcessing (", i, "):");
+			tboxHost.getOptions().getAbsorptionLog().print("\nProcessing (", i, "):");
 			if (!absorbGCI(ax)) {
 				GCIs.add(ax);
 			}

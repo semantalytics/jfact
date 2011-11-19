@@ -11,6 +11,7 @@ import static uk.ac.manchester.cs.jfact.kernel.KBStatus.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.semanticweb.owlapi.model.OWLRuntimeException;
@@ -19,12 +20,17 @@ import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
+import uk.ac.manchester.cs.jfact.helpers.ELFAxiomChecker;
+import uk.ac.manchester.cs.jfact.helpers.ELFNormalizer;
+import uk.ac.manchester.cs.jfact.helpers.ELFReasoner;
 import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 import uk.ac.manchester.cs.jfact.kernel.actors.Actor;
 import uk.ac.manchester.cs.jfact.kernel.actors.RIActor;
 import uk.ac.manchester.cs.jfact.kernel.actors.SupConceptActor;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptName;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptTop;
 import uk.ac.manchester.cs.jfact.kernel.dl.axioms.AxiomConceptInclusion;
 import uk.ac.manchester.cs.jfact.kernel.dl.axioms.AxiomDRoleDomain;
 import uk.ac.manchester.cs.jfact.kernel.dl.axioms.AxiomDRoleFunctional;
@@ -92,8 +98,6 @@ public final class ReasoningKernel {
 	private String botDRoleName;
 	// values to propagate to the new KB in case of clearance
 	private AtomicBoolean interrupted;
-	/// whether EL polynomial reasoner should be used
-	private boolean useELReasoner;
 
 	public void setInterruptedSwitch(AtomicBoolean b) {
 		interrupted = b;
@@ -103,7 +107,7 @@ public final class ReasoningKernel {
 	/** cache level */
 	private CacheStatus cacheLevel;
 	/** cached query concept description */
-	private DLTree cachedQuery;
+	private DLTree cachedQueryTree;
 	/** cached concept (either defConcept or existing one) */
 	private Concept cachedConcept;
 	/** cached query result (taxonomy position) */
@@ -116,6 +120,42 @@ public final class ReasoningKernel {
 	/** flag to gather trace information for the next reasoner's call */
 	private boolean needTracing;
 	private final DatatypeFactory datatypeFactory;
+	// types for knowledge exploration
+	/// dag-2-interface translator used in knowledge exploration
+	TDag2Interface D2I;
+	/// cached query input description
+	ConceptExpression cachedQuery;
+
+	//-----------------------------------------------------------------------------
+	//--		internal query cache manipulation
+	//-----------------------------------------------------------------------------
+	/// clear query cache
+	void clearQueryCache() {
+		cachedQuery = null; //deleteTree(cachedQueryTree);
+		cachedQueryTree = null;
+	}
+
+	/// set query cache value to QUERY
+	void setQueryCache(ConceptExpression query) {
+		clearQueryCache();
+		cachedQuery = query;
+	}
+
+	/// set query cache value to QUERY
+	void setQueryCache(DLTree query) {
+		clearQueryCache();
+		cachedQueryTree = query;
+	}
+
+	/// check whether query cache is the same as QUERY
+	boolean checkQueryCache(ConceptExpression query) {
+		return cachedQuery == query;
+	}
+
+	/// check whether query cache is the same as QUERY
+	boolean checkQueryCache(DLTree query) {
+		return equalTrees(cachedQueryTree, query);
+	}
 
 	/** get status of the KB */
 	private KBStatus getStatus() {
@@ -148,7 +188,7 @@ public final class ReasoningKernel {
 	/** clear cache and flags */
 	private void initCacheAndFlags() {
 		cacheLevel = csEmpty;
-		cachedQuery = null;
+		clearQueryCache();
 		cachedConcept = null;
 		cachedVertex = null;
 		reasoningFailed = false;
@@ -179,17 +219,58 @@ public final class ReasoningKernel {
 		return I.getRelatedCache(R);
 	}
 
+	//-----------------------------------------------------------------------------
+	//--		internal reasoning methods
+	//-----------------------------------------------------------------------------
 	/** @return true iff C is satisfiable */
-	private boolean checkSat(DLTree C) {
-		if (C.isCN()) {
-			return getTBox().isSatisfiable(getTBox().getCI(C));
-		}
+	private boolean checkSatTree(DLTree C) {
+		//		if (C.isCN()) {
+		//			return getTBox().isSatisfiable(getTBox().getCI(C));
+		//		}
 		setUpCache(C, csSat);
 		return getTBox().isSatisfiable(cachedConcept);
 	}
 
+	/// @return true iff C is satisfiable
+	boolean checkSat(ConceptExpression C) {
+		setUpCache(C, csSat);
+		return getTBox().isSatisfiable(cachedConcept);
+	}
+
+	/// helper; @return true iff C is either named concept of Top/Bot
+	boolean isNameOrConst(ConceptExpression C) {
+		return C instanceof ConceptName || C instanceof ConceptTop
+				|| C instanceof ConceptBottom;
+	}
+
+	boolean isNameOrConst(DLTree C) {
+		return C.isBOTTOM() || C.isTOP() || C.isName();
+	}
+
+	/// @return true iff C [= D holds
+	boolean checkSub(ConceptExpression C, ConceptExpression D) {
+		if (isNameOrConst(D) && isNameOrConst(C)) {
+			return checkSub(getTBox().getCI(e(C)), getTBox().getCI(e(D)));
+		}
+		return !checkSat(getExpressionManager().and(C, getExpressionManager().not(D)));
+	}
+
 	/** @return true iff C [= D holds */
 	private boolean checkSub(Concept C, Concept D) {
+		// check whether a concept is fresh
+		if (D.getpName() == 0) // D is fresh
+		{
+			if (C.getpName() == 0) {
+				return C == D; // 2 fresh concepts subsumes one another iff they are the same
+			} else {
+				// C is known
+				return !getTBox().isSatisfiable(C); // C [= D iff C=\bottom
+			}
+		} else // D is known
+		if (C.getpName() == 0) {
+			// C [= D iff D = \top, or ~D = \bottom
+			return !checkSatTree(DLTreeFactory.createSNFNot(getTBox().getTree(C)));
+		}
 		if (getStatus().ordinal() < kbClassified.ordinal()) {
 			return getTBox().isSubHolds(C, D);
 		}
@@ -204,14 +285,13 @@ public final class ReasoningKernel {
 		}
 	}
 
-	/** @return true iff C [= D holds */
-	private boolean checkSub(DLTree C, DLTree D) {
-		if (C.isCN() && D.isCN()) {
-			return checkSub(getTBox().getCI(C), getTBox().getCI(D));
-		}
-		return !checkSat(DLTreeFactory.createSNFAnd(C, DLTreeFactory.createSNFNot(D)));
-	}
-
+	//	/** @return true iff C [= D holds */
+	//	private boolean checkSub(DLTree C, DLTree D) {
+	//		if (C.isCN() && D.isCN()) {
+	//			return checkSub(getTBox().getCI(C), getTBox().getCI(D));
+	//		}
+	//		return !checkSatTree(DLTreeFactory.createSNFAnd(C, DLTreeFactory.createSNFNot(D)));
+	//	}
 	// get access to internal structures
 	/** @throw an exception if no TBox found */
 	private void checkTBox() {
@@ -230,7 +310,7 @@ public final class ReasoningKernel {
 	private void clearTBox() {
 		pTBox = null;
 		pET = null;
-		cachedQuery = null;
+		D2I = null;
 	}
 
 	/** get RW access to Object RoleMaster from TBox */
@@ -330,6 +410,7 @@ public final class ReasoningKernel {
 	 * TBox
 	 */
 	public void writeReasoningResult(LogAdapter o, long time) {
+		getTBox().clearQueryConcept(); // get rid of the query leftovers
 		getTBox().writeReasoningResult(o, time);
 	}
 
@@ -341,7 +422,7 @@ public final class ReasoningKernel {
 				DLTreeFactory.createSNFNot(getFreshFiller(R)));
 		tmp = DLTreeFactory.createSNFAnd(tmp,
 				DLTreeFactory.createSNFExists(R, getFreshFiller(R)));
-		return !checkSat(tmp);
+		return !checkSatTree(tmp);
 	}
 
 	/** @return true if R is functional; set the value for R if necessary */
@@ -361,7 +442,7 @@ public final class ReasoningKernel {
 		tmp = DLTreeFactory.createSNFExists(R.copy(), tmp);
 		tmp = DLTreeFactory.createSNFAnd(tmp,
 				DLTreeFactory.createSNFForall(R, getTBox().getFreshConcept()));
-		return !checkSat(tmp);
+		return !checkSatTree(tmp);
 	}
 
 	/** @return true if R is symmetric wrt ontology */
@@ -371,7 +452,7 @@ public final class ReasoningKernel {
 				DLTreeFactory.createSNFNot(getTBox().getFreshConcept()));
 		tmp = DLTreeFactory.createSNFAnd(getTBox().getFreshConcept(),
 				DLTreeFactory.createSNFExists(R, tmp));
-		return !checkSat(tmp);
+		return !checkSatTree(tmp);
 	}
 
 	/** @return true if R is reflexive wrt ontology */
@@ -380,7 +461,7 @@ public final class ReasoningKernel {
 		DLTree tmp = DLTreeFactory.createSNFForall(R,
 				DLTreeFactory.createSNFNot(getTBox().getFreshConcept()));
 		tmp = DLTreeFactory.createSNFAnd(getTBox().getFreshConcept(), tmp);
-		return !checkSat(tmp);
+		return !checkSatTree(tmp);
 	}
 
 	/** @return true if R [= S wrt ontology */
@@ -393,7 +474,7 @@ public final class ReasoningKernel {
 				DLTreeFactory.createSNFNot(getFreshFiller(S)));
 		tmp = DLTreeFactory.createSNFAnd(
 				DLTreeFactory.createSNFExists(R, getFreshFiller(R)), tmp);
-		return !checkSat(tmp);
+		return !checkSatTree(tmp);
 	}
 
 	/** get access to an expression manager */
@@ -815,7 +896,7 @@ public final class ReasoningKernel {
 	public boolean isSatisfiable(final ConceptExpression C) {
 		preprocessKB();
 		try {
-			return checkSat(e(C));
+			return checkSat(C);
 		} catch (OWLRuntimeException crn) {
 			if (C instanceof ConceptName) {
 				// this is an unknown concept
@@ -829,13 +910,13 @@ public final class ReasoningKernel {
 	/** @return true iff C [= D holds */
 	public boolean isSubsumedBy(final ConceptExpression C, final ConceptExpression D) {
 		preprocessKB();
-		return checkSub(e(C), e(D));
+		return checkSub(C, D);
 	}
 
 	/** @return true iff C is disjoint with D; that is, C [= \not D holds */
 	public boolean isDisjoint(final ConceptExpression C, final ConceptExpression D) {
 		preprocessKB();
-		return checkSub(e(C), DLTreeFactory.createSNFNot(e(D)));
+		return checkSub(C, getExpressionManager().not(D));
 	}
 
 	/** @return true iff C is equivalent to D */
@@ -848,7 +929,7 @@ public final class ReasoningKernel {
 	/** apply actor__apply() to all DIRECT super-concepts of [complex] C */
 	public void getSupConcepts(final ConceptExpression C, boolean direct, Actor actor) {
 		classifyKB(); // ensure KB is ready to answer the query
-		setUpCache(e(C), csClassified);
+		setUpCache(C, csClassified);
 		Taxonomy tax = getCTaxonomy();
 		if (direct) {
 			tax.getRelativesInfo(cachedVertex, actor, false, true, true);
@@ -860,7 +941,7 @@ public final class ReasoningKernel {
 	/** apply actor__apply() to all DIRECT sub-concepts of [complex] C */
 	public void getSubConcepts(final ConceptExpression C, boolean direct, Actor actor) {
 		classifyKB(); // ensure KB is ready to answer the query
-		setUpCache(e(C), csClassified);
+		setUpCache(C, csClassified);
 		Taxonomy tax = getCTaxonomy();
 		tax.getRelativesInfo(cachedVertex, actor, false, direct, false);
 	}
@@ -868,14 +949,14 @@ public final class ReasoningKernel {
 	/** apply actor__apply() to all synonyms of [complex] C */
 	public void getEquivalentConcepts(final ConceptExpression C, Actor actor) {
 		classifyKB(); // ensure KB is ready to answer the query
-		setUpCache(e(C), csClassified);
+		setUpCache(C, csClassified);
 		actor.apply(cachedVertex);
 	}
 
 	/// apply actor::apply() to all named concepts disjoint with [complex] C
 	public void getDisjointConcepts(ConceptExpression C, Actor actor) {
 		classifyKB(); // ensure KB is ready to answer the query
-		setUpCache(DLTreeFactory.createSNFNot(e(C)), csClassified);
+		setUpCache(getExpressionManager().not(C), csClassified);
 		Taxonomy tax = getCTaxonomy();
 		// we are looking for all sub-concepts of (not C) (including synonyms to it)
 		tax.getRelativesInfo(cachedVertex, actor, true, false, false);
@@ -910,12 +991,27 @@ public final class ReasoningKernel {
 	 * apply actor__apply() to all DIRECT NC that are in the domain of [complex]
 	 * R
 	 */
-	public void getRoleDomain(final RoleExpression r, boolean direct, Actor actor) {
+	public void getORoleDomain(final ObjectRoleExpression r, boolean direct, Actor actor) {
 		classifyKB(); // ensure KB is ready to answer the query
-		setUpCache(DLTreeFactory.createSNFExists(e(r), DLTreeFactory.createTop()),
+		setUpCache(getExpressionManager().exists(r, getExpressionManager().top()),
 				csClassified);
 		Taxonomy tax = getCTaxonomy();
 		tax.getRelativesInfo(cachedVertex, actor, true, direct, true);
+	}
+
+	/// apply actor::apply() to all DIRECT NC that are in the domain of data role R
+	//template<class Actor>
+	void getDRoleDomain(DataRoleExpression r, boolean direct, Actor actor) {
+		classifyKB(); // ensure KB is ready to answer the query
+		setUpCache(getExpressionManager().exists(r, getExpressionManager().dataTop()),
+				csClassified);
+		Taxonomy tax = getCTaxonomy();
+		if (direct) {
+			tax.getRelativesInfo(cachedVertex, actor, true, true, true);
+		} else {
+			// gets all named classes that are in the domain of a role
+			tax.getRelativesInfo(cachedVertex, actor, true, false, true);
+		}
 	}
 
 	/**
@@ -923,7 +1019,7 @@ public final class ReasoningKernel {
 	 * R
 	 */
 	public void getRoleRange(final ObjectRoleExpression r, boolean direct, Actor actor) {
-		getRoleDomain(getExpressionManager().inverse(r), direct, actor);
+		getORoleDomain(getExpressionManager().inverse(r), direct, actor);
 	}
 
 	// instances
@@ -938,7 +1034,7 @@ public final class ReasoningKernel {
 	/** apply actor__apply() to all direct instances of given [complex] C */
 	public void getDirectInstances(final ConceptExpression C, Actor actor) {
 		realiseKB(); // ensure KB is ready to answer the query
-		setUpCache(e(C), csClassified);
+		setUpCache(C, csClassified);
 		// implement 1-level check by hand
 		// if the root vertex contains individuals -- we are done
 		if (actor.apply(cachedVertex)) {
@@ -954,7 +1050,7 @@ public final class ReasoningKernel {
 	/** apply actor__apply() to all instances of given [complex] C */
 	public void getInstances(final ConceptExpression C, Actor actor) { // FIXME!! check for Racer's/IS approach
 		realiseKB(); // ensure KB is ready to answer the query
-		setUpCache(e(C), csClassified);
+		setUpCache(C, csClassified);
 		Taxonomy tax = getCTaxonomy();
 		tax.getRelativesInfo(cachedVertex, actor, true, false, false);
 	}
@@ -965,7 +1061,7 @@ public final class ReasoningKernel {
 	 */
 	public void getTypes(final IndividualExpression I, boolean direct, Actor actor) {
 		realiseKB(); // ensure KB is ready to answer the query
-		setUpCache(e(I), csClassified);
+		setUpCache(getExpressionManager().oneOf(I), csClassified);
 		Taxonomy tax = getCTaxonomy();
 		tax.getRelativesInfo(cachedVertex, actor, true, direct, true);
 	}
@@ -987,6 +1083,16 @@ public final class ReasoningKernel {
 		return getTBox().isSameIndividuals(i, j);
 	}
 
+	//----------------------------------------------------------------------------------
+	// knowledge exploration queries
+	//----------------------------------------------------------------------------------
+	/// build a completion tree for a concept expression C (no caching as it breaks the idea of KE). @return the root node
+	DlCompletionTree buildCompletionTree(ConceptExpression C) {
+		preprocessKB();
+		setUpCache(C, csSat);
+		return getTBox().buildCompletionTree(cachedConcept);
+	}
+
 	/** @return true iff individual I is instance of given [complex] C */
 	public boolean isInstance(final IndividualExpression I, final ConceptExpression C) {
 		realiseKB(); // ensure KB is ready to answer the query
@@ -995,13 +1101,15 @@ public final class ReasoningKernel {
 	}
 
 	public ReasoningKernel(JFactReasonerConfiguration conf, DatatypeFactory factory) {
-		this.kernelOptions = conf;
-		this.datatypeFactory = factory;
+		D2I = null;
+		cachedQuery = null;
+		cachedQueryTree = null;
+		kernelOptions = conf;
+		datatypeFactory = factory;
 		pTBox = null;
 		pET = null;
 		cachedQuery = null;
 		initCacheAndFlags();
-		useELReasoner = false;
 	}
 
 	/// try to perform the incremental reasoning on the changed ontology
@@ -1019,6 +1127,18 @@ public final class ReasoningKernel {
 	private void forceReload() {
 		clearTBox();
 		newKB();
+		// Protege (as the only user of non-trivial monitors with reload) does not accept multiple usage of a monitor
+		// so switch it off after the 1st usage
+		if (kernelOptions.isUseELReasoner()) {
+			ELFAxiomChecker ac = new ELFAxiomChecker();
+			ac.visitOntology(ontology);
+			if (ac.value()) {
+				ELFNormalizer normalizer = new ELFNormalizer(getExpressionManager());
+				normalizer.visitOntology(ontology);
+				ELFReasoner reasoner = new ELFReasoner(ontology);
+				reasoner.classify();
+			}
+		}
 		// split ontological axioms
 		if (kernelOptions.isSplits()) {
 			TAxiomSplitter AxiomSplitter = new TAxiomSplitter(ontology);
@@ -1102,74 +1222,209 @@ public final class ReasoningKernel {
 		pTBox.performRealisation();
 	}
 
-	private void setUpCache(DLTree query, CacheStatus level) {
+	//-----------------------------------------------------------------------------
+	//--		query caching support
+	//-----------------------------------------------------------------------------
+	/// classify query; cache is ready at the point. NAMED means whether concept is just a name
+	void classifyQuery(boolean named) {
+		// make sure KB is classified
+		classifyKB();
+		if (!named) {
+			getTBox().classifyQueryConcept();
+		}
+		cachedVertex = cachedConcept.getTaxVertex();
+		if (cachedVertex == null) {
+			cachedVertex = getCTaxonomy().getFreshVertex(cachedConcept);
+		}
+	}
+
+	void setUpCache(DLTree query, CacheStatus level) {
 		// if KB was changed since it was classified,
 		// we should catch it before
 		assert !ontology.isChanged();
 		// check if the query is already cached
-		if (cachedQuery != null && equalTrees(cachedQuery, query)) { // ... with the same level -- nothing to do
-			query = null;
+		if (checkQueryCache(query)) { // ... with the same level -- nothing to do
+										//deleteTree(query);
+										//query=null;
 			if (level.ordinal() <= cacheLevel.ordinal()) {
 				return;
 			} else { // concept was defined but not classified yet
 				assert level == csClassified && cacheLevel != csClassified;
-				if (cacheLevel == csEmpty) {
-					//XXX this is broken: query is necessarily null but unchecked
-					needSetup(level, query);
-					return;
-				} else {
-					needClassify(level);
+				if (cacheLevel == csSat) // already check satisfiability
+				{
+					classifyQuery(cachedQueryTree.isCN());
 					return;
 				}
 			}
+		} else {
+			// change current query
+			setQueryCache(query);
 		}
-		// change current query
-		//deleteTree(cachedQuery);
-		cachedQuery = query;
-		needSetup(level, query);
+		// clean cached info
+		cachedVertex = null;
+		cacheLevel = level;
+		// check if concept-to-cache is defined in ontology
+		if (cachedQueryTree.isCN()) {
+			cachedConcept = getTBox().getCI(cachedQueryTree);
+		} else // case of complex query
+		{
+			getTBox().clearQueryConcept();
+			cachedConcept = getTBox().createQueryConcept(cachedQueryTree);
+		}
+		assert cachedConcept != null;
+		// preprocess concept is necessary (fresh concept in query or complex one)
+		if (cachedConcept.getpName() == 0) {
+			getTBox().preprocessQueryConcept(cachedConcept);
+		}
+		if (level == csClassified) {
+			classifyQuery(cachedQueryTree.isCN());
+		}
+	}
+
+	void setUpCache(ConceptExpression query, CacheStatus level) {
+		// if KB was changed since it was classified,
+		// we should catch it before
+		assert !ontology.isChanged();
+		// check if the query is already cached
+		if (checkQueryCache(query)) { // ... with the same level -- nothing to do
+			if (level.ordinal() <= cacheLevel.ordinal()) {
+				return;
+			} else { // concept was defined but not classified yet
+				assert level == csClassified && cacheLevel != csClassified;
+				if (cacheLevel == csSat) // already check satisfiability
+				{
+					classifyQuery(isNameOrConst(cachedQuery));
+					return;
+				}
+			}
+		} else {
+			// change current query
+			setQueryCache(query);
+		}
+		// clean cached info
+		cachedVertex = null;
+		cacheLevel = level;
+		// check if concept-to-cache is defined in ontology
+		if (isNameOrConst(cachedQuery)) {
+			cachedConcept = getTBox().getCI(e(cachedQuery));
+		} else // case of complex query
+		{
+			// need to clear the query before transform it into DLTree
+			getTBox().clearQueryConcept();
+			// ... as if fresh names appears there, they would be cleaned up
+			cachedConcept = getTBox().createQueryConcept(e(cachedQuery));
+		}
+		assert cachedConcept != null;
+		// preprocess concept is necessary (fresh concept in query or complex one)
+		if (cachedConcept.getpName() == 0) {
+			getTBox().preprocessQueryConcept(cachedConcept);
+		}
+		if (level == csClassified) {
+			classifyQuery(isNameOrConst(cachedQuery));
+		}
+	}
+
+	//----------------------------------------------------------------------------------
+	// knowledge exploration queries
+	//----------------------------------------------------------------------------------
+	/// build the set of data neighbours of a NODE, put the set into the RESULT variable
+	void getDataRoles(DlCompletionTree node, Set<RoleExpression> Result, boolean onlyDet) {
+		Result.clear();
+		for (DlCompletionTreeArc p : node.getNeighbour()) {
+			if (!p.isIBlocked() && p.getArcEnd().isDataNode()
+					&& (!onlyDet || p.getDep().isEmpty())) {
+				// FIXME!! add also all supers
+				Result.add(getExpressionManager().dataRole(p.getRole().getName()));
+			}
+		}
+	}
+
+	/// build the set of object neighbours of a NODE; incoming edges are counted iff NEEDINCOMING is true
+	void getObjectRoles(DlCompletionTree node, Set<RoleExpression> Result,
+			boolean onlyDet, boolean needIncoming) {
+		Result.clear();
+		for (DlCompletionTreeArc p : node.getNeighbour()) {
+			if (!p.isIBlocked() && !p.getArcEnd().isDataNode()
+					&& (!onlyDet || p.getDep().isEmpty())
+					&& (needIncoming || p.isSuccEdge())) {
+				Result.add(getExpressionManager().objectRole(p.getRole().getName()));
+			}
+		}
+	}
+
+	/// build the set of neighbours of a NODE via role ROLE; put the resulting list into RESULT
+	void getNeighbours(DlCompletionTree node, RoleExpression role,
+			List<DlCompletionTree> Result) {
+		Result.clear();
+		Role R = getRole(role, "Role expression expected in getNeighbours() method");
+		for (DlCompletionTreeArc p : node.getNeighbour()) {
+			if (!p.isIBlocked() && p.isNeighbour(R)) {
+				Result.add(p.getArcEnd());
+			}
+		}
+	}
+
+	/// put into RESULT all the data expressions from the NODE label
+	void getLabel(DlCompletionTree node, List<Expression> Result, boolean onlyDet) {
+		// prepare D2I translator
+		if (D2I == null) {
+			D2I = new TDag2Interface(getTBox().getDag(), getExpressionManager());
+		} else {
+			D2I.ensureDagSize();
+		}
+		boolean data = node.isDataNode();
+		Result.clear();
+		for (ConceptWDep p : node.beginl_sc()) {
+			if (!onlyDet || p.getDep().isEmpty()) {
+				Result.add(D2I.getExpr(p.getConcept(), data));
+			}
+		}
+		for (ConceptWDep p : node.beginl_cc()) {
+			if (!onlyDet || p.getDep().isEmpty()) {
+				Result.add(D2I.getExpr(p.getConcept(), data));
+			}
+		}
 	}
 
 	// classification only needed for complex expression
-	private void needClassify(CacheStatus level) {
-		if (level == csClassified) {
-			classifyKB();
-			getTBox().classifyQueryConcept();
-			// cached concept now have to be classified
-			assert cachedConcept.isClassified();
-			cachedVertex = cachedConcept.getTaxVertex();
-		}
-	}
-
-	private void needSetup(CacheStatus level, DLTree query) {
-		// clean cached info
-		cachedVertex = null;
-		// check if concept-to-cache is defined in ontology
-		if (query.isCN()) {
-			cachedConcept = getTBox().getCI(query);
-			// undefined/non-classified concept -- need to reclassify
-			if (cachedConcept == null) {
-				// invalidate cache
-				cacheLevel = csEmpty;
-				// FIXME!! reclassification
-				throw new ReasonerInternalException(
-						"FaCT++ Kernel: incremental classification not supported");
-			}
-			cacheLevel = level;
-			if (level == csClassified) // need to set the pointers
-			{
-				classifyKB();
-				//assert ( cachedConcept.isClassified() );
-				cachedVertex = cachedConcept.getTaxVertex();
-			}
-			return;
-		}
-		// we are preprocessed here
-		// case of complex query
-		cachedConcept = getTBox().createQueryConcept(query);
-		cacheLevel = level;
-		needClassify(level);
-	}
-
+	//	private void needClassify(CacheStatus level) {
+	//		if (level == csClassified) {
+	//			classifyKB();
+	//			getTBox().classifyQueryConcept();
+	//			// cached concept now have to be classified
+	//			assert cachedConcept.isClassified();
+	//			cachedVertex = cachedConcept.getTaxVertex();
+	//		}
+	//	}
+	//	private void needSetup(CacheStatus level, DLTree query) {
+	//		// clean cached info
+	//		cachedVertex = null;
+	//		// check if concept-to-cache is defined in ontology
+	//		if (query.isCN()) {
+	//			cachedConcept = getTBox().getCI(query);
+	//			// undefined/non-classified concept -- need to reclassify
+	//			if (cachedConcept == null) {
+	//				// invalidate cache
+	//				cacheLevel = csEmpty;
+	//				// FIXME!! reclassification
+	//				throw new ReasonerInternalException(
+	//						"FaCT++ Kernel: incremental classification not supported");
+	//			}
+	//			cacheLevel = level;
+	//			if (level == csClassified) // need to set the pointers
+	//			{
+	//				classifyKB();
+	//				//assert ( cachedConcept.isClassified() );
+	//				cachedVertex = cachedConcept.getTaxVertex();
+	//			}
+	//			return;
+	//		}
+	//		// we are preprocessed here
+	//		// case of complex query
+	//		cachedConcept = getTBox().createQueryConcept(query);
+	//		cacheLevel = level;
+	//		needClassify(level);
+	//	}
 	/**
 	 * @return true iff the chain contained in the arg-list is a sub-property of
 	 *         R
@@ -1189,7 +1444,7 @@ public final class ReasoningKernel {
 		}
 		tmp = DLTreeFactory.createSNFAnd(tmp, DLTreeFactory.createSNFForall(DLTreeFactory
 				.buildTree(new Lexeme(Token.RNAME, R)), getTBox().getFreshConcept()));
-		return !checkSat(tmp);
+		return !checkSatTree(tmp);
 	}
 
 	/** @return true if R is a super-role of a chain holding in the args */

@@ -23,15 +23,7 @@ public class TSignature {
 		set.addAll(copy.set);
 	}
 
-	/// assignment
-	//TODO check references in the original
-	//	TSignature& operator= (  TSignature& copy )
-	//	{
-	//		set = copy.set;
-	//		return *this;
-	//	}
-	// add names to signature
-	/// add pointer to named object to signature
+	/// add names to signature
 	public void add(NamedEntity p) {
 		set.add(p);
 	}
@@ -39,6 +31,11 @@ public class TSignature {
 	/// remove given element from a signature
 	public void remove(NamedEntity p) {
 		set.remove(p);
+	}
+
+	/// add another signature to a given one
+	void add(TSignature Sig) {
+		set.addAll(Sig.set);
 	}
 
 	/// set new locality polarity

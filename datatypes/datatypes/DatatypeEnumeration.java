@@ -4,11 +4,9 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
@@ -55,7 +53,7 @@ public class DatatypeEnumeration<R extends Comparable<R>> implements
 	}
 
 	public DatatypeExpression<R> asExpression() {
-		return (DatatypeExpression<R>) this;
+		return this;
 	}
 
 	public Collection<Datatype<?>> getAncestors() {

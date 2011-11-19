@@ -57,6 +57,8 @@ public final class DlCompletionGraph {
 	/** number of node' saves */
 	private int nNodeRestores;
 	// flags
+	/// how many nodes skip before block; work only with FAIRNESS
+	private int nSkipBeforeBlock = 0;
 	/** use or not lazy blocking (ie test blocking only expanding exists) */
 	private boolean useLazyBlocking;
 	/** whether to use Anywhere blocking as opposed to an ancestor one */
@@ -197,7 +199,8 @@ public final class DlCompletionGraph {
 
 	// flag setting
 	/** set flags for blocking */
-	public void initContext(boolean useLB, boolean useAB) {
+	public void initContext(int nSkip, boolean useLB, boolean useAB) {
+		nSkipBeforeBlock = nSkip;
 		useLazyBlocking = useLB;
 		useAnywhereBlocking = useAB;
 	}
@@ -277,6 +280,16 @@ public final class DlCompletionGraph {
 				}
 			}
 		} while (repeat);
+	}
+
+	/// @ return true if a fairness constraint C is violated in one of the loops in the CGraph
+	DlCompletionTree getFCViolator(int C) {
+		for (DlCompletionTree p : nodeBase) {
+			if (p.isDBlocked() && !p.isLoopLabelled(C)) {
+				return p.blocker;
+			}
+		}
+		return null;
 	}
 
 	/** clear all the session statistics */
@@ -394,7 +407,8 @@ public final class DlCompletionGraph {
 			pReasoner
 					.getOptions()
 					.getLog()
-					.printTemplate(Templates.IS_BLOCKED_FAILURE_BY, node.getId(), blocker.getId());
+					.printTemplate(Templates.IS_BLOCKED_FAILURE_BY, node.getId(),
+							blocker.getId());
 		}
 		return ret;
 	}
@@ -431,6 +445,14 @@ public final class DlCompletionGraph {
 
 	private void findDAncestorBlocker(DlCompletionTree node) {
 		DlCompletionTree p = node;
+		if (pReasoner.getOptions().isRKG_USE_FAIRNESS()) {
+			if (nSkipBeforeBlock > 0) {
+				for (int n = nSkipBeforeBlock - 1; n >= 0 && p.hasParent()
+						&& p.isBlockableNode(); --n) {
+					p = p.getParentNode();
+				}
+			}
+		}
 		while (p.hasParent()) {
 			p = p.getParentNode();
 			if (!p.isBlockableNode()) {
@@ -499,9 +521,9 @@ public final class DlCompletionGraph {
 					.getOptions()
 					.getLog()
 					.printTemplate(Templates.CREATE_EDGE,
-							(isPredEdge ? to.getId() : from.getId()),
-							(isPredEdge ? "<-" : "->"),
-							(isPredEdge ? from.getId() : to.getId()), roleName.getName());
+							isPredEdge ? to.getId() : from.getId(),
+							isPredEdge ? "<-" : "->",
+							isPredEdge ? from.getId() : to.getId(), roleName.getName());
 		}
 		return forward;
 	}

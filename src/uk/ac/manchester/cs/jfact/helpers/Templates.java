@@ -4,10 +4,7 @@ public enum Templates {
 	TAX_TRYING("\nTAX: trying '%s' [= '%s'... "), INTERVAL(" %s%s%s,%s%s"), CLASH(
 			" DT-%s"), CREATE_EDGE(" ce(%s%s%s,%s)"), IS_BLOCKED_FAILURE_BY(" fb(%s,%s)"), LOG_NODE_BLOCKED(
 			" %sb(%s%s%s)"), LOG_SR_NODE(" %s(%s[%s],%s)"), DETERMINE_SORTS(
-			"\nThere are %s different sorts in TBox\n"), SET_ORDER_DEFAULTS1(
-			"orSortSat: initial=%s, default=%s"), SET_ORDER_DEFAULTS2(
-			", used=%s\n orSortSub: initial=%s, default=%s"), SET_ORDER_DEFAULTS3(
-			", used=%s\n"), WRITE_STATE(
+			"\nThere are %s different sorts in TBox\n"), WRITE_STATE(
 			"\nLoaded KB used DL with following features:\nKB contains %sinverse role(s)\nKB contains %srole hierarchy\nKB contains %stransitive role(s)\nKB contains %stop role expressions\nKB contains quantifier(s)\nKB contains %sfunctional restriction(s)\nKB contains %snumber restriction(s)\nKB contains %snominal(s)\n"), BUILD_CACHE_UNSAT(
 			"\nDAG entry %s is unsatisfiable\n"), CAN_BE_CACHED(" cf(%s)"), CHECK_MERGE_CLASH(
 			" x(%s,%s%s)"), COMMON_TACTIC_BODY_OR(" E(%s)"), COMMON_TACTIC_BODY_SOME(

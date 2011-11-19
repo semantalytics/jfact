@@ -20,7 +20,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
-import org.semanticweb.owlapi.vocab.XSDVocabulary;
 
 import datatypes.Facets.whitespace;
 
@@ -1007,6 +1006,14 @@ public final class DatatypeFactory {
 		}
 
 		public Float parseValue(String s) {
+			final String trim = s.trim();
+			if(trim.equals("-INF")) {
+				return Float.NEGATIVE_INFINITY;
+			}
+			if(trim.equals("INF")) {
+				return Float.POSITIVE_INFINITY;
+			}
+
 			return Float.parseFloat(s);
 		}
 		@Override

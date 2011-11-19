@@ -74,7 +74,7 @@ import datatypes.DatatypeFactory;
  * the methods which do not touch the kernel or only affect threadsafe data
  * structures. inner private classes are not synchronized since methods from
  * those classes cannot be invoked from outsize synchronized methods.
- *
+ * 
  */
 public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListener {
 	private static final String REASONER_NAME = "JFact";
@@ -100,15 +100,16 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	private final DatatypeFactory datatypeFactory;
 
 	public JFactReasoner(OWLOntology o, OWLReasonerConfiguration c, BufferingMode b) {
-		this(o, c instanceof JFactReasonerConfiguration?(JFactReasonerConfiguration)c: new JFactReasonerConfiguration(c), b);
+		this(o, c instanceof JFactReasonerConfiguration ? (JFactReasonerConfiguration) c
+				: new JFactReasonerConfiguration(c), b);
 	}
 
 	public JFactReasoner(OWLOntology rootOntology, JFactReasonerConfiguration config,
 			BufferingMode bufferingMode) {
-		this.configuration = config;
+		configuration = config;
 		this.rootOntology = rootOntology;
 		df = this.rootOntology.getOWLOntologyManager().getOWLDataFactory();
-		this.datatypeFactory = DatatypeFactory.getInstance();
+		datatypeFactory = DatatypeFactory.getInstance();
 		kernel = new ReasoningKernel(configuration, datatypeFactory);
 		em = kernel.getExpressionManager();
 		this.bufferingMode = bufferingMode;
@@ -189,7 +190,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 * then the changes will be stored in a buffer. If the reasoner is a
 	 * non-buffering reasoner then the changes will be automatically flushed
 	 * through to the change filter and passed on to the reasoner.
-	 *
+	 * 
 	 * @param changes
 	 *            The list of raw changes.
 	 */
@@ -257,7 +258,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 * removed from the list of pending changes. Note that even if the list of
 	 * pending changes is non-empty then there may be no changes for the
 	 * reasoner to deal with.
-	 *
+	 * 
 	 * @param added
 	 *            The logical axioms that have been added to the imports closure
 	 *            of the reasoner root ontology
@@ -297,7 +298,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 * Asks the reasoner implementation to handle axiom additions and removals
 	 * from the imports closure of the root ontology. The changes will not
 	 * include annotation axiom additions and removals.
-	 *
+	 * 
 	 * @param addAxioms
 	 *            The axioms to be added to the reasoner.
 	 * @param removeAxioms

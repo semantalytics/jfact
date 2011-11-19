@@ -95,8 +95,7 @@ public final class Axiom {
 		SAbsRepCN();
 		Axiom ret = copy(pos);
 		ret.add(InAx.getConcept(pos).getDescription().copy());
-		KB.getOptions().getAbsorptionLog()
-				.print(" simplify ~CN expression for ", pos);
+		KB.getOptions().getAbsorptionLog().print(" simplify ~CN expression for ", pos);
 		return ret;
 	}
 
@@ -223,8 +222,7 @@ public final class Axiom {
 			switch (p.token()) {
 				case BOTTOM: // axiom in the form T [= T or ...; nothing to do
 					SAbsBApply();
-					KB.getOptions().getAbsorptionLog()
-							.print(" Absorb into BOTTOM");
+					KB.getOptions().getAbsorptionLog().print(" Absorb into BOTTOM");
 					return true;
 				case TOP: // skip it here
 					break;
@@ -272,8 +270,7 @@ public final class Axiom {
 		// normal concept absorption
 		Concept Concept = InAx.getConcept(bestConcept);
 		if (KB.getOptions().isAbsorptionLoggingActive()) {
-			final LogAdapter logAbsorptionAdapter = KB.getOptions()
-					.getAbsorptionLog();
+			final LogAdapter logAbsorptionAdapter = KB.getOptions().getAbsorptionLog();
 			logAbsorptionAdapter.print(" C-Absorb GCI to concept ", Concept.getName());
 			if (Cons.size() > 1) {
 				logAbsorptionAdapter.print(" (other options are");
@@ -317,8 +314,7 @@ public final class Axiom {
 			role = Role.resolveRole(Cons.get(0).getChild().getLeft());
 		}
 		if (KB.getOptions().isAbsorptionLoggingActive()) {
-			final LogAdapter logAbsorptionAdapter = KB.getOptions()
-					.getAbsorptionLog();
+			final LogAdapter logAbsorptionAdapter = KB.getOptions().getAbsorptionLog();
 			logAbsorptionAdapter.print(" R-Absorb GCI to the domain of role ",
 					role.getName());
 			if (Cons.size() > 1) {
@@ -361,8 +357,7 @@ public final class Axiom {
 		// make an absorption
 		DLTree desc = KB.makeNonPrimitive(C, DLTreeFactory.createTop());
 		if (KB.getOptions().isAbsorptionLoggingActive()) {
-			final LogAdapter logAbsorptionAdapter = KB.getOptions()
-					.getAbsorptionLog();
+			final LogAdapter logAbsorptionAdapter = KB.getOptions().getAbsorptionLog();
 			logAbsorptionAdapter.print("TAxiom.absorbIntoTop() T-Absorb GCI to axiom\n");
 			if (desc != null) {
 				logAbsorptionAdapter.print("s *TOP* [=", desc, " and\n");
