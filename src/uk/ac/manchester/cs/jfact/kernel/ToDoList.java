@@ -20,7 +20,7 @@ import uk.ac.manchester.cs.jfact.helpers.SaveStack;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
 
 public final class ToDoList {
-	final static int limit = 5000;
+	final static int limit = 500;
 	protected final TODOListSaveState[] states = new TODOListSaveState[limit];
 	protected int nextState = 0;
 	volatile boolean change = true;
@@ -244,62 +244,63 @@ public final class ToDoList {
 
 	public final TODOListSaveState getInstance() {
 		//return new TODOListSaveState();
-				if (nextState == limit) {
-					nextState = 0;
-				}
-				TODOListSaveState toReturn = states[nextState];
-				if (toReturn != null) {
-					states[nextState++] = null;
-					change = true;
-					return toReturn;
-				} else {
-					//	System.err.println("ToDoList.SaveState.getInstance() STILL waiting...");
-					if (!isSaveStateGenerationStarted()) {
-						startSaveStateGeneration();
-					}
-					return new TODOListSaveState();
-				}
+		if (nextState == limit) {
+			nextState = 0;
+		}
+		TODOListSaveState toReturn = states[nextState];
+		if (toReturn != null) {
+			states[nextState++] = null;
+			change = true;
+			return toReturn;
+		} else {
+			//	System.err.println("ToDoList.SaveState.getInstance() STILL waiting...");
+			if (!isSaveStateGenerationStarted()) {
+				startSaveStateGeneration();
+			}
+			return new TODOListSaveState();
+		}
 	}
 
-		private boolean saveStateGenerationStarted = false;
+	private boolean saveStateGenerationStarted = false;
 
-		public final boolean isSaveStateGenerationStarted() {
-			return saveStateGenerationStarted;
-		}
+	public final boolean isSaveStateGenerationStarted() {
+		return saveStateGenerationStarted;
+	}
 
-		public void startSaveStateGeneration() {
-			saveStateGenerationStarted = true;
-			Thread stateFiller = new Thread() {
-				@Override
-				public void run() {
-					long last = System.currentTimeMillis();
-					// timeout at one minute from last operation
-					while (System.currentTimeMillis() - last < 60000) {
-						for (int wait = 0; wait < 10000; wait++) {
-							if (change) {
-								for (int i = 0; i < limit; i++) {
-									if (states[i] == null) {
-										states[i] = new TODOListSaveState();
-									}
+	public void startSaveStateGeneration() {
+		saveStateGenerationStarted = true;
+		Thread stateFiller = new Thread() {
+			@Override
+			public void run() {
+				long last = System.currentTimeMillis();
+				// timeout at one minute from last operation
+				while (System.currentTimeMillis() - last < 60000) {
+					for (int wait = 0; wait < 10000; wait++) {
+						if (change) {
+							for (int i = 0; i < limit; i++) {
+								if (states[i] == null) {
+									states[i] = new TODOListSaveState();
 								}
-								change = false;
-								last = System.currentTimeMillis();
 							}
-							try {
-								Thread.sleep(5);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
+							change = false;
+							last = System.currentTimeMillis();
+						}
+						try {
+							Thread.sleep(5);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
 						}
 					}
-					// after timeout elapses, reset the flag - new requests will reactivate the thread
-					saveStateGenerationStarted = false;
 				}
-			};
-			stateFiller.setPriority(Thread.MIN_PRIORITY);
-			stateFiller.setDaemon(true);
-			stateFiller.start();
-		}
+				// after timeout elapses, reset the flag - new requests will reactivate the thread
+				saveStateGenerationStarted = false;
+			}
+		};
+		stateFiller.setPriority(Thread.MIN_PRIORITY);
+		stateFiller.setDaemon(true);
+		stateFiller.start();
+	}
+
 	/** waiting ops queue for IDs */
 	private ArrayQueue queueID = new ArrayQueue();
 	/** waiting ops queue for <= ops in nominal nodes */

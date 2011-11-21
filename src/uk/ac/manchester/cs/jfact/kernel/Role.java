@@ -375,7 +375,8 @@ public final class Role extends ClassifiableEntry {
 	 * check if the role is topmost-functional (ie, has no functional ancestors)
 	 */
 	public boolean isTopFunc() {
-		return isFunctional() && topFunctionalRoles.get(0).equals(this);
+		// check for emptyness is here due to case where a role is determined to be a functional
+		return !topFunctionalRoles.isEmpty() && topFunctionalRoles.get(0).equals(this);
 	}
 
 	/** set functional attribute to given value (functional DAG vertex) */

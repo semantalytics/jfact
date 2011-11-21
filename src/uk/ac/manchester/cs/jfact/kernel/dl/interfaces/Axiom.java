@@ -36,4 +36,8 @@ public interface Axiom extends Entity {
 	public boolean isInSS();
 
 	public TSignature getSignature();
+
+	public OntologyAtom getAtom();
+
+	public void setAtom(OntologyAtom atom);
 }

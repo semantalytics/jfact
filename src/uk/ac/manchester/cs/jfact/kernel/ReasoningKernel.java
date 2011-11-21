@@ -908,20 +908,32 @@ public final class ReasoningKernel {
 	}
 
 	/** @return true iff C [= D holds */
-	public boolean isSubsumedBy(final ConceptExpression C, final ConceptExpression D) {
+	public boolean isSubsumedBy(ConceptExpression C, ConceptExpression D) {
 		preprocessKB();
-		return checkSub(C, D);
+		if (isNameOrConst(D) && isNameOrConst(C))
+			return checkSub(getTBox().getCI(e(C)), getTBox().getCI(e(D)));
+		return !checkSat(getExpressionManager().and(C, getExpressionManager().not(D)));
 	}
 
 	/** @return true iff C is disjoint with D; that is, C [= \not D holds */
-	public boolean isDisjoint(final ConceptExpression C, final ConceptExpression D) {
-		preprocessKB();
-		return checkSub(C, getExpressionManager().not(D));
+	public boolean isDisjoint(ConceptExpression C, ConceptExpression D) {
+		return isSubsumedBy(C, getExpressionManager().not(D));
 	}
 
 	/** @return true iff C is equivalent to D */
-	public boolean isEquivalent(final ConceptExpression C, final ConceptExpression D) {
+	public boolean isEquivalent(ConceptExpression C, ConceptExpression D) {
+		if (C == D) // easy case
+			return true;
 		preprocessKB();
+		if (isKBClassified()) { // try to detect C=D wrt named concepts
+			if (isNameOrConst(D) && isNameOrConst(C)) {
+				TaxonomyVertex cV = getTBox().getCI(e(C)).getTaxVertex();
+				TaxonomyVertex dV = getTBox().getCI(e(D)).getTaxVertex();
+				if (cV == null && dV == null) return false; // 2 different fresh names
+				return cV == dV;
+			}
+		}
+		// not classified or not named constants
 		return isSubsumedBy(C, D) && isSubsumedBy(D, C);
 	}
 
@@ -1097,6 +1109,7 @@ public final class ReasoningKernel {
 	public boolean isInstance(final IndividualExpression I, final ConceptExpression C) {
 		realiseKB(); // ensure KB is ready to answer the query
 		getIndividual(I, "individual name expected in the isInstance()");
+		// FIXME!! this way a new concept is created; could be done more optimal
 		return isSubsumedBy(getExpressionManager().oneOf(I), C);
 	}
 

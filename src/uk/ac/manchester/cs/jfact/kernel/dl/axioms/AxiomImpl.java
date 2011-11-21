@@ -6,6 +6,7 @@ package uk.ac.manchester.cs.jfact.kernel.dl.axioms;
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.OntologyAtom;
 import uk.ac.manchester.cs.jfact.split.TSignature;
 import uk.ac.manchester.cs.jfact.split.TSignatureUpdater;
 
@@ -20,6 +21,15 @@ abstract class AxiomImpl implements Axiom {
 	boolean inModule;
 	/** flag to show whether it is used (to support retraction) */
 	private boolean used;
+	OntologyAtom atom = null;
+
+	public OntologyAtom getAtom() {
+		return atom;
+	}
+
+	public void setAtom(OntologyAtom atom) {
+		this.atom = atom;
+	}
 
 	/// set the isSearchSpace flag
 	public void setInSS(boolean flag) {

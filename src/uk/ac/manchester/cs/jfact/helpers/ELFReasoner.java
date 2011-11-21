@@ -14,10 +14,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.axioms.AxiomORoleSubsumption;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ConceptExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
-//-------------------------------------------------------------
-// Reasoner class
-//-------------------------------------------------------------
-/// EL reasoner
 
 public class ELFReasoner {
 	/// S(C) structure

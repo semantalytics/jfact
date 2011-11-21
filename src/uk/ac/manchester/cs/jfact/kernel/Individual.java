@@ -23,13 +23,8 @@ public class Individual extends Concept {
 	public Individual(final String name) {
 		super(name);
 		node = null;
+		setSingleton(true);
 		pRelatedMap = new HashMap<Role, List<Individual>>();
-	}
-
-	/** check whether a concept is indeed a singleton */
-	@Override
-	public boolean isSingleton() {
-		return true;
 	}
 
 	/** init told subsumers of the individual by it's description */

@@ -268,8 +268,6 @@ public final class DLDag {
 		}
 	}
 
-
-
 	/// set the final DAG size
 	public void setFinalSize() {
 		finalDagSize = size();

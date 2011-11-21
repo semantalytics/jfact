@@ -140,11 +140,6 @@ public class Concept extends ClassifiableEntry {
 		return extraRules;
 	}
 
-	/** check whether a concept is indeed a singleton */
-	public boolean isSingleton() {
-		return false;
-	}
-
 	public CTTag getClassTagPlain() {
 		return classTag;
 	}
@@ -514,6 +509,16 @@ public class Concept extends ClassifiableEntry {
 
 	public void setNominal(boolean action) {
 		nominal = action;
+	}
+
+	private boolean singleton;
+
+	public boolean isSingleton() {
+		return singleton;
+	}
+
+	public void setSingleton(boolean action) {
+		singleton = action;
 	}
 
 	// concept non-primitivity methods

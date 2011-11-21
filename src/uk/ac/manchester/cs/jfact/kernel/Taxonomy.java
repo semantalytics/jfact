@@ -356,7 +356,7 @@ public class Taxonomy {
 		if (syn.equals(curEntry)) {
 			return false;
 		}
-		assert willInsertIntoTaxonomy;
+		//assert willInsertIntoTaxonomy;
 		assert syn.getTaxVertex() != null;
 		insertCurrent(syn.getTaxVertex());
 		return true;

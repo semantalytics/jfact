@@ -1495,7 +1495,9 @@ public final class TBox {
 			//			throw new ReasonerInternalException(
 			//					"isSameIndividuals() query with non-realised ontology: "+a+" "+b);
 		}
-		return a.getNode().resolvePBlocker().equals(b.getNode().resolvePBlocker());
+		//TODO equals for TaxonomyVertex
+		return a.getTaxVertex().equals(b.getTaxVertex());
+		//return a.getNode().resolvePBlocker().equals(b.getNode().resolvePBlocker());
 	}
 
 	public boolean isDisjointRoles(final Role R, final Role S) {
@@ -2477,7 +2479,6 @@ public final class TBox {
 	}
 
 	public void initReasoner() {
-
 		assert !reasonersInited();
 		//		if (stdReasoner == null) {
 		//			assert nomReasoner == null;
