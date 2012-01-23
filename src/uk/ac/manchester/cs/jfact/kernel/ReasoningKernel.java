@@ -10,6 +10,8 @@ import static uk.ac.manchester.cs.jfact.kernel.CacheStatus.*;
 import static uk.ac.manchester.cs.jfact.kernel.KBStatus.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,6 +20,9 @@ import org.semanticweb.owlapi.model.OWLRuntimeException;
 import org.semanticweb.owlapi.reasoner.InconsistentOntologyException;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
+import uk.ac.manchester.cs.jfact.datatypes.DatatypeFactory;
+import uk.ac.manchester.cs.jfact.datatypes.Literal;
+import uk.ac.manchester.cs.jfact.datatypes.LiteralEntry;
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
 import uk.ac.manchester.cs.jfact.helpers.ELFAxiomChecker;
@@ -74,9 +79,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.RoleExpression;
 import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
 import uk.ac.manchester.cs.jfact.split.TAxiomSplitter;
-import datatypes.DatatypeFactory;
-import datatypes.Literal;
-import datatypes.LiteralEntry;
 
 public final class ReasoningKernel {
 	/** options for the kernel and all related substructures */
@@ -1099,7 +1101,7 @@ public final class ReasoningKernel {
 	// knowledge exploration queries
 	//----------------------------------------------------------------------------------
 	/// build a completion tree for a concept expression C (no caching as it breaks the idea of KE). @return the root node
-	DlCompletionTree buildCompletionTree(ConceptExpression C) {
+	public DlCompletionTree buildCompletionTree(ConceptExpression C) {
 		preprocessKB();
 		setUpCache(C, csSat);
 		return getTBox().buildCompletionTree(cachedConcept);
@@ -1341,8 +1343,8 @@ public final class ReasoningKernel {
 	// knowledge exploration queries
 	//----------------------------------------------------------------------------------
 	/// build the set of data neighbours of a NODE, put the set into the RESULT variable
-	void getDataRoles(DlCompletionTree node, Set<RoleExpression> Result, boolean onlyDet) {
-		Result.clear();
+	public Set<DataRoleExpression> getDataRoles(DlCompletionTree node, boolean onlyDet) {
+		Set<DataRoleExpression> Result = new HashSet<DataRoleExpression>();
 		for (DlCompletionTreeArc p : node.getNeighbour()) {
 			if (!p.isIBlocked() && p.getArcEnd().isDataNode()
 					&& (!onlyDet || p.getDep().isEmpty())) {
@@ -1350,12 +1352,13 @@ public final class ReasoningKernel {
 				Result.add(getExpressionManager().dataRole(p.getRole().getName()));
 			}
 		}
+		return Result;
 	}
 
 	/// build the set of object neighbours of a NODE; incoming edges are counted iff NEEDINCOMING is true
-	void getObjectRoles(DlCompletionTree node, Set<RoleExpression> Result,
+	public Collection<ObjectRoleExpression> getObjectRoles(DlCompletionTree node,
 			boolean onlyDet, boolean needIncoming) {
-		Result.clear();
+		Collection<ObjectRoleExpression> Result = new HashSet<ObjectRoleExpression>();
 		for (DlCompletionTreeArc p : node.getNeighbour()) {
 			if (!p.isIBlocked() && !p.getArcEnd().isDataNode()
 					&& (!onlyDet || p.getDep().isEmpty())
@@ -1363,81 +1366,69 @@ public final class ReasoningKernel {
 				Result.add(getExpressionManager().objectRole(p.getRole().getName()));
 			}
 		}
+		return Result;
 	}
 
 	/// build the set of neighbours of a NODE via role ROLE; put the resulting list into RESULT
-	void getNeighbours(DlCompletionTree node, RoleExpression role,
-			List<DlCompletionTree> Result) {
-		Result.clear();
+	public List<DlCompletionTree> getNeighbours(DlCompletionTree node, RoleExpression role) {
+		List<DlCompletionTree> Result = new ArrayList<DlCompletionTree>();
 		Role R = getRole(role, "Role expression expected in getNeighbours() method");
 		for (DlCompletionTreeArc p : node.getNeighbour()) {
 			if (!p.isIBlocked() && p.isNeighbour(R)) {
 				Result.add(p.getArcEnd());
 			}
 		}
+		return Result;
 	}
 
 	/// put into RESULT all the data expressions from the NODE label
-	void getLabel(DlCompletionTree node, List<Expression> Result, boolean onlyDet) {
+	public List<ConceptExpression> getObjectLabel(DlCompletionTree node, boolean onlyDet) {
+		List<ConceptExpression> Result = new ArrayList<ConceptExpression>();
 		// prepare D2I translator
 		if (D2I == null) {
 			D2I = new TDag2Interface(getTBox().getDag(), getExpressionManager());
 		} else {
 			D2I.ensureDagSize();
 		}
-		boolean data = node.isDataNode();
+		//boolean data = node.isDataNode();
 		Result.clear();
 		for (ConceptWDep p : node.beginl_sc()) {
 			if (!onlyDet || p.getDep().isEmpty()) {
-				Result.add(D2I.getExpr(p.getConcept(), data));
+				Result.add(D2I.getCExpr(p.getConcept()));
 			}
 		}
 		for (ConceptWDep p : node.beginl_cc()) {
 			if (!onlyDet || p.getDep().isEmpty()) {
-				Result.add(D2I.getExpr(p.getConcept(), data));
+				Result.add(D2I.getCExpr(p.getConcept()));
 			}
 		}
+		return Result;
 	}
 
-	// classification only needed for complex expression
-	//	private void needClassify(CacheStatus level) {
-	//		if (level == csClassified) {
-	//			classifyKB();
-	//			getTBox().classifyQueryConcept();
-	//			// cached concept now have to be classified
-	//			assert cachedConcept.isClassified();
-	//			cachedVertex = cachedConcept.getTaxVertex();
-	//		}
-	//	}
-	//	private void needSetup(CacheStatus level, DLTree query) {
-	//		// clean cached info
-	//		cachedVertex = null;
-	//		// check if concept-to-cache is defined in ontology
-	//		if (query.isCN()) {
-	//			cachedConcept = getTBox().getCI(query);
-	//			// undefined/non-classified concept -- need to reclassify
-	//			if (cachedConcept == null) {
-	//				// invalidate cache
-	//				cacheLevel = csEmpty;
-	//				// FIXME!! reclassification
-	//				throw new ReasonerInternalException(
-	//						"FaCT++ Kernel: incremental classification not supported");
-	//			}
-	//			cacheLevel = level;
-	//			if (level == csClassified) // need to set the pointers
-	//			{
-	//				classifyKB();
-	//				//assert ( cachedConcept.isClassified() );
-	//				cachedVertex = cachedConcept.getTaxVertex();
-	//			}
-	//			return;
-	//		}
-	//		// we are preprocessed here
-	//		// case of complex query
-	//		cachedConcept = getTBox().createQueryConcept(query);
-	//		cacheLevel = level;
-	//		needClassify(level);
-	//	}
+	public List<DataExpression> getDataLabel(DlCompletionTree node, boolean onlyDet) {
+		List<DataExpression> Result = new ArrayList<DataExpression>();
+		// prepare D2I translator
+		if (D2I == null) {
+			D2I = new TDag2Interface(getTBox().getDag(), getExpressionManager());
+		} else {
+			D2I.ensureDagSize();
+		}
+		Result.clear();
+
+		for (ConceptWDep p : node.beginl_sc()) {
+			if (!onlyDet || p.getDep().isEmpty()) {
+				Result.add(D2I.getDExpr(p.getConcept()));
+			}
+		}
+		for (ConceptWDep p : node.beginl_cc()) {
+			if (!onlyDet || p.getDep().isEmpty()) {
+				Result.add(D2I.getDExpr(p.getConcept()));
+			}
+		}
+		return Result;
+	}
+
+
 	/**
 	 * @return true iff the chain contained in the arg-list is a sub-property of
 	 *         R

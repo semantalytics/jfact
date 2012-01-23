@@ -6,6 +6,8 @@ import java.util.List;
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
 import uk.ac.manchester.cs.jfact.helpers.UnreachableSituationException;
+import uk.ac.manchester.cs.jfact.kernel.dl.ConceptTop;
+import uk.ac.manchester.cs.jfact.kernel.dl.DataTop;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ConceptExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Expression;
@@ -13,11 +15,12 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Expression;
 /// class to translate DAG entities into the TDL* expressions
 class TDag2Interface {
 	/// DAG to be translated
-	DLDag Dag;
+	private final DLDag Dag;
 	/// expression manager
-	ExpressionManager Manager;
+	private final ExpressionManager Manager;
 	/// vector of cached expressions
-	List<Expression> Trans = new ArrayList<Expression>();
+	private final List<ConceptExpression> TransConcept = new ArrayList<ConceptExpression>();
+	private final List<DataExpression> TransData = new ArrayList<DataExpression>();
 
 	/// build concept expression by a vertex V
 	ConceptExpression buildCExpr(DLVertex v) {
@@ -104,20 +107,22 @@ class TDag2Interface {
 	TDag2Interface(DLDag dag, ExpressionManager manager) {
 		Dag = dag;
 		Manager = manager;
-		Trans = new ArrayList<Expression>();
-		Helper.resize(Trans, dag.size());
+		Helper.resize(TransConcept, dag.size());
+		Helper.resize(TransData, dag.size());
 	}
 
 	/// make sure that size of expression cache is the same as the size of a DAG
 	void ensureDagSize() {
-		int ds = Dag.size(), ts = Trans.size();
+		int ds = Dag.size(), ts = TransConcept.size();
 		if (ds == ts) {
 			return;
 		}
-		Helper.resize(Trans, ds);
+		Helper.resize(TransConcept, ds);
+		Helper.resize(TransData, ds);
 		if (ds > ts) {
 			while (ts != ds) {
-				Trans.set(ts++, null);
+				TransConcept.set(ts++, null);
+				TransData.set(ts++, null);
 			}
 		}
 	}
@@ -127,10 +132,10 @@ class TDag2Interface {
 		if (p < 0) {
 			return Manager.not(getCExpr(-p));
 		}
-		if (Trans.get(p) == null) {
-			Trans.set(p, buildCExpr(Dag.get(p)));
+		if (TransConcept.get(p) == null) {
+			TransConcept.set(p, buildCExpr(Dag.get(p)));
 		}
-		return (ConceptExpression) Trans.get(p);
+		return TransConcept.get(p);
 	}
 
 	/// get data expression corresponding index of vertex
@@ -138,18 +143,11 @@ class TDag2Interface {
 		if (p < 0) {
 			return Manager.dataNot(getDExpr(-p));
 		}
-		if (Trans.get(p) == null) {
-			Trans.set(p, buildDExpr(Dag.get(p)));
+		DataExpression expression = TransData.get(p);
+		if (expression == null) {
+			expression = buildDExpr(Dag.get(p));
+			TransData.set(p, expression);
 		}
-		return (DataExpression) Trans.get(p);
-	}
-
-	/// get expression corresponding index of vertex given the DATA flag
-	Expression getExpr(int p, boolean data) {
-		if (data) {
-			return getDExpr(p);
-		} else {
-			return getCExpr(p);
-		}
+		return expression;
 	}
 }

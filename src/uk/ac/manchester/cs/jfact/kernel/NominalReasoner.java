@@ -10,12 +10,12 @@ import static uk.ac.manchester.cs.jfact.kernel.ClassifiableEntry.resolveSynonym;
 import java.util.ArrayList;
 import java.util.List;
 
+import uk.ac.manchester.cs.jfact.datatypes.DatatypeFactory;
 import uk.ac.manchester.cs.jfact.dep.DepSet;
 import uk.ac.manchester.cs.jfact.helpers.Helper;
 import uk.ac.manchester.cs.jfact.helpers.Pair;
 import uk.ac.manchester.cs.jfact.helpers.Templates;
 import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
-import datatypes.DatatypeFactory;
 
 public final class NominalReasoner extends DlSatTester {
 	/** all nominals defined in TBox */

@@ -12,6 +12,10 @@ import java.util.List;
 
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 
+import uk.ac.manchester.cs.jfact.datatypes.Datatype;
+import uk.ac.manchester.cs.jfact.datatypes.DatatypeEntry;
+import uk.ac.manchester.cs.jfact.datatypes.Literal;
+import uk.ac.manchester.cs.jfact.datatypes.LiteralEntry;
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptAnd;
@@ -56,10 +60,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NAryExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NamedEntity;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitorEx;
-import datatypes.Datatype;
-import datatypes.DatatypeEntry;
-import datatypes.Literal;
-import datatypes.LiteralEntry;
 
 public final class ExpressionTranslator implements DLExpressionVisitorEx<DLTree> {
 	/** TBox to get access to the named entities */

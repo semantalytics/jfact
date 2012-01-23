@@ -27,6 +27,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.semanticweb.owlapi.reasoner.ReasonerInternalException;
 import org.semanticweb.owlapi.reasoner.ReasonerProgressMonitor;
 
+import uk.ac.manchester.cs.jfact.datatypes.Datatype;
+import uk.ac.manchester.cs.jfact.datatypes.DatatypeEntry;
+import uk.ac.manchester.cs.jfact.datatypes.DatatypeExpression;
+import uk.ac.manchester.cs.jfact.datatypes.DatatypeFactory;
+import uk.ac.manchester.cs.jfact.datatypes.LiteralEntry;
 import uk.ac.manchester.cs.jfact.helpers.DLTree;
 import uk.ac.manchester.cs.jfact.helpers.DLTreeFactory;
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
@@ -46,11 +51,6 @@ import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
 import uk.ac.manchester.cs.jfact.split.TSplitRules;
 import uk.ac.manchester.cs.jfact.split.TSplitVar;
 import uk.ac.manchester.cs.jfact.split.TSplitVars;
-import datatypes.Datatype;
-import datatypes.DatatypeEntry;
-import datatypes.DatatypeExpression;
-import datatypes.DatatypeFactory;
-import datatypes.LiteralEntry;
 
 public final class TBox {
 	protected static final class IndividualCreator implements NameCreator<Individual> {

@@ -23,6 +23,8 @@ import java.util.Set;
 
 import org.semanticweb.owlapi.reasoner.TimeOutException;
 
+import uk.ac.manchester.cs.jfact.datatypes.DataTypeReasoner;
+import uk.ac.manchester.cs.jfact.datatypes.DatatypeFactory;
 import uk.ac.manchester.cs.jfact.dep.DepSet;
 import uk.ac.manchester.cs.jfact.helpers.DLVertex;
 import uk.ac.manchester.cs.jfact.helpers.FastSet;
@@ -53,8 +55,6 @@ import uk.ac.manchester.cs.jfact.split.TModularizer;
 import uk.ac.manchester.cs.jfact.split.TSignature;
 import uk.ac.manchester.cs.jfact.split.TSplitRules.TSplitRule;
 import uk.ac.manchester.cs.jfact.split.TSplitVar;
-import datatypes.DataTypeReasoner;
-import datatypes.DatatypeFactory;
 
 public class DlSatTester {
 	private final class LocalFastSet implements FastSet {

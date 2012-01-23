@@ -1,5 +1,7 @@
 package uk.ac.manchester.cs.jfact.helpers;
 
+import uk.ac.manchester.cs.jfact.datatypes.Datatype;
+import uk.ac.manchester.cs.jfact.datatypes.Literal;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptAnd;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataExactCardinality;
@@ -39,8 +41,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionInto;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleTop;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Expression;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
-import datatypes.Datatype;
-import datatypes.Literal;
 
 class ELFExpressionChecker implements DLExpressionVisitor {
 	boolean value;

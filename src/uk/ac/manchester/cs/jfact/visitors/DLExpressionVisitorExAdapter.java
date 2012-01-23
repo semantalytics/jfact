@@ -1,5 +1,7 @@
 package uk.ac.manchester.cs.jfact.visitors;
 
+import uk.ac.manchester.cs.jfact.datatypes.Datatype;
+import uk.ac.manchester.cs.jfact.datatypes.Literal;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptAnd;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataExactCardinality;
@@ -37,8 +39,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleName;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionFrom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleProjectionInto;
 import uk.ac.manchester.cs.jfact.kernel.dl.ObjectRoleTop;
-import datatypes.Datatype;
-import datatypes.Literal;
 
 @SuppressWarnings("unused")
 public abstract class DLExpressionVisitorExAdapter<A> implements DLExpressionVisitorEx<A> {

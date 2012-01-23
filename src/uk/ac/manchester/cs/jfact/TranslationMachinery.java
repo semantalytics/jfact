@@ -114,6 +114,11 @@ import org.semanticweb.owlapi.reasoner.impl.OWLNamedIndividualNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNode;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
 
+import uk.ac.manchester.cs.jfact.datatypes.Datatype;
+import uk.ac.manchester.cs.jfact.datatypes.DatatypeExpression;
+import uk.ac.manchester.cs.jfact.datatypes.DatatypeFactory;
+import uk.ac.manchester.cs.jfact.datatypes.Facets;
+import uk.ac.manchester.cs.jfact.datatypes.Literal;
 import uk.ac.manchester.cs.jfact.kernel.ExpressionManager;
 import uk.ac.manchester.cs.jfact.kernel.ReasoningKernel;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Axiom;
@@ -126,11 +131,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.IndividualExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleComplexExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
 import uk.ac.manchester.cs.jfact.kernel.voc.Vocabulary;
-import datatypes.Datatype;
-import datatypes.DatatypeExpression;
-import datatypes.DatatypeFactory;
-import datatypes.Facets;
-import datatypes.Literal;
 
 public final class TranslationMachinery {
 	private volatile AxiomTranslator axiomTranslator;

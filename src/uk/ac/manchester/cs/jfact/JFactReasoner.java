@@ -6,6 +6,7 @@ package uk.ac.manchester.cs.jfact;
  This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
  You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA*/
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -21,10 +22,12 @@ import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyExpression;
+import org.semanticweb.owlapi.model.OWLDataRange;
 import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyExpression;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyChange;
@@ -50,9 +53,13 @@ import org.semanticweb.owlapi.reasoner.impl.OWLClassNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLDataPropertyNode;
 import org.semanticweb.owlapi.reasoner.impl.OWLDataPropertyNodeSet;
 import org.semanticweb.owlapi.reasoner.impl.OWLObjectPropertyNodeSet;
+import org.semanticweb.owlapi.reasoner.knowledgeexploration.OWLKnowledgeExplorerReasoner;
+import org.semanticweb.owlapi.reasoner.knowledgeexploration.OWLKnowledgeExplorerReasoner.RootNode;
 import org.semanticweb.owlapi.util.Version;
 
+import uk.ac.manchester.cs.jfact.datatypes.DatatypeFactory;
 import uk.ac.manchester.cs.jfact.helpers.LogAdapter;
+import uk.ac.manchester.cs.jfact.kernel.DlCompletionTree;
 import uk.ac.manchester.cs.jfact.kernel.ExpressionManager;
 import uk.ac.manchester.cs.jfact.kernel.NamedEntry;
 import uk.ac.manchester.cs.jfact.kernel.ReasonerFreshEntityException;
@@ -63,20 +70,24 @@ import uk.ac.manchester.cs.jfact.kernel.actors.IndividualPolicy;
 import uk.ac.manchester.cs.jfact.kernel.actors.ObjectPropertyPolicy;
 import uk.ac.manchester.cs.jfact.kernel.actors.TaxonomyActor;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ConceptExpression;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.DataRoleExpression;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.Expression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.IndividualExpression;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleExpression;
+import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.RoleExpression;
 import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
 import uk.ac.manchester.cs.jfact.kernel.voc.Vocabulary;
-import datatypes.DatatypeFactory;
 
 /**
  * Synchronization policy: all methods for OWLReasoner are synchronized, except
  * the methods which do not touch the kernel or only affect threadsafe data
  * structures. inner private classes are not synchronized since methods from
  * those classes cannot be invoked from outsize synchronized methods.
- * 
+ *
  */
-public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListener {
+public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListener,
+		OWLKnowledgeExplorerReasoner {
 	private static final String REASONER_NAME = "JFact";
 	private static final Version VERSION = new Version(0, 0, 0, 0);
 	protected final AtomicBoolean interrupted = new AtomicBoolean(false);
@@ -190,7 +201,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 * then the changes will be stored in a buffer. If the reasoner is a
 	 * non-buffering reasoner then the changes will be automatically flushed
 	 * through to the change filter and passed on to the reasoner.
-	 * 
+	 *
 	 * @param changes
 	 *            The list of raw changes.
 	 */
@@ -258,7 +269,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 * removed from the list of pending changes. Note that even if the list of
 	 * pending changes is non-empty then there may be no changes for the
 	 * reasoner to deal with.
-	 * 
+	 *
 	 * @param added
 	 *            The logical axioms that have been added to the imports closure
 	 *            of the reasoner root ontology
@@ -298,7 +309,7 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 	 * Asks the reasoner implementation to handle axiom additions and removals
 	 * from the imports closure of the root ontology. The changes will not
 	 * include annotation axiom additions and removals.
-	 * 
+	 *
 	 * @param addAxioms
 	 *            The axioms to be added to the reasoner.
 	 * @param removeAxioms
@@ -736,5 +747,77 @@ public final class JFactReasoner implements OWLReasoner, OWLOntologyChangeListen
 
 	public synchronized void writeReasoningResult(LogAdapter o, long time) {
 		kernel.writeReasoningResult(o, time);
+	}
+
+
+	private class RootNodeImpl implements RootNode{
+		private final DlCompletionTree pointer;
+		public RootNodeImpl(DlCompletionTree p) {
+			if(p==null) {
+				System.out.println("JFactReasoner.RootNodeImpl.RootNodeImpl()");
+			}
+		this.pointer=p;
+		}
+		public <T> T getNode() {
+
+			return (T)pointer;
+		}
+	}
+	public RootNode getRoot(OWLClassExpression expression) {
+		return new RootNodeImpl(kernel
+				.buildCompletionTree(translationMachinery.toClassPointer(expression)));
+	}
+
+	public Node<? extends OWLObjectPropertyExpression> getObjectNeighbours(RootNode object,
+			boolean deterministicOnly) {
+		Collection<ObjectRoleExpression> Set = kernel.getObjectRoles(
+				(DlCompletionTree) object.getNode(), deterministicOnly, false);
+		List<ObjectRoleExpression> ret = new ArrayList<ObjectRoleExpression>();
+		for (RoleExpression p : Set)
+			ret.add((ObjectRoleExpression) p);
+		return translationMachinery.getObjectPropertyTranslator()
+				.getNodeFromPointers(Set);
+	}
+
+	public Node<OWLDataProperty> getDataNeighbours(RootNode object,
+			boolean deterministicOnly) {
+		Set<DataRoleExpression> Set = kernel.getDataRoles((DlCompletionTree) object.getNode(),
+				deterministicOnly);
+		List<DataRoleExpression> ret = new ArrayList<DataRoleExpression>();
+		for (RoleExpression p : Set)
+			ret.add((DataRoleExpression) p);
+		return translationMachinery.getDataPropertyTranslator().getNodeFromPointers(Set);
+	}
+
+	public Collection<RootNode> getObjectNeighbours(RootNode n, OWLObjectProperty property) {
+		List<RootNode> toReturn=new ArrayList<RootNode>();
+		for(DlCompletionTree t:kernel.getNeighbours((DlCompletionTree) n.getNode(),
+				translationMachinery.toObjectPropertyPointer(property))) {
+			toReturn.add(new RootNodeImpl(t));
+
+		}
+		return toReturn;
+	}
+
+	public Collection<RootNode> getDataNeighbours(RootNode n, OWLDataProperty property) {
+		List<RootNode> toReturn=new ArrayList<RootNode>();
+		for(DlCompletionTree t:kernel.getNeighbours((DlCompletionTree) n.getNode(),
+				translationMachinery.toDataPropertyPointer(property))) {
+			toReturn.add(new RootNodeImpl(t));
+
+		}
+		return toReturn;
+	}
+
+	public Node<? extends OWLClassExpression> getObjectLabel(RootNode object,
+			boolean deterministicOnly) {
+		return translationMachinery.getClassExpressionTranslator().getNodeFromPointers(
+				kernel.getObjectLabel((DlCompletionTree) object.getNode(), deterministicOnly));
+	}
+
+	public Node<? extends OWLDataRange> getDataLabel(RootNode object,
+			boolean deterministicOnly) {
+		return translationMachinery.getDataRangeTranslator().getNodeFromPointers(
+				kernel.getDataLabel((DlCompletionTree) object.getNode(), deterministicOnly));
 	}
 }

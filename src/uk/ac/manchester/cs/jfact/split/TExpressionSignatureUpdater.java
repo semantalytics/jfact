@@ -1,5 +1,7 @@
 package uk.ac.manchester.cs.jfact.split;
 
+import uk.ac.manchester.cs.jfact.datatypes.Datatype;
+import uk.ac.manchester.cs.jfact.datatypes.Literal;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptAnd;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptBottom;
 import uk.ac.manchester.cs.jfact.kernel.dl.ConceptDataExactCardinality;
@@ -45,8 +47,6 @@ import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NAryExpression;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.NamedEntity;
 import uk.ac.manchester.cs.jfact.kernel.dl.interfaces.ObjectRoleArg;
 import uk.ac.manchester.cs.jfact.visitors.DLExpressionVisitor;
-import datatypes.Datatype;
-import datatypes.Literal;
 
 /// update the signature by adding all signature elements from the expression
 class TExpressionSignatureUpdater implements DLExpressionVisitor {
