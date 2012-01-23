@@ -20,7 +20,7 @@ import org.semanticweb.owlapi.reasoner.SimpleConfiguration;
 import uk.ac.manchester.cs.jfact.kernel.options.JFactReasonerConfiguration;
 
 public class JUnitRunner {
-	private static final int _10000 = 200000;
+	private static final int _10000 = 20000;
 	private TestClasses t;
 	private OWLReasonerFactory f;
 	private String testId;
