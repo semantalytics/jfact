@@ -7,7 +7,7 @@ import conformance.TestClasses;
 
 public class WebOnt_description_logic_209 extends TestCase {
 	public void testWebOnt_description_logic_209() throws Exception{
-		String premise = "<rdf:RDF\n"
+		String premisePart1 = "<rdf:RDF\n"
 				+ "    xml:base=\"http://www.w3.org/2002/03owlt/description-logic/premises209\"\n"
 				+ "    xmlns:oiled=\"http://oiled.man.example.net/test#\"\n"
 				+ "    xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n"
@@ -476,8 +476,8 @@ public class WebOnt_description_logic_209 extends TestCase {
 				+ "                    <owl:Class rdf:about=\"http://oiled.man.example.net/test#C80\"/>\n"
 				+ "                </owl:intersectionOf>\n"
 				+ "            </owl:Class>\n"
-				+ "        </owl:equivalentClass>\n"
-				+ "    </owl:Class>\n"
+				+ "        </owl:equivalentClass>\n";
+			String premisePart2 = "    </owl:Class>\n"
 				+ "    <owl:Class rdf:about=\"http://oiled.man.example.net/test#C84\">\n"
 				+ "        <owl:equivalentClass>\n"
 				+ "            <owl:Class>\n"
@@ -1016,8 +1016,8 @@ public class WebOnt_description_logic_209 extends TestCase {
 				+ "                    <owl:Class rdf:about=\"http://oiled.man.example.net/test#C40\"/>\n"
 				+ "                </owl:complementOf>\n"
 				+ "            </owl:Class>\n"
-				+ "        </rdf:type>\n"
-				+ "        <rdf:type>\n"
+				+ "        </rdf:type>\n";
+			String premisePart3 = "        <rdf:type>\n"
 				+ "            <owl:Restriction>\n"
 				+ "                <owl:onProperty rdf:resource=\"http://oiled.man.example.net/test#R1\"/>\n"
 				+ "                <owl:allValuesFrom>\n"
@@ -1711,7 +1711,11 @@ public class WebOnt_description_logic_209 extends TestCase {
 		String d = "DL Test: k_poly\n"
 				+ "ABox test from DL98 systems comparison.\n"
 				+ "(Modified in light of implementation feedback, see test description-logic-208).";
-		JUnitRunner r = new JUnitRunner(premise, conclusion, id, tc, d);
+		StringBuilder premise = new StringBuilder("");
+		premise.append(premisePart1);
+		premise.append(premisePart2);
+		premise.append(premisePart3);
+		JUnitRunner r = new JUnitRunner(premise.toString(), conclusion, id, tc, d);
 		r.setReasonerFactory(Factory.factory());
 	//	r.printConsequence();
 		r.run();

@@ -71,7 +71,7 @@ public class DatatypeParser extends TestCase {
 		String simple = "xs:simpleType";
 		String complex = "xs:complexType";
 		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-				.parse(new File("datatypes/schema.xsd"));
+				.parse(new File("test/schema.xsd"));
 		final NodeList childNodes = doc.getElementsByTagName(simple);
 		DatatypeFactory f = DatatypeFactory.getInstance();
 		Map<String, Element> known = new HashMap<String, Element>();

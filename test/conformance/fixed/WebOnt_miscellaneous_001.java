@@ -8,7 +8,7 @@ import conformance.TestClasses;
 public class WebOnt_miscellaneous_001 extends TestCase {
 	public void testWebOnt_miscellaneous_001() {
 		//XXX invalid OWL 2
-		String premise = "<!DOCTYPE owl [\n"
+		String premisePart1 = "<!DOCTYPE owl [\n"
 				+ "     <!ENTITY vin  \"http://www.w3.org/2002/03owlt/miscellaneous/consistent001#\" >\n"
 				+ "     <!ENTITY food \"http://www.w3.org/2002/03owlt/miscellaneous/consistent002#\" >\n"
 				+ "     <!ENTITY owl  \"http://www.w3.org/2002/07/owl#\" >\n"
@@ -386,8 +386,8 @@ public class WebOnt_miscellaneous_001 extends TestCase {
 				+ "      <owl:Thing rdf:about=\"#Delicate\" />\n"
 				+ "      <owl:Thing rdf:about=\"#Moderate\" />\n"
 				+ "      <owl:Thing rdf:about=\"#Strong\" />\n"
-				+ "    </owl:oneOf>\n"
-				+ "  </owl:Class>\n"
+				+ "    </owl:oneOf>\n";
+			String premisePart2 = "  </owl:Class>\n"
 				+ "  \n"
 				+ "  <owl:Class rdf:ID=\"WineBody\">\n"
 				+ "    <rdfs:subClassOf rdf:resource=\"#WineTaste\" />\n"
@@ -704,8 +704,8 @@ public class WebOnt_miscellaneous_001 extends TestCase {
 				+ "      <owl:Class rdf:about=\"#RedWine\" />\n"
 				+ "    </owl:intersectionOf>\n"
 				+ "  </owl:Class>\n"
-				+ "  \n"
-				+ "  <owl:Class rdf:ID=\"RedBordeaux\">\n"
+				+ "  \n";
+			String premisePart3 = "  <owl:Class rdf:ID=\"RedBordeaux\">\n"
 				+ "    <rdfs:subClassOf>\n"
 				+ "      <owl:Restriction>\n"
 				+ "        <owl:onProperty rdf:resource=\"#madeFromGrape\" />\n"
@@ -1134,8 +1134,8 @@ public class WebOnt_miscellaneous_001 extends TestCase {
 				+ "          </owl:Class>\n"
 				+ "        </owl:allValuesFrom>\n"
 				+ "      </owl:Restriction>\n"
-				+ "    </rdfs:subClassOf>\n"
-				+ "    <rdfs:subClassOf>\n"
+				+ "    </rdfs:subClassOf>\n";
+			String premisePart4 = "    <rdfs:subClassOf>\n"
 				+ "      <owl:Restriction>\n"
 				+ "        <owl:onProperty rdf:resource=\"#hasFlavor\" />\n"
 				+ "        <owl:allValuesFrom>\n"
@@ -2414,7 +2414,12 @@ public class WebOnt_miscellaneous_001 extends TestCase {
 		String id = "WebOnt_miscellaneous_001";
 		TestClasses tc = TestClasses.valueOf("CONSISTENCY");
 		String d = "Wine example taken from the guide. Note that this is the same as the ontology http://www.w3.org/2002/03owlt/miscellaneous/consistent002 imported in other tests.";
-		JUnitRunner r = new JUnitRunner(premise, conclusion, id, tc, d);
+		StringBuilder premise = new StringBuilder("");
+		premise.append(premisePart1);
+		premise.append(premisePart2);
+		premise.append(premisePart3);
+		premise.append(premisePart4);
+		JUnitRunner r = new JUnitRunner(premise.toString(), conclusion, id, tc, d);
 		r.setReasonerFactory(Factory.factory());
 		r.run();
 	}
