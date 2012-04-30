@@ -258,5 +258,12 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Sets up the META-INF/services/ files automatically at compile time. optional so it is not a transitive dependency -->
+        <dependency>
+        	<groupId>org.kohsuke.metainf-services</groupId>
+        	<artifactId>metainf-services</artifactId>
+        	<version>1.4</version>
+        	<optional>true</optional>
+        </dependency>
 	</dependencies>
 </project>
