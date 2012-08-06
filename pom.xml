@@ -17,7 +17,7 @@
 	<groupId>net.sourceforge.jfact</groupId>
 	<artifactId>jfact</artifactId>
 	<packaging>jar</packaging>
-	<version>3.4-SNAPSHOT</version>
+	<version>3.5-SNAPSHOT</version>
 	<name>JFact</name>
 	<description>The OWL API is a Java API and reference implementation for creating, manipulating and serialising OWL Ontologies. The latest version of the API is focused towards OWL 2</description>
 	<url>http://sourceforge.net/projects/jfact/</url>
@@ -184,12 +184,12 @@
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-reasoner</artifactId>
+				<artifactId>owlapi-misc</artifactId>
 				<version>${owlapi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-apibinding</artifactId>
+				<artifactId>owlapi-parsers</artifactId>
 				<version>${owlapi.version}</version>
 				<scope>test</scope>
 			</dependency>
@@ -197,49 +197,6 @@
 				<groupId>net.sourceforge.owlapi</groupId>
 				<artifactId>owlapi-impl</artifactId>
 				<version>${owlapi.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-turtle</artifactId>
-				<version>${owlapi.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-mansyntax</artifactId>
-				<version>${owlapi.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-krss</artifactId>
-				<version>${owlapi.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-functional</artifactId>
-				<version>${owlapi.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-latex</artifactId>
-				<version>${owlapi.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-obo</artifactId>
-				<version>${owlapi.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
-				<artifactId>owlapi-owlxml</artifactId>
-				<version>${owlapi.version}</version>
-				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>net.sourceforge.owlapi</groupId>
@@ -287,12 +244,12 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-apibinding</artifactId>
-			<scope>test</scope>
+			<artifactId>owlapi-impl</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
-			<artifactId>owlapi-reasoner</artifactId>
+			<artifactId>owlapi-parsers</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
