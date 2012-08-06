@@ -163,7 +163,7 @@
 	<!-- Specify the encoding of the source files. -->
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<owlapi.version>3.4-SNAPSHOT</owlapi.version>
+		<owlapi.version>3.5-SNAPSHOT</owlapi.version>
 		<sesame.version>2.6.8</sesame.version>
 	</properties>
 
