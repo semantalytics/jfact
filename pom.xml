@@ -178,28 +178,28 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
+				<groupId>com.github.ansell.owlapi</groupId>
 				<artifactId>owlapi-api</artifactId>
 				<version>${owlapi.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
+				<groupId>com.github.ansell.owlapi</groupId>
 				<artifactId>owlapi-misc</artifactId>
 				<version>${owlapi.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
+				<groupId>com.github.ansell.owlapi</groupId>
 				<artifactId>owlapi-parsers</artifactId>
 				<version>${owlapi.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
+				<groupId>com.github.ansell.owlapi</groupId>
 				<artifactId>owlapi-impl</artifactId>
 				<version>${owlapi.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>net.sourceforge.owlapi</groupId>
+				<groupId>com.github.ansell.owlapi</groupId>
 				<artifactId>owlapi-rio</artifactId>
 				<version>${owlapi.version}</version>
 				<scope>test</scope>
@@ -239,20 +239,20 @@
 	</dependencyManagement>
 	<dependencies>
 		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
+			<groupId>com.github.ansell.owlapi</groupId>
 			<artifactId>owlapi-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
+			<groupId>com.github.ansell.owlapi</groupId>
 			<artifactId>owlapi-impl</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
+			<groupId>com.github.ansell.owlapi</groupId>
 			<artifactId>owlapi-parsers</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.sourceforge.owlapi</groupId>
+			<groupId>com.github.ansell.owlapi</groupId>
 			<artifactId>owlapi-rio</artifactId>
 			<scope>test</scope>
 		</dependency>
