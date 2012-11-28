@@ -8,7 +8,9 @@ package uk.ac.manchester.cs.jfact;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.reasoner.*;
+import org.kohsuke.MetaInfServices;
 
+@MetaInfServices(org.semanticweb.owlapi.reasoner.OWLReasonerFactory.class)
 public class JFactFactory implements OWLReasonerFactory {
     public String getReasonerName() {
         return "JFact";
