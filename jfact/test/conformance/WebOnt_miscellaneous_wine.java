@@ -7,7 +7,7 @@ public class WebOnt_miscellaneous_wine {
     @Test
     public void testWebOnt_miscellaneous_001() {
         // XXX invalid OWL 2
-        String premise = "<!DOCTYPE owl [ "
+        String premise1 = "<!DOCTYPE owl [ "
                 + "<!ENTITY vin  \"http://www.w3.org/2002/03owlt/miscellaneous/consistent001#\" > "
                 + "<!ENTITY food \"http://www.w3.org/2002/03owlt/miscellaneous/consistent002#\" > "
                 + "<!ENTITY owl  \"http://www.w3.org/2002/07/owl#\" > "
@@ -742,8 +742,9 @@ public class WebOnt_miscellaneous_wine {
                 + "          </owl:Restriction>\n"
                 + "        </owl:allValuesFrom>\n"
                 + "      </owl:Restriction>\n"
-                + "    </rdfs:subClassOf>\n"
-                + "    <rdfs:subClassOf>\n"
+                + "    </rdfs:subClassOf>\n";
+                
+            String premise2 = "    <rdfs:subClassOf>\n"
                 + "      <owl:Restriction>\n"
                 + "        <owl:onProperty rdf:resource=\"#hasDrink\" />\n"
                 + "        <owl:allValuesFrom>\n"
@@ -1208,8 +1209,9 @@ public class WebOnt_miscellaneous_wine {
                 + "  <owl:Class rdf:about=\"#EatingGrape\">\n"
                 + "    <rdfs:subClassOf rdf:resource=\"#Grape\" />\n"
                 + "  </owl:Class>\n"
-                + "\n"
-                + "  <NonBlandFish rdf:about=\"#Tuna\" />\n"
+                + "\n";
+                
+         String premise3 = "  <NonBlandFish rdf:about=\"#Tuna\" />\n"
                 + "  \n"
                 + "  <LightMeatFowl rdf:about=\"#Turkey\" />\n"
                 + "  \n"
@@ -1532,8 +1534,9 @@ public class WebOnt_miscellaneous_wine {
                 + "    <owl:intersectionOf rdf:parseType=\"Collection\"><owl:Class rdf:about=\"#Wine\" /><owl:Restriction><owl:onProperty rdf:resource=\"#madeFromGrape\" /><owl:hasValue rdf:resource=\"#GamayGrape\" /></owl:Restriction><owl:Restriction><owl:onProperty rdf:resource=\"#madeFromGrape\" /><owl:maxCardinality rdf:datatype=\"&xsd;nonNegativeInteger\">1</owl:maxCardinality></owl:Restriction></owl:intersectionOf></owl:Class>"
                 + "  <owl:Class rdf:about=\"#FullBodiedWine\">\n"
                 + "    <owl:intersectionOf rdf:parseType=\"Collection\"><owl:Class rdf:about=\"#Wine\" /><owl:Restriction><owl:onProperty rdf:resource=\"#hasBody\" /><owl:hasValue rdf:resource=\"#Full\" /></owl:Restriction></owl:intersectionOf></owl:Class>"
-                + "  <Region rdf:about=\"#FrenchRegion\" />"
-                + "  <owl:Class rdf:about=\"#FrenchWine\">\n"
+                + "  <Region rdf:about=\"#FrenchRegion\" />";
+                
+        String premise4 = "  <owl:Class rdf:about=\"#FrenchWine\">\n"
                 + "    <owl:intersectionOf rdf:parseType=\"Collection\"><owl:Class rdf:about=\"#Wine\" /><owl:Restriction><owl:onProperty rdf:resource=\"#locatedIn\" /><owl:hasValue rdf:resource=\"#FrenchRegion\" /></owl:Restriction></owl:intersectionOf></owl:Class>\n"
                 + "  <owl:Class rdf:about=\"#EarlyHarvest\">\n"
                 + "    <rdfs:subClassOf rdf:resource=\"#Wine\" />\n"
@@ -1781,7 +1784,12 @@ public class WebOnt_miscellaneous_wine {
         String id = "WebOnt_miscellaneous_001";
         TestClasses tc = TestClasses.valueOf("CONSISTENCY");
         String d = "Wine example taken from the guide. Note that this is the same as the ontology http://www.w3.org/2002/03owlt/miscellaneous/consistent002 imported in other tests.";
-        JUnitRunner r = new JUnitRunner(premise, conclusion, id, tc, d);
+        StringBuilder premise = new StringBuilder();
+        premise.append(premise1);
+        premise.append(premise2);
+        premise.append(premise3);
+        premise.append(premise4);
+        JUnitRunner r = new JUnitRunner(premise.toString(), conclusion, id, tc, d);
         r.setReasonerFactory(Factory.factory());
         r.run();
     }

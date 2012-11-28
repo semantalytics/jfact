@@ -12,7 +12,12 @@ public class WebOnt_miscellaneous_002 {
         String id = "WebOnt_miscellaneous_002";
         TestClasses tc = TestClasses.valueOf("CONSISTENCY");
         String d = "Food example taken from the guide. Note that this is the same as the ontology http://www.w3.org/2002/03owlt/miscellaneous/consistent002 imported in other tests.";
-        JUnitRunner r = new JUnitRunner(premise, conclusion, id, tc, d);
+        StringBuilder premise = new StringBuilder();
+        premise.append(premise1);
+        premise.append(premise2);
+        premise.append(premise3);
+        premise.append(premise4);
+        JUnitRunner r = new JUnitRunner(premise.toString(), conclusion, id, tc, d);
         r.setReasonerFactory(Factory.factory());
         r.run();
     }
@@ -23,7 +28,12 @@ public class WebOnt_miscellaneous_002 {
         String id = "WebOnt_miscellaneous_002";
         TestClasses tc = TestClasses.valueOf("CONSISTENCY");
         String d = "Food example taken from the guide. Note that this is the same as the ontology http://www.w3.org/2002/03owlt/miscellaneous/consistent002 imported in other tests.";
-        JUnitRunner r = new JUnitRunner(premise, conclusion, id, tc, d);
+        StringBuilder premise = new StringBuilder();
+        premise.append(premise1);
+        premise.append(premise2);
+        premise.append(premise3);
+        premise.append(premise4);
+        JUnitRunner r = new JUnitRunner(premise.toString(), conclusion, id, tc, d);
         r.getConfiguration().setorSortSat(s1);
         r.getConfiguration().setorSortSub(s2);
         // r.getConfiguration().setLoggingActive(true);
@@ -57,7 +67,7 @@ public class WebOnt_miscellaneous_002 {
         }
     }
 
-    private static String premise = "<!DOCTYPE owl ["
+    private static String premise1 = "<!DOCTYPE owl ["
             + "<!ENTITY owl \"http://www.w3.org/2002/07/owl#\" >"
             + "<!ENTITY vin  \"http://www.w3.org/2002/03owlt/miscellaneous/consistent001#\" >"
             + "<!ENTITY food \"http://www.w3.org/2002/03owlt/miscellaneous/consistent002#\" >"
@@ -313,8 +323,9 @@ public class WebOnt_miscellaneous_002 {
             + "    <rdfs:domain rdf:resource=\"#Wine\" />\n"
             + "    <rdfs:range rdf:resource=\"#WineColor\" />\n"
             + "  </owl:ObjectProperty>\n"
-            + "\n"
-            + "  <owl:ObjectProperty rdf:about=\"#hasMaker\">\n"
+            + "\n";
+    
+    private static String premise2 = "  <owl:ObjectProperty rdf:about=\"#hasMaker\">\n"
             + "    <rdf:type rdf:resource=\"&owl;FunctionalProperty\" />\n"
             + "  </owl:ObjectProperty>\n"
             + "  \n"
@@ -781,8 +792,9 @@ public class WebOnt_miscellaneous_002 {
             + "      </owl:Restriction>\n"
             + "    </rdfs:subClassOf>\n"
             + "  </owl:Class>\n"
-            + "  \n"
-            + "  <owl:Class rdf:about=\"#PinotNoir\">\n"
+            + "  \n";
+            
+    private String premise3 = "  <owl:Class rdf:about=\"#PinotNoir\">\n"
             + "    <rdfs:subClassOf>\n"
             + "      <owl:Restriction>\n"
             + "        <owl:onProperty rdf:resource=\"#hasColor\" />\n"
@@ -1604,8 +1616,9 @@ public class WebOnt_miscellaneous_002 {
             + "      </owl:Restriction>\n"
             + "    </owl:intersectionOf>\n"
             + "  </owl:Class>\n"
-            + "  \n"
-            + "  <owl:Class rdf:about=\"#Burgundy\">\n"
+            + "  \n";
+            
+    private String premise4 = "  <owl:Class rdf:about=\"#Burgundy\">\n"
             + "    <owl:intersectionOf rdf:parseType=\"Collection\">\n"
             + "      <owl:Class rdf:about=\"#Wine\" />\n"
             + "      <owl:Restriction>\n"
