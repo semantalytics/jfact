@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<!-- The MAVEN pom file for the JFact reasoner. -->
+
+
+	<!-- The OWL API libraries are hosted on the Sonatype OSS repository. We 
+		therfore need to refer to org.sonatype.oss.oss-parent as the parent project. -->
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>7</version>
+	</parent>
+
+	<groupId>net.sourceforge.jfact</groupId>
+	<artifactId>jfact</artifactId>
+	<packaging>jar</packaging>
+	<version>3.5-ansell-SNAPSHOT</version>
+	<name>JFact</name>
+	<description>JFact is an OWL DL reasoner, based on FaCT++</description>
+	<url>http://sourceforge.net/projects/jfact/</url>
+
+
+
+	<issueManagement>
+		<system>sourceforge</system>
+		<url>https://sourceforge.net/p/jfact/bugs/</url>
+	</issueManagement>
+
+
+	<licenses>
+		<license>
+			<name>Apache License Version 2.0, January 2004</name>
+			<url>http://www.apache.org/licenses/</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+
+
+
+	<mailingLists>
+		<mailingList>
+			<name>OWLAPI Development Mailing list</name>
+			<subscribe>https://lists.sourceforge.net/lists/listinfo/owlapi-developert</subscribe>
+			<unsubscribe>https://lists.sourceforge.net/lists/listinfo/owlapi-developer</unsubscribe>
+			<archive>http://sourceforge.net/mailarchive/forum.php?forum_name=owlapi-developer</archive>
+			<post>owlapi-developer@lists.sourceforge.net</post>
+		</mailingList>
+	</mailingLists>
+
+
+
+	<organization>
+		<name>The University of Manchester</name>
+		<url>http://www.cs.manchester.ac.uk/</url>
+	</organization>
+
+	<profiles>
+
+		<profile>
+			<id>release-sign-artifacts</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<property>
+					<name>performRelease</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<!-- We need the GPG Plugin to self-sign the jar files. A valid signature 
+						for the jar files is a requirement for deploying to Maven Central. -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.4</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+	</profiles>
+
+	<build>
+		<sourceDirectory>jfact/src/</sourceDirectory>
+		<testSourceDirectory>jfact/test/</testSourceDirectory>
+		<pluginManagement>
+			<plugins>
+
+				<!-- In the Compiler Plugin we specify the encoding and the compiler 
+					version. -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.5.1</version>
+					<configuration>
+						<source>1.7</source>
+						<target>1.7</target>
+						<encoding>UTF-8</encoding>
+					</configuration>
+				</plugin>
+
+				<!-- We need to configure the Source Plugin for deploying the sources. -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.1.2</version>
+					<executions>
+						<!-- Attach sources. -->
+						<execution>
+							<id>attach-sources</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<!-- We need to configure the Javadoc Plugin for deploying the Javadocs -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.8.1</version>
+					<executions>
+						<execution>
+							<id>attach-javadocs</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<!-- The Surefire Plugin is for error reporting. -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.12.3</version>
+					<configuration>
+						<includes>
+							<include>**/*.java</include>
+						</includes>
+					</configuration>
+				</plugin>
+
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<!-- Specify the encoding of the source files. -->
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<owlapi.version>3.5-ansell-SNAPSHOT</owlapi.version>
+		<sesame.version>2.6.10</sesame.version>
+	</properties>
+
+	<!-- Parameters for the Source Code Management system. -->
+	<scm>
+		<connection>scm:svn:https://jfact.svn.sourceforge.net/svnroot/jfact/trunk</connection>
+		<developerConnection>scm:svn:https://jfact.svn.sourceforge.net/svnroot/jfact/trunk</developerConnection>
+		<tag>trunk</tag>
+		<url>https://jfact.svn.sourceforge.net/svnroot/jfact/trunk</url>
+	</scm>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>net.sourceforge.owlapi</groupId>
+				<artifactId>owlapi-api</artifactId>
+				<version>${owlapi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sourceforge.owlapi</groupId>
+				<artifactId>owlapi-parsers</artifactId>
+				<version>${owlapi.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>net.sourceforge.owlapi</groupId>
+				<artifactId>owlapi-impl</artifactId>
+				<version>${owlapi.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>net.sourceforge.owlapi</groupId>
+				<artifactId>owlapi-rio</artifactId>
+				<version>${owlapi.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-rio-api</artifactId>
+				<version>${sesame.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-rio-rdfxml</artifactId>
+				<version>${sesame.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-rio-binary</artifactId>
+				<version>${sesame.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-rio-ntriples</artifactId>
+				<version>${sesame.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.openrdf.sesame</groupId>
+				<artifactId>sesame-rio-turtle</artifactId>
+				<version>${sesame.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.11</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-all</artifactId>
+				<version>1.9.5</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<dependencies>
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-impl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-parsers</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-rio</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-rdfxml</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-binary</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-ntriples</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openrdf.sesame</groupId>
+			<artifactId>sesame-rio-turtle</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Sets up the META-INF/services/ files automatically at compile time. optional so it is not a transitive dependency -->
+		<dependency>
+			<groupId>org.kohsuke.metainf-services</groupId>
+			<artifactId>metainf-services</artifactId>
+			<version>1.4</version>
+			<optional>true</optional>
+		</dependency>
+	</dependencies>
+	
+	<repositories>
+		<repository>
+			<id>aduna-opensource.releases</id>
+			<name>Aduna repository</name>
+			<url>http://repo.aduna-software.org/maven2/releases</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>aduna-opensource.snapshots</id>
+			<name>Aduna snapshot repository</name>
+			<url>http://repo.aduna-software.org/maven2/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>fortytwo.net</id>
+			<name>SesameTools Repository</name>
+			<url>http://fortytwo.net/maven2</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+</project>
+
