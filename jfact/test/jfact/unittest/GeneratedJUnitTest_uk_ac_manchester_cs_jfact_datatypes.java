@@ -93,7 +93,7 @@ public class GeneratedJUnitTest_uk_ac_manchester_cs_jfact_datatypes {
                 mock(Literal.class));
         DatatypeEnumeration testSubject2 = new DatatypeEnumeration(mock(Datatype.class),
                 mock(Collection.class));
-        Object result0 = testSubject0.add(mock(Object.class));
+        //Object result0 = testSubject0.add(mock(Object.class));
         DatatypeEnumeration result1 = testSubject0.add(mock(Literal.class));
         String result2 = testSubject0.toString();
         Object result3 = testSubject0.accept(mock(DLExpressionVisitorEx.class));
@@ -258,7 +258,7 @@ public class GeneratedJUnitTest_uk_ac_manchester_cs_jfact_datatypes {
         boolean result13 = testSubject0.hasMinExclusive();
         boolean result14 = testSubject0.hasMin();
         boolean result15 = testSubject0.hasMax();
-        Object result16 = testSubject0.add(mock(Object.class));
+        //Object result16 = testSubject0.add(mock(Object.class));
         String result17 = testSubject0.toString();
         Object result18 = testSubject0.accept(mock(DLExpressionVisitorEx.class));
         testSubject0.accept(mock(DLExpressionVisitor.class));
@@ -457,7 +457,7 @@ public class GeneratedJUnitTest_uk_ac_manchester_cs_jfact_datatypes {
         testSubject0.accept(mock(DLExpressionVisitor.class));
         Datatype result4 = testSubject0.getDatatypeExpression();
         Comparable result5 = testSubject0.typedValue();
-        int result6 = testSubject0.compareTo(mock(Object.class));
+        //int result6 = testSubject0.compareTo(mock(Object.class));
     }
 
     @Test
