@@ -68,7 +68,7 @@ public class DatatypeParser {
         String simple = "xs:simpleType";
         String complex = "xs:complexType";
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-                .parse(new File("datatypes/schema.xsd"));
+                .parse(DatatypeParser.class.getResourceAsStream("/uk/ac/manchester/cs/jfact/datatypes/schema.xsd"));
         NodeList childNodes = doc.getElementsByTagName(simple);
         DatatypeFactory f = DatatypeFactory.getInstance();
         Map<String, Element> known = new HashMap<String, Element>();
